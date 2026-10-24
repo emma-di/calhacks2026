@@ -269,3 +269,14 @@ Emma chose iPhone displaying the same live alerts (not camera streaming). Read-o
 see docs/phone-mirror.md. Use Receiver mode on the laptop. Browser-only simulation is not cross-device.
 Temporary LAN viewer requires an access key, blocks writes, and exposes only /api/state plus build assets.
 Real Safari/network trial pending. Thumbs-up reliability tuning remains explicitly deferred.
+
+### Continuity Camera and John's audio handoff — October 24
+
+Emma confirmed same Apple Account and selected Continuity Camera for iPhone → laptop POV.
+Use docs/iphone-camera.md. Camera device list now refreshes on device change and manually; setup
+help is in the stage. Actual physical camera trial pending. The phone must stay locked for camera
+use, so Safari alert viewing on that same phone is a separate mode.
+
+Fetched John's johnaou/custom-sounds at 87aff0d and ran 14 targeted tests in isolation, all passing.
+It is not merged: its older server must not replace the current priority/settings engine. Custom
+per-ID identity, TS parser and OLED icon are key integration gaps. See docs/john-audio-review.md.

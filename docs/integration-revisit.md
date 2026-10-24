@@ -14,6 +14,8 @@ compass arrow. Unknown direction has no arrow. Browser patch scale is illustrati
 | Camera gesture tuning | Deferred at Emma's request after live trial | Several users, lighting, false/accidental dismissals and latency; reliable release/rearm. Keep manual Dismiss available |
 | Physical dismiss control | Final input hardware agreed | Wearer can acknowledge exact current cue without laptop assistance; stale input cannot clear a newer cue |
 | iPhone synchronized alert viewer | Implemented; real Safari/Wi-Fi trial pending | Connect real phone; validate latency, orientation, permissions, disconnect/reconnect and source labeling |
+| iPhone camera POV | Continuity Camera selected; software help/device refresh implemented | Emma verifies actual selected device, movement, overlay, stop and reconnect; see iphone-camera.md |
+| Custom sound recognition integration | John branch reviewed; 14 targeted tests passed | Port routes into current receiver, per-ID repeat/ack/settings, parser and OLED fallback; see john-audio-review.md |
 | Cross-client preferences | More than one settings-owning companion | Revision/conflict ownership; opening a fresh viewer must not overwrite saved choices |
 | Final room recognition | Audio owners + final mic | Miss/false-alert rates and total sound-to-cue latency |
 | End-to-end health | Capture worker supplies heartbeat | Distinguish silence, listening, stalled inference and disconnected display |

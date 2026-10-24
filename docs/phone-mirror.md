@@ -2,7 +2,8 @@
 
 Shows the authoritative receiver cue with the same 128×64 renderer, labels, compass arrow and
 acknowledgement check. It does not own settings, run inference, access a camera or dismiss alerts.
-This is an alert viewer, not phone camera streaming. Opening it never auto-starts a microphone.
+This is an alert viewer, not phone camera streaming. For iPhone POV, use
+[Continuity Camera](iphone-camera.md); that locks the phone, so use the laptop to view alerts. Opening it never auto-starts a microphone.
 
 ## Run on the processing Mac
 

@@ -18,6 +18,19 @@ function useCamera() {
   const [error, setError] = useState<string | null>(null);
   const current = useRef<MediaStream | null>(null);
   const generation = useRef(0);
+  const refresh = useCallback(async () => {
+    const version = generation.current;
+    try {
+      const all = await navigator.mediaDevices.enumerateDevices();
+      if (version === generation.current)
+        setDevices(all.filter((device) => device.kind === "videoinput"));
+    } catch {
+      if (version === generation.current)
+        setError(
+          "Could not refresh cameras. The current camera can keep playing.",
+        );
+    }
+  }, []);
   const stop = useCallback(() => {
     generation.current++;
     current.current?.getTracks().forEach((track) => track.stop());
@@ -76,10 +89,12 @@ function useCamera() {
         const name = (e as DOMException).name;
         setError(
           name === "NotAllowedError"
-            ? "Camera access is blocked. Allow it in this site's settings, then try again."
+            ? "Camera access is blocked. On the Mac, allow this browser in site settings and System Settings → Privacy & Security → Camera, then try again."
             : name === "NotFoundError" || name === "OverconstrainedError"
               ? "No camera found."
-              : "The camera could not start. Another app may be using it.",
+              : name === "NotReadableError"
+                ? "Camera busy or unavailable. Close other camera apps, reconnect the iPhone, then try again."
+                : "The camera could not start. Reconnect it and try again.",
         );
       }
     },
@@ -93,7 +108,15 @@ function useCamera() {
     },
     [],
   );
-  return { stream, devices, deviceId, error, start, stop };
+  useEffect(() => {
+    if (!stream) return;
+    // Continuity Camera can appear after capture starts or after plugging in USB.
+    const changed = () => void refresh();
+    navigator.mediaDevices.addEventListener("devicechange", changed);
+    return () =>
+      navigator.mediaDevices.removeEventListener("devicechange", changed);
+  }, [stream, refresh]);
+  return { stream, devices, deviceId, error, start, stop, refresh };
 }
 
 // Simulated wearer view: an optional demo camera backdrop, not a camera on the glasses.
@@ -187,6 +210,14 @@ export default function Stage({
               ))}
             </select>
           )}
+          {camera.stream && (
+            <button
+              className="stage-button"
+              onClick={() => void camera.refresh()}
+            >
+              Refresh cameras
+            </button>
+          )}
           <button
             className="stage-button"
             onClick={() =>
@@ -199,6 +230,22 @@ export default function Stage({
           </button>
         </span>
       </div>
+      <details className="camera-help">
+        <summary>Use an iPhone camera</summary>
+        <p>
+          Connect your iPhone to this Mac by USB, trust the Mac if prompted,
+          then lock and mount the phone with the rear camera facing the scene.
+          Both devices need the same Apple Account and Continuity Camera
+          enabled. Choose Use POV camera, then select your iPhone in Camera. If
+          it is missing, choose Refresh cameras. Stop camera ends this page’s
+          capture.
+        </p>
+        <p>
+          The phone stays locked while supplying the camera; use the laptop to
+          view alerts. The phone’s Safari alert mirror is a separate viewing
+          mode.
+        </p>
+      </details>
       {gesture !== "off" && (
         <p className={`gesture-demo-status is-${gesture}`} role="status">
           Demo camera · {gestureText[gesture]}

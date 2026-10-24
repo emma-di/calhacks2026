@@ -141,3 +141,7 @@ after phone type/flow is confirmed. One OLED alert at a time is the current deci
 Phone mirror implemented and browser-checked at 390px with a real receiver mock event. It is read-only,
 access-key protected, and uses the shared OLED renderer. 43 Python / 18 frontend tests pass. Actual
 Safari-on-iPhone network trial pending; see docs/phone-mirror.md. No phone camera streaming implemented.
+
+Continuity Camera selected for iPhone POV; device refresh and in-app instructions added. Physical
+trial requires Emma to connect/lock/mount the phone and select it on the Mac. John's custom-sound
+branch reviewed with 14 passing isolated tests; integration boundaries recorded in docs/john-audio-review.md.
