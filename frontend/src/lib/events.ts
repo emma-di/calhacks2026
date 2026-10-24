@@ -176,6 +176,23 @@ export function makeMock(
   directionDegrees: number | null = null,
 ): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
+  if (type === "name_called")
+    // John's name events are schema v2 (audio/names.py): no score, no direction, which alias matched.
+    return {
+      schema_version: 2,
+      event_id: crypto.randomUUID(),
+      type,
+      label: sound.label,
+      confidence: null,
+      source: "mock",
+      priority_tier: tier ?? sound.tier,
+      timestamp_ms: Date.now(),
+      direction_degrees: null,
+      direction_confidence: null,
+      distance_meters: null,
+      matched_alias_id: "primary",
+      profile_revision: 0,
+    } as SoundEvent;
   return {
     schema_version: 1,
     event_id: crypto.randomUUID(),
@@ -207,7 +224,7 @@ export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");
   const e = input as Record<string, unknown>;
   if (
-    e.schema_version !== 1 ||
+    !(e.schema_version === 1 || (e.schema_version === 2 && e.type === "name_called")) ||
     typeof e.event_id !== "string" ||
     !e.event_id ||
     typeof e.label !== "string" ||

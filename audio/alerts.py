@@ -74,7 +74,8 @@ def validate_profile(value, known_types):
     return dict(schema_version=1, profile_id=str(value.get('profile_id', 'local'))[:64],
                 revision=0, custom_sound_requests=custom, display_name=str(value.get('display_name', ''))[:60],
                 name_detection=dict(enabled=bool(names.get('enabled', False)), primary_name=primary,
-                                    aliases=list(aliases), language=str(names.get('language', 'en'))[:12]),
+                                    aliases=list(aliases), language=str(names.get('language', 'en'))[:12],
+                                    **name_extras(names)),
                 notification_preferences=dict(mode=prefs['mode'], event_tiers=dict(tiers), category_tiers=dict(categories)),
                 display=dict(labels=display.get('labels', False)))
 
@@ -98,6 +99,17 @@ def direction_bucket(degrees, confidence):
     if -135 <= d < -45:
         return 'left'
     return 'behind'
+
+
+def name_extras(names):
+    """John's name spotter settings (audio/names.py): kept when valid so saving preferences never drops them."""
+    extras = {}
+    if names.get('sensitivity') in ('low', 'balanced', 'high'):
+        extras['sensitivity'] = names['sensitivity']
+    learned = names.get('learned_spellings')
+    if isinstance(learned, list) and len(learned) <= 8 and all(isinstance(x, (str, dict)) for x in learned):
+        extras['learned_spellings'] = learned
+    return extras
 
 
 def effective_tier(kind, producer_tier, profile):

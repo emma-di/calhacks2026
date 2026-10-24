@@ -85,3 +85,12 @@ test("receiver display label setting is authoritative for the physical mirror", 
   );
   assert.equal(parseSnapshot(base).display_labels, null);
 });
+
+test("name events from John's spotter (schema v2) parse; other v2 events do not", () => {
+  const name = makeMock("name_called");
+  assert.equal(name.schema_version, 2);
+  assert.equal(parseSnapshot({ active: name, events: [name], decisions: [] }).active?.type, "name_called");
+  assert.throws(() =>
+    parseSnapshot({ active: { ...makeMock("knock"), schema_version: 2 }, events: [], decisions: [] }),
+  );
+});

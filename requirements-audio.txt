@@ -4,3 +4,5 @@ scipy<2
 sounddevice<1
 soundfile<1
 sherpa-onnx==2.0.0
+# Name detection (audio/names.py): keyword spotter tokenizer
+sentencepiece<1

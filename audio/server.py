@@ -184,7 +184,7 @@ state = AlertState()
 class Handler(BaseHTTPRequestHandler):
     @property
     def receiver_state(self):
-        return self.server.alert_state
+        return getattr(self.server, 'alert_state', state)
 
     def reply(self, status, payload, content_type='application/json'):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
