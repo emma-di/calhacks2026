@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   Activity,
-  ArrowDownLeft,
   ArrowRight,
   AudioLines,
   Check,
@@ -11,15 +10,12 @@ import {
   Expand,
   Glasses,
   LayoutDashboard,
-  Link2,
   List,
   LoaderCircle,
   Monitor,
   Play,
   Radio,
-  RotateCcw,
   Settings2,
-  ShieldCheck,
   Sparkles,
   Unplug,
   VolumeX,
@@ -28,6 +24,11 @@ import {
 import Cue, { SoundIcon } from "./components/Cue";
 import Scene from "./components/Scene";
 import Oled from "./components/Oled";
+import Preferences, {
+  defaultAppearance,
+  type Appearance,
+} from "./components/Preferences";
+import { mockPriority, type Preset } from "./lib/presets";
 import {
   applyMock,
   emptyMock,
@@ -57,6 +58,8 @@ export default function App() {
   const [mode, setMode] = useState<Mode>("mock");
   const [view, setView] = useState<View>("companion");
   const [focus, setFocus] = useState(false);
+  const [preset, setPreset] = useState<Preset>("balanced");
+  const [appearance, setAppearance] = useState<Appearance>(defaultAppearance);
   const [mock, setMock] = useState(emptyMock);
   const [remote, setRemote] = useState<Snapshot>(initial);
   const [connection, setConnection] = useState<
@@ -155,12 +158,15 @@ export default function App() {
     );
   };
   const trigger = async (type: EventType) => {
-    const event = makeMock(type, mode === "mock" ? overrides[type] : undefined);
+    const event = makeMock(
+      type,
+      mode === "mock" ? mockPriority(type, preset, overrides) : undefined,
+    );
     if (mode === "mock") {
       setMock((s) => applyMock(s, event, performance.now()));
       setMessage(
         event.priority_tier === 0
-          ? "Conversation received. Tier 0 stays quietly in the background."
+          ? `${event.label} received. Tier 0 stays quietly in the background.`
           : `${event.label} sent. Higher-priority cues stay in focus until cleared.`,
       );
       return;
@@ -207,7 +213,7 @@ export default function App() {
     ];
     timers.current = steps.map(([delay, type]) =>
       setTimeout(() => {
-        const event = makeMock(type, overrides[type]);
+        const event = makeMock(type, mockPriority(type, preset, overrides));
         setMock((s) => applyMock(s, event, performance.now()));
         setMessage(
           `Demo sequence: ${event.label} at tier ${event.priority_tier}. Higher-priority cues remain in focus.`,
@@ -254,17 +260,23 @@ export default function App() {
               className={view === "companion" ? "selected" : ""}
               onClick={() => setView("companion")}
               aria-label="Companion"
+              title="Companion"
               aria-current={view === "companion" ? "page" : undefined}
             >
               <LayoutDashboard size={20} />
             </button>
-            <button onClick={openMirror} aria-label="Audience mirror">
+            <button
+              onClick={openMirror}
+              aria-label="Audience mirror"
+              title="Audience mirror"
+            >
               <Glasses size={21} />
             </button>
             <button
               className={view === "events" ? "selected" : ""}
               onClick={() => setView("events")}
               aria-label="Event log"
+              title="Event log"
               aria-current={view === "events" ? "page" : undefined}
             >
               <List size={21} />
@@ -273,6 +285,7 @@ export default function App() {
               className={view === "preferences" ? "selected" : ""}
               onClick={() => setView("preferences")}
               aria-label="Preview preferences"
+              title="Preview preferences"
               aria-current={view === "preferences" ? "page" : undefined}
             >
               <Settings2 size={20} />
@@ -285,9 +298,6 @@ export default function App() {
           >
             <CircleHelp size={21} />
           </button>
-          <span className="avatar" title="Demo session">
-            A
-          </span>
         </aside>
       )}
       <main>
@@ -305,9 +315,6 @@ export default function App() {
               <small>the visual companion</small>
             </a>
             <div className="topbar-right">
-              <span className="prototype">
-                CALHACKS ’26 <i /> PROTOTYPE
-              </span>
               <button className="text-button" onClick={() => setHelp(true)}>
                 How it works <ArrowRight size={15} />
               </button>
@@ -317,23 +324,13 @@ export default function App() {
         {!focus && (
           <div className="page-heading">
             <div>
-              <div className="eyebrow">
-                <span /> SOUND, MADE VISIBLE
-              </div>
               <h1>
                 {view === "events"
-                  ? "Every sound has a story."
+                  ? "Event log"
                   : view === "preferences"
-                    ? "Make space for what matters."
-                    : "Stay in the moment."}
+                    ? "Preview preferences"
+                    : "Sound overview"}
               </h1>
-              <p>
-                {view === "events"
-                  ? "A closer look at what arrived, and what came into focus."
-                  : view === "preferences"
-                    ? "Explore how much attention each sound deserves."
-                    : "A quieter interface to the world around you."}
-              </p>
             </div>
             <button
               className="outline-button mirror-launch"
@@ -352,10 +349,7 @@ export default function App() {
                 aria-label="Audience mirror preview"
               >
                 <div className="panel-heading">
-                  <div>
-                    <span className="mini-dot" /> Wearer’s view{" "}
-                    <span className="subtle">/ browser mirror</span>
-                  </div>
+                  <div>Browser mirror</div>
                   <button
                     className="icon-button"
                     onClick={() => setFocus(!focus)}
@@ -375,68 +369,37 @@ export default function App() {
                         className={`status-dot ${mode === "receiver" && !connected ? "offline" : ""}`}
                       />
                       {mode === "mock"
-                        ? "SIMULATED ENVIRONMENT"
+                        ? `Mock preview${appearance.direction === "unknown" ? "" : " · simulated " + appearance.direction}`
                         : connected
-                          ? "RECEIVER MIRROR"
-                          : "CONNECTION LOST"}
-                    </span>
-                    <span className="scene-coordinate">
-                      {mode === "mock" ? "DESIGN PREVIEW" : "LOCAL SESSION"}
+                          ? `Receiver · ${state.active ? cueSource : "ready"}`
+                          : "Disconnected"}
                     </span>
                   </div>
-                  <div className="view-bracket top-left" />
-                  <div className="view-bracket top-right" />
-                  <div className="view-bracket bottom-left" />
-                  <div className="view-bracket bottom-right" />
-                  <div className="scene-center">
-                    <span />
-                    <span />
-                    <span />
-                    <span />
-                  </div>
-                  <Cue event={state.active} />
-                  <div className="view-bottom">
-                    <span>
-                      <Glasses size={15} />{" "}
-                      {mode === "mock"
-                        ? "A preview of your perspective"
-                        : "Following the local alert state"}
-                    </span>
-                    <span>{state.active ? cueSource : "NO ACTIVE ALERT"}</span>
-                  </div>
-                </div>
-                <div className="view-caption">
-                  <span>
-                    <span className="mini-dot" /> One cue. Just what matters.
-                  </span>
-                  <span>
-                    Direction unavailable <ArrowDownLeft size={13} />
-                  </span>
+                  <Cue
+                    event={state.active}
+                    appearance={appearance}
+                    direction={
+                      mode === "mock" ? appearance.direction : "unknown"
+                    }
+                  />
                 </div>
               </section>
               {!focus && (
                 <aside className="right-stack">
                   <section className="device-panel">
                     <div className="device-title">
-                      <span>THE GLASSES DISPLAY</span>
+                      <span>Glasses preview</span>
                       <Glasses size={19} />
                     </div>
                     <div className="oled-screen">
-                      <span className="oled-cross">+</span>
                       <Oled event={state.active} />
-                      <span className="oled-pixels">128 × 64 · 1 BIT</span>
                     </div>
                     <div className="device-note">
-                      <span className="outline-dot" /> Hardware not connected{" "}
-                      <span className="device-note-detail">
-                        Awaiting Yameen’s display adapter
-                      </span>
+                      <span className="outline-dot" /> Preview only · not
+                      connected
                     </div>
                   </section>
                   <section className="connection-panel">
-                    <div className="section-label">
-                      YOUR SESSION <Link2 size={14} />
-                    </div>
                     <div
                       className="mode-picker"
                       role="group"
@@ -468,18 +431,14 @@ export default function App() {
                     </div>
                     <p>
                       {mode === "mock"
-                        ? "Try a sound. Explore the cue. No microphone needed."
+                        ? "Mock sounds. No microphone needed."
                         : connected
-                          ? "Events come from Python. Microphone activity is not reported by this receiver."
+                          ? "Following Python alerts. Microphone status unavailable."
                           : "Start the local Python receiver, then this view reconnects automatically."}
                     </p>
                     {mode === "receiver" && !connected && (
                       <code>python3 -m audio.server</code>
                     )}
-                    <div className="capability">
-                      <span>Spatial direction</span>
-                      <span>Not available</span>
-                    </div>
                   </section>
                 </aside>
               )}
@@ -488,8 +447,7 @@ export default function App() {
               <section className="sound-section">
                 <div className="section-heading">
                   <div>
-                    <span className="eyebrow">EXPLORE THE EXPERIENCE</span>
-                    <h2>Give a sound a little space.</h2>
+                    <h2>Try a sound</h2>
                   </div>
                   <div className="sound-actions">
                     {mode === "mock" && (
@@ -498,7 +456,7 @@ export default function App() {
                         onClick={scenario ? stopScenario : runScenario}
                       >
                         {scenario ? <X size={15} /> : <Play size={14} />}{" "}
-                        {scenario ? "Stop sequence" : "Play demo sequence"}
+                        {scenario ? "Stop sequence" : "Play sequence"}
                       </button>
                     )}
                     <button
@@ -521,35 +479,10 @@ export default function App() {
                       }
                       onClick={() => void trigger(sound.type)}
                     >
-                      <span className="sound-card-top">
-                        <span className="sound-icon">
-                          <SoundIcon type={sound.type} />
-                        </span>
-                        <span
-                          className={`tier-chip tier-chip-${mode === "mock" ? (overrides[sound.type] ?? sound.tier) : sound.tier}`}
-                        >
-                          0
-                          {mode === "mock"
-                            ? (overrides[sound.type] ?? sound.tier)
-                            : sound.tier}
-                        </span>
+                      <span className="sound-icon">
+                        <SoundIcon type={sound.type} size={19} />
                       </span>
                       <strong>{sound.label}</strong>
-                      <span className="sound-detail">
-                        {mode === "receiver" && !sound.receiver
-                          ? "Simulator only"
-                          : sound.detail}
-                      </span>
-                      <span className="sound-card-footer">
-                        {
-                          tierNames[
-                            mode === "mock"
-                              ? (overrides[sound.type] ?? sound.tier)
-                              : sound.tier
-                          ]
-                        }
-                        <ArrowRight size={14} />
-                      </span>
                     </button>
                   ))}
                 </div>
@@ -563,58 +496,17 @@ export default function App() {
         )}
 
         {!focus && view === "preferences" && (
-          <section className="preferences-panel">
-            <div className="preferences-intro">
-              <span className="eyebrow">PREVIEW PRIORITIES</span>
-              <h2>Your attention is personal.</h2>
-              <p>
-                Try different cue levels in the simulator. These choices apply
-                only to this browser preview; saved profiles and live
-                preferences are coming with backend integration.
-              </p>
-              <button
-                className="outline-button"
-                onClick={() => {
-                  setOverrides({});
-                  setMessage("Preview priorities reset.");
-                }}
-              >
-                <RotateCcw size={15} /> Reset preview
-              </button>
-            </div>
-            <div className="preference-list">
-              {sounds.map((sound) => (
-                <label className="preference-row" key={sound.type}>
-                  <span className="preference-icon">
-                    <SoundIcon type={sound.type} />
-                  </span>
-                  <span>
-                    <strong>{sound.label}</strong>
-                    <small>{sound.detail}</small>
-                  </span>
-                  <select
-                    aria-label={`${sound.label} preview priority`}
-                    value={overrides[sound.type] ?? sound.tier}
-                    onChange={(e) =>
-                      setOverrides((p) => ({
-                        ...p,
-                        [sound.type]: Number(e.target.value) as Tier,
-                      }))
-                    }
-                  >
-                    {tierNames.map((label, tier) => (
-                      <option key={tier} value={tier}>
-                        {tier} · {label}
-                      </option>
-                    ))}
-                  </select>
-                </label>
-              ))}
-            </div>
-          </section>
+          <Preferences
+            overrides={overrides}
+            onOverridesChange={setOverrides}
+            appearance={appearance}
+            onAppearanceChange={setAppearance}
+            preset={preset}
+            onPresetChange={setPreset}
+          />
         )}
 
-        {!focus && (
+        {!focus && view === "events" && (
           <section
             className={`activity-panel ${view === "events" ? "expanded-events" : ""}`}
           >
@@ -622,9 +514,7 @@ export default function App() {
               <div>
                 <span className="mini-dot" />{" "}
                 {view === "events" ? "Event log" : "A moment in your session"}{" "}
-                <span className="count">
-                  {state.events.length.toString().padStart(2, "0")}
-                </span>
+                <span className="count">{state.events.length}</span>
               </div>
               {view !== "events" && (
                 <button
@@ -718,20 +608,6 @@ export default function App() {
             </button>
           </div>
         )}
-        {!focus && (
-          <footer>
-            <span>
-              <AudioLines size={16} /> More presence. Less noise.
-            </span>
-            <span>
-              Built for connection <span className="footer-dot">·</span>{" "}
-              CalHacks 2026
-            </span>
-            <span>
-              <ShieldCheck size={13} /> Experimental awareness aid
-            </span>
-          </footer>
-        )}
       </main>
       <dialog
         ref={helpDialog}
@@ -748,7 +624,6 @@ export default function App() {
         >
           <X size={20} />
         </button>
-        <span className="eyebrow">AWARE / PROTOTYPE</span>
         <h2 id="about-title">Sound, made visible.</h2>
         <p>
           A browser companion for situational awareness glasses. A judge wears

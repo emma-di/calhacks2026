@@ -37,7 +37,9 @@ npm run dev --prefix frontend
 
 Open http://127.0.0.1:5173. Simulator mode needs no microphone or model.
 Read [AGENTS.md](AGENTS.md) for the agent entry point and [hardware stack](docs/hardware-stack.md)
-for the original Pi Zero W + two INMP441s + SSD1306 plan.
+for the original Pi Zero W + two INMP441s + SSD1306 plan. The [offline OLED renderer](docs/display-renderer.md)
+can export fake 128×64 cues before device integration. Read [display UX](docs/display-ux.md) for
+icon-first/peripheral design limits and [Mana onboarding](docs/mana-onboarding.md) for source handoff status.
 
 ## UI / hardware: run mock alerts immediately
 

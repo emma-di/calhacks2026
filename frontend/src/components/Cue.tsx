@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { tierNames, type EventType, type SoundEvent } from "../lib/events";
+import type { Appearance } from "./Preferences";
 const icons: Record<EventType, LucideIcon> = {
   knock: DoorOpen,
   bell: Bell,
@@ -29,46 +30,47 @@ export function SoundIcon({
   size?: number;
 }) {
   const Icon = icons[type];
-  return <Icon size={size} strokeWidth={1.6} aria-hidden="true" />;
+  return <Icon size={size} strokeWidth={1.7} aria-hidden="true" />;
 }
 export default function Cue({
   event,
-  oled = false,
+  appearance,
+  direction,
 }: {
   event: SoundEvent | null;
-  oled?: boolean;
+  appearance: Appearance;
+  direction: Appearance["direction"];
 }) {
   const visible = event && event.priority_tier > 0;
+  const text =
+    visible && (appearance.text === "labels" || event.priority_tier === 4);
   return (
     <div
-      className={`cue-region ${oled ? "oled-cue" : ""}`}
+      className={`cue-region edge-${visible ? direction : "unknown"}`}
       role="status"
       aria-live="polite"
       aria-atomic="true"
     >
       {visible ? (
-        <div key={event.event_id} className={`cue tier-${event.priority_tier}`}>
+        <div
+          key={event.event_id}
+          className={`cue tier-${event.priority_tier} ${text ? "" : "icon-only"} ${appearance.motion === "gentle" ? "gentle-cue" : ""}`}
+          role="group"
+          aria-label={`${tierNames[event.priority_tier]}: ${event.label}`}
+          style={{
+            color: appearance.colors[event.priority_tier],
+            borderColor: appearance.colors[event.priority_tier],
+          }}
+        >
           <span className="cue-symbol">
-            <SoundIcon type={event.type} size={oled ? 25 : 32} />
+            <SoundIcon type={event.type} size={32} />
           </span>
-          <div>
-            <span className="cue-eyebrow">
-              {tierNames[event.priority_tier]}
-            </span>
-            <strong>{event.label}</strong>
-          </div>
-          {!oled && (
-            <span className="cue-tail" aria-hidden="true">
-              ●
-            </span>
-          )}
+          {text && <strong>{event.label}</strong>}
         </div>
       ) : (
         <div className="cue-idle">
           <span className="idle-orbit" />
-          <span>
-            {oled ? "No active cue" : "A little quiet. A little clarity."}
-          </span>
+          <span>No active alerts</span>
         </div>
       )}
     </div>

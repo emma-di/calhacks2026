@@ -10,6 +10,7 @@ This is the CalHacks situational-awareness glasses repo. Read this file before c
 3. Read [team workstreams](docs/team-workstreams.md) and [distilled build instructions](docs/team-build-instructions.md).
 4. Read [integration contract](docs/integration.md) before changing events or transports.
 5. Read [UI/backend plan](docs/ui-ux-backend-plan.md), [hardware stack](docs/hardware-stack.md),
+   [display UX](docs/display-ux.md), [offline display renderer](docs/display-renderer.md),
    and [sponsor decisions](docs/sponsor-build-guide.md) for the task you are implementing.
 6. Name work uses [the name plan](docs/name-detection-plan.md); environmental ML uses
    [the audio guide](docs/audio-guide.md) and [measured results](reports/summary.md).
@@ -34,6 +35,7 @@ Some plans remain proposals: inspect code and current PRs before assuming an API
 - Unknown direction stays unknown; synchronized capture and measured error gate spatial cues.
 - Zipformer is the current pretrained default. Rule tuning is not model-weight fine-tuning.
 - Bicycle subtype is disabled pending evidence. Name recognition and hardware links are not implemented by a design preview.
+- UI direction: calm, no eyebrow headings or decorative HUD chrome. Defaults first, then search/add explicit exceptions; icon-first nonurgent cues, urgent labels, optional gentle motion with reduced-motion support. See display UX notes.
 - No per-user training for settings. Match names only after the speech worker is actually integrated.
 - Evaluate sponsor tools against meaningful product use; record adopt/defer, preserve local fallback,
   and choose at most one equivalent cloud state layer. Never claim unverified track eligibility.

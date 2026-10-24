@@ -16,7 +16,7 @@ Open http://127.0.0.1:5173. The development server binds only to the local compu
 
 - **Simulator:** try sound buttons or the scripted interruption sequence. All events are mock.
 - **Audience mirror:** expands the same active cue; Escape returns to companion view.
-- **Preview preferences:** changes simulator-only tiers for the current page session, not saved/live profiles.
+- **Preview preferences:** uses presets and searchable exception rules for the current page session, not saved/live profiles. Display options preview icon-first cues, colors and mock direction.
 - **Event log:** shows arrivals, priority outcomes and optional developer JSON.
 - **OLED:** exact 128×64 one-bit raster design preview, not a connected physical display.
 
@@ -78,4 +78,6 @@ Verified in this pass: production build; priority/expiry/dedup/parser/HTTP failu
 browser urgent interruption, receiver connection, labeled-recording inference → mirror, OLED cue,
 audience expansion and dismissal. The physical display and final room microphone remain untested.
 
-![Recorded smoke-alarm cue in companion view](../docs/browser-mirror-preview.png)
+![Mock urgent cue and simulated edge placement in the cleaned companion](../docs/browser-mirror-preview.png)
+
+The [display UX notes](../docs/display-ux.md) explain defaults/search, icon-first cues, mock peripheral positioning, monochrome limits and the optical questions for Yameen. The offline [device renderer](../docs/display-renderer.md) is a separate implementation; it is not connected to this preview yet.

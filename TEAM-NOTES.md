@@ -104,6 +104,28 @@ If you already have that local branch, use `git switch codex/browser-mirror` ins
   onboarding/export/event-relay proof before making sponsor usage claims.
 - Team: official sponsor rules, deadline, cloud-state decision and final submission categories.
 
+## Latest design update — October 23
+
+- **No eyebrow headings.** Calm neutral interface; remove decorative crosshairs, repeated captions,
+  large sound cards and inline history. Event history remains in its own view.
+- **Defaults before customization.** Preset → search → a short queue/list of only custom rules;
+  do not make people configure every sound. Explicit Ignore/tier 0 must survive preset changes.
+- User wants full customization; supported sound coverage is a separate ML capability. Unsupported
+  niche queries must say they require recognition support rather than pretending they already work.
+- **Peripheral, icon-first cues** are the desired experience. Text optional for ordinary cues;
+  urgent cues keep a label. Browser tier colors, still/gentle motion and mock edge placement are
+  preview controls. White SSD1306 needs monochrome equivalents. No rapid flashing.
+- OLED pixel dimensions do not establish full-field optical coverage. Confirm virtual-image placement,
+  angular field of view and orientation with Yameen before promising a Fortnite-style full-field overlay.
+  See [display UX](docs/display-ux.md) for the precise questions and fallback.
+- Local mirror remains React-built. Taste guidance is now installed/applied. Mana built onboarding
+  and its numeric-tier/search revision is visible; final source export is being reviewed. Do not import
+  the first draft's string priorities. See [Mana handoff](docs/mana-onboarding.md). No Bridge pairing
+  or live Mana→hardware connection is claimed.
+- Offline device renderer is now implemented: original bitmap icons/font, one-bit frames, SSD1306
+  page conversion, stale/duplicate/expiry/disconnect guards. Thirteen tests pass; no physical driver
+  or display output is connected. [Handoff](docs/display-renderer.md).
+
 ## Add a note
 
 ```text

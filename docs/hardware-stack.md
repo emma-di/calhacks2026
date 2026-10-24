@@ -147,3 +147,5 @@ preview in the browser; enlarge it with crisp pixels for audience readability.
 
 Record checkpoint evidence in the [master TODO](../TODO.md). See the
 [integration handoff](integration.md) and [UI/backend plan](ui-ux-backend-plan.md) for software boundaries.
+
+See [display UX / optical questions](display-ux.md) before promising full-field peripheral placement, and the [offline pixel renderer](display-renderer.md) for software frames ready for driver integration.

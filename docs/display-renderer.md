@@ -1,0 +1,112 @@
+# Offline OLED renderer
+
+Implemented: dependency-free Python rendering to a **128×64 one-bit frame**, PBM preview export,
+SSD1306 page-byte conversion, and a transport-independent consumer state guard. No microphone,
+network connection, Raspberry Pi driver, I²C command or physical display is started by this module.
+This is software preparation for Yameen's hardware integration, not proof that glasses work.
+
+## Try fake cues
+
+Run from the repo root with Python 3.12; no additional packages are needed:
+
+```sh
+python3 -m hardware.display --event knock --tier 2
+python3 -m hardware.display --event bell --tier 2 --output .cache/bell.pbm
+python3 -m hardware.display --event dog --tier 1 --output .cache/dog.pbm
+python3 -m hardware.display --event name --tier 3 --output .cache/name.pbm
+python3 -m hardware.display --event smoke --tier 4 --output .cache/smoke.pbm
+python3 -m hardware.display --event bell --tier 2 --icons-only --output .cache/bell-icon.pbm
+python3 -m hardware.display --event knock --tier 0 --output .cache/blank.pbm
+python3 -m unittest discover -s tests -p test_display.py -v
+```
+
+Default output is `.cache/display-preview.pbm`. PBM is a portable binary image, not an SSD1306
+wire packet. It uses black background/white illuminated pixels. `Bitmap.buffer` is 1,024 packed
+row-major bytes (MSB first; 1 = illuminated); `ssd1306_pages()` returns 1,024 bytes with vertical
+page bits suitable for a future driver's framebuffer input. Initialization commands, address,
+rotation and optical inversion still belong to the actual device adapter.
+
+## Cue vocabulary
+
+Original line pictograms use these IDs: `knock` (door + knock marks), `bell` (bell), `dog` (dog face),
+`name` (person), `smoke` (warning triangle). They contain no unsupported direction arrow.
+Original 5×7 bitmap text is deterministic across machines; letters are uppercase and unsupported
+characters display `?`. Long labels wrap to two bounded lines with an ellipsis; ambient labels
+use a shorter single line. These icons/font are standalone; browser artwork has not been synchronized
+with them yet. Confirm the final vocabulary with UI/UX before claiming visual parity.
+
+| Effective tier | Static treatment |
+| --- | --- |
+| 0 | Completely blank frame |
+| 1 | Small peripheral icon and short label |
+| 2 | Centered icon and label |
+| 3 | Frame and explicit ATTENTION header |
+| 4 | Double frame and inverse URGENT header; no flashing |
+
+Compare an icon-first nonurgent preview with `--icons-only`, or call
+`render(presentation, show_labels=False)`. The icon, tier frame and ATTENTION header remain;
+nonurgent event labels disappear. **Urgent labels and the URGENT header always remain.**
+Default rendering still includes labels for backward compatibility while optics/readability are
+tested. This option is a local design comparison, not a saved backend preference. The OLED is
+white monochrome; browser color cannot carry over. Gentle motion is not implemented here;
+evaluate physical readability and refresh behavior before adding any animation.
+
+## Proposed presentation contract
+
+This is a separate **display-consumer contract**, not a change to `audio/events.py` or an existing
+server API. Backend chooses priority and remaining lifetime; this renderer does not queue events,
+read user preferences or interpret model scores. An eventual backend adapter must map resolved
+events to icon IDs and supply the fields below. A unique session ID identifies each backend run.
+
+```json
+{
+  "schema_version": 1,
+  "session_id": "backend-run-unique-id",
+  "state_sequence": 12,
+  "event_id": "event-unique-id",
+  "label": "Door knock",
+  "icon_id": "knock",
+  "effective_tier": 2,
+  "remaining_ms": 2300
+}
+```
+
+All fields are required. Clear uses tier 0, remaining 0, null event/icon IDs and an empty label.
+`--snapshot path/to/snapshot.json` validates and renders a supplied snapshot once. That CLI is a
+static asset tool; continuous transport code must use `DisplayState` to enforce lifetimes:
+
+```python
+from hardware.display import DisplayState
+
+display = DisplayState()
+display.connect("backend-run-unique-id")  # explicitly establish the current session
+display.accept(snapshot_dict)
+frame = display.frame()                 # call periodically even without incoming packets
+device_bytes = frame.ssd1306_pages()     # pass to a future hardware driver
+display.disconnect()                    # call on link loss; frame is now blank
+```
+
+The state guard rejects old/equal sequence numbers and packets from another session. A new run
+must be established explicitly with `connect(new_session_id)`, which resets sequence/dedupe state.
+Reconnect to the same session preserves the last sequence number. Disconnect clears immediately;
+old cues are not automatically restored. A repeated event ID may shorten an active cue's lifetime,
+but cannot extend or resurrect it after expiry, clear or disconnect. The 128 most recent event IDs
+are remembered; transport still must avoid replaying historical events beyond that bounded cache.
+Reconnect should send a fresh backend state with a new event ID if the product deliberately needs
+to re-present a cue; finalize that policy before wiring the adapter.
+
+Expiry uses a local monotonic clock, capped at 30 seconds from the first accepted occurrence.
+The transport owner must account for packet age before supplying `remaining_ms`; delayed packets
+cannot be detected from this field alone. It must also detect disconnect/heartbeat failure and
+call `disconnect()`. `frame()` and `tick()` perform expiry; simply retaining an old frame forever
+does not clear physical pixels. A driver loop must write the blank frame when state changes.
+
+## Remaining integration gates
+
+- Agree backend session/sequence, clear and reconnect behavior; add the presentation adapter.
+- Verify SSD1306 address, library/driver support, framebuffer ordering, refresh and optical orientation.
+- Render the same icon IDs in the browser and confirm parity with the physical OLED.
+- Test tier readability through optics and tune pixel art at actual viewing distance.
+- Verify fake cue → clear/expiry → reconnect on the real board, then connect real audio.
+
+See the [hardware stack](hardware-stack.md) for candidate pins and capture feasibility gates.

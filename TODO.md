@@ -26,14 +26,14 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] UI-04 — Complete deterministic mock scenarios (all tiers and interruption built; remaining states pending): all tiers, interruption, repeated/long labels, idle,
   paused, unknown direction, disconnection and reconnect. Label simulated inputs.
 - [x] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
-- [ ] UI-06 — Review contrast, keyboard access, reduced motion, responsive layout and audience-distance readability.
+- [ ] UI-06 — Taste source lint and desktop review complete; finish responsive, keyboard, reduced-motion and wearer/readability checks. See docs/display-ux.md.
 - [x] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
 - [x] UI-08 — Capture screenshots and short demo evidence for teammate review.
 
 ## Then: setup and preferences — Emma
 
-- [ ] SET-01 — Confirm profile fields, mode defaults versus explicit overrides, and sound enable/disable semantics.
-- [ ] SET-02 — Design/build optional typed name + aliases, sound preferences and cue previews.
+- [ ] SET-01 — Core decision: defaults → searchable exception rules; keep numeric 0–4 overrides separate from presets. Confirm remaining profile and enable/disable semantics.
+- [ ] SET-02 — Local searchable exception/appearance preview built. Mana onboarding revision in progress; integrate optional name/aliases and verify export before completion.
 - [ ] SET-03 — Support editable settings and clear draft/saved/applied/error states.
 - [ ] SET-04 — Connect saved profile to backend; show name worker availability accurately.
 
@@ -72,7 +72,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
 - [ ] HW-03 — Display a fake cue on actual hardware independently of recognition.
-- [ ] HW-04 — Implement device renderer for agreed icon IDs, labels, tiers, clear and expiry.
+- [ ] HW-04 — Offline renderer implemented with 13 tests; finalize icon parity and connect actual SSD1306 driver before marking complete. See docs/display-renderer.md.
 - [ ] HW-05 — Connect authoritative backend state; compare event IDs with audience mirror.
 - [ ] HW-06 — Validate optical readability, refresh, mounting, power and reconnect/clear behavior.
 - [ ] HW-07 — Feed final audio device into capture adapter and complete the physical end-to-end demo.

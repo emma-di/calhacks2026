@@ -60,3 +60,11 @@ test("non-success HTTP response is an error, not a connected empty state", async
     globalThis.fetch = original;
   }
 });
+
+test("preset defaults remain separate from explicit tier-zero overrides", async () => {
+  const { mockPriority } = await import("./presets.ts");
+  assert.equal(mockPriority("dog_bark", "active", {}), 2);
+  assert.equal(mockPriority("dog_bark", "gentle", {}), 0);
+  assert.equal(mockPriority("dog_bark", "active", { dog_bark: 0 }), 0);
+  assert.equal(mockPriority("knock", "balanced", {}), 2);
+});

@@ -97,8 +97,25 @@ export const sounds: {
     receiver: false,
   },
 ];
+export const soundCatalog = [
+  ...sounds,
+  {
+    type: "alarm_clock" as EventType,
+    label: "Alarm clock",
+    detail: "A scheduled reminder",
+    tier: 2 as Tier,
+    receiver: true,
+  },
+  {
+    type: "siren" as EventType,
+    label: "Siren",
+    detail: "An approaching warning",
+    tier: 3 as Tier,
+    receiver: true,
+  },
+];
 export function makeMock(type: EventType, tier?: Tier): SoundEvent {
-  const sound = sounds.find((s) => s.type === type)!;
+  const sound = soundCatalog.find((s) => s.type === type)!;
   return {
     schema_version: 1,
     event_id: crypto.randomUUID(),
