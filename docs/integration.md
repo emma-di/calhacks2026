@@ -35,6 +35,8 @@ Current notification tier defaults are in `audio/events.py`; user preference ove
 The optional `model` field identifies the classifier. Generic `bell` means Bell / chime;
 the `bicycle_bell` subtype is disabled in the default recognition policy.
 User-taught sounds use `type: "custom"` with a `custom_sound_id`; see [custom sounds](custom-sounds.md).
+Every analysis window is also published as a raw observation (top labels, every rule's score and reason,
+custom-sound scores, level) at `GET /observations`; see the [live-site handoff](handoff-live-site.md).
 
 ## Yameen's handoff
 

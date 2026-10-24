@@ -34,6 +34,9 @@ def main():
         p.add_argument('--endpoint')
         p.add_argument('--debug', action='store_true')
         p.add_argument('--no-custom', action='store_true', help='ignore taught custom sounds')
+        p.add_argument('--observations', help='URL for per-window observations (default: next to --endpoint)')
+        p.add_argument('--no-observations', action='store_true', help='do not stream per-window observations')
+        p.add_argument('--observe-top', type=int, default=10, help='labels per observation (1..25)')
         p.add_argument('--decision-log',type=Path,default=Path(__file__).resolve().parent.parent/'.cache'/'recognition-decisions.jsonl')
         if name == 'file':
             p.add_argument('path')
@@ -78,6 +81,16 @@ def main():
     decision_log.write(dict(kind='recognition_session',model=args.model,policy=detector.policy,
         window_samples=model.window_samples,hop_samples=model.hop_samples,sample_rate=16000))
     print(f'Decision log: {args.decision_log}',file=sys.stderr)
+    observer=None
+    observation_url=args.observations or (args.endpoint.rsplit('/events',1)[0]+'/observations'
+                                         if args.endpoint and args.endpoint.endswith('/events') else None)
+    if observation_url and not args.no_observations:
+        from audio.observations import ObservationPublisher, MAX_TOP_K
+        if not 1 <= args.observe_top <= MAX_TOP_K:
+            parser.error(f'--observe-top must be 1..{MAX_TOP_K}')
+        observer=ObservationPublisher(observation_url)
+        atexit.register(observer.flush)
+        print(f'Observations: {observation_url}',file=sys.stderr)
 
     def process(window, source, clock=None, timestamp=None):
         scores, elapsed = model.predict(window)
@@ -94,6 +107,15 @@ def main():
             event['inference_ms'] = round(elapsed, 1)
             event['model'] = args.model
             deliveries.append({'event_id':event['event_id'],'status':publish(event,args.endpoint)})
+        if observer is not None:
+            from audio.observations import build_observation
+            from audio.custom_sounds import rms as window_rms
+            observer.publish(build_observation(scores, source=source, model=args.model,
+                timestamp_ms=timestamp, inference_ms=elapsed, window_rms=window_rms(window),
+                rule_decisions=detector.decisions, custom_decisions=custom_decisions,
+                custom_labels={m['id']:m['label'] for m,_ in custom.heads} if custom is not None else None,
+                events=events, top_k=args.observe_top,
+                window_seconds=model.window_samples/16000, hop_seconds=model.hop_samples/16000))
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
             top5=sorted(scores.items(),key=lambda x:x[1],reverse=True)[:5],
