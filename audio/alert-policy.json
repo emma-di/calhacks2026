@@ -12,6 +12,8 @@
   "queue_limit": 5,
   "queue_fresh_ms": 10000,
   "direction_min_confidence": 0.6,
+  "spatial_match": {"before_ms": 3000, "after_ms": 300, "min_coherence": 0.6, "stale_ms": 4000},
+  "spatial_note": "Phone FOA readings are matched to a recognized sound by Mac receive time: the classifier reports a sound up to ~2.5 s after it was heard (2 s windows), so readings from the preceding 3 s are eligible. Only calibrated readings with coherence >= 0.6 are used.",
   "gesture_to_dismiss": {
     "count": 1,
     "window_ms": 3000

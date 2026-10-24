@@ -7,6 +7,7 @@ Endpoints (JSON):
   GET  /profile   saved preferences;  PUT /profile  validate, apply and persist atomically
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
   POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
+  POST /spatial   phone FOA reading {bearing_degrees, coherence, rms, calibrated, device}; matched to sounds
 """
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -19,6 +20,7 @@ import time
 from urllib.parse import urlsplit, parse_qs
 from audio.alerts import AlertEngine, DEFAULT_PROFILE, direction_bucket, validate_profile
 from audio.events import EVENT_TYPES, validate_event
+from audio.spatial import SpatialBuffer, validate_reading
 
 ROOT = Path(__file__).resolve().parent.parent
 CAPTURE_SOURCES = ('microphone', 'replay', 'simulation')
@@ -39,6 +41,7 @@ class AlertState:
                                   on_decision=decision_log.write if decision_log else None)
         self.last_event = {}       # source -> monotonic ms
         self.display_clients = {}  # client name -> monotonic ms of last /display poll
+        self.spatial = SpatialBuffer()
 
     @property
     def decisions(self):
@@ -59,8 +62,22 @@ class AlertState:
 
     def add(self, event, now=None):
         with self.lock:
-            self.last_event[event['source']] = self._ms(now)
-            return self.engine.add(event, self._ms(now))
+            at = self._ms(now)
+            self.last_event[event['source']] = at
+            if event.get('direction_degrees') is None and event['source'] in CAPTURE_SOURCES:
+                reading = self.spatial.match(at)
+                if reading:
+                    # Same moment, separate device: direction comes from the phone's FOA microphones.
+                    event = dict(event, direction_degrees=reading['bearing_degrees'],
+                                 direction_confidence=round(reading['coherence'], 3),
+                                 direction_source=f"{reading['device']}_foa")
+            return self.engine.add(event, at)
+
+    def spatial_reading(self, value, now=None):
+        reading = validate_reading(value)
+        with self.lock:
+            self.spatial.add(reading, self._ms(now))
+        return reading
 
     def dismiss(self, event_id=None, now=None):
         with self.lock:
@@ -110,7 +127,7 @@ class AlertState:
             capture=dict(last_event_ms_ago=recent, live=any(
                 recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES)),
             display=dict(connected=bool(displays), clients=displays),
-            name_worker='unavailable', spatial='unavailable')
+            name_worker='unavailable', spatial=self.spatial.status(at))
 
     def snapshot(self, now=None):
         with self.lock:
@@ -172,7 +189,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
-        if path not in ('/events', '/dismiss', '/controls', '/look'):
+        if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial'):
             return self.reply(404, {'error': 'Not found'})
         try:
             payload = self.read_json()
@@ -191,6 +208,9 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError('heading_degrees must be a finite number')
                     direction = direction_bucket(heading, 1.0)
                 return self.reply(200, {'ok': True, 'resolved': self.receiver_state.look(direction)})
+            if path == '/spatial':
+                self.receiver_state.spatial_reading(payload)
+                return self.reply(200, {'ok': True})
             if path == '/controls':
                 self.receiver_state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'))
                 return self.reply(200, {'ok': True})

@@ -40,7 +40,7 @@ export interface Health {
   display: { connected: boolean; clients: Record<string, number> };
   capture: { live: boolean; last_event_ms_ago: Record<string, number> };
   name_worker: string;
-  spatial: string;
+  spatial: string | { connected: boolean; devices: Record<string, { age_ms: number; bearing_degrees: number | null; coherence: number; calibrated: boolean }> };
 }
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
