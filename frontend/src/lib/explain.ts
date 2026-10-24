@@ -6,25 +6,30 @@ export interface Explainable {
   priority_tier: Tier;
   reason: string;
   active_type?: string | null;
+  label?: string;
+  active_label?: string | null;
   direction?: string;
   gesture?: string;
 }
 
 const gestureName = (gesture?: string) => (gesture === "finger_snap" ? "Snap" : "Thumbs up");
-const name = (type?: string | null) =>
-  soundCatalog.find((s) => s.type === type)?.label ?? type ?? "another cue";
+// A taught custom sound is named by the user ("Front doorbell"); built-in sounds use the catalog label.
+const name = (type?: string | null, label?: string | null) =>
+  (type === "custom" && label) ||
+  (soundCatalog.find((s) => s.type === type)?.label ?? type ?? "another cue");
 
 // One sentence per backend decision, written for someone watching the demo, not for a log reader.
 export function explain(d: Explainable): string {
-  const sound = name(d.type);
+  const sound = name(d.type, d.label);
+  const other = name(d.active_type, d.active_label);
   const tier = tierNames[d.priority_tier];
   switch (d.reason) {
     case "displayed":
       return `${sound} shown as ${tier}.`;
     case "interrupted":
-      return `${sound} (${tier}) took over from ${name(d.active_type)}.`;
+      return `${sound} (${tier}) took over from ${other}.`;
     case "queued":
-      return `${sound} is waiting while ${name(d.active_type)} is showing.`;
+      return `${sound} is waiting while ${other} is showing.`;
     case "resumed_from_queue":
       return `${sound} came back once the screen was free.`;
     case "expired_in_queue":
@@ -54,7 +59,7 @@ export function explain(d: Explainable): string {
     case "ignored_tier_zero":
       return `${sound} is set to Ignore.`;
     case "suppressed_lower_priority":
-      return `${sound} skipped: ${name(d.active_type)} matters more right now.`;
+      return `${sound} skipped: ${other} matters more right now.`;
     case "held_work_mode":
       return `${sound} held back by Work mode.`;
     case "held_dnd_mode":

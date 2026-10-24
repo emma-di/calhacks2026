@@ -184,8 +184,19 @@ def check():
     return c
 
 
+def sound():
+    """Generic cue for a user-taught custom sound: a speaker with two sound waves."""
+    c = Canvas()
+    c.round_rect(3, 12, 9, 20, 1)                       # speaker body
+    c.polygon([(9, 12), (16, 5), (16, 27), (9, 20)])    # cone
+    c.arc(17, 16, 7, 300, 60, 2)                        # near wave
+    c.arc(17, 16, 12, 305, 55, 2)                       # far wave
+    c.ellipse(28.5, 7.5, 1.2, 1.2)                      # small sparkle: "learned" sound
+    return c
+
+
 ICONS = dict(dog=dog, knock=knock, bell=bell, name=name, smoke=smoke, siren=siren, clock=clock,
-             chat=conversation, check=check)
+             chat=conversation, check=check, sound=sound)
 
 
 def build():

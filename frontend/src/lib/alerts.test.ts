@@ -6,8 +6,10 @@ import { soundCatalog, type EventType } from "./events.ts";
 import { AWARE_PRESET_DEFAULTS } from "../../mana/AwareOnboarding.jsx";
 import { explain } from "./explain.ts";
 
-const fixtureEvent = (type: EventType, id: string, at: number, direction?: [number, number]) => {
-  const sound = soundCatalog.find((s) => s.type === type)!;
+const fixtureEvent = (type: EventType, id: string, at: number, direction?: [number, number], customId?: string) => {
+  // A user-taught sound isn't in the catalog: its label and tier come from the user.
+  const sound = soundCatalog.find((s) => s.type === type) ?? { label: customId ?? "Custom sound", tier: 2 };
+  const custom = type === "custom" ? { custom_sound_id: customId } : {};
   return {
     schema_version: 1,
     event_id: id,
@@ -20,6 +22,7 @@ const fixtureEvent = (type: EventType, id: string, at: number, direction?: [numb
     direction_degrees: direction?.[0] ?? null,
     direction_confidence: direction?.[1] ?? null,
     distance_meters: null,
+    ...custom,
   };
 };
 
@@ -31,7 +34,7 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       const label = `${scenario.name} / step ${index}`;
       let result: Record<string, unknown> = {};
       if (step.add)
-        result = { ...engine.add(fixtureEvent(step.add, step.id, step.at, step.direction), step.at) };
+        result = { ...engine.add(fixtureEvent(step.add, step.id, step.at, step.direction, step.sound), step.at) };
       else if (step.look) result = { resolved: engine.look(step.at, step.look) };
       else if (step.dismiss) {
         result = { dismissed: engine.dismiss(step.at, step.dismiss) };

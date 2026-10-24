@@ -67,7 +67,8 @@
     "conversation": "chat",
     "resolved": "check",
     "finger_snap": "check",
-    "thumbs_up": "check"
+    "thumbs_up": "check",
+    "custom": "sound"
   },
   "categories": {
     "home": "Home & devices",

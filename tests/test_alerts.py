@@ -25,7 +25,10 @@ def run_step(engine, step):
     at = step['at']
     result = {}
     if 'add' in step:
-        result = engine.add(fixture_event(step['add'], step['id'], at, step.get('direction')), at)
+        event = fixture_event(step['add'], step['id'], at, step.get('direction'))
+        if 'sound' in step:   # a user-taught custom sound
+            event.update(custom_sound_id=step['sound'], label=step['sound'])
+        result = engine.add(event, at)
     elif 'look' in step:
         result = dict(resolved=engine.look(at, step['look']))
     elif 'dismiss' in step:
@@ -115,8 +118,9 @@ class PolicyTests(unittest.TestCase):
         state.connect(engine.session_id)
         for index, kind in enumerate(k for k in EVENT_TYPES if k not in GESTURES):
             engine.set_controls(index * 100_000)
-            engine.add(make_event(kind, .9, 'mock') if kind != 'name_called' else
-                       fixture_event(kind, f'n{index}', 0), index * 100_000)
+            event = (make_event(kind, .9, 'mock') if kind not in ('name_called', 'custom') else
+                     dict(fixture_event(kind, f'n{index}', 0), custom_sound_id='front-doorbell'))
+            engine.add(event, index * 100_000)
             envelope = engine.presentation(index * 100_000)
             cue = Presentation.parse(envelope)
             self.assertIsNotNone(cue.icon_id, kind)

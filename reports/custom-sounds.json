@@ -1,0 +1,2525 @@
+{
+ "dataset": "ESC-50",
+ "protocol": [
+  "Each of the 50 ESC-50 classes takes a turn as the \"custom sound\":",
+  "  * k training recordings from folds 1-3 (distinct source recordings),",
+  "  * test positives: that class in folds 4-5, excluding the training sources,",
+  "  * background bank: every other class in folds 1-3,",
+  "  * test negatives: every other class in folds 4-5 (about 1,560 recordings).",
+  "A recording counts as detected when any non-silent window scores above the head's threshold.",
+  ""
+ ],
+ "repeats": 3,
+ "results": {
+  "3_shot": {
+   "mean_recall": 0.815,
+   "mean_false_alert_rate": 0.0024,
+   "classes": {
+    "airplane": {
+     "recall": 0.5,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "wind",
+       6
+      ],
+      [
+       "car_horn",
+       3
+      ],
+      [
+       "breathing",
+       2
+      ]
+     ]
+    },
+    "breathing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.703,
+     "most_confused_with": [
+      [
+       "snoring",
+       8
+      ],
+      [
+       "drinking_sipping",
+       5
+      ],
+      [
+       "sneezing",
+       1
+      ]
+     ]
+    },
+    "brushing_teeth": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       3
+      ]
+     ]
+    },
+    "can_opening": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0081,
+     "false_alerts_per_run": 6.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       8
+      ],
+      [
+       "cat",
+       3
+      ],
+      [
+       "crackling_fire",
+       3
+      ]
+     ]
+    },
+    "car_horn": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "helicopter",
+       1
+      ],
+      [
+       "wind",
+       1
+      ]
+     ]
+    },
+    "cat": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pig",
+       2
+      ],
+      [
+       "sheep",
+       1
+      ]
+     ]
+    },
+    "chainsaw": {
+     "recall": 0.792,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "engine",
+       2
+      ]
+     ]
+    },
+    "chirping_birds": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       4
+      ],
+      [
+       "crow",
+       1
+      ],
+      [
+       "frog",
+       1
+      ]
+     ]
+    },
+    "church_bells": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clapping": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clock_alarm": {
+     "recall": 0.812,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clock_tick": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       2
+      ]
+     ]
+    },
+    "coughing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0115,
+     "false_alerts_per_run": 9.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sneezing",
+       26
+      ],
+      [
+       "laughing",
+       1
+      ]
+     ]
+    },
+    "cow": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "helicopter",
+       1
+      ]
+     ]
+    },
+    "crackling_fire": {
+     "recall": 0.771,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "clapping",
+       1
+      ],
+      [
+       "keyboard_typing",
+       1
+      ],
+      [
+       "fireworks",
+       1
+      ]
+     ]
+    },
+    "crickets": {
+     "recall": 0.625,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "chirping_birds",
+       2
+      ]
+     ]
+    },
+    "crow": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "crying_baby": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "laughing",
+       3
+      ],
+      [
+       "door_wood_creaks",
+       2
+      ],
+      [
+       "cat",
+       2
+      ]
+     ]
+    },
+    "dog": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "door_wood_creaks": {
+     "recall": 0.562,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "insects",
+       1
+      ]
+     ]
+    },
+    "door_wood_knock": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0047,
+     "false_alerts_per_run": 3.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "footsteps",
+       8
+      ],
+      [
+       "door_wood_creaks",
+       3
+      ]
+     ]
+    },
+    "drinking_sipping": {
+     "recall": 0.667,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "can_opening",
+       2
+      ],
+      [
+       "clock_tick",
+       1
+      ]
+     ]
+    },
+    "engine": {
+     "recall": 0.5,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       3
+      ],
+      [
+       "airplane",
+       1
+      ]
+     ]
+    },
+    "fireworks": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0043,
+     "false_alerts_per_run": 3.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "thunderstorm",
+       9
+      ],
+      [
+       "footsteps",
+       1
+      ]
+     ]
+    },
+    "footsteps": {
+     "recall": 0.417,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "glass_breaking",
+       1
+      ]
+     ]
+    },
+    "frog": {
+     "recall": 0.917,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       2
+      ]
+     ]
+    },
+    "glass_breaking": {
+     "recall": 0.854,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       1
+      ]
+     ]
+    },
+    "hand_saw": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "brushing_teeth",
+       1
+      ]
+     ]
+    },
+    "helicopter": {
+     "recall": 0.812,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       5
+      ],
+      [
+       "airplane",
+       4
+      ],
+      [
+       "wind",
+       2
+      ]
+     ]
+    },
+    "hen": {
+     "recall": 0.917,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.754,
+     "most_confused_with": [
+      [
+       "rooster",
+       14
+      ],
+      [
+       "clock_tick",
+       1
+      ]
+     ]
+    },
+    "insects": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "keyboard_typing": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       1
+      ]
+     ]
+    },
+    "laughing": {
+     "recall": 0.771,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crying_baby",
+       2
+      ],
+      [
+       "coughing",
+       1
+      ]
+     ]
+    },
+    "mouse_click": {
+     "recall": 0.312,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "water_drops",
+       2
+      ],
+      [
+       "keyboard_typing",
+       2
+      ],
+      [
+       "can_opening",
+       2
+      ]
+     ]
+    },
+    "pig": {
+     "recall": 0.75,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "pouring_water": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "water_drops",
+       4
+      ],
+      [
+       "toilet_flush",
+       3
+      ]
+     ]
+    },
+    "rain": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0051,
+     "false_alerts_per_run": 4.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crackling_fire",
+       10
+      ],
+      [
+       "thunderstorm",
+       1
+      ],
+      [
+       "clapping",
+       1
+      ]
+     ]
+    },
+    "rooster": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "hen",
+       3
+      ]
+     ]
+    },
+    "sea_waves": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       4
+      ],
+      [
+       "wind",
+       2
+      ],
+      [
+       "toilet_flush",
+       1
+      ]
+     ]
+    },
+    "sheep": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pig",
+       2
+      ]
+     ]
+    },
+    "siren": {
+     "recall": 0.417,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "sneezing": {
+     "recall": 0.854,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "coughing",
+       4
+      ],
+      [
+       "drinking_sipping",
+       1
+      ],
+      [
+       "snoring",
+       1
+      ]
+     ]
+    },
+    "snoring": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "breathing",
+       2
+      ]
+     ]
+    },
+    "thunderstorm": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0051,
+     "false_alerts_per_run": 4.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       5
+      ],
+      [
+       "wind",
+       3
+      ],
+      [
+       "helicopter",
+       3
+      ]
+     ]
+    },
+    "toilet_flush": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "train": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       2
+      ],
+      [
+       "siren",
+       2
+      ]
+     ]
+    },
+    "vacuum_cleaner": {
+     "recall": 0.771,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       5
+      ],
+      [
+       "chainsaw",
+       1
+      ]
+     ]
+    },
+    "washing_machine": {
+     "recall": 0.271,
+     "false_alert_rate": 0.0038,
+     "false_alerts_per_run": 3.0,
+     "negatives": 784,
+     "threshold": 0.736,
+     "most_confused_with": [
+      [
+       "vacuum_cleaner",
+       6
+      ],
+      [
+       "helicopter",
+       2
+      ],
+      [
+       "engine",
+       1
+      ]
+     ]
+    },
+    "water_drops": {
+     "recall": 0.542,
+     "false_alert_rate": 0.0038,
+     "false_alerts_per_run": 3.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       3
+      ],
+      [
+       "drinking_sipping",
+       3
+      ],
+      [
+       "can_opening",
+       1
+      ]
+     ]
+    },
+    "wind": {
+     "recall": 0.167,
+     "false_alert_rate": 0.0089,
+     "false_alerts_per_run": 7.0,
+     "negatives": 784,
+     "threshold": 0.717,
+     "most_confused_with": [
+      [
+       "sea_waves",
+       13
+      ],
+      [
+       "rain",
+       2
+      ],
+      [
+       "thunderstorm",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "5_shot": {
+   "mean_recall": 0.922,
+   "mean_false_alert_rate": 0.0035,
+   "classes": {
+    "airplane": {
+     "recall": 0.792,
+     "false_alert_rate": 0.0089,
+     "false_alerts_per_run": 7.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "helicopter",
+       8
+      ],
+      [
+       "wind",
+       4
+      ],
+      [
+       "car_horn",
+       4
+      ]
+     ]
+    },
+    "breathing": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.73,
+     "most_confused_with": [
+      [
+       "snoring",
+       6
+      ],
+      [
+       "drinking_sipping",
+       6
+      ],
+      [
+       "sneezing",
+       2
+      ]
+     ]
+    },
+    "brushing_teeth": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "can_opening": {
+     "recall": 0.896,
+     "false_alert_rate": 0.0098,
+     "false_alerts_per_run": 7.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       9
+      ],
+      [
+       "cat",
+       3
+      ],
+      [
+       "keyboard_typing",
+       3
+      ]
+     ]
+    },
+    "car_horn": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "siren",
+       2
+      ]
+     ]
+    },
+    "cat": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       2
+      ],
+      [
+       "pig",
+       2
+      ],
+      [
+       "insects",
+       2
+      ]
+     ]
+    },
+    "chainsaw": {
+     "recall": 0.812,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "engine",
+       3
+      ],
+      [
+       "cow",
+       1
+      ]
+     ]
+    },
+    "chirping_birds": {
+     "recall": 0.854,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       4
+      ],
+      [
+       "crow",
+       3
+      ],
+      [
+       "frog",
+       1
+      ]
+     ]
+    },
+    "church_bells": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clapping": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clock_alarm": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clock_tick": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       3
+      ],
+      [
+       "drinking_sipping",
+       1
+      ]
+     ]
+    },
+    "coughing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0136,
+     "false_alerts_per_run": 10.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sneezing",
+       29
+      ],
+      [
+       "laughing",
+       3
+      ]
+     ]
+    },
+    "cow": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "crackling_fire": {
+     "recall": 0.875,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "fireworks",
+       1
+      ]
+     ]
+    },
+    "crickets": {
+     "recall": 0.771,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "chirping_birds",
+       3
+      ],
+      [
+       "washing_machine",
+       1
+      ],
+      [
+       "airplane",
+       1
+      ]
+     ]
+    },
+    "crow": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       3
+      ],
+      [
+       "chirping_birds",
+       1
+      ]
+     ]
+    },
+    "crying_baby": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0047,
+     "false_alerts_per_run": 3.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "laughing",
+       4
+      ],
+      [
+       "door_wood_creaks",
+       3
+      ],
+      [
+       "cat",
+       3
+      ]
+     ]
+    },
+    "dog": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "door_wood_creaks": {
+     "recall": 0.854,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "snoring",
+       2
+      ],
+      [
+       "keyboard_typing",
+       1
+      ]
+     ]
+    },
+    "door_wood_knock": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0043,
+     "false_alerts_per_run": 3.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "footsteps",
+       7
+      ],
+      [
+       "door_wood_creaks",
+       3
+      ]
+     ]
+    },
+    "drinking_sipping": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0047,
+     "false_alerts_per_run": 3.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "water_drops",
+       5
+      ],
+      [
+       "can_opening",
+       4
+      ],
+      [
+       "mouse_click",
+       1
+      ]
+     ]
+    },
+    "engine": {
+     "recall": 0.896,
+     "false_alert_rate": 0.0021,
+     "false_alerts_per_run": 1.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "helicopter",
+       2
+      ],
+      [
+       "snoring",
+       2
+      ],
+      [
+       "car_horn",
+       1
+      ]
+     ]
+    },
+    "fireworks": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "thunderstorm",
+       10
+      ],
+      [
+       "footsteps",
+       3
+      ]
+     ]
+    },
+    "footsteps": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "fireworks",
+       3
+      ]
+     ]
+    },
+    "frog": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       3
+      ]
+     ]
+    },
+    "glass_breaking": {
+     "recall": 0.896,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       1
+      ]
+     ]
+    },
+    "hand_saw": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "brushing_teeth",
+       3
+      ]
+     ]
+    },
+    "helicopter": {
+     "recall": 0.854,
+     "false_alert_rate": 0.0068,
+     "false_alerts_per_run": 5.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       6
+      ],
+      [
+       "airplane",
+       5
+      ],
+      [
+       "wind",
+       2
+      ]
+     ]
+    },
+    "hen": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.774,
+     "most_confused_with": [
+      [
+       "rooster",
+       12
+      ],
+      [
+       "clock_tick",
+       1
+      ]
+     ]
+    },
+    "insects": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "keyboard_typing": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       3
+      ],
+      [
+       "door_wood_knock",
+       3
+      ],
+      [
+       "door_wood_creaks",
+       1
+      ]
+     ]
+    },
+    "laughing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "coughing",
+       4
+      ],
+      [
+       "crying_baby",
+       3
+      ]
+     ]
+    },
+    "mouse_click": {
+     "recall": 0.667,
+     "false_alert_rate": 0.0077,
+     "false_alerts_per_run": 6.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "can_opening",
+       5
+      ],
+      [
+       "keyboard_typing",
+       4
+      ],
+      [
+       "water_drops",
+       3
+      ]
+     ]
+    },
+    "pig": {
+     "recall": 0.75,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "pouring_water": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0051,
+     "false_alerts_per_run": 4.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "water_drops",
+       10
+      ],
+      [
+       "drinking_sipping",
+       1
+      ],
+      [
+       "toilet_flush",
+       1
+      ]
+     ]
+    },
+    "rain": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0072,
+     "false_alerts_per_run": 5.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crackling_fire",
+       12
+      ],
+      [
+       "clapping",
+       3
+      ],
+      [
+       "toilet_flush",
+       2
+      ]
+     ]
+    },
+    "rooster": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0043,
+     "false_alerts_per_run": 3.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "hen",
+       7
+      ],
+      [
+       "pig",
+       2
+      ],
+      [
+       "cat",
+       1
+      ]
+     ]
+    },
+    "sea_waves": {
+     "recall": 0.979,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       4
+      ],
+      [
+       "rain",
+       2
+      ],
+      [
+       "wind",
+       1
+      ]
+     ]
+    },
+    "sheep": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0021,
+     "false_alerts_per_run": 1.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pig",
+       3
+      ],
+      [
+       "cow",
+       2
+      ]
+     ]
+    },
+    "siren": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "wind",
+       8
+      ]
+     ]
+    },
+    "sneezing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0068,
+     "false_alerts_per_run": 5.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "coughing",
+       12
+      ],
+      [
+       "snoring",
+       3
+      ],
+      [
+       "breathing",
+       1
+      ]
+     ]
+    },
+    "snoring": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "breathing",
+       5
+      ],
+      [
+       "drinking_sipping",
+       1
+      ],
+      [
+       "chainsaw",
+       1
+      ]
+     ]
+    },
+    "thunderstorm": {
+     "recall": 1.0,
+     "false_alert_rate": 0.006,
+     "false_alerts_per_run": 4.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       8
+      ],
+      [
+       "wind",
+       3
+      ],
+      [
+       "helicopter",
+       3
+      ]
+     ]
+    },
+    "toilet_flush": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "train": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0043,
+     "false_alerts_per_run": 3.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       7
+      ],
+      [
+       "siren",
+       3
+      ]
+     ]
+    },
+    "vacuum_cleaner": {
+     "recall": 0.917,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       8
+      ]
+     ]
+    },
+    "washing_machine": {
+     "recall": 0.562,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.791,
+     "most_confused_with": [
+      [
+       "engine",
+       4
+      ],
+      [
+       "helicopter",
+       2
+      ]
+     ]
+    },
+    "water_drops": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0077,
+     "false_alerts_per_run": 6.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       6
+      ],
+      [
+       "drinking_sipping",
+       6
+      ],
+      [
+       "can_opening",
+       5
+      ]
+     ]
+    },
+    "wind": {
+     "recall": 0.583,
+     "false_alert_rate": 0.0081,
+     "false_alerts_per_run": 6.3,
+     "negatives": 784,
+     "threshold": 0.776,
+     "most_confused_with": [
+      [
+       "sea_waves",
+       9
+      ],
+      [
+       "thunderstorm",
+       4
+      ],
+      [
+       "airplane",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "10_shot": {
+   "mean_recall": 0.948,
+   "mean_false_alert_rate": 0.0052,
+   "classes": {
+    "airplane": {
+     "recall": 0.938,
+     "false_alert_rate": 0.02,
+     "false_alerts_per_run": 15.7,
+     "negatives": 784,
+     "threshold": 0.707,
+     "most_confused_with": [
+      [
+       "helicopter",
+       20
+      ],
+      [
+       "wind",
+       11
+      ],
+      [
+       "car_horn",
+       5
+      ]
+     ]
+    },
+    "breathing": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0068,
+     "false_alerts_per_run": 5.3,
+     "negatives": 784,
+     "threshold": 0.793,
+     "most_confused_with": [
+      [
+       "snoring",
+       7
+      ],
+      [
+       "drinking_sipping",
+       6
+      ],
+      [
+       "laughing",
+       2
+      ]
+     ]
+    },
+    "brushing_teeth": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       4
+      ]
+     ]
+    },
+    "can_opening": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0094,
+     "false_alerts_per_run": 7.3,
+     "negatives": 784,
+     "threshold": 0.703,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       10
+      ],
+      [
+       "cat",
+       3
+      ],
+      [
+       "keyboard_typing",
+       3
+      ]
+     ]
+    },
+    "car_horn": {
+     "recall": 1.0,
+     "false_alert_rate": 0.003,
+     "false_alerts_per_run": 2.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "siren",
+       3
+      ],
+      [
+       "helicopter",
+       2
+      ],
+      [
+       "church_bells",
+       1
+      ]
+     ]
+    },
+    "cat": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0051,
+     "false_alerts_per_run": 4.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       3
+      ],
+      [
+       "insects",
+       3
+      ],
+      [
+       "pig",
+       2
+      ]
+     ]
+    },
+    "chainsaw": {
+     "recall": 0.875,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "engine",
+       3
+      ],
+      [
+       "cow",
+       3
+      ]
+     ]
+    },
+    "chirping_birds": {
+     "recall": 0.917,
+     "false_alert_rate": 0.0068,
+     "false_alerts_per_run": 5.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       10
+      ],
+      [
+       "crow",
+       4
+      ],
+      [
+       "frog",
+       2
+      ]
+     ]
+    },
+    "church_bells": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clapping": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "fireworks",
+       1
+      ]
+     ]
+    },
+    "clock_alarm": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "clock_tick": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0021,
+     "false_alerts_per_run": 1.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       3
+      ],
+      [
+       "drinking_sipping",
+       2
+      ]
+     ]
+    },
+    "coughing": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0149,
+     "false_alerts_per_run": 11.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sneezing",
+       31
+      ],
+      [
+       "laughing",
+       4
+      ]
+     ]
+    },
+    "cow": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       2
+      ],
+      [
+       "pig",
+       2
+      ],
+      [
+       "laughing",
+       1
+      ]
+     ]
+    },
+    "crackling_fire": {
+     "recall": 0.938,
+     "false_alert_rate": 0.006,
+     "false_alerts_per_run": 4.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "footsteps",
+       6
+      ],
+      [
+       "rain",
+       3
+      ],
+      [
+       "fireworks",
+       3
+      ]
+     ]
+    },
+    "crickets": {
+     "recall": 0.896,
+     "false_alert_rate": 0.0068,
+     "false_alerts_per_run": 5.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "chirping_birds",
+       7
+      ],
+      [
+       "frog",
+       6
+      ],
+      [
+       "washing_machine",
+       2
+      ]
+     ]
+    },
+    "crow": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       3
+      ],
+      [
+       "chirping_birds",
+       2
+      ],
+      [
+       "airplane",
+       1
+      ]
+     ]
+    },
+    "crying_baby": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0051,
+     "false_alerts_per_run": 4.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "laughing",
+       9
+      ],
+      [
+       "door_wood_creaks",
+       2
+      ],
+      [
+       "cat",
+       1
+      ]
+     ]
+    },
+    "dog": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "door_wood_creaks": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0047,
+     "false_alerts_per_run": 3.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "snoring",
+       4
+      ],
+      [
+       "keyboard_typing",
+       3
+      ],
+      [
+       "insects",
+       2
+      ]
+     ]
+    },
+    "door_wood_knock": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "footsteps",
+       11
+      ],
+      [
+       "door_wood_creaks",
+       4
+      ]
+     ]
+    },
+    "drinking_sipping": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0077,
+     "false_alerts_per_run": 6.0,
+     "negatives": 784,
+     "threshold": 0.719,
+     "most_confused_with": [
+      [
+       "water_drops",
+       9
+      ],
+      [
+       "can_opening",
+       4
+      ],
+      [
+       "footsteps",
+       2
+      ]
+     ]
+    },
+    "engine": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "helicopter",
+       1
+      ],
+      [
+       "car_horn",
+       1
+      ],
+      [
+       "washing_machine",
+       1
+      ]
+     ]
+    },
+    "fireworks": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0072,
+     "false_alerts_per_run": 5.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "thunderstorm",
+       14
+      ],
+      [
+       "footsteps",
+       3
+      ]
+     ]
+    },
+    "footsteps": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0038,
+     "false_alerts_per_run": 3.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "fireworks",
+       2
+      ],
+      [
+       "rain",
+       2
+      ],
+      [
+       "breathing",
+       2
+      ]
+     ]
+    },
+    "frog": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crickets",
+       3
+      ]
+     ]
+    },
+    "glass_breaking": {
+     "recall": 0.938,
+     "false_alert_rate": 0.0017,
+     "false_alerts_per_run": 1.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "footsteps",
+       2
+      ],
+      [
+       "pouring_water",
+       2
+      ]
+     ]
+    },
+    "hand_saw": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0013,
+     "false_alerts_per_run": 1.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "brushing_teeth",
+       3
+      ]
+     ]
+    },
+    "helicopter": {
+     "recall": 0.896,
+     "false_alert_rate": 0.0115,
+     "false_alerts_per_run": 9.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       10
+      ],
+      [
+       "washing_machine",
+       6
+      ],
+      [
+       "engine",
+       4
+      ]
+     ]
+    },
+    "hen": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.809,
+     "most_confused_with": [
+      [
+       "rooster",
+       12
+      ],
+      [
+       "clock_tick",
+       1
+      ]
+     ]
+    },
+    "insects": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0,
+     "false_alerts_per_run": 0.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": []
+    },
+    "keyboard_typing": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0047,
+     "false_alerts_per_run": 3.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "mouse_click",
+       6
+      ],
+      [
+       "door_wood_knock",
+       3
+      ],
+      [
+       "door_wood_creaks",
+       2
+      ]
+     ]
+    },
+    "laughing": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "coughing",
+       3
+      ],
+      [
+       "crying_baby",
+       3
+      ]
+     ]
+    },
+    "mouse_click": {
+     "recall": 0.958,
+     "false_alert_rate": 0.014,
+     "false_alerts_per_run": 11.0,
+     "negatives": 784,
+     "threshold": 0.769,
+     "most_confused_with": [
+      [
+       "keyboard_typing",
+       13
+      ],
+      [
+       "can_opening",
+       12
+      ],
+      [
+       "water_drops",
+       3
+      ]
+     ]
+    },
+    "pig": {
+     "recall": 0.792,
+     "false_alert_rate": 0.0004,
+     "false_alerts_per_run": 0.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "sheep",
+       1
+      ]
+     ]
+    },
+    "pouring_water": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "water_drops",
+       8
+      ],
+      [
+       "toilet_flush",
+       4
+      ],
+      [
+       "drinking_sipping",
+       3
+      ]
+     ]
+    },
+    "rain": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0081,
+     "false_alerts_per_run": 6.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "crackling_fire",
+       12
+      ],
+      [
+       "clapping",
+       4
+      ],
+      [
+       "toilet_flush",
+       3
+      ]
+     ]
+    },
+    "rooster": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "hen",
+       12
+      ],
+      [
+       "pig",
+       1
+      ]
+     ]
+    },
+    "sea_waves": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0043,
+     "false_alerts_per_run": 3.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       6
+      ],
+      [
+       "wind",
+       2
+      ],
+      [
+       "rain",
+       2
+      ]
+     ]
+    },
+    "sheep": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pig",
+       3
+      ],
+      [
+       "cow",
+       3
+      ],
+      [
+       "door_wood_creaks",
+       1
+      ]
+     ]
+    },
+    "siren": {
+     "recall": 0.979,
+     "false_alert_rate": 0.0038,
+     "false_alerts_per_run": 3.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "wind",
+       9
+      ]
+     ]
+    },
+    "sneezing": {
+     "recall": 0.917,
+     "false_alert_rate": 0.0064,
+     "false_alerts_per_run": 5.0,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "coughing",
+       9
+      ],
+      [
+       "snoring",
+       3
+      ],
+      [
+       "breathing",
+       2
+      ]
+     ]
+    },
+    "snoring": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0085,
+     "false_alerts_per_run": 6.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "breathing",
+       13
+      ],
+      [
+       "drinking_sipping",
+       2
+      ],
+      [
+       "chainsaw",
+       2
+      ]
+     ]
+    },
+    "thunderstorm": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0106,
+     "false_alerts_per_run": 8.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       12
+      ],
+      [
+       "wind",
+       7
+      ],
+      [
+       "crickets",
+       3
+      ]
+     ]
+    },
+    "toilet_flush": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0009,
+     "false_alerts_per_run": 0.7,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       2
+      ]
+     ]
+    },
+    "train": {
+     "recall": 1.0,
+     "false_alert_rate": 0.0055,
+     "false_alerts_per_run": 4.3,
+     "negatives": 784,
+     "threshold": 0.7,
+     "most_confused_with": [
+      [
+       "airplane",
+       9
+      ],
+      [
+       "siren",
+       3
+      ],
+      [
+       "helicopter",
+       1
+      ]
+     ]
+    },
+    "vacuum_cleaner": {
+     "recall": 0.958,
+     "false_alert_rate": 0.0034,
+     "false_alerts_per_run": 2.7,
+     "negatives": 784,
+     "threshold": 0.707,
+     "most_confused_with": [
+      [
+       "washing_machine",
+       8
+      ]
+     ]
+    },
+    "washing_machine": {
+     "recall": 0.229,
+     "false_alert_rate": 0.0026,
+     "false_alerts_per_run": 2.0,
+     "negatives": 784,
+     "threshold": 0.946,
+     "most_confused_with": [
+      [
+       "engine",
+       3
+      ],
+      [
+       "helicopter",
+       2
+      ],
+      [
+       "vacuum_cleaner",
+       1
+      ]
+     ]
+    },
+    "water_drops": {
+     "recall": 0.833,
+     "false_alert_rate": 0.0098,
+     "false_alerts_per_run": 7.7,
+     "negatives": 784,
+     "threshold": 0.706,
+     "most_confused_with": [
+      [
+       "pouring_water",
+       8
+      ],
+      [
+       "drinking_sipping",
+       6
+      ],
+      [
+       "can_opening",
+       4
+      ]
+     ]
+    },
+    "wind": {
+     "recall": 0.708,
+     "false_alert_rate": 0.0081,
+     "false_alerts_per_run": 6.3,
+     "negatives": 784,
+     "threshold": 0.897,
+     "most_confused_with": [
+      [
+       "sea_waves",
+       9
+      ],
+      [
+       "thunderstorm",
+       4
+      ],
+      [
+       "airplane",
+       3
+      ]
+     ]
+    }
+   }
+  }
+ }
+}

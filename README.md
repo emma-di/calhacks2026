@@ -103,7 +103,10 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/model.py`, `audio/cli.py` | Local inference and capture/replay |
 | `audio/events.py`, `audio/policy-*.json` | Event contract, thresholds, cooldown and recent-context rules |
 | `audio/server.py` | Local event receiver and alert priority/state |
-| `audio/monitor.html` | Browser cue simulator |
+| `audio/monitor.html` | Basic debug monitor, with a live "Hearing now" meter |
+| `audio/custom_sounds.py`, `audio/embeddings.py`, `audio/teach.html` | User-taught custom sounds; `/teach` page |
+| `audio/names.py` | Name detection (streaming keyword spotter, learned spellings) |
+| `audio/observations.py` | Per-window "what it heard" stream (`GET /observations`) |
 | `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |
 | `tests/` | Fast unit checks; no weights or microphone required |
 | `docs/` | Team handoffs, setup detail and planned contracts |
@@ -115,8 +118,13 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 - The current Zipformer evaluation covers **418 recordings / 1,672 transformed cases**.
 - Generic bells improved, but false alerts remain. Bicycle-specific labeling stays disabled.
 - Smoke-alarm evidence is limited; the final microphone and room still need testing.
-- Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
-  from the saved onboarding profile; it does not require training a new model per user.
+- [Custom sounds](docs/custom-sounds.md): teach a sound from ~5 recordings at
+  http://127.0.0.1:8765/teach; each taught sound is its own cue (generic sound icon, user's label).
+  92% recall / 0.35% false alerts in an offline ESC-50 test; not yet validated live.
+- [Name detection](docs/name-detection.md): listens for the name and nicknames from the profile (set them in
+  the companion's Preferences), plus spellings learned from a short recording on `/teach`. 62% of name
+  mentions caught on synthetic voices; not yet validated with real voices.
+- `GET /observations` streams every analysis window (top labels, every rule's decision) for live views.
 - Notification policy is implemented in one receiver engine (preferences, repeats, dismiss, Work/DND,
   pause, queue) with a matching browser simulator. A glasses client and SSD1306 driver exist and are
   tested in software; they have not yet driven the physical OLED.

@@ -24,7 +24,8 @@ def main():
     rng = random.Random(args.seed)
     engine = AlertEngine()
     actions, expected = [], []
-    kinds = ['knock', 'bell', 'dog_bark', 'name_called', 'smoke_alarm', 'siren', 'alarm_clock']
+    kinds = ['knock', 'bell', 'dog_bark', 'name_called', 'smoke_alarm', 'siren', 'alarm_clock', 'custom']
+    taught = ['front-doorbell', 'kettle', 'microwave']   # separate custom sounds share type 'custom'
     at, ids = 0, []
     for index in range(args.steps):
         at += rng.randrange(1, 2500)
@@ -40,6 +41,9 @@ def main():
                          source='simulation', priority_tier=tier, confidence=None, timestamp_ms=at,
                          direction_degrees=degrees, direction_confidence=None if degrees is None else rng.choice([.2, .6, 1]),
                          distance_meters=None)
+            if kind == 'custom':
+                sound = rng.choice(taught)
+                event.update(custom_sound_id=sound, label=sound, priority_tier=rng.choice([1, 2, 3]))
             action['event'] = event
             engine.add(event, at)
         elif choice < .79:

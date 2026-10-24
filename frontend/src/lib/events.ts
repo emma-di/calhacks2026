@@ -10,7 +10,8 @@ export type EventType =
   | "alarm_clock"
   | "bicycle_bell"
   | "finger_snap"
-  | "thumbs_up";
+  | "thumbs_up"
+  | "custom";
 export interface SoundEvent {
   schema_version: number;
   event_id: string;
@@ -23,6 +24,8 @@ export interface SoundEvent {
   direction_degrees: number | null;
   direction_confidence: number | null;
   distance_meters: number | null;
+  // Present only on type "custom": which user-taught sound (label is the user's own name for it).
+  custom_sound_id?: string;
 }
 export interface Decision {
   event_id: string;
@@ -186,6 +189,7 @@ const knownTypes = new Set([
   "bicycle_bell",
   "finger_snap",
   "thumbs_up",
+  "custom",
 ]);
 export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");
@@ -213,6 +217,8 @@ export function parseEvent(input: unknown): SoundEvent {
   ) {
     throw new Error("Receiver returned an invalid event");
   }
+  if (e.type === "custom" && !(typeof e.custom_sound_id === "string" && /^[a-z0-9-]{1,64}$/.test(e.custom_sound_id)))
+    throw new Error("Receiver returned a custom sound without an id");
   // Direction is kept only as a validated pair; the engine decides whether it is confident enough.
   const degrees = e.direction_degrees;
   const certainty = e.direction_confidence;

@@ -3,6 +3,7 @@ import math
 import time
 import uuid
 import json
+import re
 from pathlib import Path
 
 # Exact YAMNet class names. Thresholds are starting points, not calibrated probabilities.
@@ -22,6 +23,10 @@ EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items(
 EVENT_TYPES['name_called'] = ('Your name', 3)
 # Wearer gestures seen by a camera (glasses camera or the demo webcam); never displayed.
 EVENT_TYPES['thumbs_up'] = ('Thumbs up', 0)
+# User-taught sounds (audio/custom_sounds.py): the label and tier come from the user; custom_sound_id
+# identifies which taught sound, so acknowledging one never silences another.
+EVENT_TYPES['custom'] = ('Custom sound', 2)
+CUSTOM_ID = re.compile(r'^[a-z0-9-]{1,64}$')
 
 def runtime_model():
     path=Path(__file__).with_name('runtime.json')
@@ -66,9 +71,20 @@ def make_event(kind, confidence, source, timestamp_ms=None):
                 direction_degrees=None, direction_confidence=None,
                 distance_meters=None, proximity='unknown')
 
+def make_custom_event(sound, confidence, source, timestamp_ms=None):
+    """Event for a user-taught sound. `label` is the user's own name for it, e.g. "Front doorbell"."""
+    return dict(schema_version=1, event_id=str(uuid.uuid4()), type='custom',
+                custom_sound_id=sound['id'], label=sound['label'], confidence=float(confidence),
+                source=source, priority_tier=int(sound['priority_tier']),
+                timestamp_ms=timestamp_ms if timestamp_ms is not None else int(time.time()*1000),
+                direction_degrees=None, direction_confidence=None,
+                distance_meters=None, proximity='unknown')
+
 def validate_event(event):
     if not isinstance(event, dict) or event.get('type') not in EVENT_TYPES:
         raise ValueError('Unknown event type')
+    if event['type'] == 'custom' and not CUSTOM_ID.match(str(event.get('custom_sound_id', ''))):
+        raise ValueError('custom events need a custom_sound_id of 1..64 lowercase letters, digits or dashes')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
     for key in ('event_id', 'label', 'source'):

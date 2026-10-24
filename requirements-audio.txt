@@ -4,3 +4,9 @@ scipy<2
 sounddevice<1
 soundfile<1
 sherpa-onnx==2.0.0
+# Custom sounds (audio/embeddings.py): run the same Zipformer ONNX directly to get embeddings.
+onnx<2
+onnxruntime<2
+kaldi-native-fbank<2
+# Name detection (audio/names.py): keyword spotter tokenizer
+sentencepiece<1

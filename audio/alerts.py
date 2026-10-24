@@ -47,6 +47,14 @@ def validate_profile(value, known_types):
     if not isinstance(aliases, list) or len(aliases) > 8 or not all(
             isinstance(a, str) and 0 < len(a) <= 60 for a in aliases):
         raise ValueError('aliases must be up to 8 short strings')
+    sensitivity = names.get('sensitivity', 'balanced')
+    if sensitivity not in ('low', 'balanced', 'high'):
+        raise ValueError('name_detection.sensitivity must be low, balanced or high')
+    learned = names.get('learned_spellings', [])
+    if not isinstance(learned, list) or len(learned) > 8 or not all(
+            isinstance(i, dict) and isinstance(i.get('text'), str) and isinstance(i.get('tokens'), str)
+            and 0 < len(i['text']) <= 60 and 0 < len(i['tokens']) <= 200 for i in learned):
+        raise ValueError('learned_spellings must be up to 8 {text, tokens} entries')
     requests = value.get('custom_sound_requests', [])
     if not isinstance(requests, list) or len(requests) > 20:
         raise ValueError('custom_sound_requests must contain at most 20 pending requests')
@@ -74,7 +82,9 @@ def validate_profile(value, known_types):
     return dict(schema_version=1, profile_id=str(value.get('profile_id', 'local'))[:64],
                 revision=0, custom_sound_requests=custom, display_name=str(value.get('display_name', ''))[:60],
                 name_detection=dict(enabled=bool(names.get('enabled', False)), primary_name=primary,
-                                    aliases=list(aliases), language=str(names.get('language', 'en'))[:12]),
+                                    aliases=list(aliases), language=str(names.get('language', 'en'))[:12],
+                                    sensitivity=sensitivity,
+                                    learned_spellings=[dict(text=i['text'], tokens=i['tokens']) for i in learned]),
                 notification_preferences=dict(mode=prefs['mode'], event_tiers=dict(tiers), category_tiers=dict(categories)),
                 display=dict(labels=display.get('labels', False)))
 
@@ -98,6 +108,14 @@ def direction_bucket(degrees, confidence):
     if -135 <= d < -45:
         return 'left'
     return 'behind'
+
+
+def sound_key(event):
+    """Which sound an event is, for repeats, acknowledgements and the queue. Each taught custom sound
+    is its own sound; every built-in type is one sound."""
+    if event['type'] == 'custom':
+        return 'custom:' + str(event.get('custom_sound_id'))
+    return event['type']
 
 
 def effective_tier(kind, producer_tier, profile):
@@ -132,7 +150,9 @@ class AlertEngine:
     def _decide(self, event, tier, reason, now, **extra):
         decision = dict(kind='alert_state', event_id=event['event_id'], type=event['type'],
                         priority_tier=tier, reason=reason, at_ms=round(now),
-                        active_type=self.active['event']['type'] if self.active else None)
+                        active_type=self.active['event']['type'] if self.active else None,
+                        label=event.get('label'),   # custom sounds are named by the user, not the type
+                        active_label=self.active['event'].get('label') if self.active else None)
         decision.update(extra)
         self.decisions.append(decision)
         if self.on_decision:
@@ -173,7 +193,7 @@ class AlertEngine:
     def _resolve(self, now, reason, **extra):
         """The wearer dealt with the cue: acknowledge its sound, confirm with a check, then resume."""
         shown = self.active['event']
-        self.acks[shown['type']] = now + POLICY['acknowledge_hold_ms']
+        self.acks[sound_key(shown)] = now + POLICY['acknowledge_hold_ms']
         decision = self._decide(shown, self.active['tier'], reason, now, **extra)
         self.confirm = dict(until=now + POLICY['confirm_ms'], direction=self.active['direction'],
                             event_id=shown['event_id'])
@@ -218,7 +238,7 @@ class AlertEngine:
         tier = effective_tier(event['type'], producer, self.profile)
         logged = dict(event, priority_tier=tier, producer_tier=producer)
         self.events.append(logged)
-        kind = event['type']
+        kind = sound_key(event)
         if self.paused:
             return self._decide(logged, tier, 'paused', now)
         if tier == 0:
@@ -230,7 +250,7 @@ class AlertEngine:
             self.acks[kind] = now + POLICY['acknowledge_hold_ms']
             return self._decide(logged, tier, 'acknowledged_repeat', now)
         active = self.active
-        if active and active['event']['type'] == kind and tier <= active['tier']:
+        if active and sound_key(active['event']) == kind and tier <= active['tier']:
             # Same ongoing sound: keep the original cue, no new animation or lifetime restart.
             active['repeats'] += 1
             if active['tier'] == 4:
@@ -242,17 +262,18 @@ class AlertEngine:
             return self._decide(logged, tier, 'merged_repeat', now, shown_event_id=active['event']['event_id'])
         if active is None or tier >= active['tier']:
             reason = 'displayed' if active is None else 'interrupted'
-            self.queue = [item for item in self.queue if item['event']['type'] != kind]
-            if active and active['tier'] in (2, 3) and active['event']['type'] != kind:
+            self.queue = [item for item in self.queue if sound_key(item['event']) != kind]
+            if active and active['tier'] in (2, 3) and sound_key(active['event']) != kind:
                 # The interrupted cue may resume afterwards, but only while it is still fresh.
                 self.queue.append(dict(event=active['event'], tier=active['tier'], received=active['started']))
             self._bound_queue(now)
             self._show(logged, tier, now)
             return self._decide(logged, tier, reason, now,
-                                active_type=active['event']['type'] if active else None)
+                                active_type=active['event']['type'] if active else None,
+                                active_label=active['event'].get('label') if active else None)
         if tier == 1:
             return self._decide(logged, tier, 'suppressed_lower_priority', now)
-        self.queue = [item for item in self.queue if item['event']['type'] != kind]
+        self.queue = [item for item in self.queue if sound_key(item['event']) != kind]
         self.queue.append(dict(event=logged, tier=tier, received=now))
         self._bound_queue(now)
         return self._decide(logged, tier, 'queued', now)

@@ -838,6 +838,88 @@
      }
     }
    ]
+  },
+  {
+   "name": "two taught custom sounds are separate sounds: dismissing the kettle never silences the doorbell",
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d1",
+     "expect": {
+      "reason": "displayed",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 1000,
+     "add": "custom",
+     "sound": "kettle",
+     "id": "k1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "k1",
+      "queue": [
+       "d1"
+      ]
+     }
+    },
+    {
+     "at": 1500,
+     "dismiss": "k1",
+     "expect": {
+      "dismissed": true,
+      "active": null,
+      "confirm": true
+     }
+    },
+    {
+     "at": 2200,
+     "tick": true,
+     "expect": {
+      "active": "d1",
+      "last_reason": "resumed_from_queue"
+     }
+    },
+    {
+     "at": 2500,
+     "add": "custom",
+     "sound": "kettle",
+     "id": "k2",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 2600,
+     "dismiss": "d1",
+     "expect": {
+      "dismissed": true
+     }
+    },
+    {
+     "at": 3500,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d3",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    }
+   ]
   }
  ]
 }

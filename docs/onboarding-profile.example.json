@@ -7,7 +7,9 @@
     "enabled": true,
     "primary_name": "Samira",
     "aliases": [],
-    "language": "en"
+    "language": "en",
+    "sensitivity": "balanced",
+    "learned_spellings": []
   },
   "notification_preferences": {
     "mode": "balanced",

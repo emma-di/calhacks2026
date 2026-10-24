@@ -4,6 +4,12 @@ import policy from "../../../audio/alert-policy.json";
 import type { EventType, SoundEvent, Tier } from "./events";
 
 export type FocusMode = "everyday" | "work" | "dnd";
+
+// Which sound an event is, for repeats, acknowledgements and the queue (mirrors sound_key in alerts.py).
+// Each taught custom sound is its own sound; every built-in type is one sound.
+export function soundKey(event: SoundEvent): string {
+  return event.type === "custom" ? `custom:${event.custom_sound_id}` : event.type;
+}
 export type Preset = keyof typeof policy.presets;
 export interface Preferences {
   mode: Preset;
@@ -17,6 +23,8 @@ export interface AlertDecision {
   reason: string;
   at_ms: number;
   active_type: EventType | null;
+  label?: string; // custom sounds are named by the user, not the type
+  active_label?: string | null;
   shown_event_id?: string;
   direction?: Direction;
   gesture?: string;
@@ -112,7 +120,7 @@ export class AlertEngine {
   sequence = 0;
   active: Active | null = null;
   queue: Queued[] = [];
-  acks = new Map<EventType, number>();
+  acks = new Map<string, number>();
   gestures: number[] = [];
   confirm: {
     until: number;
@@ -137,6 +145,8 @@ export class AlertEngine {
       reason,
       at_ms: Math.round(now),
       active_type: this.active?.event.type ?? null,
+      label: event.label,
+      active_label: this.active?.event.label ?? null,
       ...extra,
     };
     this.decisions = [...this.decisions, decision].slice(-50);
@@ -192,7 +202,7 @@ export class AlertEngine {
     extra: Partial<AlertDecision> = {},
   ): AlertDecision {
     const active = this.active!;
-    this.acks.set(active.event.type, now + policy.acknowledge_hold_ms);
+    this.acks.set(soundKey(active.event), now + policy.acknowledge_hold_ms);
     const decision = this.decide(active.event, active.tier, reason, now, extra);
     this.confirm = {
       until: now + policy.confirm_ms,
@@ -254,7 +264,7 @@ export class AlertEngine {
       producer_tier: producer,
     };
     this.events = [...this.events, logged].slice(-50);
-    const kind = event.type;
+    const kind = soundKey(event);
     if (this.paused) return this.decide(logged, tier, "paused", now);
     if (tier === 0) return this.decide(logged, tier, "ignored_tier_zero", now);
     if (this.blocked(tier))
@@ -264,7 +274,7 @@ export class AlertEngine {
       return this.decide(logged, tier, "acknowledged_repeat", now);
     }
     const active = this.active;
-    if (active && active.event.type === kind && tier <= active.tier) {
+    if (active && soundKey(active.event) === kind && tier <= active.tier) {
       active.repeats += 1;
       if (active.tier === 4) {
         const cap = active.started + policy.urgent_ongoing_cap_ms;
@@ -283,11 +293,11 @@ export class AlertEngine {
     }
     if (!active || tier >= active.tier) {
       const reason = active ? "interrupted" : "displayed";
-      this.queue = this.queue.filter((item) => item.event.type !== kind);
+      this.queue = this.queue.filter((item) => soundKey(item.event) !== kind);
       if (
         active &&
         (active.tier === 2 || active.tier === 3) &&
-        active.event.type !== kind
+        soundKey(active.event) !== kind
       )
         this.queue.push({
           event: active.event,
@@ -298,11 +308,12 @@ export class AlertEngine {
       this.show(logged, tier, now);
       return this.decide(logged, tier, reason, now, {
         active_type: active ? active.event.type : null,
+        active_label: active ? active.event.label : null,
       });
     }
     if (tier === 1)
       return this.decide(logged, tier, "suppressed_lower_priority", now);
-    this.queue = this.queue.filter((item) => item.event.type !== kind);
+    this.queue = this.queue.filter((item) => soundKey(item.event) !== kind);
     this.queue.push({ event: logged, tier, received: now });
     this.boundQueue(now);
     return this.decide(logged, tier, "queued", now);
