@@ -30,7 +30,7 @@ const LIMITS: Record<Target, { seconds: number; label: string }> = {
   clip: { seconds: 8, label: "Recording the sound: make it once, then stop" },
   test: { seconds: 8, label: "Testing: make the sound once" },
   room: { seconds: 10, label: "Recording the room as it normally sounds" },
-  name: { seconds: 5, label: "Recording: someone says only your name" },
+  name: { seconds: 5, label: "Recording: someone says your name once" },
 };
 
 async function api<T>(method: string, path: string, body?: unknown): Promise<T> {
@@ -236,19 +236,24 @@ export default function TeachPanel() {
             <>
               <p className="teach-note">
                 Listening for <b>{name.primary_name}</b>
-                {name.enabled ? "" : " (turned off)"}. Have a friend say only your name, 3 times.
+                {name.enabled ? "" : " (turned off)"}. Have a friend say just your name, once per recording.
+                Do this 2–3 times.
               </p>
               <div className="teach-row">
                 {recButton("name", "Record name", async (wav) => {
-                  const r = await api<{ heard: string; spelling: string; added: boolean; note: string | null }>(
-                    "POST",
-                    "/profile/name-samples",
-                    wav,
-                  );
+                  const r = await api<{
+                    heard: string;
+                    spelling: string;
+                    added: boolean;
+                    note: string | null;
+                    warning: string | null;
+                  }>("POST", "/profile/name-samples", wav);
                   setMessage(
-                    r.added
-                      ? { text: `Heard "${r.heard}". Added "${r.spelling}".`, tone: "ok" }
-                      : { text: `Heard "${r.heard}". ${r.note ?? ""}` },
+                    !r.added
+                      ? { text: `Heard "${r.heard}". ${r.note ?? ""}` }
+                      : r.warning
+                        ? { text: `Added "${r.spelling}". Note: ${r.warning}.`, tone: "bad" }
+                        : { text: `Heard "${r.heard}". Added "${r.spelling}".`, tone: "ok" },
                   );
                 })}
                 {name.learned_spellings.length > 0 && (

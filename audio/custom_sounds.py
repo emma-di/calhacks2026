@@ -222,6 +222,9 @@ def create_sound(label, priority_tier=2):
     label = validate_label(label)
     if type(priority_tier) is not int or not 1 <= priority_tier <= 4:
         raise ValueError('priority_tier must be 1..4')
+    key = ' '.join(label.split()).casefold()
+    if any(' '.join(m['label'].split()).casefold() == key for m in list_sounds()):
+        raise ValueError(f'You already have a sound called "{label}". Use Teach more on it, or pick another name.')
     base = slugify(label)
     sound_id = base if not (STORE/base).exists() else f'{base}-{uuid.uuid4().hex[:6]}'
     (sound_dir(sound_id)/'clips').mkdir(parents=True)

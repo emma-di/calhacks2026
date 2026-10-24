@@ -82,7 +82,9 @@ class StoreAndDetectorTests(unittest.TestCase):
     def test_create_list_remove_and_validation(self):
         meta = cs.create_sound('Front doorbell', 3)
         self.assertEqual(meta['id'], 'front-doorbell')
-        self.assertEqual(cs.create_sound('Front doorbell')['id'][:15], 'front-doorbell-')
+        with self.assertRaises(ValueError):
+            cs.create_sound('  front   DOORBELL ')                 # duplicate name, any spacing/case
+        self.assertEqual(cs.create_sound('Back doorbell')['id'], 'back-doorbell')
         self.assertEqual(len(cs.list_sounds()), 2)
         cs.remove_sound('front-doorbell')
         self.assertEqual(len(cs.list_sounds()), 1)

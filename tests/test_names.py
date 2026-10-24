@@ -13,7 +13,7 @@ from audio import names, server
 from audio.events import validate_event
 from audio.server import AlertState
 
-VOCAB = {'▁JO', 'H', 'N', '▁E', 'M', 'MA', '▁', 'Y', 'E', '▁WHY', '▁DON', "'", 'T', '▁AND', '▁THE', '▁SAID', 'AR', 'TH', '▁A', 'R'}
+VOCAB = {'▁YOU', '▁MEAN', '▁ME', '▁JO', 'H', 'N', '▁E', 'M', 'MA', '▁', 'Y', 'E', '▁WHY', '▁DON', "'", 'T', '▁AND', '▁THE', '▁SAID', 'AR', 'TH', '▁A', 'R'}
 
 class ProfileTests(unittest.TestCase):
     def test_validation_and_normalization(self):
@@ -63,13 +63,27 @@ class SpellingTests(unittest.TestCase):
             p.stop()
 
     def test_common_words_are_rejected_or_stripped(self):
-        self.assertEqual(names.safe_spelling(['▁', 'Y', 'E', 'M', 'Y'])[0], ['▁', 'Y', 'E', 'M', 'Y'])
+        self.assertEqual(names.safe_spelling(['▁', 'Y', 'E', 'M', 'Y'])[:2], (['▁', 'Y', 'E', 'M', 'Y'], None))
         self.assertEqual(names.safe_spelling(['▁AND', '▁E', 'M', 'MA', '▁THE'])[0], ['▁E', 'M', 'MA'])
         self.assertIsNone(names.safe_spelling(['▁WHY'])[0])                       # Wei -> "why"
         self.assertIsNone(names.safe_spelling(['▁DON', "'", 'T'])[0])             # John -> "don't"
-        self.assertIsNone(names.safe_spelling(['▁SAID', '▁E', 'AR', 'TH'])[0])    # contains common words
         self.assertIsNone(names.safe_spelling(['▁A', 'R'])[0])                    # too short
         self.assertEqual(names.safe_spelling(['▁GRACE'], allowed={'GRACE'})[0], ['▁GRACE'])
+
+    def test_repeats_collapse_and_common_phrases_warn(self):
+        # Yameen said three times in one recording, heard as "you mean you mean you mean".
+        tokens, problem, warning = names.safe_spelling(['▁YOU', '▁MEAN']*3)
+        self.assertEqual((tokens, problem), (['▁YOU', '▁MEAN'], None))
+        self.assertIn('you mean', warning)
+        tokens, _, _ = names.safe_spelling(['▁', 'Y', 'E', 'M', 'Y', '▁', 'Y', 'E', 'M', 'Y', '▁AND'])
+        self.assertEqual(tokens, ['▁', 'Y', 'E', 'M', 'Y'])
+        tokens, _, _ = names.safe_spelling(['▁YOU', '▁MEAN', '▁YOU', '▁ME', '▁YOU', '▁MEAN'])
+        self.assertEqual(tokens, ['▁YOU', '▁MEAN'])                               # near-repeats: most frequent phrase
+        self.assertIsNotNone(names.safe_spelling(['▁SAID', '▁E', 'AR', 'TH'])[2])  # all common: kept, warned
+        self.assertEqual(names.safe_spelling(['▁E', 'M', 'MA', '▁WHY'])[:2], (['▁E', 'M', 'MA'], None))
+        # Several attempts that differ: the distinctive word wins over a repeated everyday phrase.
+        heard = ['▁YOU', '▁MEAN', '▁', 'Y', 'A', 'M', 'I', 'N', 'G', '▁YOU', '▁MEAN']
+        self.assertEqual(names.safe_spelling(heard)[:2], (['▁', 'Y', 'A', 'M', 'I', 'N', 'G'], None))
 
     def test_keyword_lines_use_sensitivity_and_skip_unknown_tokens(self):
         profile = names.validate_profile({'name_detection': {

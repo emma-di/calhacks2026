@@ -168,9 +168,39 @@ def common_words():
         _common |= {t[1:] for t in model_vocabulary() if t.startswith('▁') and len(t) >= 3 and t[1:].replace("'", '').isalpha()}
     return _common
 
+# Filler the tiny model hears around a short recording (silence, breath); stripped from the edges.
+FILLER = {'AND', 'THE', 'A', 'AN', 'UH', 'UM', 'OH', 'SO', 'HEY', 'HI', 'OKAY', 'OK', 'AH', 'ER'}
+
+def collapse_repeats(words, text, common=frozenset()):
+    """People often say the name several times in one recording. 'YOU MEAN YOU MEAN YOU MEAN' -> 'YOU MEAN'
+    (exact repetition). If attempts differ ('YEAH I MEAN YAMING YEAH I MEAN', 'YEMY YEMMING YEMY'), the
+    most frequent distinctive (uncommon) word wins; failing that, the longest phrase heard at least twice.
+    Without any repetition it's one saying and is returned unchanged."""
+    n = len(words)
+    keys = [text(w) for w in words]
+    for size in range(1, n//2+1):
+        if n % size == 0 and all(keys[i] == keys[i % size] for i in range(n)):
+            return words[:size]
+    if len(set(keys)) == n:
+        return words   # nothing repeats: a single saying, possibly several words ("MARY JANE")
+    distinctive = [k for k in keys if k not in common]
+    if distinctive:
+        best = max(distinctive, key=lambda k: (distinctive.count(k), -keys.index(k)))
+        return [words[keys.index(best)]]
+    for size in range(min(4, n//2), 0, -1):
+        counts = {}
+        for i in range(n-size+1):
+            counts.setdefault(tuple(keys[i:i+size]), []).append(i)
+        repeated = [(len(at), at[0]) for gram, at in counts.items() if len(at) >= 2]
+        if repeated:
+            _, start = max(repeated)
+            return words[start:start+size]
+    return words
+
 def safe_spelling(tokens, allowed=()):
-    """Strip common words at the edges; reject spellings that are or contain common words
-    ("why" for Wei, "don't" for John) because they would fire constantly in conversation."""
+    """Returns (tokens, problem, warning). Strips filler at the edges and collapses repeats. A single
+    common word ("why" for Wei, "don't" for John) is rejected: it would fire constantly. A phrase made
+    only of common words ("you mean" for Yameen) is kept, with a warning that it can also fire on that phrase."""
     words = []
     for token in tokens:
         if token.startswith('▁') or not words:
@@ -178,18 +208,26 @@ def safe_spelling(tokens, allowed=()):
         else:
             words[-1].append(token)
     text = lambda word: ''.join(word).replace('▁', '')
-    common = common_words()-set(allowed)   # a user named Grace may say "Grace"
-    while words and text(words[0]) in common:
+    while words and text(words[0]) in FILLER:
         words.pop(0)
-    while words and text(words[-1]) in common:
+    while words and text(words[-1]) in FILLER:
         words.pop()
     if not words:
-        return None, 'only common words were heard'
-    if any(text(w) in common for w in words):
-        return None, 'it contains a common word'
+        return None, 'nothing but filler was heard', None
+    common = common_words()-set(allowed)   # a user named Grace may say "Grace"
+    words = collapse_repeats(words, text, common)
+    distinctive = [i for i, w in enumerate(words) if text(w) not in common]
+    if distinctive:   # "EMMA WHO" -> "EMMA": trim common words around the name-like part
+        words = words[distinctive[0]:distinctive[-1]+1]
     if sum(len(text(w)) for w in words) < 3:
-        return None, 'too short to be reliable'
-    return [t for w in words for t in w], None
+        return None, 'too short to be reliable', None
+    phrase = ' '.join(text(w) for w in words)
+    if len(words) == 1 and phrase in common:
+        return None, f'"{phrase}" is a common word and would trigger constantly', None
+    warning = None
+    if all(text(w) in common for w in words):
+        warning = f'"{phrase}" is made of everyday words, so it may also alert when someone says "{phrase.lower()}"'
+    return [t for w in words for t in w], None, warning
 
 _recognizer = None
 
@@ -223,9 +261,9 @@ def learn_spelling(waveform, profile):
     heard = hear(waveform)
     heard_text = ' '.join(''.join(heard).replace('▁', ' ').split())
     names = [detection['primary_name']]+detection['aliases']
-    tokens, problem = safe_spelling(heard, allowed={w for n in names for w in spoken_form(n).split()})
+    tokens, problem, warning = safe_spelling(heard, allowed={w for n in names for w in spoken_form(n).split()})
     if problem:
-        raise ValueError(f'heard "{heard_text or "nothing"}"; not added because {problem}. Try again, saying only the name.')
+        raise ValueError(f'Heard "{heard_text or "nothing"}"; not added because {problem}. Try again, saying only the name.')
     entry = dict(text=''.join(tokens).replace('▁', ' ').strip(), tokens=' '.join(tokens))
     typed = {' '.join(tokenize(spoken_form(n))) for n in names}
     known = typed | {i['tokens'] for i in detection['learned_spellings']}
@@ -234,7 +272,7 @@ def learn_spelling(waveform, profile):
         if len(detection['learned_spellings']) >= MAX_LEARNED:
             raise ValueError(f'at most {MAX_LEARNED} learned spellings; clear them first')
         detection['learned_spellings'].append(entry)
-    return (profile if added else None), dict(heard=heard_text, spelling=entry['text'], added=added,
+    return (profile if added else None), dict(heard=heard_text, spelling=entry['text'], added=added, warning=warning,
                          note=None if added else 'already covered by your typed name or an earlier recording')
 
 # ---------- detection ----------
