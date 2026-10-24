@@ -331,9 +331,25 @@ export function AwareCuePreview({
       className={`onboarding-cue-preview ${render === "oled" ? "onboarding-oled" : ""}`}
     >
       {render === "oled" ? (
-        <Oled event={event} labels={appearance.text === "labels"} />
+        <Oled
+          event={event}
+          labels={appearance.text === "labels"}
+          direction={direction === "unknown" ? null : direction}
+        />
       ) : (
-        <Cue event={event} appearance={appearance} direction={direction} />
+        <div
+          className={`lens-frame ${motionOn ? "gentle-cue" : ""}`}
+          style={{
+            filter: `drop-shadow(0 0 5px ${display.colors[tier] ?? "#ffffff"})`,
+          }}
+        >
+          <Oled
+            event={event}
+            labels={appearance.text === "labels"}
+            direction={direction === "unknown" ? null : direction}
+            lens
+          />
+        </div>
       )}
     </div>
   );
@@ -617,8 +633,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
         </h1>
         <p style={{ fontSize: 16, margin: "8px 0 0" }}>
           Stay aware of the sounds that matter to you, without watching a
-          screen. Start from a preset, then add exceptions. Changes apply to
-          the preview right away and to the receiver whenever it is connected.
+          screen. Start from a preset, then add exceptions. Changes apply to the
+          preview right away and to the receiver whenever it is connected.
         </p>
         <div
           role="status"
@@ -1104,16 +1120,15 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                   onChange={(e) => updateDisplay({ labels: e.target.checked })}
                   style={{ width: 18, height: 18, accentColor: p.ink }}
                 />
-                Show short labels next to icons
+                Show short labels with icons
               </label>
             </div>
 
             <div style={{ marginTop: 20 }}>
-              <div style={{ fontWeight: 500 }}>Colors by priority</div>
+              <div style={{ fontWeight: 500 }}>Browser glow by priority</div>
               <p style={Object.assign({}, s.help, { marginTop: 2 })}>
-                Browser only. The white SSD1306 OLED has no color, so it uses
-                monochrome equivalents: size, a frame, or an inverted screen for
-                Urgent.
+                The browser glow uses these colors. The OLED pixels stay white;
+                frames and the urgent label communicate priority.
               </p>
               <div
                 style={{

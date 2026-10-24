@@ -104,6 +104,7 @@ export default function Stage({
   caption,
   large = false,
   motion = "none",
+  accent,
   children,
 }: {
   event: SoundEvent | null;
@@ -112,6 +113,7 @@ export default function Stage({
   caption: string;
   large?: boolean;
   motion?: "none" | "gentle";
+  accent?: string;
   children?: ReactNode;
 }) {
   const camera = useCamera();
@@ -171,6 +173,11 @@ export default function Stage({
       )}
       <div
         key={event?.event_id ?? "idle"}
+        style={
+          event && accent
+            ? { filter: `drop-shadow(0 0 5px ${accent})` }
+            : undefined
+        }
         className={`lens-frame ${event ? "is-lit" : ""} ${event?.priority_tier === 4 ? "is-urgent" : ""} ${motion === "gentle" ? "gentle-cue" : ""}`}
       >
         <Oled event={event} labels={labels} direction={direction} lens />

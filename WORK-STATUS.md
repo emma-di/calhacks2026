@@ -119,3 +119,13 @@ The glasses have no camera. Optional POV camera video is a browser demonstration
 Automatic hand tracking and the test thumbs-up button are removed from the app flow; manual Dismiss
 and expiry remain. Earlier camera-on-glasses and physical gesture claims are superseded. Phone as
 OS-exposed webcam is a possible demo input, not a verified direct phone-to-site streaming feature.
+
+## Overnight software pass — October 24
+
+[Full verification report](docs/overnight-verification.md): 41 Python tests, 15 frontend tests, 17 shared
+scenarios, 127 raster fixtures and 150,000 matching stress actions (~52 simulated hours, not wall-clock
+hardware runtime). Fixed Pause confirmation leakage, queue bounds/ties, invalid-request rollback,
+receiver-instance isolation, malformed-state handling, onboarding/live render mismatch and responsive
+controls/audience sizing. Actual UI→receiver settings, pause, connection-loss/restart and keyboard mode
+selection exercised on isolated ports without opening a mic/camera. Physical checks and multi-client
+profile ownership remain pending; existing backend processes need restart to load Python fixes.

@@ -52,7 +52,8 @@ export class Bitmap {
   }
   rect(x: number, y: number, width: number, height: number, fill = false) {
     if (fill) {
-      for (let row = y; row < y + height; row++) this.line(x, row, x + width - 1, row);
+      for (let row = y; row < y + height; row++)
+        this.line(x, row, x + width - 1, row);
       return;
     }
     this.line(x, y, x + width - 1, y);
@@ -71,19 +72,31 @@ export class Bitmap {
     }
   }
   centered(text: string, y: number, value = 1) {
-    this.text(text, Math.floor((WIDTH - (text.length * 6 - 1)) / 2), y, value);
+    this.text(
+      text,
+      Math.floor((WIDTH - ([...text].length * 6 - 1)) / 2),
+      y,
+      value,
+    );
   }
 }
 
 function drawIcon(bitmap: Bitmap, id: string, x: number, y: number) {
   (bitmaps[id] ?? []).forEach((bits, row) => {
-    for (let column = 0; column < bits.length; column++) if (bits[column] === "1") bitmap.pixel(x + column, y + row);
+    for (let column = 0; column < bits.length; column++)
+      if (bits[column] === "1") bitmap.pixel(x + column, y + row);
   });
 }
 
 export function fitLabel(label: string, width: number) {
   const text = label.toUpperCase().split(/\s+/).filter(Boolean).join(" ");
-  return text.length <= width ? text : text.slice(0, width - 3).trimEnd() + "...";
+  const chars = [...text];
+  return chars.length <= width
+    ? text
+    : chars
+        .slice(0, width - 3)
+        .join("")
+        .trimEnd() + "...";
 }
 
 // Icon top-left per placement and its label row (always reserved, so the icon never moves).
@@ -96,11 +109,19 @@ const PLACES: Record<string, [number, number, number]> = {
 };
 
 // Where the cue sits (see hardware/display.py layout()): the direction is the position.
-export function layout(direction: string | null | undefined, label: string | null) {
+export function layout(
+  direction: string | null | undefined,
+  label: string | null,
+) {
   const [x, y, textY] = PLACES[direction ?? "none"] ?? PLACES.none;
   const text = label ? fitLabel(label, 19) : null;
-  const tw = text ? text.length * 6 - 1 : 0;
-  const textX = direction === "left" ? EDGE : direction === "right" ? WIDTH - EDGE - tw : Math.floor((WIDTH - tw) / 2);
+  const tw = text ? [...text].length * 6 - 1 : 0;
+  const textX =
+    direction === "left"
+      ? EDGE
+      : direction === "right"
+        ? WIDTH - EDGE - tw
+        : Math.floor((WIDTH - tw) / 2);
   return {
     box: [x, y, ICON_SIZE, ICON_SIZE] as const,
     icon: [x, y] as const,
@@ -121,9 +142,18 @@ function drawEdge(bitmap: Bitmap, direction?: string | null) {
 // Tier changes only the box around the cue; position always comes from the direction.
 export function render(cue: Cue | null, showLabels = true): Bitmap {
   const bitmap = new Bitmap();
-  if (!cue || cue.effective_tier === 0 || cue.remaining_ms === 0 || !cue.icon_id) return bitmap;
+  if (
+    !cue ||
+    cue.effective_tier === 0 ||
+    cue.remaining_ms === 0 ||
+    !cue.icon_id
+  )
+    return bitmap;
   const tier = cue.effective_tier;
-  const place = layout(cue.direction, showLabels || tier === 4 ? cue.label : null);
+  const place = layout(
+    cue.direction,
+    showLabels || tier === 4 ? cue.label : null,
+  );
   const [x, y, cw, ch] = place.box;
   if (tier >= 2) bitmap.rect(x - 2, y - 2, cw + 4, ch + 4);
   if (tier >= 3) bitmap.rect(x - 4, y - 4, cw + 8, ch + 8);

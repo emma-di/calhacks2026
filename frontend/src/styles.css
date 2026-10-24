@@ -11,7 +11,8 @@
   --muted: #8f8d85;
   --signal: #ffb547;
   --signal-ink: #1d1304;
-  --pixel: "Silkscreen", ui-monospace, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
+  --pixel:
+    "Silkscreen", ui-monospace, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
   font-family: "Instrument Sans", Inter, system-ui, sans-serif;
   font-size: 15px;
   line-height: 1.5;
@@ -67,7 +68,8 @@ a {
   text-decoration: none;
 }
 code {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
+  font-family:
+    ui-monospace, SFMono-Regular, Menlo, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
   font-size: 12px;
 }
 .num {
@@ -203,7 +205,9 @@ code {
   font-size: 13px;
   color: var(--muted);
   white-space: nowrap;
-  transition: background-color 140ms ease, color 140ms ease;
+  transition:
+    background-color 140ms ease,
+    color 140ms ease;
 }
 .switch button:hover:not(:disabled) {
   color: var(--text);
@@ -232,7 +236,10 @@ code {
   isolation: isolate;
   border-radius: 28px;
   background-color: #050505;
-  background-image: radial-gradient(rgba(244, 242, 234, 0.06) 1px, transparent 1px); /* taste-skill-ignore: display pixel-dot texture, not a colour fade */
+  background-image: radial-gradient(
+    rgba(244, 242, 234, 0.06) 1px,
+    transparent 1px
+  ); /* taste-skill-ignore: display pixel-dot texture, not a colour fade */
   background-size: 6px 6px;
 }
 /* Lens vignette: the edge of the glass, over the room or the dark. */
@@ -338,10 +345,14 @@ code {
 }
 .lens-frame.is-lit {
   animation: lens-in 220ms ease-out;
-  filter: drop-shadow(0 0 5px rgba(244, 242, 234, 0.55)); /* taste-skill-ignore: OLED glow */
+  filter: drop-shadow(
+    0 0 5px rgba(244, 242, 234, 0.55)
+  ); /* taste-skill-ignore: OLED glow */
 }
 .lens-frame.is-urgent {
-  filter: drop-shadow(0 0 7px rgba(255, 181, 71, 0.75)); /* taste-skill-ignore: OLED glow */
+  filter: drop-shadow(
+    0 0 7px rgba(255, 181, 71, 0.75)
+  ); /* taste-skill-ignore: OLED glow */
 }
 .lens-frame.gentle-cue {
   animation:
@@ -871,4 +882,62 @@ code {
     animation: none !important;
     transition: none !important;
   }
+}
+
+/* Keep session health and the judge view reachable on narrow screens. */
+.mobile-session {
+  display: none;
+}
+@media (max-width: 860px) {
+  .mobile-session {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 8px 16px 12px;
+    font-size: 12px;
+    color: var(--muted);
+  }
+  .mobile-session .key {
+    font-size: 12px;
+  }
+  .switch button,
+  .stage-button,
+  .stage-tools select,
+  .help-button {
+    min-height: 44px;
+  }
+  .help-button {
+    min-width: 44px;
+  }
+  .stage-bar {
+    padding: 12px;
+    align-items: flex-start;
+  }
+  .stage-caption {
+    max-width: 48%;
+    font-family: inherit;
+    font-size: 12px;
+    letter-spacing: 0;
+  }
+  .stage-tools {
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: 50%;
+  }
+  .stage-tools select {
+    max-width: 100%;
+  }
+}
+/* Audience mode fills the viewport without stretching the 2:1 panel frame. */
+.audience .stage-large {
+  height: 100dvh;
+  min-height: 100dvh;
+  max-height: none;
+}
+.audience .lens-frame {
+  width: min(92vw, 120dvh);
+  height: auto;
+  max-width: 92%;
 }

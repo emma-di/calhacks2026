@@ -18,6 +18,10 @@ def cases():
                 yield dict(icon_id=icon, label=LABELS[icon], effective_tier=tier, remaining_ms=3000, show_labels=labels)
     yield dict(icon_id='knock', label='A very long label that needs wrapping onto two lines', effective_tier=2,
                remaining_ms=3000, show_labels=True)
+    for label in ('门铃 🔔', '🚨' * 24, 'Straße alarm', '  Alarm\t clock  '):
+        for direction in (None, 'left', 'right', 'behind'):
+            yield dict(icon_id='bell', label=label, effective_tier=4, remaining_ms=3000,
+                       show_labels=True, direction=direction)
     for direction in DIRECTIONS:
         for tier in range(1, 5):
             yield dict(icon_id='smoke', label='Smoke alarm', effective_tier=tier, remaining_ms=3000,

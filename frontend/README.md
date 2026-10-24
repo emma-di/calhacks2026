@@ -94,3 +94,10 @@ The glasses have no camera. **Use POV camera** adds a demo backdrop from a brows
 Camera video stays in the tab. Hand recognition is not loaded or run by the current app, and dev/build
 no longer downloads its model. The unused experimental code remains available for future evaluation.
 A direct remote phone-browser feed is not configured; laptop localhost is not a phone-accessible site.
+
+## Latest verification
+
+See [the overnight report](../docs/overnight-verification.md) for 17 shared alert scenarios, 127 exact
+raster fixtures, cross-language stress tests, browser integration checks and remaining physical limits.
+Onboarding and Live now use the same pixel renderer. Browser glow is customizable; the OLED stays white.
+Use one settings-owning companion during the demo until cross-client profile conflicts are implemented.
