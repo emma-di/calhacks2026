@@ -16,9 +16,7 @@ const font: Record<string, string[]> = Object.fromEntries(
 );
 const bitmaps = assets.bitmaps as Record<string, string[]>;
 const ICON_SIZE = 32;
-const ICON_X = (WIDTH - ICON_SIZE) / 2;
-const ICON_Y = 7;
-const LABEL_Y = 46;
+const EDGE = 6;
 
 export class Bitmap {
   buffer = new Uint8Array((WIDTH * HEIGHT) / 8);
@@ -77,42 +75,65 @@ export class Bitmap {
   }
 }
 
-function drawIcon(bitmap: Bitmap, id: string) {
+function drawIcon(bitmap: Bitmap, id: string, x: number, y: number) {
   (bitmaps[id] ?? []).forEach((bits, row) => {
-    for (let column = 0; column < bits.length; column++)
-      if (bits[column] === "1") bitmap.pixel(ICON_X + column, ICON_Y + row);
+    for (let column = 0; column < bits.length; column++) if (bits[column] === "1") bitmap.pixel(x + column, y + row);
   });
 }
 
-export function fitLabel(label: string, width = 18) {
+export function fitLabel(label: string, width: number) {
   const text = label.toUpperCase().split(/\s+/).filter(Boolean).join(" ");
   return text.length <= width ? text : text.slice(0, width - 3).trimEnd() + "...";
 }
 
-// A solid arrow beside the icon, on the side nearest the sound.
-function drawDirection(bitmap: Bitmap, direction?: string | null) {
-  if (direction !== "left" && direction !== "right") return;
-  const middle = ICON_Y + ICON_SIZE / 2;
-  for (let k = -6; k <= 6; k++)
-    for (let x = 6 + Math.abs(k); x < 13; x++) bitmap.pixel(direction === "left" ? x : WIDTH - 1 - x, middle + k);
+// Icon top-left per placement and its label row (always reserved, so the icon never moves).
+const PLACES: Record<string, [number, number, number]> = {
+  none: [(WIDTH - ICON_SIZE) / 2, 14, 52],
+  left: [EDGE, 14, 52],
+  right: [WIDTH - EDGE - ICON_SIZE, 14, 52],
+  front: [(WIDTH - ICON_SIZE) / 2, EDGE, 44],
+  behind: [(WIDTH - ICON_SIZE) / 2, HEIGHT - EDGE - ICON_SIZE, 13],
+};
+
+// Where the cue sits (see hardware/display.py layout()): the direction is the position.
+export function layout(direction: string | null | undefined, label: string | null) {
+  const [x, y, textY] = PLACES[direction ?? "none"] ?? PLACES.none;
+  const text = label ? fitLabel(label, 19) : null;
+  const tw = text ? text.length * 6 - 1 : 0;
+  const textX = direction === "left" ? EDGE : direction === "right" ? WIDTH - EDGE - tw : Math.floor((WIDTH - tw) / 2);
+  return {
+    box: [x, y, ICON_SIZE, ICON_SIZE] as const,
+    icon: [x, y] as const,
+    text,
+    origin: [textX, textY] as const,
+    width: tw,
+  };
 }
 
-// One fixed layout for every tier; tier only changes the frame (see hardware/display.py render()).
+// A one-pixel line along the edge the sound came from.
+function drawEdge(bitmap: Bitmap, direction?: string | null) {
+  if (direction === "left") bitmap.line(0, 8, 0, 55);
+  else if (direction === "right") bitmap.line(WIDTH - 1, 8, WIDTH - 1, 55);
+  else if (direction === "front") bitmap.line(16, 0, 111, 0);
+  else if (direction === "behind") bitmap.line(16, HEIGHT - 1, 111, HEIGHT - 1);
+}
+
+// Tier changes only the box around the cue; position always comes from the direction.
 export function render(cue: Cue | null, showLabels = true): Bitmap {
   const bitmap = new Bitmap();
   if (!cue || cue.effective_tier === 0 || cue.remaining_ms === 0 || !cue.icon_id) return bitmap;
   const tier = cue.effective_tier;
-  if (tier >= 2) bitmap.rect(1, 1, 126, 62);
-  if (tier >= 3) bitmap.rect(3, 3, 122, 58);
-  drawIcon(bitmap, cue.icon_id);
-  if (showLabels || tier === 4) {
-    const text = fitLabel(cue.label);
-    if (tier === 4) {
-      bitmap.rect(6, LABEL_Y - 3, 116, 13, true);
-      bitmap.centered(text, LABEL_Y, 0);
-    } else bitmap.centered(text, LABEL_Y);
+  const place = layout(cue.direction, showLabels || tier === 4 ? cue.label : null);
+  const [x, y, cw, ch] = place.box;
+  if (tier >= 2) bitmap.rect(x - 2, y - 2, cw + 4, ch + 4);
+  if (tier >= 3) bitmap.rect(x - 4, y - 4, cw + 8, ch + 8);
+  drawIcon(bitmap, cue.icon_id, place.icon[0], place.icon[1]);
+  if (place.text) {
+    const [tx, ty] = place.origin;
+    if (tier === 4) bitmap.rect(tx - 2, ty - 2, place.width + 4, 11, true);
+    bitmap.text(place.text, tx, ty, tier === 4 ? 0 : 1);
   }
-  drawDirection(bitmap, cue.direction);
+  drawEdge(bitmap, cue.direction);
   return bitmap;
 }
 

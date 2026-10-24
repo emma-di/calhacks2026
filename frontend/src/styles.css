@@ -225,6 +225,9 @@ code {
 .stage {
   position: relative;
   aspect-ratio: 21 / 9;
+  max-height: calc(100dvh - 400px);
+  min-height: 280px;
+  width: 100%;
   overflow: hidden;
   isolation: isolate;
   border-radius: 28px;
@@ -309,7 +312,8 @@ code {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: min(54%, 640px);
+  height: 84%;
+  max-width: 92%;
   aspect-ratio: 2 / 1;
   transform: translate(-50%, -50%);
   z-index: 2;
@@ -355,17 +359,14 @@ code {
   z-index: 2;
 }
 .oled-inset {
-  position: absolute;
-  right: 22px;
-  bottom: 18px;
-  z-index: 3;
   display: grid;
   gap: 6px;
   justify-items: end;
+  flex-shrink: 0;
 }
 .oled-inset .oled-bitmap {
-  width: 160px;
-  height: 80px;
+  width: 128px;
+  height: 64px;
   border-radius: 6px;
   outline: 1px solid var(--line-strong);
 }
@@ -401,7 +402,7 @@ code {
 }
 .narration-row {
   display: flex;
-  align-items: baseline;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 24px;
   padding: 18px 4px 22px;
@@ -414,9 +415,9 @@ code {
   max-width: 760px;
 }
 .aside {
+  margin-top: 8px;
   font-size: 13px;
   color: var(--muted);
-  text-align: right;
 }
 
 /* Dock */
@@ -522,10 +523,13 @@ code {
   border-radius: 0;
 }
 .audience .lens-frame {
-  width: min(70%, 1100px);
+  height: 70%;
 }
 .audience .oled-inset {
+  position: absolute;
+  right: 22px;
   bottom: 96px;
+  z-index: 3;
 }
 .audience-bar {
   position: fixed;
@@ -773,8 +777,12 @@ code {
     aspect-ratio: 4 / 3;
     border-radius: 20px;
   }
+  .stage {
+    max-height: none;
+  }
   .lens-frame {
-    width: 86%;
+    height: auto;
+    width: 94%;
   }
   /* On a phone the lens already is the panel's frame; the inset would cover it. */
   .oled-inset {

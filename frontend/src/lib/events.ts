@@ -43,7 +43,7 @@ export interface Health {
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
   remaining_ms: number;
-  direction: "left" | "right" | null;
+  direction: "front" | "right" | "behind" | "left" | null;
   state_sequence: number;
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
@@ -231,7 +231,7 @@ export function parseSnapshot(input: unknown): ViewState {
     events: s.events.map(parseEvent),
     decisions,
     remaining_ms: typeof s.remaining_ms === "number" ? s.remaining_ms : 0,
-    direction: ["left", "right"].includes(String(s.direction))
+    direction: ["front", "right", "behind", "left"].includes(String(s.direction))
       ? (s.direction as ViewState["direction"])
       : null,
     state_sequence: typeof s.state_sequence === "number" ? s.state_sequence : 0,

@@ -6,7 +6,6 @@ Times are monotonic milliseconds supplied by the caller so tests and replays are
 """
 from collections import deque
 import json
-import math
 from pathlib import Path
 import uuid
 
@@ -55,21 +54,25 @@ def validate_profile(value, known_types):
                 display=dict(labels=display.get('labels', False)))
 
 
-DIRECTIONS = ('left', 'right')
+DIRECTIONS = ('front', 'right', 'behind', 'left')
 
 
 def direction_bucket(degrees, confidence):
-    """Left or right of the wearer, or None when unmeasured, weak, or near the front/back axis.
+    """Which edge of the display the cue sits on, or None when unmeasured or not confident.
 
-    Two microphones (the current hardware) resolve the lateral angle only, so front and behind
-    are deliberately not distinguished.
+    0 front, +90 right, -90 left, 180 behind, each covering 90 degrees. A two-microphone array
+    cannot tell front from behind; such a worker should send null rather than guess.
     """
     if degrees is None or confidence is None or confidence < POLICY['direction_min_confidence']:
         return None
-    lateral = math.sin(math.radians(degrees))
-    if abs(lateral) < 0.5:
-        return None
-    return 'right' if lateral > 0 else 'left'
+    d = (degrees + 180) % 360 - 180
+    if -45 <= d <= 45:
+        return 'front'
+    if 45 < d <= 135:
+        return 'right'
+    if -135 <= d < -45:
+        return 'left'
+    return 'behind'
 
 
 def effective_tier(kind, producer_tier, profile):

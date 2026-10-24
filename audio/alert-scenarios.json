@@ -527,7 +527,7 @@
    ]
   },
   {
-   "name": "near the front-back axis there is no side to show",
+   "name": "every side maps to its own edge",
    "steps": [
     {
      "at": 0,
@@ -539,7 +539,7 @@
      ],
      "expect": {
       "active": "k1",
-      "direction": null
+      "direction": "front"
      }
     },
     {
@@ -548,6 +548,27 @@
      "expect": {
       "resolved": false,
       "active": "k1"
+     }
+    },
+    {
+     "at": 20,
+     "look": "front",
+     "expect": {
+      "resolved": true,
+      "active": null
+     }
+    },
+    {
+     "at": 30000,
+     "add": "siren",
+     "id": "r1",
+     "direction": [
+      -170,
+      0.9
+     ],
+     "expect": {
+      "active": "r1",
+      "direction": "behind"
      }
     }
    ]

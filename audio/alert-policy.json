@@ -7,7 +7,7 @@
   "queue_limit": 5,
   "queue_fresh_ms": 10000,
   "direction_min_confidence": 0.6,
-  "direction_note": "Degrees relative to the wearer's face: 0 front, +90 right, -90 left. Only left/right (more than 30 degrees off the front-back axis) are shown; two microphones cannot tell front from behind. Below the confidence floor the cue stays undirected.",
+  "direction_note": "Degrees relative to the wearer's face: 0 front, +90 right, -90 left, 180 behind; each side covers 90 degrees and puts the cue on that edge of the display. A two-microphone worker cannot tell front from behind and should send null rather than guess. Below the confidence floor the cue stays centred.",
   "focus_minimum_tier": {"everyday": 1, "work": 3, "dnd": 4},
   "presets": {
     "balanced": {"dog_bark": 1, "knock": 2, "bell": 2, "name_called": 3, "smoke_alarm": 4, "alarm_clock": 2, "siren": 3},

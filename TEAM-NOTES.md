@@ -196,10 +196,11 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
 - Companion restyled ("Night lens"): dark lens is the page, Instrument Sans + Silkscreen, amber as the
   only signal colour. The live view now draws the glasses' own 128×64 frame (black = see-through), so
   the lens and the panel cannot disagree. Status: implemented.
-- Panel layout is fixed for every tier (icon same place, label same row); tier changes only the frame.
+- Panel layout: the direction is the position (icon hugs left/right/front/behind edge with an edge line;
+  unknown stays centred). Tier changes only the box around the icon; the icon never moves with tier or labels.
   New 32×32 pixel icons from `hardware/icons.py`, also used for the site's sound buttons.
 - Direction contract ready for spatial work: `direction_degrees` + `direction_confidence` on events;
-  left/right only (two mics), confidence ≥ 0.6. Cues resolve by expiry, Dismiss, or `POST /look`
+  four sides, confidence ≥ 0.6; a two-mic worker should send null rather than guess front vs behind. Cues resolve by expiry, Dismiss, or `POST /look`
   (no head sensor yet; the UI's Look button simulates it). See docs/alert-engine.md.
 
 ## Add a note

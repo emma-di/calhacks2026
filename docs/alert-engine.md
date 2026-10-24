@@ -26,8 +26,8 @@ the Mana onboarding defaults.
 | Duplicate event ID | Counted once. |
 | Lifetimes | Ambient 2 s, Notify 3 s, Attention 5 s, Urgent 30 s (unchanged from before). |
 
-| Direction | Optional `direction_degrees` (0 front, +90 right, -90 left) with `direction_confidence`. Shown only when confidence ≥ 0.6 and the sound is more than 30° off the front–back axis, as **left** or **right**: two microphones cannot tell front from behind. Otherwise the cue is undirected. |
-| Resolution | A cue ends by **expiring** (logged), **Dismiss**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking. |
+| Direction | Optional `direction_degrees` (0 front, +90 right, -90 left, 180 behind) with `direction_confidence`. At confidence ≥ 0.6 the cue moves to that edge of the display (each side covers 90°); otherwise it stays centred. A two-microphone worker cannot tell front from behind and should send null rather than guess. |
+| Resolution | A cue ends by **expiring** (logged), **Dismiss**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
 
 Every decision has a reason code and a plain-language sentence (`frontend/src/lib/explain.ts`) shown
 on the Live screen and in the Event log.
@@ -43,7 +43,7 @@ on the Live screen and in the Event log.
 | `POST /events` | v1 events. Now also accepts `name_called` and `confidence: null` (NAME-04) for the planned speech worker. Replies with the decision. |
 | `POST /dismiss` | `{"event_id": "..."}`; omit the ID to dismiss whatever is showing. |
 | `POST /controls` | `{"focus_mode": "everyday" \| "work" \| "dnd", "paused": bool}`. |
-| `POST /look` | `{"direction": "left"\|"right"}` or `{"heading_degrees": n}` from a head-orientation source (none in today's hardware; the companion's Look button simulates it). Replies `{"resolved": bool}`. |
+| `POST /look` | `{"direction": "front"\|"right"\|"behind"\|"left"}` or `{"heading_degrees": n}` from a head-orientation source (none in today's hardware; the companion's Look button simulates it). Replies `{"resolved": bool}`. |
 
 The receiver binds to 127.0.0.1. `--host 0.0.0.0` exposes it to the local network so the Pi can poll
 `/display`; use that only on a trusted network. `--port` changes the port; point the dev server at
@@ -93,6 +93,6 @@ The hardware list does not include a camera, and nothing on the glasses depends 
 
 Send direction on the normal event: `direction_degrees` in −180..180 relative to the wearer's face
 (0 ahead, +90 right, −90 left) and `direction_confidence` in 0..1. Both or neither; distance stays
-rejected. Nothing else changes: the engine buckets it, the glasses draw an arrow beside the icon,
+rejected. Nothing else changes: the engine buckets it, the cue moves to that edge of the glasses,
 the browser shows the same frame, and `/look` resolution starts working. Until measured, leave both
 null and every cue stays undirected, which is today's honest behavior.

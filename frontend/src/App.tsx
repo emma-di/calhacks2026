@@ -215,9 +215,7 @@ export default function App() {
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
           <div className="lens-wrap">
-            <Stage event={active} labels={labels} direction={direction} caption={stageCaption} motion={appearance.motion}>
-              {oledInset}
-            </Stage>
+            <Stage event={active} labels={labels} direction={direction} caption={stageCaption} motion={appearance.motion} />
             <div className="lifeline" aria-hidden="true">
               <div
                 className={`lifeline-fill ${active?.priority_tier === 4 ? "is-urgent" : ""}`}
@@ -225,13 +223,16 @@ export default function App() {
               />
             </div>
           </div>
-          <div className="narration-row" aria-live="polite">
-            <p className="narration">{narration}</p>
-            <p className="aside">
+          <div className="narration-row">
+            <div aria-live="polite">
+              <p className="narration">{narration}</p>
+              <p className="aside">
               {active
                 ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction} or dismiss to resolve` : "dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
                 : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
-            </p>
+              </p>
+            </div>
+            {oledInset}
           </div>
 
           <section className="dock" aria-label="Controls">
@@ -256,7 +257,7 @@ export default function App() {
             </div>
             <div className="dock-row">
               <div className="switch" role="radiogroup" aria-label="Simulated direction of the next test sound">
-                {([null, "left", "right"] as const).map((d) => (
+                {([null, "left", "front", "right", "behind"] as const).map((d) => (
                   <button
                     key={d ?? "unknown"}
                     role="radio"
@@ -264,7 +265,7 @@ export default function App() {
                     onClick={() => setTestDirection(d)}
                     title={d ? `Next test sound comes from the ${d} (simulated)` : "No direction, as today's hardware reports"}
                   >
-                    {d ? `From ${d}` : "No direction"}
+                    {d ? d[0].toUpperCase() + d.slice(1) : "No direction"}
                   </button>
                 ))}
               </div>

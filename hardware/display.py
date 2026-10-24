@@ -13,7 +13,7 @@ WIDTH, HEIGHT = 128, 64
 _ASSETS = json.loads((Path(__file__).with_name("oled-assets.json")).read_text())
 _GLYPHS = _ASSETS["glyphs"]
 ICON_IDS = frozenset(_ASSETS["bitmaps"])
-DIRECTIONS = ("left", "right")
+DIRECTIONS = ("left", "right", "front", "behind")
 FONT = {char: rows.split() for char, rows in _GLYPHS.items()}
 
 
@@ -82,11 +82,10 @@ class Bitmap:
 
 
 ICON_SIZE = 32
-ICON_X, ICON_Y = (WIDTH - ICON_SIZE) // 2, 7
-LABEL_Y = 46
+EDGE = 6  # gap between a directed cue and its screen edge, room for the tier boxes and edge line
 
 
-def draw_icon(bitmap, icon_id, x=ICON_X, y=ICON_Y):
+def draw_icon(bitmap, icon_id, x, y):
     for row, bits in enumerate(_ASSETS["bitmaps"][icon_id]):
         for column, bit in enumerate(bits):
             if bit == "1":
@@ -131,49 +130,74 @@ class Presentation:
             raise ValueError("Visible cue needs event_id, icon_id and label")
         direction = value.get("direction")
         if direction not in (None, *DIRECTIONS):
-            raise ValueError("direction must be left, right or null")
+            raise ValueError("direction must be left, right, front, behind or null")
         fields = [key for key in cls.__dataclass_fields__ if key != "direction"]
         return cls(**{key: value[key] for key in fields}, direction=direction)
 
 
-def fit_label(label, width=18):
+def fit_label(label, width):
     text = " ".join(label.upper().split())
     return text if len(text) <= width else text[:width - 3].rstrip() + "..."
 
 
-def draw_direction(bitmap, direction):
-    """A solid arrow beside the icon, on the side nearest the sound."""
-    if direction not in DIRECTIONS:
-        return
-    middle = ICON_Y + ICON_SIZE // 2
-    for k in range(-6, 7):
-        for x in range(6 + abs(k), 13):
-            bitmap.pixel(x if direction == "left" else WIDTH - 1 - x, middle + k)
+# Icon top-left for each placement, and the row its label uses. The label row is always reserved,
+# so the icon never moves when labels are switched on or off.
+PLACES = {
+    None: ((WIDTH - ICON_SIZE) // 2, 14, 52),
+    "left": (EDGE, 14, 52),
+    "right": (WIDTH - EDGE - ICON_SIZE, 14, 52),
+    "front": ((WIDTH - ICON_SIZE) // 2, EDGE, 44),
+    "behind": ((WIDTH - ICON_SIZE) // 2, HEIGHT - EDGE - ICON_SIZE, 13),
+}
+
+
+def layout(direction, label):
+    """Where the cue sits. The direction is the position; unknown stays centred.
+
+    The icon hugs the edge the sound came from; the label sits on its own row, aligned to that
+    edge (under the icon, or above it for behind). Returns the icon box and text origin.
+    """
+    x, y, text_y = PLACES[direction]
+    text = fit_label(label, 19) if label else None
+    tw = len(text) * 6 - 1 if text else 0
+    text_x = {"left": EDGE, "right": WIDTH - EDGE - tw}.get(direction, (WIDTH - tw) // 2)
+    return dict(box=(x, y, ICON_SIZE, ICON_SIZE), icon=(x, y), text=text,
+                origin=(text_x, text_y) if text else None, width=tw)
+
+
+def draw_edge(bitmap, direction):
+    """A one-pixel line along the edge the sound came from."""
+    if direction == "left":
+        bitmap.line(0, 8, 0, 55)
+    elif direction == "right":
+        bitmap.line(WIDTH - 1, 8, WIDTH - 1, 55)
+    elif direction == "front":
+        bitmap.line(16, 0, 111, 0)
+    elif direction == "behind":
+        bitmap.line(16, HEIGHT - 1, 111, HEIGHT - 1)
 
 
 def render(presentation=None, show_labels=True):
-    """One fixed layout for every tier: icon in the same place, label on the same row.
-
-    Tier only changes the frame: 1 none, 2 thin frame, 3 double frame, 4 double frame and an
-    inverted label bar (Urgent always shows its label).
+    """Tier changes only the box around the cue: 1 none, 2 thin, 3 double, 4 double plus an
+    inverted label (Urgent always shows its label). Position always comes from the direction.
     """
     bitmap = Bitmap()
     if presentation is None or presentation.effective_tier == 0 or presentation.remaining_ms == 0:
         return bitmap
-    tier = presentation.effective_tier
+    tier, direction = presentation.effective_tier, presentation.direction
+    place = layout(direction, presentation.label if show_labels or tier == 4 else None)
+    x, y, cw, ch = place["box"]
     if tier >= 2:
-        bitmap.rect(1, 1, 126, 62)
+        bitmap.rect(x - 2, y - 2, cw + 4, ch + 4)
     if tier >= 3:
-        bitmap.rect(3, 3, 122, 58)
-    draw_icon(bitmap, presentation.icon_id)
-    if show_labels or tier == 4:
-        text = fit_label(presentation.label)
+        bitmap.rect(x - 4, y - 4, cw + 8, ch + 8)
+    draw_icon(bitmap, presentation.icon_id, *place["icon"])
+    if place["text"]:
+        tx, ty = place["origin"]
         if tier == 4:
-            bitmap.rect(6, LABEL_Y - 3, 116, 13, fill=True)
-            bitmap.centered(text, LABEL_Y, value=0)
-        else:
-            bitmap.centered(text, LABEL_Y)
-    draw_direction(bitmap, presentation.direction)
+            bitmap.rect(tx - 2, ty - 2, place["width"] + 4, 11, fill=True)
+        bitmap.text(place["text"], tx, ty, value=0 if tier == 4 else 1)
+    draw_edge(bitmap, direction)
     return bitmap
 
 

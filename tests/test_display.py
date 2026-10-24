@@ -5,7 +5,7 @@ import tempfile
 from pathlib import Path
 import unittest
 
-from hardware.display import Bitmap, DisplayState, Presentation, render
+from hardware.display import layout, Bitmap, DisplayState, Presentation, render
 
 
 def snapshot(**changes):
@@ -48,21 +48,40 @@ class DisplayTests(unittest.TestCase):
                   for tier in range(1, 5)]
         self.assertEqual(len(set(frames)), 4)
         self.assertTrue(all(any(frame) for frame in frames))
-        ambient, notify, attention, urgent = (render(Presentation.parse(snapshot(effective_tier=t)))
-                                              for t in range(1, 5))
-        self.assertEqual((ambient.get(1, 1), notify.get(1, 1), notify.get(3, 3)), (0, 1, 0))
-        self.assertEqual((attention.get(1, 1), attention.get(3, 3)), (1, 1))
-        self.assertEqual(urgent.get(6, 43), 1)  # inverted label bar
+        def frame(tier):
+            return render(Presentation.parse(snapshot(effective_tier=tier)), show_labels=False)
+        ambient, notify, attention, urgent = (frame(t) for t in range(1, 5))
+        x, y, _, _ = layout(None, None)["box"]
+        self.assertEqual((ambient.get(x - 2, y - 2), notify.get(x - 2, y - 2), notify.get(x - 4, y - 4)), (0, 1, 0))
+        self.assertEqual((attention.get(x - 2, y - 2), attention.get(x - 4, y - 4)), (1, 1))
+        self.assertGreater(sum(map(int.bit_count, urgent.buffer)), sum(map(int.bit_count, attention.buffer)))
 
-    def test_icon_sits_in_the_same_place_at_every_tier_and_direction(self):
-        def icon_pixels(**changes):
-            frame = render(Presentation.parse(snapshot(**changes)), show_labels=False)
-            return [frame.get(x, y) for y in range(7, 39) for x in range(48, 80)]
-        reference = icon_pixels(effective_tier=1)
-        self.assertTrue(any(reference))
-        for tier in range(1, 5):
-            for direction in (None, "left", "right"):
-                self.assertEqual(icon_pixels(effective_tier=tier, direction=direction), reference)
+    def test_direction_is_the_position_and_tier_never_moves_the_icon(self):
+        def icon_pixels(direction, tier, labels=False):
+            frame = render(Presentation.parse(snapshot(effective_tier=tier, direction=direction)), labels)
+            ix, iy = layout(direction, "Door knock" if labels else None)["icon"]
+            return [frame.get(ix + dx, iy + dy) for dy in range(32) for dx in range(32)]
+        origins = {d: layout(d, None)["icon"] for d in (None, "left", "right", "front", "behind")}
+        self.assertEqual(len(set(origins.values())), 5)
+        self.assertEqual(origins["left"][0], 6)
+        self.assertEqual(origins["right"][0], 128 - 6 - 32)
+        self.assertLess(origins["front"][1], origins[None][1])
+        self.assertGreater(origins["behind"][1], origins[None][1])
+        for direction in origins:
+            reference = icon_pixels(direction, 1)
+            self.assertTrue(any(reference))
+            for tier in range(2, 5):
+                self.assertEqual(icon_pixels(direction, tier), reference)
+        for direction in origins:  # the label row is reserved, so labels never move the icon
+            self.assertEqual(origins[direction], layout(direction, "Door knock")["icon"])
+            self.assertEqual(icon_pixels(direction, 2, labels=True), icon_pixels(direction, 2))
+            self.assertEqual(icon_pixels(direction, 4, labels=True), icon_pixels(direction, 2))
+
+    def test_directed_cues_mark_their_edge(self):
+        for direction, (x, y) in (("left", (0, 32)), ("right", (127, 32)), ("front", (64, 0)), ("behind", (64, 63))):
+            frame = render(Presentation.parse(snapshot(direction=direction)), show_labels=False)
+            self.assertEqual(frame.get(x, y), 1, direction)
+        self.assertEqual(render(Presentation.parse(snapshot()), show_labels=False).get(0, 32), 0)
 
     def test_icons_are_distinct_and_long_labels_are_bounded(self):
         frames = [bytes(render(Presentation.parse(snapshot(icon_id=icon))).buffer)
@@ -73,14 +92,8 @@ class DisplayTests(unittest.TestCase):
     def test_optional_nonurgent_labels_preserve_icon_and_urgent_text(self):
         for tier in (1, 2, 3):
             cue = Presentation.parse(snapshot(effective_tier=tier))
-            labeled = render(cue)
-            icon_only = render(cue, show_labels=False)
-            self.assertNotEqual(labeled.buffer, icon_only.buffer)
-            self.assertEqual(
-                [labeled.get(x, y) for y in range(7, 39) for x in range(48, 80)],
-                [icon_only.get(x, y) for y in range(7, 39) for x in range(48, 80)],
-            )
-            self.assertTrue(any(icon_only.buffer))
+            self.assertNotEqual(render(cue).buffer, render(cue, show_labels=False).buffer)
+            self.assertTrue(any(render(cue, show_labels=False).buffer))
         urgent = Presentation.parse(snapshot(effective_tier=4))
         self.assertEqual(render(urgent).buffer, render(urgent, show_labels=False).buffer)
 

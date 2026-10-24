@@ -35,17 +35,28 @@ uses the same bitmaps for its sound buttons, and `frontend/src/lib/oled.ts` draw
 frames (checked against `hardware/render-fixtures.json`). Text is the original 5×7 font, uppercase,
 one line, truncated with an ellipsis.
 
-**One fixed layout for every tier:** the icon always sits at x 48–79, y 7–38; the label always on the
-row starting at y 46; a left/right direction arrow always beside the icon at its vertical centre.
-Only the frame changes with tier:
+**The direction is the position.** The icon hugs the edge the sound came from, with a one-pixel
+line along that edge; its label sits on its own row aligned to the same edge (under the icon, or
+above it for behind). Unknown direction stays centred so the position never claims a side.
+
+| Direction | Icon (x, y) | Label row |
+| --- | --- | --- |
+| Unknown | centred (48, 14) | y 52, centred |
+| Left | (6, 14) | y 52, left-aligned |
+| Right | (90, 14) | y 52, right-aligned |
+| Front | (48, 6) | y 44, centred |
+| Behind | (48, 26) | y 13, centred |
+
+The label row is always reserved, so labels on/off and tier never move the icon (tested).
+Tier only changes the box around the icon:
 
 | Effective tier | Treatment |
 | --- | --- |
 | 0 | Completely blank frame |
-| 1 Ambient | Icon (and label), no frame |
-| 2 Notify | Thin frame |
-| 3 Attention | Double frame |
-| 4 Urgent | Double frame and an inverted label bar; the label always shows; no flashing |
+| 1 Ambient | Icon, no box |
+| 2 Notify | Thin box |
+| 3 Attention | Double box |
+| 4 Urgent | Double box and an inverted label; the label always shows; no flashing |
 
 Compare an icon-first nonurgent preview with `--icons-only`, or call
 `render(presentation, show_labels=False)`. The icon and tier frame remain;

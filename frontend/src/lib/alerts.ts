@@ -58,15 +58,18 @@ export const focusMinimum = policy.focus_minimum_tier as Record<
   Tier
 >;
 
-// Two microphones resolve left/right only, so front and behind are not distinguished.
-export type Direction = "left" | "right";
-export const directionDegrees: Record<Direction, number> = { right: 90, left: -90 };
+// Each side covers 90 degrees and puts the cue on that edge. A two-microphone worker cannot tell
+// front from behind and should send null rather than guess.
+export type Direction = "front" | "right" | "behind" | "left";
+export const directionDegrees: Record<Direction, number> = { front: 0, right: 90, behind: 180, left: -90 };
 
 export function directionBucket(degrees: number | null, confidence: number | null): Direction | null {
   if (degrees === null || confidence === null || confidence < policy.direction_min_confidence) return null;
-  const lateral = Math.sin((degrees * Math.PI) / 180);
-  if (Math.abs(lateral) < 0.5) return null;
-  return lateral > 0 ? "right" : "left";
+  const d = ((((degrees + 180) % 360) + 360) % 360) - 180;
+  if (d >= -45 && d <= 45) return "front";
+  if (d > 45 && d <= 135) return "right";
+  if (d >= -135 && d < -45) return "left";
+  return "behind";
 }
 
 export function effectiveTier(
