@@ -258,7 +258,6 @@ export function sanitizeAwareDisplay(raw) {
 const AWARE_DRAFT_KEY = "aware.profile-draft.v2";
 const AWARE_LEGACY_KEY = "aware.profile-draft.v1";
 const AWARE_DISPLAY_KEY = "aware.display-prefs.v1";
-const AWARE_EXPORT_FILE = "aware-profile-demo.json";
 
 function awareKey(base) {
   return base + ":local-demo";
@@ -296,13 +295,6 @@ function readAwareDraft() {
       rules: [],
     });
   return null;
-}
-
-function awareTime(ms) {
-  return new Date(ms).toLocaleTimeString([], {
-    hour: "numeric",
-    minute: "2-digit",
-  });
 }
 
 function awareReadableOn(hex) {
@@ -347,7 +339,7 @@ export function AwareCuePreview({
   );
 }
 
-export default function AwareOnboarding({ onChange } = {}) {
+export default function AwareOnboarding({ onChange, onComplete } = {}) {
   const isDark = false; // Host app currently supplies the light theme.
   const uid = useId();
   const [storageOk] = useState(() => awareStorageAvailable());
@@ -365,7 +357,6 @@ export default function AwareOnboarding({ onChange } = {}) {
   }));
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState(null); // { key, tier }
-  const [exportNote, setExportNote] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [previewKey, setPreviewKey] = useState("smoke_alarm");
   const [direction, setDirection] = useState("unknown");
@@ -413,7 +404,6 @@ export default function AwareOnboarding({ onChange } = {}) {
   useEffect(() => {
     onChange?.({ profile, display, direction });
   }, [profile, display, direction, onChange]);
-  const json = useMemo(() => JSON.stringify(profile, null, 2), [profile]);
   const ruleCount = draft.rules.length;
   const primary = profile.name_detection.primary_name;
   const preset = AWARE_PRESETS.find((m) => m.key === draft.mode);
@@ -571,70 +561,18 @@ export default function AwareOnboarding({ onChange } = {}) {
   };
   const resetRule = (key) => setDraft((d) => removeAwareRule(d, key));
 
-  const exportProfile = () => {
-    try {
-      const blob = new Blob([json + "\n"], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = AWARE_EXPORT_FILE;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      setTimeout(() => URL.revokeObjectURL(url), 1500);
-      setExportNote(
-        "Downloaded " +
-          AWARE_EXPORT_FILE +
-          " at " +
-          awareTime(Date.now()) +
-          ".",
-      );
-    } catch (e) {
-      setExportNote(
-        "Download is not available here. Open the profile JSON below and copy it instead.",
-      );
-    }
-  };
-
-  const copyJson = async () => {
-    let ok = false;
-    try {
-      if (navigator.clipboard) {
-        await navigator.clipboard.writeText(json);
-        ok = true;
-      }
-    } catch (e) {
-      ok = false;
-    }
-    setExportNote(
-      ok
-        ? "Copied the profile JSON."
-        : "Copy failed. Select the text below instead.",
-    );
-  };
-
   const resetAll = () => {
     setDraft(AWARE_EMPTY_DRAFT);
     setDisplay(sanitizeAwareDisplay(null));
     setPending(null);
     setQuery("");
     setConfirmReset(false);
-    setExportNote("");
   };
 
-  let statusText;
-  if (!storageOk)
-    statusText =
-      "Draft not saved: this browser does not allow local storage. Export to keep your settings.";
-  else if (saveState.kind === "saved")
-    statusText =
-      "Draft saved in this browser at " + awareTime(saveState.at) + ".";
-  else if (saveState.kind === "restored")
-    statusText = "Draft restored from this browser.";
-  else if (saveState.kind === "failed")
-    statusText =
-      "Draft could not be saved in this browser. Export to keep your settings.";
-  else statusText = "New draft. Changes are saved in this browser as you edit.";
+  const statusText =
+    !storageOk || saveState.kind === "failed"
+      ? "Settings apply for this visit, but could not be saved in this browser."
+      : "Settings save automatically on this browser.";
 
   const previewEv = awareEvent(previewKey) || AWARE_EVENTS[0];
   const previewResolved = resolveAwareTier(draft, previewEv.key);
@@ -689,9 +627,7 @@ export default function AwareOnboarding({ onChange } = {}) {
           style={{ marginTop: 14, fontSize: 14, color: p.muted }}
         >
           <div>{statusText}</div>
-          <div>
-            Not connected to glasses, a microphone or a profile service.
-          </div>
+          <div>Preview mode · glasses sync is not connected yet.</div>
         </div>
 
         {/* Preset */}
@@ -768,7 +704,7 @@ export default function AwareOnboarding({ onChange } = {}) {
             {draft.mode !== "balanced" && (
               <p style={s.help}>
                 {preset.label} defaults are provisional; only Balanced is agreed
-                so far. Defaults are not written to the profile.
+                so far. You can change any sound below.
               </p>
             )}
           </div>
@@ -780,8 +716,7 @@ export default function AwareOnboarding({ onChange } = {}) {
             Sound rules
           </h2>
           <p style={s.lead}>
-            Search the supported sounds to give one its own priority. Only these
-            rules are written to the profile.
+            Search for a sound to change how it gets your attention.
           </p>
 
           {!pending && (
@@ -1085,7 +1020,7 @@ export default function AwareOnboarding({ onChange } = {}) {
                   marginLeft: 6,
                 }}
               >
-                {primary ? "Name detection on in profile" : "Off"}
+                {primary ? "Saved for later" : "Off"}
               </span>
             </summary>
             <div style={{ marginTop: 16 }}>
@@ -1103,7 +1038,7 @@ export default function AwareOnboarding({ onChange } = {}) {
               />
               <p id={uid + "-name-help"} style={s.help}>
                 {primary
-                  ? "Name detection is turned on in the exported profile. Nothing is listening for it yet."
+                  ? "Your name is saved. Name recognition is not available yet."
                   : "Leave blank to keep name detection off."}
               </p>
             </div>
@@ -1145,8 +1080,7 @@ export default function AwareOnboarding({ onChange } = {}) {
               </span>
             </summary>
             <p style={Object.assign({}, s.lead, { marginTop: 12 })}>
-              Saved in this browser and kept out of the profile file until a
-              display schema is agreed.
+              See how your cues will look. These choices apply to this preview.
             </p>
 
             <div style={{ marginTop: 20 }}>
@@ -1402,20 +1336,8 @@ export default function AwareOnboarding({ onChange } = {}) {
           </details>
         </section>
 
-        {/* Export */}
-        <section style={s.section} aria-labelledby={uid + "-export-h"}>
-          <h2 id={uid + "-export-h"} style={s.h2}>
-            Profile file
-          </h2>
-          <p style={s.lead}>
-            Export the profile as JSON for the Aware mirror.{" "}
-            {ruleCount === 0
-              ? "No sound rules."
-              : ruleCount === 1
-                ? "One sound rule."
-                : ruleCount + " sound rules."}{" "}
-            Display preferences are not included.
-          </p>
+        <section style={s.section} aria-label="Finish setup">
+          <p style={s.lead}>You can change these preferences anytime.</p>
           <div
             style={{
               display: "flex",
@@ -1425,8 +1347,8 @@ export default function AwareOnboarding({ onChange } = {}) {
               marginTop: 20,
             }}
           >
-            <button type="button" onClick={exportProfile} style={s.primaryBtn}>
-              Export profile JSON
+            <button type="button" onClick={onComplete} style={s.primaryBtn}>
+              Start preview
             </button>
             {!confirmReset ? (
               <button
@@ -1446,7 +1368,7 @@ export default function AwareOnboarding({ onChange } = {}) {
                 }}
               >
                 <span style={{ fontSize: 14, color: p.muted }}>
-                  Clear the profile and display settings?
+                  Reset your sound and display preferences?
                 </span>
                 <button type="button" onClick={resetAll} style={s.quietBtn}>
                   Clear
@@ -1461,51 +1383,6 @@ export default function AwareOnboarding({ onChange } = {}) {
               </span>
             )}
           </div>
-          <p
-            role="status"
-            aria-live="polite"
-            style={Object.assign({}, s.help, { minHeight: 22 })}
-          >
-            {exportNote}
-          </p>
-          <details style={{ marginTop: 8 }}>
-            <summary style={{ fontSize: 15, color: p.muted, padding: "6px 0" }}>
-              Show profile JSON
-            </summary>
-            <div
-              style={{
-                marginTop: 10,
-                border: "1px solid " + p.line,
-                borderRadius: 12,
-                overflow: "hidden",
-              }}
-            >
-              <pre
-                style={{
-                  margin: 0,
-                  padding: 16,
-                  fontFamily: mono,
-                  fontSize: 14,
-                  lineHeight: 1.5,
-                  overflowX: "auto",
-                  background: p.tint,
-                  userSelect: "text",
-                }}
-              >
-                {json}
-              </pre>
-              <div
-                style={{
-                  borderTop: "1px solid " + p.line,
-                  padding: "8px 12px",
-                }}
-              >
-                <button type="button" onClick={copyJson} style={s.textBtn}>
-                  Copy JSON
-                </button>
-              </div>
-            </div>
-          </details>
         </section>
       </div>
     </div>

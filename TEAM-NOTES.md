@@ -163,6 +163,12 @@ If you already have that local branch, use `git switch codex/browser-mirror` ins
 - Keep a short benefit sentence in onboarding. Put the fuller problem, motivation and impact story in
   the submission/pitch; keep the live mirror focused on detections.
 
+## Tester onboarding correction — October 23
+
+User-facing onboarding must not ask testers to download, copy or manage JSON. Settings save locally
+automatically, and Start preview returns to the companion. Internal profile helpers remain for future
+backend integration; the interface explicitly says glasses syncing is not connected.
+
 ## Add a note
 
 ```text

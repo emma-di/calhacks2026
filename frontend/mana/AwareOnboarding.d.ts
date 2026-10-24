@@ -51,4 +51,5 @@ export function resolveAwareTier(
 ): { tier: Tier; source: "rule" | "preset" };
 export default function AwareOnboarding(props: {
   onChange?: (change: SetupChange) => void;
+  onComplete?: () => void;
 }): ReactElement;

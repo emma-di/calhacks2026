@@ -21,7 +21,7 @@ not be imported. The revision requires numeric tiers 0–4 and generic Bell/chim
 - Numeric tier 0 remains a real Ignore override, not a falsey “use default.”
 - Switching preset preserves overrides; removing a rule restores default and removes it from export.
 - Unknown niche queries explain model support; they do not create recognition capability.
-- Local draft status and profile JSON export; no implication that saving controls a live device.
+- Automatic browser-local saving and Start preview; no JSON download or technical profile UI.
 - Display settings stay outside the proposed profile JSON until a display schema is agreed.
 - Icon-first ordinary cues, urgent labels, optional labels/colors/motion, clear mock-direction labeling.
 

@@ -515,7 +515,10 @@ export default function App() {
           <button className="text-button" onClick={() => setView("companion")}>
             Back to mirror <ArrowRight size={15} />
           </button>
-          <Onboarding onChange={applySetup} />
+          <Onboarding
+            onChange={applySetup}
+            onComplete={() => setView("companion")}
+          />
         </div>
         {!focus && view === "events" && (
           <section
