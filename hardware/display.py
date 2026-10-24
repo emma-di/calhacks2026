@@ -144,7 +144,7 @@ def fit_label(label, width):
 # Icon top-left for each placement, and the row its label uses. The label row is always reserved,
 # so the icon never moves when labels are switched on or off.
 # The entire panel sits on the right side of the wearer's field of view. The icon stays
-# centered within that patch; a compass arrow communicates sound direction around it.
+# centered within that patch; a solid triangle on that side shows the sound's direction.
 def layout(direction, label):
     x, y, text_y = (WIDTH - ICON_SIZE) // 2, 10, 55
     text = fit_label(label, 19) if label else None
@@ -154,20 +154,27 @@ def layout(direction, label):
 
 
 def draw_edge(bitmap, direction):
-    """Compass arrow outside the stationary icon; no arrow for unknown direction."""
-    if direction == 'left':
-        bitmap.line(27, 26, 37, 26); bitmap.line(27, 26, 32, 21); bitmap.line(27, 26, 32, 31)
-    elif direction == 'right':
-        bitmap.line(91, 26, 101, 26); bitmap.line(101, 26, 96, 21); bitmap.line(101, 26, 96, 31)
-    elif direction == 'front':
-        bitmap.line(64, 0, 64, 5); bitmap.line(64, 0, 60, 4); bitmap.line(64, 0, 68, 4)
-    elif direction == 'behind':
-        bitmap.line(64, 47, 64, 51); bitmap.line(64, 51, 60, 47); bitmap.line(64, 51, 68, 47)
+    """Solid triangle beside the stationary icon, pointing toward the sound; none for unknown.
+
+    Filled shapes read better than line arrows on a 128x64 panel seen through optics.
+    """
+    if direction in ("left", "right"):
+        for k in range(-6, 7):                      # 7 px deep, 13 px tall, apex outward
+            for x in range(30 + abs(k), 37):
+                bitmap.pixel(x if direction == "left" else WIDTH - 1 - x, 26 + k)
+    elif direction == "front":
+        for row in range(6):                        # apex at the top edge
+            for x in range(64 - row, 65 + row):
+                bitmap.pixel(x, row)
+    elif direction == "behind":
+        for row in range(6):                        # apex pointing down, above the label row
+            for x in range(64 - row, 65 + row):
+                bitmap.pixel(x, 53 - row)
 
 
 def render(presentation=None, show_labels=True):
     """Tier changes only the box around the cue: 1 none, 2 thin, 3 double, 4 double plus an
-    inverted label (Urgent always shows its label). The icon is centered; direction is shown by the compass arrow.
+    inverted label (Urgent always shows its label). The icon is centered; direction is shown by a solid triangle.
     """
     bitmap = Bitmap()
     if presentation is None or presentation.effective_tier == 0 or presentation.remaining_ms == 0:
