@@ -8,6 +8,7 @@ Endpoints (JSON):
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
   POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
   POST /spatial   phone FOA reading {bearing_degrees, coherence, rms, calibrated, device}; matched to sounds
+  POST /spatial/calibrate {right_degrees}: bearing the phone reported for a sound at the right (fixes mirror/squeeze)
 """
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -41,7 +42,7 @@ class AlertState:
                                   on_decision=decision_log.write if decision_log else None)
         self.last_event = {}       # source -> monotonic ms
         self.display_clients = {}  # client name -> monotonic ms of last /display poll
-        self.spatial = SpatialBuffer()
+        self.spatial = SpatialBuffer(Path(profile_path).with_name('spatial-calibration.json') if profile_path else None)
 
     @property
     def decisions(self):
@@ -68,10 +69,16 @@ class AlertState:
                 reading = self.spatial.match(at)
                 if reading:
                     # Same moment, separate device: direction comes from the phone's FOA microphones.
-                    event = dict(event, direction_degrees=reading['bearing_degrees'],
+                    event = dict(event, direction_degrees=round(reading['bearing_degrees'], 1),
+                                 phone_degrees=reading['phone_degrees'],
                                  direction_confidence=round(reading['coherence'], 3),
                                  direction_source=f"{reading['device']}_foa")
             return self.engine.add(event, at)
+
+    def spatial_calibrate(self, right_degrees):
+        with self.lock:
+            self.spatial.calibrate(right_degrees)
+            return self.spatial.right_reference
 
     def spatial_reading(self, value, now=None):
         reading = validate_reading(value)
@@ -189,7 +196,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
-        if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial'):
+        if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial', '/spatial/calibrate'):
             return self.reply(404, {'error': 'Not found'})
         try:
             payload = self.read_json()
@@ -208,6 +215,9 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError('heading_degrees must be a finite number')
                     direction = direction_bucket(heading, 1.0)
                 return self.reply(200, {'ok': True, 'resolved': self.receiver_state.look(direction)})
+            if path == '/spatial/calibrate':
+                return self.reply(200, {'ok': True, 'right_degrees': self.receiver_state.spatial_calibrate(
+                    payload.get('right_degrees'))})
             if path == '/spatial':
                 self.receiver_state.spatial_reading(payload)
                 return self.reply(200, {'ok': True})

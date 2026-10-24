@@ -35,6 +35,19 @@ class SpatialTests(unittest.TestCase):
         state.add(make_event('bell', .9, 'mock'), now=30.0)
         self.assertIsNone(state.snapshot(now=30.0)['direction'])
 
+    def test_right_reference_unmirrors_and_unsqueezes_portrait_phones(self):
+        from audio.spatial import stretch
+        # John's iPhone in portrait: right knocks read about -29, left about +31.
+        self.assertAlmostEqual(stretch(-29, -29), 90)
+        self.assertLess(stretch(31, -29), -45)            # left lands on the left
+        self.assertEqual((abs(stretch(0, -29)), abs(stretch(180, -29))), (0, 180))  # front, behind
+        buffer = SpatialBuffer()
+        buffer.calibrate(-29)
+        buffer.add(reading(-30, 0.8), 100)
+        self.assertGreater(buffer.match(200)['bearing_degrees'], 45)
+        with self.assertRaises(ValueError):
+            buffer.calibrate(3)
+
     def test_invalid_readings_are_rejected(self):
         for bad in (dict(bearing_degrees=400, coherence=.5, rms=0, calibrated=True),
                     dict(bearing_degrees=10, coherence=2, rms=0, calibrated=True),
