@@ -81,12 +81,11 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 
 - [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
-- [ ] HW-03 — Display a fake cue on actual hardware independently of recognition.
+- [x] HW-03 — Fake cues on the real SSD1306 via glasses-pi (Oct 24): `scripts/glasses_up.sh selftest`, OLED at 0x3C.
 - [ ] HW-04 — Renderer + browser preview byte-identical (render fixtures); SSD1306 I²C driver and
   hardware/oled_client.py with self-test written and tested against a fake bus. Mark complete after it
   drives the real module. See docs/alert-engine.md.
-- [ ] HW-05 — Client polls /display (event IDs and sequence match the mirror) and the companion shows it as
-  connected. Pending: run on the Pi against the laptop receiver (--host 0.0.0.0).
+- [x] HW-05 — Live receiver state on the real OLED (Oct 24): `scripts/glasses_up.sh live` over an SSH tunnel; demo scene drove knock/dog/alarm-clock/smoke cues, 40–118 ms receiver→display.
 - [ ] HW-06 — Validate optical readability, refresh, mounting, power and reconnect/clear behavior.
 - [ ] HW-07 — Feed final audio device into capture adapter and complete the physical end-to-end demo.
 
