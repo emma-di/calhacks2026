@@ -30,6 +30,44 @@ The original Pi Zero W remains the planned capture/display endpoint; another Mac
   when asked; repository notes contain their outputs rather than automatically inheriting chat state.
 - Do not mark another teammate's task complete without their evidence.
 
+## Handoff snapshot — October 24, ~00:30 (Claude session → Codex)
+
+All work is pushed to `codex/browser-mirror` (PR #2, not merged to main).
+
+**Built and verified (automated tests + browser checks):**
+- Receiver alert engine (audio/alerts.py) and identical browser port; 12 shared scenarios run by both.
+  Preferences → effective tier, interrupt/queue/resume, repeat merging, acknowledgement, Work/DND,
+  pause, duplicate IDs, expiry logging, four-way direction (confidence ≥ 0.6), look-to-resolve,
+  thumbs-up gesture dismiss, 0.6 s check-mark confirmation.
+- Receiver API: /state, /display, /health, GET/PUT /profile (atomic, survives restart), /events,
+  /dismiss {event_id}, /controls, /look. 38 Python tests incl. HTTP and restart.
+- Glasses: edge-placed panel layout (icon hugs the sound's edge, unknown centred, tier = box only),
+  32×32 pixel icons; browser renderer byte-identical to Python (render fixtures). oled_client + SSD1306
+  driver tested against a fake I²C bus and live against the receiver (pbm sink).
+- Companion "Night lens" redesign; lens draws the real panel frame; camera backdrop; MediaPipe
+  thumbs-up (model loads locally, verified with a synthetic stream; real-hand dismiss seen in receiver log).
+- Live laptop-mic recognition into the receiver was exercised (knock detected).
+
+**Still to test:** physical SSD1306 + optics readability; glasses camera as a webcam; thumbs-up in
+demo lighting with a real hand across several people; full taste/inspector pass on the night theme
+at 768/390; unfamiliar tester; second Mac; final mic/room accuracy and latency.
+
+**Still to do:** confirm camera model/interface (Yameen); capture/inference heartbeat for /health;
+spatial worker emitting direction; name worker; slow 1 Hz urgent pulse (proposed, not built);
+merge PR #2 after teammate review.
+
+**Decisions made in this session that need team re-review:**
+1. Receiver, not producers, decides tier; `/state.active.priority_tier` is now the effective tier.
+2. Queue/repeat/ack timings (5 items, 10 s fresh, 15 s acknowledge, urgent up to 2 min) and
+   one-gesture dismiss; check mark delays a resumed cue by 0.6 s.
+3. `DisplayState` trusts a newer `state_sequence` for the same event (needed for resume/extension).
+4. Panel layout changed (edge placement, new icons, tier = box). Unknown direction stays centred.
+5. Direction: four sides at 90° each; a two-mic worker must send null rather than guess front/behind.
+6. Dismiss is a camera thumbs-up (not snap); audio snap rule disabled. Gesture choice is open.
+7. Night lens visual direction replaced the repo's dealt "achromatic ledger" style (Emma chose it);
+   onboarding tier colours reset to white + amber (storage key bumped, old colours dropped).
+8. `name_called` and `confidence: null` accepted by /events; Gentle/Active presets still provisional.
+
 ## Verification limits and next acceptance checks
 
 - Last verified local build (Oct 23, late): TypeScript/Vite success; 9 frontend tests; 34 Python tests.
