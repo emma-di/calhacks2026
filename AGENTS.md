@@ -21,7 +21,8 @@ Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and upd
 
 Current UI/backend checkpoint: [simulator freeze](docs/simulator-freeze.md),
 [integration revisit list](docs/integration-revisit.md), [phone mirror](docs/phone-mirror.md),
-[iPhone POV camera](docs/iphone-camera.md), and [John audio review](docs/john-audio-review.md).
+[iPhone POV camera](docs/iphone-camera.md), and [John audio review](docs/john-audio-review.md),
+and [Leo spatial review](docs/leo-spatial-review.md).
 
 These files contain shared context. Agents do not automatically inherit Emma's chat history.
 Some plans remain proposals: inspect code and current PRs before assuming an API exists.

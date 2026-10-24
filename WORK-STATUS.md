@@ -145,3 +145,8 @@ Safari-on-iPhone network trial pending; see docs/phone-mirror.md. No phone camer
 Continuity Camera selected for iPhone POV; device refresh and in-app instructions added. Physical
 trial requires Emma to connect/lock/mount the phone and select it on the Mac. John's custom-sound
 branch reviewed with 14 passing isolated tests; integration boundaries recorded in docs/john-audio-review.md.
+
+Leo spatial branch reviewed: 17 synthetic tests pass; standalone simulated map on localhost:8878.
+No microphone started. Live gates: silence/input guards, synchronized capture, measured yaw,
+classification association and receiver adapter. Current iPhone Continuity input is mono; see
+docs/leo-spatial-review.md for Apple native stereo alternatives and limitations.

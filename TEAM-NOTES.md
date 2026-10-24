@@ -287,3 +287,12 @@ Emma confirmed USB Continuity Camera video works. Audio input is separate: Mac l
 (index 0 this session) plus built-in Mac mic. Input-format check accepts 16 kHz mono float32 without
 capture. Bounded microphone command is in docs/iphone-camera.md; live phone-audio trial not run yet.
 This is a mono demo path, not validation of glasses stereo/spatial capture. Re-enumerate indices on reconnect.
+
+### Leo spatial review / iPhone channel limit — October 24
+
+Emma requested holding the phone mic test until spatial review. No mic capture started.
+Reviewed Leo's lragogna/audio-triangulation at ff840bc: 17 synthetic tests pass; isolated simulator on
+8878 with --no-audio (8766 is our alert receiver). Silence and one-channel input crash localize;
+live capture adapter and measured head yaw remain absent. Full details: docs/leo-spatial-review.md.
+Continuity's “Emma Microphone” advertises one channel, so it cannot supply Leo's two-channel TDOA.
+Native iOS stereo/directional capture APIs exist but are a separate unvalidated capture experiment.
