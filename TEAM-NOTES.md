@@ -296,3 +296,14 @@ Reviewed Leo's lragogna/audio-triangulation at ff840bc: 17 synthetic tests pass;
 live capture adapter and measured head yaw remain absent. Full details: docs/leo-spatial-review.md.
 Continuity's “Emma Microphone” advertises one channel, so it cannot supply Leo's two-channel TDOA.
 Native iOS stereo/directional capture APIs exist but are a separate unvalidated capture experiment.
+
+### Native phone direction investigation — October 24
+
+Emma's phone: iPhone 15 Pro / iOS 26.6. John offered his iPhone 18 Pro and connected/trusted it.
+Native spatial capture is worth trying: Apple provides live four-channel ACN/SN3D FOA buffers on
+supported hardware. Continuity's mono feed does not expose them. Native source and test plan are in
+native/PhoneSpatialProbe; preparation script uses Apple's licensed project shell in ignored .cache.
+80 synthetic direction checks pass; unsigned iPhone build succeeds with installed Xcode 27.1.
+Physical support/orientation/accuracy remain pending. Probe does not record, upload or control alerts.
+Emma authorized Personal Team signing for device testing; account/provisioning details stay local.
+John's observations stream at 8a440e1 passes six isolated tests; speech is in progress separately.

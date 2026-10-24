@@ -150,3 +150,9 @@ Leo spatial branch reviewed: 17 synthetic tests pass; standalone simulated map o
 No microphone started. Live gates: silence/input guards, synchronized capture, measured yaw,
 classification association and receiver adapter. Current iPhone Continuity input is mono; see
 docs/leo-spatial-review.md for Apple native stereo alternatives and limitations.
+
+Native spatial phone probe: Xcode 27.1 installed; actual iPhoneOS build passes, plus 80 synthetic math
+checks. John’s phone is connected/trusted; signing/deployment in progress. No live direction accuracy
+claim yet. See native/PhoneSpatialProbe/README.md and docs/phone-direction-research.md. This probe is
+separate from the frozen simulator and does not emit alerts. John’s observations stream reviewed
+with six passing isolated tests; not merged into current receiver. Speech remains John’s ongoing work.
