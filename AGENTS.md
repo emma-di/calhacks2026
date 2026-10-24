@@ -4,7 +4,7 @@ This is the CalHacks situational-awareness glasses repo. Read this file before c
 
 ## Start here
 
-Audio/signals owner (John): start with [HANDOFF-JOHN.md](HANDOFF-JOHN.md).
+Resume point: [HANDOFF-NEXT.md](HANDOFF-NEXT.md). Audio/signals owner (John): [HANDOFF-JOHN.md](HANDOFF-JOHN.md).
 
 Latest continuity handoff: [HANDOFF-CLAUDE.md](HANDOFF-CLAUDE.md).
 
