@@ -12,6 +12,7 @@ import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 import json
+import math
 import os
 import threading
 import time
@@ -122,6 +123,10 @@ state = AlertState()
 
 
 class Handler(BaseHTTPRequestHandler):
+    @property
+    def receiver_state(self):
+        return self.server.alert_state
+
     def reply(self, status, payload, content_type='application/json'):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
         self.send_response(status)
@@ -136,14 +141,14 @@ class Handler(BaseHTTPRequestHandler):
         if url.path == '/':
             self.reply(200, Path(__file__).with_name('monitor.html').read_bytes(), 'text/html; charset=utf-8')
         elif url.path == '/state':
-            self.reply(200, state.snapshot())
+            self.reply(200, self.receiver_state.snapshot())
         elif url.path == '/display':
             client = parse_qs(url.query).get('client', [None])[0]
-            self.reply(200, state.presentation(client))
+            self.reply(200, self.receiver_state.presentation(client))
         elif url.path == '/health':
-            self.reply(200, state.health())
+            self.reply(200, self.receiver_state.health())
         elif url.path == '/profile':
-            self.reply(200, state.profile())
+            self.reply(200, self.receiver_state.profile())
         else:
             self.reply(404, {'error': 'Not found'})
 
@@ -159,7 +164,7 @@ class Handler(BaseHTTPRequestHandler):
         if urlsplit(self.path).path != '/profile':
             return self.reply(404, {'error': 'Not found'})
         try:
-            self.reply(200, state.save_profile(self.read_json()))
+            self.reply(200, self.receiver_state.save_profile(self.read_json()))
         except (ValueError, TypeError) as exc:
             self.reply(400, {'error': str(exc)})
         except OSError:
@@ -177,19 +182,19 @@ class Handler(BaseHTTPRequestHandler):
                 event_id = payload.get('event_id')
                 if event_id is not None and not isinstance(event_id, str):
                     raise ValueError('event_id must be a string')
-                return self.reply(200, {'ok': True, 'dismissed': state.dismiss(event_id)})
+                return self.reply(200, {'ok': True, 'dismissed': self.receiver_state.dismiss(event_id)})
             if path == '/look':
                 direction = payload.get('direction')
                 if direction is None and payload.get('heading_degrees') is not None:
                     heading = payload['heading_degrees']
-                    if type(heading) not in (int, float):
-                        raise ValueError('heading_degrees must be a number')
+                    if type(heading) not in (int, float) or not math.isfinite(heading):
+                        raise ValueError('heading_degrees must be a finite number')
                     direction = direction_bucket(heading, 1.0)
-                return self.reply(200, {'ok': True, 'resolved': state.look(direction)})
+                return self.reply(200, {'ok': True, 'resolved': self.receiver_state.look(direction)})
             if path == '/controls':
-                state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'))
+                self.receiver_state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'))
                 return self.reply(200, {'ok': True})
-            decision = state.add(validate_event(payload))
+            decision = self.receiver_state.add(validate_event(payload))
             self.reply(200, {'ok': True, 'reason': decision['reason'], 'priority_tier': decision['priority_tier']})
         except (ValueError, TypeError) as exc:
             self.reply(400, {'error': str(exc)})
@@ -202,8 +207,9 @@ def create_server(port=8765, host='127.0.0.1', profile_path=None):
     global state
     from audio.decision_log import DecisionLog
     server = ThreadingHTTPServer((host, port), Handler)
-    state = AlertState(decision_log=DecisionLog(ROOT / '.cache' / 'alert-decisions.jsonl'),
-                       profile_path=profile_path or ROOT / '.cache' / 'profile.json')
+    server.alert_state = AlertState(decision_log=DecisionLog(ROOT / '.cache' / 'alert-decisions.jsonl'),
+                                    profile_path=profile_path or ROOT / '.cache' / 'profile.json')
+    state = server.alert_state  # legacy callers; each HTTP handler uses its own server's state
     return server
 
 

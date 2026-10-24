@@ -133,6 +133,12 @@ class AlertEngine:
                 kept.append(item)
         self.queue = kept
 
+    def _bound_queue(self, now):
+        while len(self.queue) > POLICY['queue_limit']:
+            dropped = min(self.queue, key=lambda item: (item['tier'], item['received']))
+            self.queue.remove(dropped)
+            self._decide(dropped['event'], dropped['tier'], 'dropped_queue_full', now)
+
     def _blocked_by_focus(self, tier):
         return tier < POLICY['focus_minimum_tier'][self.focus_mode]
 
@@ -213,6 +219,7 @@ class AlertEngine:
             if active and active['tier'] in (2, 3) and active['event']['type'] != kind:
                 # The interrupted cue may resume afterwards, but only while it is still fresh.
                 self.queue.append(dict(event=active['event'], tier=active['tier'], received=active['started']))
+            self._bound_queue(now)
             self._show(logged, tier, now)
             return self._decide(logged, tier, reason, now,
                                 active_type=active['event']['type'] if active else None)
@@ -220,10 +227,7 @@ class AlertEngine:
             return self._decide(logged, tier, 'suppressed_lower_priority', now)
         self.queue = [item for item in self.queue if item['event']['type'] != kind]
         self.queue.append(dict(event=logged, tier=tier, received=now))
-        if len(self.queue) > POLICY['queue_limit']:
-            dropped = min(self.queue, key=lambda item: (item['tier'], item['received']))
-            self.queue.remove(dropped)
-            self._decide(dropped['event'], dropped['tier'], 'dropped_queue_full', now)
+        self._bound_queue(now)
         return self._decide(logged, tier, 'queued', now)
 
     def dismiss(self, now, event_id=None):
@@ -252,17 +256,21 @@ class AlertEngine:
         return True
 
     def set_controls(self, now, focus_mode=None, paused=None):
+        # Validate the whole request before applying any part.
+        if focus_mode is not None and focus_mode not in FOCUS_MODES:
+            raise ValueError(f'focus_mode must be one of {", ".join(FOCUS_MODES)}')
+        if paused is not None and not isinstance(paused, bool):
+            raise ValueError('paused must be true or false')
         self.tick(now)
         if focus_mode is not None:
-            if focus_mode not in FOCUS_MODES:
-                raise ValueError(f'focus_mode must be one of {", ".join(FOCUS_MODES)}')
             self.focus_mode = focus_mode
         if paused is not None:
-            if not isinstance(paused, bool):
-                raise ValueError('paused must be true or false')
             self.paused = paused
         if self.paused:
             self.queue = []
+            if self.confirm:
+                self.confirm = None
+                self.sequence += 1
             self._clear()
             return
         self.queue = [item for item in self.queue if not self._blocked_by_focus(item['tier'])]

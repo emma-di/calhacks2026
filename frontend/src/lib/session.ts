@@ -25,6 +25,7 @@ export type SyncStatus =
   | { kind: "error"; message: string };
 
 const emptyView = (): ViewState => ({
+  display_labels: null,
   active: null,
   events: [],
   decisions: [],

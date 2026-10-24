@@ -57,3 +57,31 @@ test("shared presentation keeps icons, urgent text and mock placement consistent
   );
 });
 
+test("malformed receiver extensions fail cleanly instead of crashing the live screen", () => {
+  const base = { active: null, events: [], decisions: [] };
+  for (const extra of [
+    { health: {} },
+    { health: { display: {} } },
+    { remaining_ms: NaN },
+    { remaining_ms: -1 },
+    { confirm: { direction: "north", remaining_ms: 50 } },
+    { confirm: { direction: null, remaining_ms: Infinity } },
+    { queue: [null] },
+    { queue: [{ event_id: "x", type: "knock", tier: 9 }] },
+    { state_sequence: Infinity },
+  ])
+    assert.throws(() => parseSnapshot({ ...base, ...extra }));
+});
+
+test("receiver display label setting is authoritative for the physical mirror", () => {
+  const base = { active: null, events: [], decisions: [] };
+  assert.equal(
+    parseSnapshot({ ...base, display: { show_labels: false } }).display_labels,
+    false,
+  );
+  assert.equal(
+    parseSnapshot({ ...base, display: { show_labels: true } }).display_labels,
+    true,
+  );
+  assert.equal(parseSnapshot(base).display_labels, null);
+});

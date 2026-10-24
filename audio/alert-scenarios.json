@@ -635,6 +635,177 @@
      }
     }
    ]
+  },
+  {
+   "name": "pause removes resolve confirmation immediately",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k"
+     }
+    },
+    {
+     "at": 100,
+     "dismiss": "k",
+     "expect": {
+      "confirm": true
+     }
+    },
+    {
+     "at": 200,
+     "controls": {
+      "paused": true
+     },
+     "expect": {
+      "active": null,
+      "confirm": false,
+      "queue": []
+     }
+    },
+    {
+     "at": 300,
+     "add": "smoke_alarm",
+     "id": "s",
+     "expect": {
+      "reason": "paused",
+      "active": null,
+      "confirm": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "equal priority interruptions keep the queue bounded",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {
+     "knock": 2,
+     "bell": 2,
+     "dog_bark": 2,
+     "name_called": 2,
+     "smoke_alarm": 2,
+     "siren": 2,
+     "alarm_clock": 2,
+     "bicycle_bell": 2
+    }
+   },
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "0",
+     "expect": {
+      "active": "0"
+     }
+    },
+    {
+     "at": 10,
+     "add": "bell",
+     "id": "1",
+     "expect": {
+      "active": "1"
+     }
+    },
+    {
+     "at": 20,
+     "add": "dog_bark",
+     "id": "2",
+     "expect": {
+      "active": "2"
+     }
+    },
+    {
+     "at": 30,
+     "add": "name_called",
+     "id": "3",
+     "expect": {
+      "active": "3"
+     }
+    },
+    {
+     "at": 40,
+     "add": "smoke_alarm",
+     "id": "4",
+     "expect": {
+      "active": "4"
+     }
+    },
+    {
+     "at": 50,
+     "add": "siren",
+     "id": "5",
+     "expect": {
+      "active": "5",
+      "queue": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4"
+      ]
+     }
+    },
+    {
+     "at": 60,
+     "add": "alarm_clock",
+     "id": "6",
+     "expect": {
+      "active": "6",
+      "queue": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "queue ties choose the first received cue consistently across languages",
+   "steps": [
+    {
+     "at": 0,
+     "add": "bell",
+     "id": "b",
+     "expect": {
+      "active": "b"
+     }
+    },
+    {
+     "at": 0,
+     "add": "alarm_clock",
+     "id": "c",
+     "expect": {
+      "active": "c"
+     }
+    },
+    {
+     "at": 1,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k",
+      "queue": [
+       "b",
+       "c"
+      ]
+     }
+    },
+    {
+     "at": 3001,
+     "expect": {
+      "active": "b",
+      "queue": [
+       "c"
+      ]
+     }
+    }
+   ]
   }
  ]
 }

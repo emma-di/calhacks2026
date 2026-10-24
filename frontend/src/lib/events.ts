@@ -44,9 +44,13 @@ export interface Health {
 }
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
+  display_labels: boolean | null;
   remaining_ms: number;
   direction: "front" | "right" | "behind" | "left" | null;
-  confirm: { direction: "front" | "right" | "behind" | "left" | null; remaining_ms: number } | null;
+  confirm: {
+    direction: "front" | "right" | "behind" | "left" | null;
+    remaining_ms: number;
+  } | null;
   state_sequence: number;
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
@@ -150,7 +154,11 @@ export const soundCatalog = [
   },
 ];
 // A simulated direction is labeled as a test sound and carries full confidence.
-export function makeMock(type: EventType, tier?: Tier, directionDegrees: number | null = null): SoundEvent {
+export function makeMock(
+  type: EventType,
+  tier?: Tier,
+  directionDegrees: number | null = null,
+): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
   return {
     schema_version: 1,
@@ -209,8 +217,12 @@ export function parseEvent(input: unknown): SoundEvent {
   const degrees = e.direction_degrees;
   const certainty = e.direction_confidence;
   const directed =
-    typeof degrees === "number" && Number.isFinite(degrees) && Math.abs(degrees) <= 180 &&
-    typeof certainty === "number" && certainty >= 0 && certainty <= 1;
+    typeof degrees === "number" &&
+    Number.isFinite(degrees) &&
+    Math.abs(degrees) <= 180 &&
+    typeof certainty === "number" &&
+    certainty >= 0 &&
+    certainty <= 1;
   return {
     ...e,
     direction_degrees: directed ? degrees : null,
@@ -242,24 +254,78 @@ export function parseSnapshot(input: unknown): ViewState {
       throw new Error("Invalid decision");
     return d as Decision;
   });
+  const nonnegative = (value: unknown, name: string, fallback = 0): number => {
+    if (value === undefined) return fallback;
+    if (typeof value !== "number" || !Number.isFinite(value) || value < 0)
+      throw new Error(`Invalid ${name}`);
+    return value;
+  };
+  const directions = ["front", "right", "behind", "left"];
+  let confirm: ViewState["confirm"] = null;
+  if (s.confirm !== undefined && s.confirm !== null) {
+    if (typeof s.confirm !== "object") throw new Error("Invalid confirmation");
+    const c = s.confirm as Record<string, unknown>;
+    if (c.direction !== null && !directions.includes(String(c.direction)))
+      throw new Error("Invalid confirmation direction");
+    confirm = {
+      direction: c.direction as ViewState["direction"],
+      remaining_ms: nonnegative(c.remaining_ms, "confirmation lifetime"),
+    };
+  }
+  const queue: ViewState["queue"] = [];
+  if (s.queue !== undefined) {
+    if (!Array.isArray(s.queue) || s.queue.length > 5)
+      throw new Error("Invalid queue");
+    for (const item of s.queue) {
+      if (
+        !item ||
+        typeof item.event_id !== "string" ||
+        !knownTypes.has(item.type) ||
+        !Number.isInteger(item.tier) ||
+        item.tier < 0 ||
+        item.tier > 4
+      )
+        throw new Error("Invalid queued cue");
+      queue.push(item);
+    }
+  }
+  let health: Health | null = null;
+  if (s.health !== undefined && s.health !== null) {
+    const h = s.health as Health;
+    if (
+      !h.display ||
+      typeof h.display.connected !== "boolean" ||
+      !h.capture ||
+      typeof h.capture.live !== "boolean"
+    )
+      throw new Error("Invalid receiver health");
+    health = h;
+  }
   const focus = ["everyday", "work", "dnd"].includes(String(s.focus_mode))
     ? (s.focus_mode as ViewState["focus_mode"])
     : "everyday";
   return {
+    display_labels:
+      s.display &&
+      typeof s.display === "object" &&
+      typeof (s.display as { show_labels?: unknown }).show_labels === "boolean"
+        ? (s.display as { show_labels: boolean }).show_labels
+        : null,
     active: s.active === null ? null : parseEvent(s.active),
     events: s.events.map(parseEvent),
     decisions,
-    remaining_ms: typeof s.remaining_ms === "number" ? s.remaining_ms : 0,
-    direction: ["front", "right", "behind", "left"].includes(String(s.direction))
+    remaining_ms: nonnegative(s.remaining_ms, "remaining lifetime"),
+    direction: ["front", "right", "behind", "left"].includes(
+      String(s.direction),
+    )
       ? (s.direction as ViewState["direction"])
       : null,
-    state_sequence: typeof s.state_sequence === "number" ? s.state_sequence : 0,
-    confirm:
-      s.confirm && typeof s.confirm === "object" ? (s.confirm as ViewState["confirm"]) : null,
+    state_sequence: nonnegative(s.state_sequence, "state sequence"),
+    confirm,
     focus_mode: focus,
     paused: s.paused === true,
-    queue: Array.isArray(s.queue) ? (s.queue as ViewState["queue"]) : [],
-    health: s.health && typeof s.health === "object" ? (s.health as Health) : null,
+    queue,
+    health,
     session_id: typeof s.session_id === "string" ? s.session_id : null,
   };
 }

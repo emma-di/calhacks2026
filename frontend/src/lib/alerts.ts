@@ -64,10 +64,23 @@ export const focusMinimum = policy.focus_minimum_tier as Record<
 // Each side covers 90 degrees and puts the cue on that edge. A two-microphone worker cannot tell
 // front from behind and should send null rather than guess.
 export type Direction = "front" | "right" | "behind" | "left";
-export const directionDegrees: Record<Direction, number> = { front: 0, right: 90, behind: 180, left: -90 };
+export const directionDegrees: Record<Direction, number> = {
+  front: 0,
+  right: 90,
+  behind: 180,
+  left: -90,
+};
 
-export function directionBucket(degrees: number | null, confidence: number | null): Direction | null {
-  if (degrees === null || confidence === null || confidence < policy.direction_min_confidence) return null;
+export function directionBucket(
+  degrees: number | null,
+  confidence: number | null,
+): Direction | null {
+  if (
+    degrees === null ||
+    confidence === null ||
+    confidence < policy.direction_min_confidence
+  )
+    return null;
   const d = ((((degrees + 180) % 360) + 360) % 360) - 180;
   if (d >= -45 && d <= 45) return "front";
   if (d > 45 && d <= 135) return "right";
@@ -92,7 +105,11 @@ export class AlertEngine {
   queue: Queued[] = [];
   acks = new Map<EventType, number>();
   gestures: number[] = [];
-  confirm: { until: number; direction: Direction | null; event_id: string } | null = null;
+  confirm: {
+    until: number;
+    direction: Direction | null;
+    event_id: string;
+  } | null = null;
   seen: string[] = [];
   events: LoggedEvent[] = [];
   decisions: AlertDecision[] = [];
@@ -123,7 +140,10 @@ export class AlertEngine {
       started: now,
       expires: now + lifetime(tier),
       repeats: 0,
-      direction: directionBucket(event.direction_degrees, event.direction_confidence),
+      direction: directionBucket(
+        event.direction_degrees,
+        event.direction_confidence,
+      ),
     };
     this.sequence += 1;
   }
@@ -140,6 +160,15 @@ export class AlertEngine {
       return false;
     });
   }
+  private boundQueue(now: number) {
+    while (this.queue.length > policy.queue_limit) {
+      const dropped = this.best(this.queue, (b, a) =>
+        b.tier !== a.tier ? b.tier < a.tier : b.received < a.received,
+      );
+      this.queue = this.queue.filter((item) => item !== dropped);
+      this.decide(dropped.event, dropped.tier, "dropped_queue_full", now);
+    }
+  }
   private blocked(tier: Tier) {
     return tier < focusMinimum[this.focusMode];
   }
@@ -148,11 +177,19 @@ export class AlertEngine {
   }
 
   // The wearer dealt with the cue: acknowledge its sound, confirm with a check, then resume.
-  private resolve(now: number, reason: string, extra: Partial<AlertDecision> = {}): AlertDecision {
+  private resolve(
+    now: number,
+    reason: string,
+    extra: Partial<AlertDecision> = {},
+  ): AlertDecision {
     const active = this.active!;
     this.acks.set(active.event.type, now + policy.acknowledge_hold_ms);
     const decision = this.decide(active.event, active.tier, reason, now, extra);
-    this.confirm = { until: now + policy.confirm_ms, direction: active.direction, event_id: active.event.event_id };
+    this.confirm = {
+      until: now + policy.confirm_ms,
+      direction: active.direction,
+      event_id: active.event.event_id,
+    };
     this.gestures = [];
     this.clear();
     this.tick(now);
@@ -162,10 +199,15 @@ export class AlertEngine {
   // A thumbs-up (camera) or snap dismisses the showing cue; with nothing showing it does nothing.
   private gesture(event: SoundEvent, now: number): AlertDecision {
     const extra = { gesture: event.type };
-    if (!this.active) return this.decide(event, 0, "gesture_ignored", now, extra);
+    if (!this.active)
+      return this.decide(event, 0, "gesture_ignored", now, extra);
     const rule = policy.gesture_to_dismiss;
-    this.gestures = [...this.gestures.filter((t) => now - t <= rule.window_ms), now];
-    if (this.gestures.length < rule.count) return this.decide(event, 0, "gesture_waiting", now, extra);
+    this.gestures = [
+      ...this.gestures.filter((t) => now - t <= rule.window_ms),
+      now,
+    ];
+    if (this.gestures.length < rule.count)
+      return this.decide(event, 0, "gesture_waiting", now, extra);
     return this.resolve(now, "dismissed_gesture", extra);
   }
 
@@ -181,7 +223,7 @@ export class AlertEngine {
     this.freshQueue(now);
     if (!this.active && this.queue.length && !this.confirm) {
       const best = this.best(this.queue, (b, a) =>
-        b.tier !== a.tier ? b.tier > a.tier : b.received >= a.received,
+        b.tier !== a.tier ? b.tier > a.tier : b.received > a.received,
       );
       this.queue = this.queue.filter((item) => item !== best);
       this.show(best.event, best.tier, now);
@@ -197,7 +239,11 @@ export class AlertEngine {
     if (GESTURES.has(event.type)) return this.gesture(event, now);
     const producer = event.priority_tier;
     const tier = effectiveTier(event.type, producer, this.prefs);
-    const logged: LoggedEvent = { ...event, priority_tier: tier, producer_tier: producer };
+    const logged: LoggedEvent = {
+      ...event,
+      priority_tier: tier,
+      producer_tier: producer,
+    };
     this.events = [...this.events, logged].slice(-50);
     const kind = event.type;
     if (this.paused) return this.decide(logged, tier, "paused", now);
@@ -213,7 +259,10 @@ export class AlertEngine {
       active.repeats += 1;
       if (active.tier === 4) {
         const cap = active.started + policy.urgent_ongoing_cap_ms;
-        const extended = Math.min(cap, Math.max(active.expires, now + lifetime(4)));
+        const extended = Math.min(
+          cap,
+          Math.max(active.expires, now + lifetime(4)),
+        );
         if (extended > active.expires) {
           active.expires = extended;
           this.sequence += 1;
@@ -226,8 +275,17 @@ export class AlertEngine {
     if (!active || tier >= active.tier) {
       const reason = active ? "interrupted" : "displayed";
       this.queue = this.queue.filter((item) => item.event.type !== kind);
-      if (active && (active.tier === 2 || active.tier === 3) && active.event.type !== kind)
-        this.queue.push({ event: active.event, tier: active.tier, received: active.started });
+      if (
+        active &&
+        (active.tier === 2 || active.tier === 3) &&
+        active.event.type !== kind
+      )
+        this.queue.push({
+          event: active.event,
+          tier: active.tier,
+          received: active.started,
+        });
+      this.boundQueue(now);
       this.show(logged, tier, now);
       return this.decide(logged, tier, reason, now, {
         active_type: active ? active.event.type : null,
@@ -237,13 +295,7 @@ export class AlertEngine {
       return this.decide(logged, tier, "suppressed_lower_priority", now);
     this.queue = this.queue.filter((item) => item.event.type !== kind);
     this.queue.push({ event: logged, tier, received: now });
-    if (this.queue.length > policy.queue_limit) {
-      const dropped = this.best(this.queue, (b, a) =>
-        b.tier !== a.tier ? b.tier < a.tier : b.received < a.received,
-      );
-      this.queue = this.queue.filter((item) => item !== dropped);
-      this.decide(dropped.event, dropped.tier, "dropped_queue_full", now);
-    }
+    this.boundQueue(now);
     return this.decide(logged, tier, "queued", now);
   }
 
@@ -264,12 +316,19 @@ export class AlertEngine {
     return true;
   }
 
-  setControls(now: number, changes: { focus_mode?: FocusMode; paused?: boolean }) {
+  setControls(
+    now: number,
+    changes: { focus_mode?: FocusMode; paused?: boolean },
+  ) {
     this.tick(now);
     if (changes.focus_mode !== undefined) this.focusMode = changes.focus_mode;
     if (changes.paused !== undefined) this.paused = changes.paused;
     if (this.paused) {
       this.queue = [];
+      if (this.confirm) {
+        this.confirm = null;
+        this.sequence += 1;
+      }
       this.clear();
       return;
     }
@@ -285,6 +344,8 @@ export class AlertEngine {
     this.tick(now);
     this.queue = [];
     this.acks.clear();
+    this.confirm = null;
+    this.gestures = [];
     this.clear();
   }
 
@@ -295,10 +356,15 @@ export class AlertEngine {
       events: this.events,
       decisions: this.decisions,
       state_sequence: this.sequence,
-      remaining_ms: this.active ? Math.max(0, Math.round(this.active.expires - now)) : 0,
+      remaining_ms: this.active
+        ? Math.max(0, Math.round(this.active.expires - now))
+        : 0,
       direction: this.active?.direction ?? null,
       confirm: this.confirm
-        ? { direction: this.confirm.direction, remaining_ms: Math.round(this.confirm.until - now) }
+        ? {
+            direction: this.confirm.direction,
+            remaining_ms: Math.round(this.confirm.until - now),
+          }
         : null,
       focus_mode: this.focusMode,
       paused: this.paused,

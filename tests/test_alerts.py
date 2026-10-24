@@ -81,6 +81,13 @@ class SharedScenarioTests(unittest.TestCase):
 
 
 class PolicyTests(unittest.TestCase):
+    def test_invalid_control_request_is_atomic(self):
+        engine = AlertEngine()
+        with self.assertRaises(ValueError):
+            engine.set_controls(0, focus_mode='dnd', paused='not-a-boolean')
+        self.assertEqual(engine.focus_mode, 'everyday')
+        self.assertFalse(engine.paused)
+
     def test_presets_match_mana_onboarding_defaults(self):
         source = (Path(__file__).resolve().parent.parent / 'frontend' / 'mana' / 'AwareOnboarding.jsx').read_text()
         block = source[source.index('export const AWARE_PRESET_DEFAULTS = {'):]
@@ -188,6 +195,30 @@ class ReceiverHttpTests(unittest.TestCase):
         self.assertEqual(caught.exception.code, 503)
         self.assertEqual(self.call('/profile'), original)
         self.assertEqual(self.call('/events', make_event('knock', .9, 'mock'))['priority_tier'], 2)
+
+    def test_receiver_instances_are_isolated(self):
+        second = self.module.create_server(port=0, profile_path=Path(self.tmp.name) / 'second.json')
+        other_thread = threading.Thread(target=second.serve_forever, daemon=True)
+        other_thread.start()
+        try:
+            self.call('/events', make_event('knock', .9, 'mock'))
+            self.assertEqual(self.call('/state')['active']['type'], 'knock')
+            with urlopen(f'http://127.0.0.1:{second.server_address[1]}/state') as response:
+                self.assertIsNone(json.loads(response.read())['active'])
+        finally:
+            second.shutdown()
+            second.server_close()
+            second.alert_state.decision_log.close()
+            self.module.state = self.server.alert_state
+
+    def test_nonfinite_look_and_invalid_controls_are_rejected_without_changes(self):
+        for heading in [float('nan'), float('inf'), -float('inf')]:
+            with self.assertRaises(HTTPError) as caught:
+                self.call('/look', {'heading_degrees': heading})
+            self.assertEqual(caught.exception.code, 400)
+        with self.assertRaises(HTTPError):
+            self.call('/controls', {'focus_mode': 'dnd', 'paused': 'bad'})
+        self.assertEqual(self.call('/state')['focus_mode'], 'everyday')
 
     def test_controls_dismiss_and_errors(self):
         alarm = make_event('smoke_alarm', .9, 'mock')
