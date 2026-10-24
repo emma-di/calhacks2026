@@ -23,6 +23,7 @@ const emptyView = (): ViewState => ({
   decisions: [],
   remaining_ms: 0,
   direction: null,
+  confirm: null,
   state_sequence: 0,
   focus_mode: "everyday",
   paused: false,
@@ -183,6 +184,15 @@ export function useSession(
     }
   }, [source, view.active]);
 
+  // Stands in for the recognizer hearing a finger snap; no microphone is involved.
+  const snap = useCallback(async () => {
+    try {
+      await send("finger_snap");
+    } catch {
+      setError("The snap did not reach the receiver.");
+    }
+  }, [send]);
+
   const look = useCallback(
     async (direction: Direction) => {
       if (source === "browser") {
@@ -215,5 +225,5 @@ export function useSession(
 
   useEffect(() => stopSequence, [source, stopSequence]);
 
-  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, setControls };
+  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, snap, setControls };
 }

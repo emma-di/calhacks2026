@@ -11,6 +11,7 @@ import uuid
 
 POLICY = json.loads(Path(__file__).with_name('alert-policy.json').read_text())
 FOCUS_MODES = tuple(POLICY['focus_minimum_tier'])
+GESTURES = frozenset({'finger_snap'})  # control input from the wearer, never an alert
 PRESETS = tuple(POLICY['presets'])
 DEFAULT_PROFILE = dict(schema_version=1, profile_id='local', revision=0, display_name='',
                        name_detection=dict(enabled=False, primary_name='', aliases=[], language='en'),
@@ -94,6 +95,8 @@ class AlertEngine:
         self.active = None  # dict(event, tier, started, expires, repeats)
         self.queue = []
         self.acks = {}
+        self.snaps = []           # recent snap times while a cue is showing
+        self.confirm = None       # brief check mark after the wearer resolves a cue
         self.seen = deque(maxlen=256)
         self.events = deque(maxlen=50)
         self.decisions = deque(maxlen=50)
@@ -134,13 +137,37 @@ class AlertEngine:
         return tier < POLICY['focus_minimum_tier'][self.focus_mode]
 
     # -- public API ------------------------------------------------------------------
+    def _resolve(self, now, reason, **extra):
+        """The wearer dealt with the cue: acknowledge its sound, confirm with a check, then resume."""
+        shown = self.active['event']
+        self.acks[shown['type']] = now + POLICY['acknowledge_hold_ms']
+        decision = self._decide(shown, self.active['tier'], reason, now, **extra)
+        self.confirm = dict(until=now + POLICY['confirm_ms'], direction=self.active['direction'],
+                            event_id=shown['event_id'])
+        self.snaps = []
+        self._clear()
+        self.tick(now)
+        return decision
+
+    def _snap(self, event, now):
+        if self.active is None:
+            return self._decide(event, 0, 'snap_ignored', now)
+        window = POLICY['snap_to_dismiss']['window_ms']
+        self.snaps = [t for t in self.snaps if now - t <= window] + [now]
+        if len(self.snaps) < POLICY['snap_to_dismiss']['snaps']:
+            return self._decide(event, 0, 'snap_waiting', now)
+        return self._resolve(now, 'dismissed_snap')
+
     def tick(self, now):
         """Expire the active cue and resume the best fresh queued cue. Call before reading."""
         if self.active and now >= self.active['expires']:
             self._decide(self.active['event'], self.active['tier'], 'expired', now)
             self._clear()
+        if self.confirm and now >= self.confirm['until']:
+            self.confirm = None
+            self.sequence += 1
         self._fresh_queue(now)
-        if self.active is None and self.queue:
+        if self.active is None and self.queue and self.confirm is None:
             best = max(self.queue, key=lambda item: (item['tier'], item['received']))
             self.queue.remove(best)
             self._show(best['event'], best['tier'], now)
@@ -151,6 +178,8 @@ class AlertEngine:
         if event['event_id'] in self.seen:
             return self._decide(event, event['priority_tier'], 'duplicate', now)
         self.seen.append(event['event_id'])
+        if event['type'] in GESTURES:
+            return self._snap(event, now)
         producer = event['priority_tier']
         tier = effective_tier(event['type'], producer, self.profile)
         logged = dict(event, priority_tier=tier, producer_tier=producer)
@@ -204,10 +233,7 @@ class AlertEngine:
         shown = self.active['event']
         if event_id is not None and event_id != shown['event_id']:
             return False
-        self.acks[shown['type']] = now + POLICY['acknowledge_hold_ms']
-        self._decide(shown, self.active['tier'], 'dismissed', now)
-        self._clear()
-        self.tick(now)
+        self._resolve(now, 'dismissed')
         return True
 
     def look(self, now, direction):
@@ -221,11 +247,7 @@ class AlertEngine:
         self.tick(now)
         if self.active is None or self.active['direction'] != direction:
             return False
-        shown = self.active['event']
-        self.acks[shown['type']] = now + POLICY['acknowledge_hold_ms']
-        self._decide(shown, self.active['tier'], 'resolved_looked', now, direction=direction)
-        self._clear()
-        self.tick(now)
+        self._resolve(now, 'resolved_looked', direction=direction)
         return True
 
     def set_controls(self, now, focus_mode=None, paused=None):
@@ -260,6 +282,11 @@ class AlertEngine:
         """Display-consumer envelope parsed by hardware.display.Presentation."""
         self.tick(now)
         active = self.active
+        if active is None and self.confirm:
+            return dict(schema_version=1, session_id=self.session_id, state_sequence=self.sequence,
+                        event_id='resolved-' + self.confirm['event_id'], label='Done', icon_id='check',
+                        effective_tier=1, remaining_ms=max(1, round(self.confirm['until'] - now)),
+                        direction=self.confirm['direction'], show_labels=False)
         if active is None:
             return dict(schema_version=1, session_id=self.session_id, state_sequence=self.sequence,
                         event_id=None, label='', icon_id=None, effective_tier=0, remaining_ms=0,
@@ -279,6 +306,8 @@ class AlertEngine:
             events=list(self.events), decisions=list(self.decisions),
             session_id=self.session_id, state_sequence=self.sequence,
             remaining_ms=self.remaining_ms(now), direction=self.active['direction'] if self.active else None,
+            confirm=dict(direction=self.confirm['direction'], remaining_ms=round(self.confirm['until'] - now))
+            if self.confirm else None,
             focus_mode=self.focus_mode, paused=self.paused,
             queue=[dict(event_id=i['event']['event_id'], type=i['event']['type'], tier=i['tier'])
                    for i in self.queue],

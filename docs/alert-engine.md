@@ -27,7 +27,9 @@ the Mana onboarding defaults.
 | Lifetimes | Ambient 2 s, Notify 3 s, Attention 5 s, Urgent 30 s (unchanged from before). |
 
 | Direction | Optional `direction_degrees` (0 front, +90 right, -90 left, 180 behind) with `direction_confidence`. At confidence ≥ 0.6 the cue moves to that edge of the display (each side covers 90°); otherwise it stays centred. A two-microphone worker cannot tell front from behind and should send null rather than guess. |
-| Resolution | A cue ends by **expiring** (logged), **Dismiss**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
+| Snap to dismiss | A `finger_snap` event (recognizer rule on the models' "Finger snapping" class) dismisses the showing cue; with nothing showing it is ignored. One snap by default; `snap_to_dismiss.snaps: 2` requires two within 3 s (about a second apart, because windows advance once per second). The threshold is provisional: there are no snap recordings in the benchmark, so test it in the demo room. |
+| Confirmation | Whenever the wearer resolves a cue (snap, Dismiss, Look) the glasses and lens show a check mark for 0.6 s where the cue was; a waiting cue resumes after it. Expiry shows nothing. |
+| Resolution | A cue ends by **expiring** (logged), **Dismiss**, a **snap**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
 
 Every decision has a reason code and a plain-language sentence (`frontend/src/lib/explain.ts`) shown
 on the Live screen and in the Event log.

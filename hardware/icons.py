@@ -177,8 +177,15 @@ def conversation():
     return c
 
 
+def check():
+    c = Canvas()
+    c.ring(16, 16, 13, 13, 2)                           # a calm done mark
+    c.polygon([(8, 16), (11, 13), (14, 17), (22, 9), (25, 12), (14, 23)])
+    return c
+
+
 ICONS = dict(dog=dog, knock=knock, bell=bell, name=name, smoke=smoke, siren=siren, clock=clock,
-             chat=conversation)
+             chat=conversation, check=check)
 
 
 def build():

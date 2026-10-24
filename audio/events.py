@@ -14,6 +14,8 @@ TARGETS = {
     'smoke_alarm': ('Smoke detector, smoke alarm', 'Smoke alarm', 4, 0.40),
     'alarm_clock': ('Alarm clock', 'Alarm clock', 2, 0.40),
     'bell': ('Bell', 'Bell / chime', 2, 0.30),
+    # A gesture, not an alert: never displayed; the alert engine treats it as snap-to-dismiss.
+    'finger_snap': ('Finger snapping', 'Finger snap', 0, 0.30),
 }
 # Every type the receiver accepts. name_called comes from the planned speech worker, not the classifier.
 EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items()}
@@ -114,8 +116,9 @@ class Detector:
                 continue
             if score<rule['threshold']:
                 decision['reason']='below_threshold'
-            elif now-self.last.get(kind,-math.inf)<self.cooldown:
-                decision.update(reason='cooldown',cooldown_remaining_seconds=round(self.cooldown-(now-self.last[kind]),3))
+            elif now-self.last.get(kind,-math.inf)<rule.get('cooldown_seconds',self.cooldown):
+                cooldown=rule.get('cooldown_seconds',self.cooldown)
+                decision.update(reason='cooldown',cooldown_remaining_seconds=round(cooldown-(now-self.last[kind]),3))
             else:
                 event=make_event(kind, score, source, timestamp_ms)
                 events.append(event)

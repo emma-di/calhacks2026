@@ -9,7 +9,7 @@ import Onboarding, {
   type SetupChange,
 } from "../mana/AwareOnboarding.jsx";
 import { effectiveTier, type Direction, type FocusMode, type Preferences } from "./lib/alerts";
-import { sounds, tierNames, type SoundEvent } from "./lib/events";
+import { soundCatalog, sounds, tierNames, type SoundEvent } from "./lib/events";
 import { explain, outcome } from "./lib/explain";
 import { useSession, type Source, type SyncStatus } from "./lib/session";
 
@@ -106,6 +106,13 @@ export default function App() {
   }) as Preferences;
   const active = state.active;
   const direction = state.direction;
+  // After the wearer resolves a cue, the lens and panel show a brief check where the cue was.
+  const lensEvent: SoundEvent | null =
+    active ??
+    (state.confirm
+      ? ({ ...soundCatalog[0], event_id: "resolved", label: "Done", type: "resolved", priority_tier: 1 } as unknown as SoundEvent)
+      : null);
+  const lensDirection = active ? direction : (state.confirm?.direction ?? null);
   const latest = state.decisions.at(-1);
   const focus = focusOptions.find((f) => f.key === state.focus_mode)!;
   const sourceSummary =
@@ -137,7 +144,7 @@ export default function App() {
 
   const oledInset = (
     <figure className="oled-inset">
-      <Oled event={active} labels={labels} direction={direction} />
+      <Oled event={lensEvent} labels={labels} direction={lensDirection} />
       <figcaption>{glasses ? "On the glasses now" : "The panel · 128×64"}</figcaption>
     </figure>
   );
@@ -145,7 +152,7 @@ export default function App() {
   if (audience) {
     return (
       <div className="night audience">
-        <Stage event={active} labels={labels} direction={direction} caption={stageCaption} motion={appearance.motion} large>
+        <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} large>
           {oledInset}
         </Stage>
         <div className="audience-bar">
@@ -215,7 +222,7 @@ export default function App() {
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
           <div className="lens-wrap">
-            <Stage event={active} labels={labels} direction={direction} caption={stageCaption} motion={appearance.motion} />
+            <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} />
             <div className="lifeline" aria-hidden="true">
               <div
                 className={`lifeline-fill ${active?.priority_tier === 4 ? "is-urgent" : ""}`}
@@ -228,7 +235,7 @@ export default function App() {
               <p className="narration">{narration}</p>
               <p className="aside">
               {active
-                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction} or dismiss to resolve` : "dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
+                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction}, snap or dismiss to resolve` : "snap or dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
                 : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
               </p>
             </div>
@@ -301,6 +308,14 @@ export default function App() {
                   Look {direction}
                 </button>
               ) : null}
+              <button
+                className="key"
+                onClick={() => void session.snap()}
+                disabled={offline}
+                title="Stands in for the glasses hearing a finger snap"
+              >
+                <SoundIcon type="finger_snap" size={16} /> Snap
+              </button>
               <button className="key" onClick={session.dismiss} disabled={!active}>
                 Dismiss
               </button>
@@ -351,7 +366,7 @@ export default function App() {
                       <td>
                         <span className="log-sound">
                           <SoundIcon type={d.type as SoundEvent["type"]} size={16} />
-                          {event?.label ?? d.type}
+                          {event?.label ?? soundCatalog.find((c) => c.type === d.type)?.label ?? d.type}
                         </span>
                       </td>
                       <td className="muted">{event ? sourceLabel(event.source) : "—"}</td>

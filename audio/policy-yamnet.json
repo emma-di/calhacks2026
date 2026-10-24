@@ -47,6 +47,14 @@
       },
       "threshold": 0.075,
       "status": "tuned_on_source_split"
+    },
+    "finger_snap": {
+      "labels": {
+        "Finger snapping": 1
+      },
+      "threshold": 0.3,
+      "cooldown_seconds": 0.9,
+      "status": "provisional_untuned: no snap recordings in the benchmark; test in the demo room before relying on it"
     }
   }
 }

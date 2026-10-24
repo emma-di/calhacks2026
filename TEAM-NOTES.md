@@ -203,6 +203,14 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
   four sides, confidence ≥ 0.6; a two-mic worker should send null rather than guess front vs behind. Cues resolve by expiry, Dismiss, or `POST /look`
   (no head sensor yet; the UI's Look button simulates it). See docs/alert-engine.md.
 
+## Snap to dismiss — October 24
+
+- `finger_snap` added to `TARGETS` (tier 0, never displayed) with a provisional rule in both model policies
+  (`Finger snapping`, threshold 0.3, 0.9 s cooldown via new per-rule `cooldown_seconds`). John/Leo:
+  please measure it in the room; nothing in the benchmark covers snaps. Status: implemented, untuned.
+- One snap dismisses only while a cue is showing (double-snap is a policy setting; 1 s hops make quick
+  double snaps merge). Resolving shows a 0.6 s check mark at the cue's position on glasses and lens.
+
 ## Add a note
 
 ```text

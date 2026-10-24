@@ -37,6 +37,12 @@ export function explain(d: Explainable): string {
       return `${sound} cleared on its own.`;
     case "resolved_looked":
       return `You looked ${d.direction ?? "toward it"}, so ${sound} is resolved.`;
+    case "snap_ignored":
+      return "Snap heard, but nothing is showing.";
+    case "snap_waiting":
+      return "One snap heard. Snap again to dismiss.";
+    case "dismissed_snap":
+      return `Snapped. ${sound} dismissed.`;
     case "dismissed":
       return `${sound} dismissed. Repeats stay quiet for 15 seconds.`;
     case "duplicate":
@@ -69,6 +75,9 @@ export function outcome(reason: string): string {
       merged_repeat: "Repeat, merged",
       acknowledged_repeat: "Repeat, already dismissed",
       dismissed: "Dismissed",
+      dismissed_snap: "Dismissed, snap",
+      snap_ignored: "Snap, nothing showing",
+      snap_waiting: "Snap, waiting for second",
       expired: "Cleared",
       resolved_looked: "Resolved, looked",
       duplicate: "Duplicate",

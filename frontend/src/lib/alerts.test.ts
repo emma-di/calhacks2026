@@ -53,6 +53,7 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       if ("sequence" in expect) assert.equal(snap.state_sequence, expect.sequence, label);
       if ("resolved" in expect) assert.equal(result.resolved, expect.resolved, label);
       if ("direction" in expect) assert.equal(snap.direction, expect.direction, label);
+      if ("confirm" in expect) assert.equal(snap.confirm !== null, expect.confirm, label);
       if ("last_reason" in expect) assert.equal(snap.decisions.at(-1)?.reason, expect.last_reason, label);
       if ("events" in expect) assert.equal(snap.events.length, expect.events, label);
     });
@@ -68,7 +69,7 @@ test("every engine decision has a plain-language explanation", () => {
     "displayed", "interrupted", "queued", "resumed_from_queue", "expired_in_queue",
     "dropped_queue_full", "merged_repeat", "acknowledged_repeat", "dismissed", "duplicate",
     "paused", "ignored_tier_zero", "suppressed_lower_priority", "held_work_mode", "held_dnd_mode",
-    "expired", "resolved_looked",
+    "expired", "resolved_looked", "snap_ignored", "snap_waiting", "dismissed_snap",
   ];
   for (const reason of reasons) {
     const text = explain({ event_id: "a", type: "knock", priority_tier: 2, reason, active_type: "smoke_alarm" });

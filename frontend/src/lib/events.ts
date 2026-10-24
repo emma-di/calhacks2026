@@ -8,7 +8,8 @@ export type EventType =
   | "conversation"
   | "siren"
   | "alarm_clock"
-  | "bicycle_bell";
+  | "bicycle_bell"
+  | "finger_snap";
 export interface SoundEvent {
   schema_version: number;
   event_id: string;
@@ -44,6 +45,7 @@ export interface Health {
 export interface ViewState extends Snapshot {
   remaining_ms: number;
   direction: "front" | "right" | "behind" | "left" | null;
+  confirm: { direction: "front" | "right" | "behind" | "left" | null; remaining_ms: number } | null;
   state_sequence: number;
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
@@ -131,6 +133,13 @@ export const soundCatalog = [
     tier: 3 as Tier,
     receiver: true,
   },
+  {
+    type: "finger_snap" as EventType,
+    label: "Finger snap",
+    detail: "Dismisses the cue that is showing",
+    tier: 0 as Tier,
+    receiver: true,
+  },
 ];
 // A simulated direction is labeled as a test sound and carries full confidence.
 export function makeMock(type: EventType, tier?: Tier, directionDegrees: number | null = null): SoundEvent {
@@ -159,6 +168,7 @@ const knownTypes = new Set([
   "siren",
   "alarm_clock",
   "bicycle_bell",
+  "finger_snap",
 ]);
 export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");
@@ -235,6 +245,8 @@ export function parseSnapshot(input: unknown): ViewState {
       ? (s.direction as ViewState["direction"])
       : null,
     state_sequence: typeof s.state_sequence === "number" ? s.state_sequence : 0,
+    confirm:
+      s.confirm && typeof s.confirm === "object" ? (s.confirm as ViewState["confirm"]) : null,
     focus_mode: focus,
     paused: s.paused === true,
     queue: Array.isArray(s.queue) ? (s.queue as ViewState["queue"]) : [],

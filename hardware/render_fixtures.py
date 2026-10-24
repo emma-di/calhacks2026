@@ -8,7 +8,7 @@ from hardware.display import DIRECTIONS, ICON_IDS, Presentation, render
 
 PATH = Path(__file__).with_name('render-fixtures.json')
 LABELS = {'knock': 'Door knock', 'bell': 'Bell / chime', 'dog': 'Dog barking', 'name': 'Your name',
-          'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock', 'chat': 'Conversation'}
+          'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock', 'chat': 'Conversation', 'check': 'Done'}
 
 
 def cases():

@@ -42,6 +42,7 @@ export interface EngineSnapshot {
   state_sequence: number;
   remaining_ms: number;
   direction: Direction | null;
+  confirm: { direction: Direction | null; remaining_ms: number } | null;
   focus_mode: FocusMode;
   paused: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
@@ -53,6 +54,7 @@ export const presets = policy.presets as Record<
   Preset,
   Partial<Record<EventType, Tier>>
 >;
+export const GESTURES = new Set<string>(["finger_snap"]); // wearer input, never an alert
 export const focusMinimum = policy.focus_minimum_tier as Record<
   FocusMode,
   Tier
@@ -88,6 +90,8 @@ export class AlertEngine {
   active: Active | null = null;
   queue: Queued[] = [];
   acks = new Map<EventType, number>();
+  snaps: number[] = [];
+  confirm: { until: number; direction: Direction | null; event_id: string } | null = null;
   seen: string[] = [];
   events: LoggedEvent[] = [];
   decisions: AlertDecision[] = [];
@@ -142,13 +146,37 @@ export class AlertEngine {
     return items.reduce((a, b) => (pick(b, a) ? b : a));
   }
 
+  // The wearer dealt with the cue: acknowledge its sound, confirm with a check, then resume.
+  private resolve(now: number, reason: string, extra: Partial<AlertDecision> = {}): AlertDecision {
+    const active = this.active!;
+    this.acks.set(active.event.type, now + policy.acknowledge_hold_ms);
+    const decision = this.decide(active.event, active.tier, reason, now, extra);
+    this.confirm = { until: now + policy.confirm_ms, direction: active.direction, event_id: active.event.event_id };
+    this.snaps = [];
+    this.clear();
+    this.tick(now);
+    return decision;
+  }
+
+  private snap(event: SoundEvent, now: number): AlertDecision {
+    if (!this.active) return this.decide(event, 0, "snap_ignored", now);
+    const window = policy.snap_to_dismiss.window_ms;
+    this.snaps = [...this.snaps.filter((t) => now - t <= window), now];
+    if (this.snaps.length < policy.snap_to_dismiss.snaps) return this.decide(event, 0, "snap_waiting", now);
+    return this.resolve(now, "dismissed_snap");
+  }
+
   tick(now: number) {
     if (this.active && now >= this.active.expires) {
       this.decide(this.active.event, this.active.tier, "expired", now);
       this.clear();
     }
+    if (this.confirm && now >= this.confirm.until) {
+      this.confirm = null;
+      this.sequence += 1;
+    }
     this.freshQueue(now);
-    if (!this.active && this.queue.length) {
+    if (!this.active && this.queue.length && !this.confirm) {
       const best = this.best(this.queue, (b, a) =>
         b.tier !== a.tier ? b.tier > a.tier : b.received >= a.received,
       );
@@ -163,6 +191,7 @@ export class AlertEngine {
     if (this.seen.includes(event.event_id))
       return this.decide(event, event.priority_tier, "duplicate", now);
     this.seen = [...this.seen, event.event_id].slice(-256);
+    if (GESTURES.has(event.type)) return this.snap(event, now);
     const producer = event.priority_tier;
     const tier = effectiveTier(event.type, producer, this.prefs);
     const logged: LoggedEvent = { ...event, priority_tier: tier, producer_tier: producer };
@@ -220,10 +249,7 @@ export class AlertEngine {
     if (!this.active) return false;
     const shown = this.active.event;
     if (eventId !== undefined && eventId !== shown.event_id) return false;
-    this.acks.set(shown.type, now + policy.acknowledge_hold_ms);
-    this.decide(shown, this.active.tier, "dismissed", now);
-    this.clear();
-    this.tick(now);
+    this.resolve(now, "dismissed");
     return true;
   }
 
@@ -231,11 +257,7 @@ export class AlertEngine {
   look(now: number, direction: Direction): boolean {
     this.tick(now);
     if (!this.active || this.active.direction !== direction) return false;
-    const shown = this.active.event;
-    this.acks.set(shown.type, now + policy.acknowledge_hold_ms);
-    this.decide(shown, this.active.tier, "resolved_looked", now, { direction });
-    this.clear();
-    this.tick(now);
+    this.resolve(now, "resolved_looked", { direction });
     return true;
   }
 
@@ -272,6 +294,9 @@ export class AlertEngine {
       state_sequence: this.sequence,
       remaining_ms: this.active ? Math.max(0, Math.round(this.active.expires - now)) : 0,
       direction: this.active?.direction ?? null,
+      confirm: this.confirm
+        ? { direction: this.confirm.direction, remaining_ms: Math.round(this.confirm.until - now) }
+        : null,
       focus_mode: this.focusMode,
       paused: this.paused,
       queue: this.queue.map((item) => ({

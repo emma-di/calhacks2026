@@ -1,5 +1,5 @@
 {
- "note": "Shared timeline fixtures. tests/test_alerts.py and frontend/src/lib/alerts.test.ts both replay these against their engine. Times are milliseconds. 'expect.active' is the id of the shown event or null. 'direction' on an add step is [degrees, confidence]; 'look' resolves toward a side; 'last_reason' checks the newest decision.",
+ "note": "Shared timeline fixtures. tests/test_alerts.py and frontend/src/lib/alerts.test.ts both replay these against their engine. Times are milliseconds. 'expect.active' is the id of the shown event or null. 'direction' on an add step is [degrees, confidence]; 'look' resolves toward a side; 'last_reason' checks the newest decision. 'confirm' checks whether the resolve check mark is showing.",
  "scenarios": [
   {
    "name": "urgent interrupts, lower priority recorded, knock resumes only while fresh",
@@ -40,12 +40,21 @@
      "dismiss": "s1",
      "expect": {
       "dismissed": true,
-      "active": "k1",
-      "reason": "resumed_from_queue"
+      "active": null,
+      "confirm": true
      }
     },
     {
-     "at": 5000,
+     "at": 2600,
+     "tick": true,
+     "expect": {
+      "active": "k1",
+      "confirm": false,
+      "last_reason": "resumed_from_queue"
+     }
+    },
+    {
+     "at": 5600,
      "tick": true,
      "expect": {
       "active": null
@@ -569,6 +578,60 @@
      "expect": {
       "active": "r1",
       "direction": "behind"
+     }
+    }
+   ]
+  },
+  {
+   "name": "a snap dismisses only while a cue is showing, then a check mark confirms it",
+   "steps": [
+    {
+     "at": 0,
+     "add": "finger_snap",
+     "id": "f1",
+     "expect": {
+      "reason": "snap_ignored",
+      "active": null,
+      "events": 0
+     }
+    },
+    {
+     "at": 100,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "active": "k1"
+     }
+    },
+    {
+     "at": 1100,
+     "add": "finger_snap",
+     "id": "f2",
+     "expect": {
+      "reason": "dismissed_snap",
+      "active": null,
+      "confirm": true,
+      "events": 1
+     }
+    },
+    {
+     "at": 1500,
+     "add": "knock",
+     "id": "k2",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    },
+    {
+     "at": 1700,
+     "tick": true,
+     "expect": {
+      "confirm": false
      }
     }
    ]

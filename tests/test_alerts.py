@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
-from audio.alerts import AlertEngine, DEFAULT_PROFILE, POLICY, validate_profile
+from audio.alerts import GESTURES, AlertEngine, DEFAULT_PROFILE, POLICY, validate_profile
 from audio.events import EVENT_TYPES, make_event
 from hardware.display import DisplayState, Presentation
 
@@ -71,6 +71,8 @@ class SharedScenarioTests(unittest.TestCase):
                         self.assertEqual(result['resolved'], expect['resolved'])
                     if 'direction' in expect:
                         self.assertEqual(snap['direction'], expect['direction'])
+                    if 'confirm' in expect:
+                        self.assertEqual(snap['confirm'] is not None, expect['confirm'])
                     if 'last_reason' in expect:
                         self.assertEqual(snap['decisions'][-1]['reason'], expect['last_reason'])
                     if 'events' in expect:
@@ -103,7 +105,7 @@ class PolicyTests(unittest.TestCase):
         engine = AlertEngine()
         state = DisplayState(clock=lambda: 0.0)
         state.connect(engine.session_id)
-        for index, kind in enumerate(EVENT_TYPES):
+        for index, kind in enumerate(k for k in EVENT_TYPES if k not in GESTURES):
             engine.set_controls(index * 100_000)
             engine.add(make_event(kind, .9, 'mock') if kind != 'name_called' else
                        fixture_event(kind, f'n{index}', 0), index * 100_000)
@@ -113,6 +115,22 @@ class PolicyTests(unittest.TestCase):
             self.assertTrue(state.accept(envelope))
             self.assertTrue(any(state.frame().buffer), kind)
             engine.dismiss(index * 100_000)
+
+
+class ConfirmationTests(unittest.TestCase):
+    def test_resolve_check_reaches_the_glasses_at_the_cue_position_then_clears(self):
+        engine = AlertEngine()
+        state = DisplayState(clock=lambda: 0.0)
+        state.connect(engine.session_id)
+        knock = make_event('knock', .9, 'mock')
+        knock.update(direction_degrees=-90, direction_confidence=1)
+        engine.add(knock, 0)
+        state.accept(engine.presentation(0))
+        engine.add(make_event('finger_snap', .9, 'microphone'), 500)
+        envelope = engine.presentation(500)
+        self.assertEqual((envelope['icon_id'], envelope['direction']), ('check', 'left'))
+        self.assertTrue(state.accept(envelope))
+        self.assertEqual(engine.presentation(1100)['effective_tier'], 0)
 
 
 class ReceiverHttpTests(unittest.TestCase):
