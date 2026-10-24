@@ -1,0 +1,16 @@
+.venv/
+.cache/
+__pycache__/
+samples/*.wav
+samples/benchmark/
+.cache/benchmark/
+*.jsonl
+*.jsonl.*
+.DS_Store
+.env
+.env.*
+!.env.example
+node_modules/
+dist/
+.pytest_cache/
+*.pyc

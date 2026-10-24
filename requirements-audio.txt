@@ -1,0 +1,6 @@
+# Default Zipformer pipeline. TensorFlow is optional; use requirements.txt for YAMNet too.
+numpy<3
+scipy<2
+sounddevice<1
+soundfile<1
+sherpa-onnx==2.0.0

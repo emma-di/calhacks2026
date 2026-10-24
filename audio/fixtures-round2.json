@@ -1,0 +1,361 @@
+{
+  "clips": [
+    {
+      "id": "freesound-369848",
+      "path": "supplemental/369848.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-SpliceSound",
+      "author": "SpliceSound",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/SpliceSound/sounds/369848/",
+      "url": "https://cdn.freesound.org/previews/369/369848_1480854-hq.mp3",
+      "title": "Smoke detector alarm, close perspective.wav by SpliceSound",
+      "description": "Smoke alarm close perspective"
+    },
+    {
+      "id": "freesound-155006",
+      "path": "supplemental/155006.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-rayprice",
+      "author": "rayprice",
+      "license": "http://creativecommons.org/licenses/by/3.0/",
+      "source_page": "https://freesound.org/people/rayprice/sounds/155006/",
+      "url": "https://cdn.freesound.org/previews/155/155006_2790242-hq.mp3",
+      "title": "Smoke Detector  Alarm by rayprice",
+      "description": "A recording of a smoke detector/fire alarm i needed for a film, So i triggered my one at home and recorded it"
+    },
+    {
+      "id": "freesound-557484",
+      "path": "supplemental/557484.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-LiftPizzas",
+      "author": "LiftPizzas",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/LiftPizzas/sounds/557484/",
+      "url": "https://cdn.freesound.org/previews/557/557484_8236910-hq.mp3",
+      "title": "LOUD Smoke Alarm unplug.wav by LiftPizzas",
+      "description": "Three regular beeps of a smoke alarm, followed by one final slowly dying beep. Warning, this is super loud and ear-piercing compared to other sounds, turn your volume waaay down before testing out this sound."
+    },
+    {
+      "id": "freesound-856778",
+      "path": "supplemental/856778.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-loganzsound",
+      "author": "loganzsound",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/loganzsound/sounds/856778/",
+      "url": "https://cdn.freesound.org/previews/856/856778_16682330-hq.mp3",
+      "title": "First Alert Smoke Detector Test Beep 02 by loganzsound",
+      "description": "1 test beep of a First Alert Smoke Detector, recorded on a Zoom H5 XYH-6 from 0.3 meters away. Denoised with Izotope Rx 11."
+    },
+    {
+      "id": "freesound-345497",
+      "path": "supplemental/345497.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-wjoojoo",
+      "author": "wjoojoo",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "source_page": "https://freesound.org/people/wjoojoo/sounds/345497/",
+      "url": "https://cdn.freesound.org/previews/345/345497_93137-hq.mp3",
+      "title": "smoke_alarm.wav by wjoojoo",
+      "description": "Smoke alarm test"
+    },
+    {
+      "id": "freesound-666761",
+      "path": "supplemental/666761.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-opalmirage",
+      "author": "opalmirage",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/opalmirage/sounds/666761/",
+      "url": "https://cdn.freesound.org/previews/666/666761_8341638-hq.mp3",
+      "title": "smoke alarm by opalmirage",
+      "description": "someone set off a smoke alarm and woke me up so i took out my phone and recorded it"
+    },
+    {
+      "id": "freesound-608739",
+      "path": "supplemental/608739.mp3",
+      "expected": [
+        "smoke_alarm"
+      ],
+      "category": "smoke_alarm",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-ladako",
+      "author": "ladako",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/ladako/sounds/608739/",
+      "url": "https://cdn.freesound.org/previews/608/608739_7747783-hq.mp3",
+      "title": "ALRMElec_Smoke Detector Test Noise In Small Room_ladako_room reflections.wav by ladako",
+      "description": "Smoke detector test noise, recorded in a small room, roughly 2m from mic. The mic is pointing into the room, only capturing room reflections.\nFundamental frequency: ca. 3374 Hz\nOvertones: ca. 6741 Hz; 10109 HZ, 13482 Hz\n\nFeel free to use this sound; no attribution required.\nFeel free to write me in the comments what you used this sound for.\n\nEquipment:\nR\u00d8DE NTG2\nSound Devices MixPre-3 II\n\nFile:\nWAV\nMono\n48 kHz\n24-bit"
+    },
+    {
+      "id": "freesound-383631",
+      "path": "supplemental/383631.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-newagesoup",
+      "author": "newagesoup",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/newagesoup/sounds/383631/",
+      "url": "https://cdn.freesound.org/previews/383/383631_4067257-hq.mp3",
+      "title": "bicycle-bell_19.wav by newagesoup",
+      "description": "Just a sample pack of 3-4 different high-pitch bicycle bells being rung."
+    },
+    {
+      "id": "freesound-328826",
+      "path": "supplemental/328826.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-magedu",
+      "author": "magedu",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "source_page": "https://freesound.org/people/magedu/sounds/328826/",
+      "url": "https://cdn.freesound.org/previews/328/328826_4877562-hq.mp3",
+      "title": "bicycle_bell_01.wav by magedu",
+      "description": "Sound of a bicycle bell. Recorded with the Rode NTG-3 and the Fostex FR2-LE."
+    },
+    {
+      "id": "freesound-173000",
+      "path": "supplemental/173000.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-KeyKrusher",
+      "author": "KeyKrusher",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "source_page": "https://freesound.org/people/KeyKrusher/sounds/173000/",
+      "url": "https://cdn.freesound.org/previews/173/173000_2193194-hq.mp3",
+      "title": "Bicycle bell 2.wav by KeyKrusher",
+      "description": "Recorded my bicycle bell with and ipod touch 3g fitted with blue mikey 2 stereo mic and FiRe app.  This is one of those simple free bells that are supplied with new bikes - just a small bell with a thumb flick action - not as nice as the older rotary style bells."
+    },
+    {
+      "id": "freesound-318193",
+      "path": "supplemental/318193.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-Robinhood76",
+      "author": "Robinhood76",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "source_page": "https://freesound.org/people/Robinhood76/sounds/318193/",
+      "url": "https://cdn.freesound.org/previews/318/318193_321967-hq.mp3",
+      "title": "05969 common bicycle bell.wav by Robinhood76",
+      "description": "Common bicycle bell - dry sound"
+    },
+    {
+      "id": "freesound-495496",
+      "path": "supplemental/495496.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-cdrk",
+      "author": "cdrk",
+      "license": "https://creativecommons.org/licenses/by/4.0/",
+      "source_page": "https://freesound.org/people/cdrk/sounds/495496/",
+      "url": "https://cdn.freesound.org/previews/495/495496_65641-hq.mp3",
+      "title": "Bike bell 14.flac by cdrk",
+      "description": "Bicycle bell recorded with an Oktava MK 012-01"
+    },
+    {
+      "id": "freesound-710386",
+      "path": "supplemental/710386.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-Jorge_M_Rodrigues",
+      "author": "Jorge_M_Rodrigues",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "source_page": "https://freesound.org/people/Jorge_M_Rodrigues/sounds/710386/",
+      "url": "https://cdn.freesound.org/previews/710/710386_9320233-hq.mp3",
+      "title": "bicycle_bell by Jorge_M_Rodrigues",
+      "description": "Bell from a bicycle."
+    },
+    {
+      "id": "freesound-152953",
+      "path": "supplemental/152953.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-peasoperro",
+      "author": "peasoperro",
+      "license": "http://creativecommons.org/licenses/by/3.0/",
+      "source_page": "https://freesound.org/people/peasoperro/sounds/152953/",
+      "url": "https://cdn.freesound.org/previews/152/152953_2371609-hq.mp3",
+      "title": "Bicycle bell by peasoperro",
+      "description": "This is the sound of a bicycle bell recorded in the street around the UPF campus. The background noise it's due to the wind. This sound was recorded with a zoom H4 recorder at 13.10 h."
+    },
+    {
+      "id": "freesound-445336",
+      "path": "supplemental/445336.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-Kroema1",
+      "author": "Kroema1",
+      "license": "http://creativecommons.org/licenses/by/3.0/",
+      "source_page": "https://freesound.org/people/Kroema1/sounds/445336/",
+      "url": "https://cdn.freesound.org/previews/445/445336_8288402-hq.mp3",
+      "title": "Bicycle bell.wav by Kroema1",
+      "description": "Metal Bicycle bell."
+    },
+    {
+      "id": "freesound-120501",
+      "path": "supplemental/120501.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-lth_stp",
+      "author": "lth_stp",
+      "license": "http://creativecommons.org/licenses/by-nc/3.0/",
+      "source_page": "https://freesound.org/people/lth_stp/sounds/120501/",
+      "url": "https://cdn.freesound.org/previews/120/120501_1777631-hq.mp3",
+      "title": "Bell6.aif by lth_stp",
+      "description": "typical dutch bicycle bell ringing"
+    },
+    {
+      "id": "freesound-365994",
+      "path": "supplemental/365994.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-Pastabra",
+      "author": "Pastabra",
+      "license": "https://creativecommons.org/licenses/by-nc/4.0/",
+      "source_page": "https://freesound.org/people/Pastabra/sounds/365994/",
+      "url": "https://cdn.freesound.org/previews/365/365994_6097925-hq.mp3",
+      "title": "Bicycle bell by Pastabra",
+      "description": "Bicycle bell: Metal bell - ringing once, twice and three times. \r\n\r\nRecorded using a SONY PCM-M10 in a studio environment.\r\n\r\nProcessing done: Noise-reduction and a slight EQ to give the bell a bit more \"body\""
+    },
+    {
+      "id": "freesound-156064",
+      "path": "supplemental/156064.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-marcolo91",
+      "author": "marcolo91",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/marcolo91/sounds/156064/",
+      "url": "https://cdn.freesound.org/previews/156/156064_2365601-hq.mp3",
+      "title": "bicycle bell.wav by marcolo91",
+      "description": "Recording of a bicycle bell in Barcelona. It is a sound of the urban-scape we are recording for our last project in Sound Creation Laboratory (upf)\r\n\r\nHarmonic and relax sound."
+    },
+    {
+      "id": "freesound-131989",
+      "path": "supplemental/131989.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-jaqcore",
+      "author": "jaqcore",
+      "license": "http://creativecommons.org/licenses/by-nc/3.0/",
+      "source_page": "https://freesound.org/people/jaqcore/sounds/131989/",
+      "url": "https://cdn.freesound.org/previews/131/131989_536653-hq.mp3",
+      "title": "Bicycle bell by jaqcore",
+      "description": "Various bicycle bells ringing. Street environment in the back."
+    },
+    {
+      "id": "freesound-789743",
+      "path": "supplemental/789743.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "test",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-nolan.creative",
+      "author": "nolan.creative",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/nolan.creative/sounds/789743/",
+      "url": "https://cdn.freesound.org/previews/789/789743_16948469-hq.mp3",
+      "title": "bicycle-bell by nolan.creative",
+      "description": "The \"ding-ding\" sound of a bicycle bell being used"
+    },
+    {
+      "id": "freesound-485072",
+      "path": "supplemental/485072.mp3",
+      "expected": [
+        "bicycle_bell"
+      ],
+      "category": "bicycle_bell",
+      "split": "tune",
+      "source": "Freesound public HQ preview",
+      "source_group": "freesound-author-IENBA",
+      "author": "IENBA",
+      "license": "http://creativecommons.org/publicdomain/zero/1.0/",
+      "source_page": "https://freesound.org/people/IENBA/sounds/485072/",
+      "url": "https://cdn.freesound.org/previews/485/485072_9616576-hq.mp3",
+      "title": "Bicycle Bell by IENBA",
+      "description": "5 samples of a Bicycle Bell.\n\nGear:\n\nRecorder: Zoom H4n\nMicrophone: Sennheiser MKE-600"
+    }
+  ]
+}

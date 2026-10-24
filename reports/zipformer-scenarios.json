@@ -1,0 +1,762 @@
+{
+  "model": "zipformer",
+  "scenarios": [
+    {
+      "name": "separated-events",
+      "duration_seconds": 72.0,
+      "expected_regions": [
+        {
+          "type": "dog_bark",
+          "start": 6,
+          "end": 11,
+          "source_id": "esc50-1-100032-A-0",
+          "detected": true
+        },
+        {
+          "type": "knock",
+          "start": 17,
+          "end": 22,
+          "source_id": "esc50-1-101336-A-30",
+          "detected": true
+        },
+        {
+          "type": "siren",
+          "start": 28,
+          "end": 33,
+          "source_id": "esc50-1-31482-A-42",
+          "detected": true
+        },
+        {
+          "type": "alarm_clock",
+          "start": 39,
+          "end": 44,
+          "source_id": "esc50-1-13613-A-37",
+          "detected": true
+        },
+        {
+          "type": "smoke_alarm",
+          "start": 50,
+          "end": 55,
+          "source_id": "freesound-136482",
+          "detected": true
+        },
+        {
+          "type": "bell",
+          "start": 61,
+          "end": 66,
+          "source_id": "freesound-120501",
+          "detected": true
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "045292f4-1417-4fbf-96f0-ec06dd449f68",
+            "type": "dog_bark",
+            "label": "Dog barking",
+            "confidence": 0.7632442712783813,
+            "source": "simulation",
+            "priority_tier": 1,
+            "timestamp_ms": 9000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 9.0,
+            "model": "zipformer"
+          },
+          "active_type": "dog_bark"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "f701f5a5-1661-42f3-93ec-b324517bf755",
+            "type": "knock",
+            "label": "Door knock",
+            "confidence": 0.9986222982406616,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 18000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 18.0,
+            "model": "zipformer"
+          },
+          "active_type": "knock"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "6c1a2e5f-32f1-4ef2-bc9e-c17a722f53b6",
+            "type": "siren",
+            "label": "Siren",
+            "confidence": 0.30734044313430786,
+            "source": "simulation",
+            "priority_tier": 3,
+            "timestamp_ms": 30000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 30.0,
+            "model": "zipformer"
+          },
+          "active_type": "siren"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "8f8b24f2-b02e-48e3-aaeb-b44c27ec36a3",
+            "type": "alarm_clock",
+            "label": "Alarm clock",
+            "confidence": 0.1533709168434143,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 44000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 44.0,
+            "model": "zipformer"
+          },
+          "active_type": "alarm_clock"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "aa4d7f71-e83a-4b9f-b495-92ca1842c58f",
+            "type": "smoke_alarm",
+            "label": "Smoke alarm",
+            "confidence": 0.7461389899253845,
+            "source": "simulation",
+            "priority_tier": 4,
+            "timestamp_ms": 51000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 51.0,
+            "model": "zipformer"
+          },
+          "active_type": "smoke_alarm"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "dd4b8282-af4d-4d13-9f21-80aeeb67f062",
+            "type": "bell",
+            "label": "Bell / chime",
+            "confidence": 0.19321224093437195,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 63000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 63.0,
+            "model": "zipformer"
+          },
+          "active_type": "smoke_alarm"
+        }
+      ],
+      "recognition_decisions": [
+        {
+          "window_seconds": 9.0,
+          "raw_score": 0.7632442712783813,
+          "threshold": 0.175,
+          "reason": "emitted",
+          "type": "dog_bark",
+          "effective_score": 0.7632442712783813,
+          "event_id": "045292f4-1417-4fbf-96f0-ec06dd449f68"
+        },
+        {
+          "window_seconds": 10.0,
+          "raw_score": 0.8419623374938965,
+          "threshold": 0.175,
+          "reason": "cooldown",
+          "type": "dog_bark",
+          "effective_score": 0.8419623374938965,
+          "cooldown_remaining_seconds": 4.0
+        },
+        {
+          "window_seconds": 18.0,
+          "raw_score": 0.9986222982406616,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "knock",
+          "effective_score": 0.9986222982406616,
+          "event_id": "f701f5a5-1661-42f3-93ec-b324517bf755"
+        },
+        {
+          "window_seconds": 20.0,
+          "raw_score": 0.48622795939445496,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.48622795939445496,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 21.0,
+          "raw_score": 0.996728241443634,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.996728241443634,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 30.0,
+          "raw_score": 0.30734044313430786,
+          "threshold": 0.225,
+          "reason": "emitted",
+          "type": "siren",
+          "effective_score": 0.30734044313430786,
+          "event_id": "6c1a2e5f-32f1-4ef2-bc9e-c17a722f53b6"
+        },
+        {
+          "window_seconds": 33.0,
+          "raw_score": 0.24551337957382202,
+          "threshold": 0.225,
+          "reason": "cooldown",
+          "type": "siren",
+          "effective_score": 0.24551337957382202,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 34.0,
+          "raw_score": 0.952203631401062,
+          "threshold": 0.225,
+          "reason": "cooldown",
+          "type": "siren",
+          "effective_score": 0.952203631401062,
+          "cooldown_remaining_seconds": 1.0
+        },
+        {
+          "window_seconds": 44.0,
+          "raw_score": 0.1533709168434143,
+          "threshold": 0.05,
+          "reason": "emitted",
+          "type": "alarm_clock",
+          "effective_score": 0.1533709168434143,
+          "event_id": "8f8b24f2-b02e-48e3-aaeb-b44c27ec36a3"
+        },
+        {
+          "window_seconds": 45.0,
+          "raw_score": 0.4549747407436371,
+          "threshold": 0.05,
+          "reason": "cooldown",
+          "type": "alarm_clock",
+          "effective_score": 0.4549747407436371,
+          "cooldown_remaining_seconds": 4.0
+        },
+        {
+          "window_seconds": 51.0,
+          "raw_score": 0.7461389899253845,
+          "threshold": 0.35,
+          "reason": "emitted",
+          "type": "smoke_alarm",
+          "effective_score": 0.7461389899253845,
+          "event_id": "aa4d7f71-e83a-4b9f-b495-92ca1842c58f"
+        },
+        {
+          "window_seconds": 52.0,
+          "raw_score": 0.736892819404602,
+          "threshold": 0.35,
+          "reason": "cooldown",
+          "type": "smoke_alarm",
+          "effective_score": 0.736892819404602,
+          "cooldown_remaining_seconds": 4.0
+        },
+        {
+          "window_seconds": 53.0,
+          "raw_score": 0.6408773064613342,
+          "threshold": 0.35,
+          "reason": "cooldown",
+          "type": "smoke_alarm",
+          "effective_score": 0.6408773064613342,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 54.0,
+          "raw_score": 0.6421785950660706,
+          "threshold": 0.35,
+          "reason": "cooldown",
+          "type": "smoke_alarm",
+          "effective_score": 0.6421785950660706,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 62.0,
+          "raw_score": 0.9988231062889099,
+          "threshold": 0.05,
+          "reason": "disabled",
+          "type": "bicycle_bell",
+          "effective_score": 0.9988231062889099
+        },
+        {
+          "window_seconds": 63.0,
+          "raw_score": 0.9926771521568298,
+          "threshold": 0.05,
+          "reason": "disabled",
+          "type": "bicycle_bell",
+          "effective_score": 0.9926771521568298
+        },
+        {
+          "window_seconds": 63.0,
+          "raw_score": 0.19321224093437195,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "bell",
+          "effective_score": 0.19321224093437195,
+          "event_id": "dd4b8282-af4d-4d13-9f21-80aeeb67f062"
+        },
+        {
+          "window_seconds": 64.0,
+          "raw_score": 0.8223741054534912,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "bell",
+          "effective_score": 0.8223741054534912,
+          "cooldown_remaining_seconds": 4.0
+        },
+        {
+          "window_seconds": 65.0,
+          "raw_score": 0.35713082551956177,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "bell",
+          "effective_score": 0.35713082551956177,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 66.0,
+          "raw_score": 0.2026127576828003,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "bell",
+          "effective_score": 0.2026127576828003,
+          "cooldown_remaining_seconds": 2.0
+        }
+      ],
+      "alert_decisions": [
+        {
+          "kind": "alert_state",
+          "event_id": "045292f4-1417-4fbf-96f0-ec06dd449f68",
+          "type": "dog_bark",
+          "priority_tier": 1,
+          "reason": "displayed",
+          "active_type": "dog_bark"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "f701f5a5-1661-42f3-93ec-b324517bf755",
+          "type": "knock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "knock"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "6c1a2e5f-32f1-4ef2-bc9e-c17a722f53b6",
+          "type": "siren",
+          "priority_tier": 3,
+          "reason": "displayed",
+          "active_type": "siren"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "8f8b24f2-b02e-48e3-aaeb-b44c27ec36a3",
+          "type": "alarm_clock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "alarm_clock"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "aa4d7f71-e83a-4b9f-b495-92ca1842c58f",
+          "type": "smoke_alarm",
+          "priority_tier": 4,
+          "reason": "displayed",
+          "active_type": "smoke_alarm"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "dd4b8282-af4d-4d13-9f21-80aeeb67f062",
+          "type": "bell",
+          "priority_tier": 2,
+          "reason": "suppressed_lower_priority",
+          "active_type": "smoke_alarm"
+        }
+      ],
+      "active_after_timeout": null
+    },
+    {
+      "name": "overlapping-dog-and-smoke",
+      "duration_seconds": 17.0,
+      "expected_regions": [
+        {
+          "type": "smoke_alarm",
+          "start": 6,
+          "end": 11,
+          "source_id": "freesound-136482",
+          "detected": true
+        },
+        {
+          "type": "dog_bark",
+          "start": 6,
+          "end": 11,
+          "source_id": "esc50-1-100032-A-0",
+          "detected": true
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "53438235-7389-496d-bd2d-2318aeba398d",
+            "type": "smoke_alarm",
+            "label": "Smoke alarm",
+            "confidence": 0.7496538162231445,
+            "source": "simulation",
+            "priority_tier": 4,
+            "timestamp_ms": 7000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 7.0,
+            "model": "zipformer"
+          },
+          "active_type": "smoke_alarm"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "88faeb6e-4cbc-4b6a-8d1d-f0418bd6ba9e",
+            "type": "dog_bark",
+            "label": "Dog barking",
+            "confidence": 0.1858033537864685,
+            "source": "simulation",
+            "priority_tier": 1,
+            "timestamp_ms": 9000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 9.0,
+            "model": "zipformer"
+          },
+          "active_type": "smoke_alarm"
+        }
+      ],
+      "recognition_decisions": [
+        {
+          "window_seconds": 7.0,
+          "raw_score": 0.7496538162231445,
+          "threshold": 0.35,
+          "reason": "emitted",
+          "type": "smoke_alarm",
+          "effective_score": 0.7496538162231445,
+          "event_id": "53438235-7389-496d-bd2d-2318aeba398d"
+        },
+        {
+          "window_seconds": 8.0,
+          "raw_score": 0.7397052049636841,
+          "threshold": 0.35,
+          "reason": "cooldown",
+          "type": "smoke_alarm",
+          "effective_score": 0.7397052049636841,
+          "cooldown_remaining_seconds": 4.0
+        },
+        {
+          "window_seconds": 9.0,
+          "raw_score": 0.1858033537864685,
+          "threshold": 0.175,
+          "reason": "emitted",
+          "type": "dog_bark",
+          "effective_score": 0.1858033537864685,
+          "event_id": "88faeb6e-4cbc-4b6a-8d1d-f0418bd6ba9e"
+        },
+        {
+          "window_seconds": 10.0,
+          "raw_score": 0.36755064129829407,
+          "threshold": 0.175,
+          "reason": "cooldown",
+          "type": "dog_bark",
+          "effective_score": 0.36755064129829407,
+          "cooldown_remaining_seconds": 4.0
+        }
+      ],
+      "alert_decisions": [
+        {
+          "kind": "alert_state",
+          "event_id": "53438235-7389-496d-bd2d-2318aeba398d",
+          "type": "smoke_alarm",
+          "priority_tier": 4,
+          "reason": "displayed",
+          "active_type": "smoke_alarm"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "88faeb6e-4cbc-4b6a-8d1d-f0418bd6ba9e",
+          "type": "dog_bark",
+          "priority_tier": 1,
+          "reason": "suppressed_lower_priority",
+          "active_type": "smoke_alarm"
+        }
+      ],
+      "active_after_timeout": null
+    },
+    {
+      "name": "repeated-knocks",
+      "duration_seconds": 32.0,
+      "expected_regions": [
+        {
+          "type": "knock",
+          "start": 6,
+          "end": 26,
+          "source_id": "esc50-1-101336-A-30",
+          "detected": true
+        }
+      ],
+      "events": [
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "ce3951ef-c5f5-40cd-963e-c844261dc4af",
+            "type": "knock",
+            "label": "Door knock",
+            "confidence": 0.9986222982406616,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 7000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 7.0,
+            "model": "zipformer"
+          },
+          "active_type": "knock"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "8f776816-bc99-468c-ba8d-dd2f1acb5504",
+            "type": "knock",
+            "label": "Door knock",
+            "confidence": 0.9986222982406616,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 12000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 12.0,
+            "model": "zipformer"
+          },
+          "active_type": "knock"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "6eff3b59-be6c-4b7f-a621-1c2159115d96",
+            "type": "knock",
+            "label": "Door knock",
+            "confidence": 0.9986222982406616,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 17000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 17.0,
+            "model": "zipformer"
+          },
+          "active_type": "knock"
+        },
+        {
+          "event": {
+            "schema_version": 1,
+            "event_id": "c8e06e3a-1f5c-4c7b-80d3-3193a0a65bea",
+            "type": "knock",
+            "label": "Door knock",
+            "confidence": 0.9986222982406616,
+            "source": "simulation",
+            "priority_tier": 2,
+            "timestamp_ms": 22000,
+            "direction_degrees": null,
+            "direction_confidence": null,
+            "distance_meters": null,
+            "proximity": "unknown",
+            "scenario_seconds": 22.0,
+            "model": "zipformer"
+          },
+          "active_type": "knock"
+        }
+      ],
+      "recognition_decisions": [
+        {
+          "window_seconds": 7.0,
+          "raw_score": 0.9986222982406616,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "knock",
+          "effective_score": 0.9986222982406616,
+          "event_id": "ce3951ef-c5f5-40cd-963e-c844261dc4af"
+        },
+        {
+          "window_seconds": 9.0,
+          "raw_score": 0.48622795939445496,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.48622795939445496,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 10.0,
+          "raw_score": 0.996728241443634,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.996728241443634,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 12.0,
+          "raw_score": 0.9986222982406616,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "knock",
+          "effective_score": 0.9986222982406616,
+          "event_id": "8f776816-bc99-468c-ba8d-dd2f1acb5504"
+        },
+        {
+          "window_seconds": 14.0,
+          "raw_score": 0.48622795939445496,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.48622795939445496,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 15.0,
+          "raw_score": 0.996728241443634,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.996728241443634,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 17.0,
+          "raw_score": 0.9986222982406616,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "knock",
+          "effective_score": 0.9986222982406616,
+          "event_id": "6eff3b59-be6c-4b7f-a621-1c2159115d96"
+        },
+        {
+          "window_seconds": 19.0,
+          "raw_score": 0.48622795939445496,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.48622795939445496,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 20.0,
+          "raw_score": 0.996728241443634,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.996728241443634,
+          "cooldown_remaining_seconds": 2.0
+        },
+        {
+          "window_seconds": 22.0,
+          "raw_score": 0.9986222982406616,
+          "threshold": 0.075,
+          "reason": "emitted",
+          "type": "knock",
+          "effective_score": 0.9986222982406616,
+          "event_id": "c8e06e3a-1f5c-4c7b-80d3-3193a0a65bea"
+        },
+        {
+          "window_seconds": 24.0,
+          "raw_score": 0.48622795939445496,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.48622795939445496,
+          "cooldown_remaining_seconds": 3.0
+        },
+        {
+          "window_seconds": 25.0,
+          "raw_score": 0.996728241443634,
+          "threshold": 0.075,
+          "reason": "cooldown",
+          "type": "knock",
+          "effective_score": 0.996728241443634,
+          "cooldown_remaining_seconds": 2.0
+        }
+      ],
+      "alert_decisions": [
+        {
+          "kind": "alert_state",
+          "event_id": "ce3951ef-c5f5-40cd-963e-c844261dc4af",
+          "type": "knock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "knock"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "8f776816-bc99-468c-ba8d-dd2f1acb5504",
+          "type": "knock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "knock"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "6eff3b59-be6c-4b7f-a621-1c2159115d96",
+          "type": "knock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "knock"
+        },
+        {
+          "kind": "alert_state",
+          "event_id": "c8e06e3a-1f5c-4c7b-80d3-3193a0a65bea",
+          "type": "knock",
+          "priority_tier": 2,
+          "reason": "displayed",
+          "active_type": "knock"
+        }
+      ],
+      "active_after_timeout": null
+    },
+    {
+      "name": "silence",
+      "duration_seconds": 10.0,
+      "expected_regions": [],
+      "events": [],
+      "recognition_decisions": [],
+      "alert_decisions": [],
+      "active_after_timeout": null
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "profile_id": "demo",
+  "revision": 1,
+  "display_name": "Samira",
+  "name_detection": {
+    "enabled": true,
+    "primary_name": "Samira",
+    "aliases": [],
+    "language": "en"
+  },
+  "notification_preferences": {
+    "mode": "balanced",
+    "event_tiers": {
+      "dog_bark": 1,
+      "knock": 2,
+      "bell": 2,
+      "name_called": 3,
+      "smoke_alarm": 4
+    }
+  }
+}

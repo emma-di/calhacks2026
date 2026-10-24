@@ -1,0 +1,10 @@
+{
+  "source_id": "esc50-4-151242-A-37",
+  "transform": "echo",
+  "expected": [
+    "alarm_clock"
+  ],
+  "unexpected": [
+    "bell"
+  ]
+}

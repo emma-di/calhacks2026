@@ -1,0 +1,1351 @@
+{
+  "model": "zipformer",
+  "source_recordings": 418,
+  "cases": 1672,
+  "variants": [
+    "clean",
+    "echo",
+    "noise10",
+    "quiet"
+  ],
+  "policy": {
+    "version": 1,
+    "model": "zipformer",
+    "cooldown_seconds": 5,
+    "tuning": "ESC-50 folds 1\u20133 and designated supplemental authors only; false-positive rate <=1% on tuning cases",
+    "rules": {
+      "knock": {
+        "labels": {
+          "Knock": 1
+        },
+        "threshold": 0.075,
+        "status": "tuned_on_source_split"
+      },
+      "bicycle_bell": {
+        "labels": {
+          "Bicycle bell": 1
+        },
+        "threshold": 0.05,
+        "status": "disabled_source_specificity_unvalidated",
+        "enabled": false
+      },
+      "dog_bark": {
+        "labels": {
+          "Bark": 1,
+          "Bow-wow": 1,
+          "Yip": 1
+        },
+        "threshold": 0.175,
+        "status": "tuned_on_source_split"
+      },
+      "siren": {
+        "labels": {
+          "Siren": 1
+        },
+        "threshold": 0.225,
+        "status": "tuned_on_source_split"
+      },
+      "smoke_alarm": {
+        "labels": {
+          "Smoke detector, smoke alarm": 1
+        },
+        "threshold": 0.35,
+        "status": "provisional_small_sample"
+      },
+      "alarm_clock": {
+        "labels": {
+          "Alarm clock": 1
+        },
+        "threshold": 0.05,
+        "status": "tuned_on_source_split"
+      },
+      "bell": {
+        "labels": {
+          "Bell": 1,
+          "Ding": 1,
+          "Chime": 1
+        },
+        "suppressors": {
+          "Alarm clock": 0.05,
+          "Smoke detector, smoke alarm": 0.35,
+          "Siren": 0.225
+        },
+        "suppressor_hold_seconds": 4,
+        "threshold": 0.075,
+        "status": "tuned_on_source_split"
+      }
+    }
+  },
+  "metrics": {
+    "clean": {
+      "knock": {
+        "baseline": {
+          "tp": 14,
+          "fp": 0,
+          "fn": 2,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.875,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-4-187284-A-30",
+            "esc50-5-218981-A-30"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 1,
+          "tn": 151,
+          "precision": 0.9375,
+          "recall": 0.9375,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-5-218981-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-234263-A-25"
+          ]
+        }
+      },
+      "bicycle_bell": {
+        "baseline": {
+          "tp": 3,
+          "fp": 1,
+          "fn": 2,
+          "tn": 162,
+          "precision": 0.75,
+          "recall": 0.6,
+          "false_positive_rate": 0.006134969325153374,
+          "missed_ids": [
+            "freesound-484344",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": [
+            "esc50-5-210612-A-37"
+          ]
+        },
+        "tuned": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 5,
+          "tn": 163,
+          "precision": null,
+          "recall": 0.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-445336",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "dog_bark": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "siren": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "smoke_alarm": {
+        "baseline": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "alarm_clock": {
+        "baseline": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 1,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.9375,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 1,
+          "tn": 151,
+          "precision": 0.9375,
+          "recall": 0.9375,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": [
+            "freesound-155006"
+          ]
+        }
+      },
+      "bell": {
+        "baseline": {
+          "tp": 7,
+          "fp": 4,
+          "fn": 0,
+          "tn": 157,
+          "precision": 0.6363636363636364,
+          "recall": 1.0,
+          "false_positive_rate": 0.024844720496894408,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "esc50-4-169508-A-37",
+            "esc50-4-209536-A-37",
+            "esc50-5-117118-A-42",
+            "esc50-5-210612-A-37"
+          ]
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 3,
+          "fn": 0,
+          "tn": 158,
+          "precision": 0.7,
+          "recall": 1.0,
+          "false_positive_rate": 0.018633540372670808,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "esc50-4-159609-A-14",
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ]
+        }
+      }
+    },
+    "echo": {
+      "knock": {
+        "baseline": {
+          "tp": 14,
+          "fp": 1,
+          "fn": 2,
+          "tn": 151,
+          "precision": 0.9333333333333333,
+          "recall": 0.875,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-4-187284-A-30",
+            "esc50-5-218980-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-234263-A-25"
+          ]
+        },
+        "tuned": {
+          "tp": 14,
+          "fp": 2,
+          "fn": 2,
+          "tn": 150,
+          "precision": 0.875,
+          "recall": 0.875,
+          "false_positive_rate": 0.013157894736842105,
+          "missed_ids": [
+            "esc50-4-187284-A-30",
+            "esc50-5-218980-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-205090-A-32",
+            "esc50-5-234263-A-25"
+          ]
+        }
+      },
+      "bicycle_bell": {
+        "baseline": {
+          "tp": 2,
+          "fp": 2,
+          "fn": 3,
+          "tn": 161,
+          "precision": 0.5,
+          "recall": 0.4,
+          "false_positive_rate": 0.012269938650306749,
+          "missed_ids": [
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": [
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ]
+        },
+        "tuned": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 5,
+          "tn": 163,
+          "precision": null,
+          "recall": 0.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-445336",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "dog_bark": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "siren": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "smoke_alarm": {
+        "baseline": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "alarm_clock": {
+        "baseline": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 1,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.9375,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 2,
+          "fn": 0,
+          "tn": 150,
+          "precision": 0.8888888888888888,
+          "recall": 1.0,
+          "false_positive_rate": 0.013157894736842105,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "freesound-445336",
+            "freesound-530094"
+          ]
+        }
+      },
+      "bell": {
+        "baseline": {
+          "tp": 7,
+          "fp": 7,
+          "fn": 0,
+          "tn": 154,
+          "precision": 0.5,
+          "recall": 1.0,
+          "false_positive_rate": 0.043478260869565216,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "esc50-4-169508-A-37",
+            "esc50-4-204684-A-37",
+            "esc50-4-209536-A-37",
+            "esc50-4-209698-A-37",
+            "esc50-5-117118-A-42",
+            "esc50-5-219242-B-37",
+            "freesound-155006"
+          ]
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      }
+    },
+    "noise10": {
+      "knock": {
+        "baseline": {
+          "tp": 10,
+          "fp": 1,
+          "fn": 6,
+          "tn": 151,
+          "precision": 0.9090909090909091,
+          "recall": 0.625,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-4-182039-A-30",
+            "esc50-4-211502-A-30",
+            "esc50-4-261068-A-30",
+            "esc50-5-218981-A-30",
+            "esc50-5-235644-A-30",
+            "esc50-5-256512-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-234263-A-25"
+          ]
+        },
+        "tuned": {
+          "tp": 13,
+          "fp": 1,
+          "fn": 3,
+          "tn": 151,
+          "precision": 0.9285714285714286,
+          "recall": 0.8125,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-4-182039-A-30",
+            "esc50-4-261068-A-30",
+            "esc50-5-218981-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-234263-A-25"
+          ]
+        }
+      },
+      "bicycle_bell": {
+        "baseline": {
+          "tp": 1,
+          "fp": 0,
+          "fn": 4,
+          "tn": 163,
+          "precision": 1.0,
+          "recall": 0.2,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 5,
+          "tn": 163,
+          "precision": null,
+          "recall": 0.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-445336",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "dog_bark": {
+        "baseline": {
+          "tp": 5,
+          "fp": 0,
+          "fn": 11,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.3125,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-4-184575-A-0",
+            "esc50-4-192236-A-0",
+            "esc50-4-194754-A-0",
+            "esc50-4-199261-A-0",
+            "esc50-4-207124-A-0",
+            "esc50-5-203128-B-0",
+            "esc50-5-212454-A-0",
+            "esc50-5-213855-A-0",
+            "esc50-5-217158-A-0",
+            "esc50-5-231762-A-0",
+            "esc50-5-9032-A-0"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 1,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.9375,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-5-9032-A-0"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "siren": {
+        "baseline": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 1,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.9375,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-4-90014-B-42"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "smoke_alarm": {
+        "baseline": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 0,
+          "fn": 0,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "alarm_clock": {
+        "baseline": {
+          "tp": 7,
+          "fp": 1,
+          "fn": 9,
+          "tn": 151,
+          "precision": 0.875,
+          "recall": 0.4375,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-4-151242-A-37",
+            "esc50-4-169508-A-37",
+            "esc50-4-189332-A-37",
+            "esc50-4-198841-A-37",
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37",
+            "esc50-5-233645-A-37",
+            "esc50-5-234247-A-37",
+            "esc50-5-250629-A-37"
+          ],
+          "false_positive_ids": [
+            "wikimedia-rotating-bell"
+          ]
+        },
+        "tuned": {
+          "tp": 13,
+          "fp": 1,
+          "fn": 3,
+          "tn": 151,
+          "precision": 0.9285714285714286,
+          "recall": 0.8125,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-4-189332-A-37",
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": [
+            "wikimedia-rotating-bell"
+          ]
+        }
+      },
+      "bell": {
+        "baseline": {
+          "tp": 4,
+          "fp": 0,
+          "fn": 3,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 0.5714285714285714,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-484344",
+            "freesound-789743"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 1,
+          "tn": 159,
+          "precision": 0.75,
+          "recall": 0.8571428571428571,
+          "false_positive_rate": 0.012422360248447204,
+          "missed_ids": [
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": [
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ]
+        }
+      }
+    },
+    "quiet": {
+      "knock": {
+        "baseline": {
+          "tp": 15,
+          "fp": 0,
+          "fn": 1,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.9375,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-5-218981-A-30"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 1,
+          "tn": 151,
+          "precision": 0.9375,
+          "recall": 0.9375,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-5-218981-A-30"
+          ],
+          "false_positive_ids": [
+            "esc50-5-234263-A-25"
+          ]
+        }
+      },
+      "bicycle_bell": {
+        "baseline": {
+          "tp": 1,
+          "fp": 1,
+          "fn": 4,
+          "tn": 162,
+          "precision": 0.5,
+          "recall": 0.2,
+          "false_positive_rate": 0.006134969325153374,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": [
+            "esc50-5-210612-A-37"
+          ]
+        },
+        "tuned": {
+          "tp": 0,
+          "fp": 0,
+          "fn": 5,
+          "tn": 163,
+          "precision": null,
+          "recall": 0.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-383631",
+            "freesound-445336",
+            "freesound-484344",
+            "freesound-789743",
+            "wikimedia-rotating-bell"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "dog_bark": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "siren": {
+        "baseline": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        }
+      },
+      "smoke_alarm": {
+        "baseline": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 1,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 0.8571428571428571,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-530094"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 1,
+          "tn": 161,
+          "precision": 1.0,
+          "recall": 0.8571428571428571,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-530094"
+          ],
+          "false_positive_ids": []
+        }
+      },
+      "alarm_clock": {
+        "baseline": {
+          "tp": 14,
+          "fp": 0,
+          "fn": 2,
+          "tn": 152,
+          "precision": 1.0,
+          "recall": 0.875,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "esc50-4-209698-A-37",
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": []
+        },
+        "tuned": {
+          "tp": 15,
+          "fp": 1,
+          "fn": 1,
+          "tn": 151,
+          "precision": 0.9375,
+          "recall": 0.9375,
+          "false_positive_rate": 0.006578947368421052,
+          "missed_ids": [
+            "esc50-5-210612-A-37"
+          ],
+          "false_positive_ids": [
+            "freesound-155006"
+          ]
+        }
+      },
+      "bell": {
+        "baseline": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 1,
+          "tn": 159,
+          "precision": 0.75,
+          "recall": 0.8571428571428571,
+          "false_positive_rate": 0.012422360248447204,
+          "missed_ids": [
+            "freesound-789743"
+          ],
+          "false_positive_ids": [
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ]
+        },
+        "tuned": {
+          "tp": 7,
+          "fp": 2,
+          "fn": 0,
+          "tn": 159,
+          "precision": 0.7777777777777778,
+          "recall": 1.0,
+          "false_positive_rate": 0.012422360248447204,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "esc50-4-209536-A-37",
+            "esc50-5-210612-A-37"
+          ]
+        }
+      }
+    }
+  },
+  "missing_sources": [],
+  "download_errors": [],
+  "previous_policy_metrics": {
+    "clean": {
+      "knock": {
+        "tp": 15,
+        "fp": 1,
+        "fn": 1,
+        "tn": 151,
+        "precision": 0.9375,
+        "recall": 0.9375,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-5-218981-A-30"
+        ],
+        "false_positive_ids": [
+          "esc50-5-234263-A-25"
+        ]
+      },
+      "bicycle_bell": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 5,
+        "tn": 163,
+        "precision": null,
+        "recall": 0.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "freesound-383631",
+          "freesound-445336",
+          "freesound-484344",
+          "freesound-789743",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": []
+      },
+      "dog_bark": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "siren": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "smoke_alarm": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 0,
+        "tn": 161,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "alarm_clock": {
+        "tp": 15,
+        "fp": 1,
+        "fn": 1,
+        "tn": 151,
+        "precision": 0.9375,
+        "recall": 0.9375,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-5-210612-A-37"
+        ],
+        "false_positive_ids": [
+          "freesound-155006"
+        ]
+      },
+      "bell": {
+        "tp": 7,
+        "fp": 3,
+        "fn": 0,
+        "tn": 158,
+        "precision": 0.7,
+        "recall": 1.0,
+        "false_positive_rate": 0.018633540372670808,
+        "missed_ids": [],
+        "false_positive_ids": [
+          "esc50-4-209536-A-37",
+          "esc50-5-117118-A-42",
+          "esc50-5-210612-A-37"
+        ]
+      }
+    },
+    "echo": {
+      "knock": {
+        "tp": 14,
+        "fp": 2,
+        "fn": 2,
+        "tn": 150,
+        "precision": 0.875,
+        "recall": 0.875,
+        "false_positive_rate": 0.013157894736842105,
+        "missed_ids": [
+          "esc50-4-187284-A-30",
+          "esc50-5-218980-A-30"
+        ],
+        "false_positive_ids": [
+          "esc50-5-205090-A-32",
+          "esc50-5-234263-A-25"
+        ]
+      },
+      "bicycle_bell": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 5,
+        "tn": 163,
+        "precision": null,
+        "recall": 0.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "freesound-383631",
+          "freesound-445336",
+          "freesound-484344",
+          "freesound-789743",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": []
+      },
+      "dog_bark": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "siren": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "smoke_alarm": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 0,
+        "tn": 161,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "alarm_clock": {
+        "tp": 16,
+        "fp": 2,
+        "fn": 0,
+        "tn": 150,
+        "precision": 0.8888888888888888,
+        "recall": 1.0,
+        "false_positive_rate": 0.013157894736842105,
+        "missed_ids": [],
+        "false_positive_ids": [
+          "freesound-445336",
+          "freesound-530094"
+        ]
+      },
+      "bell": {
+        "tp": 7,
+        "fp": 5,
+        "fn": 0,
+        "tn": 156,
+        "precision": 0.5833333333333334,
+        "recall": 1.0,
+        "false_positive_rate": 0.031055900621118012,
+        "missed_ids": [],
+        "false_positive_ids": [
+          "esc50-4-151242-A-37",
+          "esc50-4-198841-A-37",
+          "esc50-4-209536-A-37",
+          "esc50-5-117118-A-42",
+          "esc50-5-210612-A-37"
+        ]
+      }
+    },
+    "noise10": {
+      "knock": {
+        "tp": 13,
+        "fp": 1,
+        "fn": 3,
+        "tn": 151,
+        "precision": 0.9285714285714286,
+        "recall": 0.8125,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-4-182039-A-30",
+          "esc50-4-261068-A-30",
+          "esc50-5-218981-A-30"
+        ],
+        "false_positive_ids": [
+          "esc50-5-234263-A-25"
+        ]
+      },
+      "bicycle_bell": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 5,
+        "tn": 163,
+        "precision": null,
+        "recall": 0.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "freesound-383631",
+          "freesound-445336",
+          "freesound-484344",
+          "freesound-789743",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": []
+      },
+      "dog_bark": {
+        "tp": 15,
+        "fp": 0,
+        "fn": 1,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 0.9375,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "esc50-5-9032-A-0"
+        ],
+        "false_positive_ids": []
+      },
+      "siren": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "smoke_alarm": {
+        "tp": 7,
+        "fp": 0,
+        "fn": 0,
+        "tn": 161,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "alarm_clock": {
+        "tp": 13,
+        "fp": 1,
+        "fn": 3,
+        "tn": 151,
+        "precision": 0.9285714285714286,
+        "recall": 0.8125,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-4-189332-A-37",
+          "esc50-4-209536-A-37",
+          "esc50-5-210612-A-37"
+        ],
+        "false_positive_ids": [
+          "wikimedia-rotating-bell"
+        ]
+      },
+      "bell": {
+        "tp": 4,
+        "fp": 2,
+        "fn": 3,
+        "tn": 159,
+        "precision": 0.6666666666666666,
+        "recall": 0.5714285714285714,
+        "false_positive_rate": 0.012422360248447204,
+        "missed_ids": [
+          "freesound-484344",
+          "freesound-789743",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": [
+          "esc50-4-209536-A-37",
+          "esc50-5-117118-A-42"
+        ]
+      }
+    },
+    "quiet": {
+      "knock": {
+        "tp": 15,
+        "fp": 1,
+        "fn": 1,
+        "tn": 151,
+        "precision": 0.9375,
+        "recall": 0.9375,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-5-218981-A-30"
+        ],
+        "false_positive_ids": [
+          "esc50-5-234263-A-25"
+        ]
+      },
+      "bicycle_bell": {
+        "tp": 0,
+        "fp": 0,
+        "fn": 5,
+        "tn": 163,
+        "precision": null,
+        "recall": 0.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "freesound-383631",
+          "freesound-445336",
+          "freesound-484344",
+          "freesound-789743",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": []
+      },
+      "dog_bark": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "siren": {
+        "tp": 16,
+        "fp": 0,
+        "fn": 0,
+        "tn": 152,
+        "precision": 1.0,
+        "recall": 1.0,
+        "false_positive_rate": 0.0,
+        "missed_ids": [],
+        "false_positive_ids": []
+      },
+      "smoke_alarm": {
+        "tp": 6,
+        "fp": 0,
+        "fn": 1,
+        "tn": 161,
+        "precision": 1.0,
+        "recall": 0.8571428571428571,
+        "false_positive_rate": 0.0,
+        "missed_ids": [
+          "freesound-530094"
+        ],
+        "false_positive_ids": []
+      },
+      "alarm_clock": {
+        "tp": 15,
+        "fp": 1,
+        "fn": 1,
+        "tn": 151,
+        "precision": 0.9375,
+        "recall": 0.9375,
+        "false_positive_rate": 0.006578947368421052,
+        "missed_ids": [
+          "esc50-5-210612-A-37"
+        ],
+        "false_positive_ids": [
+          "freesound-155006"
+        ]
+      },
+      "bell": {
+        "tp": 5,
+        "fp": 3,
+        "fn": 2,
+        "tn": 158,
+        "precision": 0.625,
+        "recall": 0.7142857142857143,
+        "false_positive_rate": 0.018633540372670808,
+        "missed_ids": [
+          "freesound-484344",
+          "wikimedia-rotating-bell"
+        ],
+        "false_positive_ids": [
+          "esc50-4-209536-A-37",
+          "esc50-5-117118-A-42",
+          "esc50-5-210612-A-37"
+        ]
+      }
+    }
+  },
+  "inference_ms": {
+    "median": 13.897833487135358,
+    "p95": 30.787412523932286
+  }
+}

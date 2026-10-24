@@ -1,0 +1,19 @@
+[
+  {
+    "window_seconds": 4.0,
+    "decision": {
+      "raw_score": 0.26865193247795105,
+      "threshold": 0.075,
+      "reason": "suppressed_recent_context",
+      "recent_context": {
+        "labels": {
+          "Alarm clock": 0.3347289562225342
+        },
+        "seen_at_seconds": 3.0
+      },
+      "hold_remaining_seconds": 3.0,
+      "type": "bell",
+      "effective_score": 0
+    }
+  }
+]

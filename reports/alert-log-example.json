@@ -1,0 +1,10 @@
+[
+  {
+    "kind": "alert_state",
+    "event_id": "b9ac084c-717b-464a-9a85-d52defd56a9e",
+    "type": "alarm_clock",
+    "priority_tier": 2,
+    "reason": "displayed",
+    "active_type": "alarm_clock"
+  }
+]

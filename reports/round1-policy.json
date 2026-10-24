@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "model": "zipformer",
+  "cooldown_seconds": 5,
+  "tuning": "ESC-50 folds 1\u20133 and designated supplemental authors only; false-positive rate <=1% on tuning cases",
+  "rules": {
+    "knock": {
+      "labels": {
+        "Knock": 1
+      },
+      "threshold": 0.075,
+      "status": "tuned_on_source_split"
+    },
+    "bicycle_bell": {
+      "labels": {
+        "Bicycle bell": 1
+      },
+      "threshold": 0.95,
+      "status": "disabled_no_tuning_hits",
+      "enabled": false
+    },
+    "dog_bark": {
+      "labels": {
+        "Bark": 1,
+        "Bow-wow": 1,
+        "Yip": 1
+      },
+      "threshold": 0.175,
+      "status": "tuned_on_source_split"
+    },
+    "siren": {
+      "labels": {
+        "Siren": 1
+      },
+      "threshold": 0.225,
+      "status": "tuned_on_source_split"
+    },
+    "smoke_alarm": {
+      "labels": {
+        "Smoke detector, smoke alarm": 1
+      },
+      "threshold": 0.35,
+      "status": "provisional_small_sample"
+    },
+    "alarm_clock": {
+      "labels": {
+        "Alarm clock": 1
+      },
+      "threshold": 0.05,
+      "status": "tuned_on_source_split"
+    },
+    "bell": {
+      "labels": {
+        "Bell": 1
+      },
+      "threshold": 0.1,
+      "suppressors": {
+        "Alarm clock": 0.05,
+        "Smoke detector, smoke alarm": 0.35,
+        "Siren": 0.225
+      },
+      "status": "provisional_small_sample"
+    }
+  }
+}

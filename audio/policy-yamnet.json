@@ -1,0 +1,52 @@
+{
+  "version": 1,
+  "model": "yamnet",
+  "cooldown_seconds": 5,
+  "tuning": "ESC-50 folds 1\u20133 and designated supplemental authors only; false-positive rate <=1% on tuning cases",
+  "rules": {
+    "knock": {
+      "labels": {
+        "Knock": 1
+      },
+      "threshold": 0.15,
+      "status": "tuned_on_source_split"
+    },
+    "bicycle_bell": {
+      "labels": {
+        "Bicycle bell": 1
+      },
+      "threshold": 0.95,
+      "status": "tuned_on_source_split"
+    },
+    "dog_bark": {
+      "labels": {
+        "Bark": 1,
+        "Bow-wow": 1,
+        "Yip": 1
+      },
+      "threshold": 0.125,
+      "status": "tuned_on_source_split"
+    },
+    "siren": {
+      "labels": {
+        "Siren": 1
+      },
+      "threshold": 0.275,
+      "status": "tuned_on_source_split"
+    },
+    "smoke_alarm": {
+      "labels": {
+        "Smoke detector, smoke alarm": 1
+      },
+      "threshold": 0.875,
+      "status": "tuned_on_source_split"
+    },
+    "alarm_clock": {
+      "labels": {
+        "Alarm clock": 1
+      },
+      "threshold": 0.075,
+      "status": "tuned_on_source_split"
+    }
+  }
+}
