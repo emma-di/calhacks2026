@@ -29,4 +29,24 @@ struct FOADirection {
         // ACN Y points left; Aware uses clockwise/right-positive bearings.
         return FOADirection(bearing: atan2(-wy, wx)*180 / .pi, coherence: coherence, rms: rms)
     }
+
+    /// Short sounds (a knock lasts a few hundredths of a second) are diluted by room noise across a
+    /// quarter-second window. Estimate from the loudest short block instead, so the transient decides.
+    static func loudestBlock(_ samples: [Float], blockFrames: Int) -> FOADirection {
+        let frames = samples.count / 4
+        guard blockFrames > 0, frames >= blockFrames else { return estimate(samples) }
+        var best: [Float] = []
+        var bestEnergy = -1.0
+        var start = 0
+        while start + blockFrames <= frames {
+            var energy = 0.0
+            for frame in start..<(start + blockFrames) { let w = Double(samples[frame*4]); energy += w*w }
+            if energy > bestEnergy {
+                bestEnergy = energy
+                best = Array(samples[(start*4)..<((start + blockFrames)*4)])
+            }
+            start += blockFrames / 2
+        }
+        return estimate(best)
+    }
 }

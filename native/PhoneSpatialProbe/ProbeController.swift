@@ -29,6 +29,16 @@ import Network
     private var lastSent = Date.distantPast
     private var sentOK = 0
 
+    init() {
+        usb.onChange = { [weak self] clients in
+            Task { @MainActor in
+                guard let self else { return }
+                self.usbStatus = clients == 0 ? "USB: waiting for the Mac bridge."
+                    : self.running ? "USB: streaming to the Mac." : "USB: Mac connected. Tap Start listening to stream."
+            }
+        }
+    }
+
     func start() {
         guard !running else { return }
         generation += 1
@@ -187,6 +197,7 @@ final class UsbStream: @unchecked Sendable {
     private var listener: NWListener?
     private var clients: [NWConnection] = []
     private var count = 0
+    var onChange: (@Sendable (Int) -> Void)?
 
     init() {
         guard let port = NWEndpoint.Port(rawValue: 5178), let listener = try? NWListener(using: .tcp, on: port) else { return }
@@ -200,6 +211,7 @@ final class UsbStream: @unchecked Sendable {
             connection.start(queue: self.queue)
             self.clients.append(connection)
             self.count = self.clients.count
+            self.onChange?(self.count)
         }
         listener.start(queue: queue)
         self.listener = listener
@@ -208,6 +220,7 @@ final class UsbStream: @unchecked Sendable {
     private func drop(_ connection: NWConnection) {
         clients.removeAll { $0 === connection }
         count = clients.count
+        onChange?(count)
     }
 
     /// Returns how many bridges were connected when the line was queued.
@@ -277,7 +290,9 @@ private final class SpatialProbeEngine: NSObject, AVCaptureAudioDataOutputSample
         let now = ProcessInfo.processInfo.systemUptime
         guard now-lastUpdate > 0.2 else { return }
         lastUpdate = now
-        update(String(format: "Verified FOA · 4 channels · %.0f Hz", asbd.mSampleRate), FOADirection.estimate(frames))
+        let block = Int(asbd.mSampleRate * 0.04)  // 40 ms: long enough to hold a knock, short enough to exclude the room
+        update(String(format: "Verified FOA · 4 channels · %.0f Hz", asbd.mSampleRate),
+               FOADirection.loudestBlock(frames, blockFrames: block))
     }
     private static func readFloats(_ sample: CMSampleBuffer) -> [Float]? {
         let frameCount = CMSampleBufferGetNumSamples(sample)
