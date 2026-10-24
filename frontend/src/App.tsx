@@ -23,6 +23,8 @@ import {
 import { soundCatalog, sounds, tierNames, type SoundEvent } from "./lib/events";
 import { explain, outcome } from "./lib/explain";
 import { useSession, type Source, type SyncStatus } from "./lib/session";
+import { useHearing } from "./lib/observations";
+import HearingPanel from "./components/Hearing";
 
 type View = "live" | "preferences" | "log";
 
@@ -162,6 +164,7 @@ export default function App() {
     source === "receiver" && connected && state.health?.display.connected,
   );
   const offline = source === "receiver" && !connected;
+  const hearing = useHearing(source === "receiver" && connected);
 
   const applySetup = useCallback(
     ({ profile, display, direction }: SetupChange) => {
@@ -542,6 +545,7 @@ export default function App() {
               {session.error ? ` ${session.error}` : ""}
             </p>
           </section>
+          {source === "receiver" && <HearingPanel hearing={hearing} />}
         </main>
       )}
 

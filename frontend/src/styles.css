@@ -1087,3 +1087,128 @@ code {
   flex-wrap: wrap;
   justify-content: flex-end;
 }
+
+/* Hearing now: the live observation stream (Receiver mode). */
+.hearing {
+  display: grid;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--raise);
+}
+.hearing-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.hearing-head h2 {
+  font-size: 15px;
+  font-weight: 600;
+}
+.hearing-status,
+.hearing-meta {
+  font-size: 13px;
+  color: var(--muted);
+}
+.hearing-meta {
+  font-family: var(--pixel);
+  font-size: 10px;
+}
+.hearing-head a.key {
+  text-decoration: none;
+  color: var(--text);
+  height: 32px;
+  font-size: 13px;
+}
+.hearing-empty,
+.hearing-note {
+  font-size: 13px;
+  color: var(--muted);
+}
+.hearing-cmd {
+  display: block;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--raise-2);
+  color: var(--text);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+.hearing-alert {
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--signal);
+}
+.hearing-sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--muted);
+}
+.hearing-list {
+  display: grid;
+  gap: 4px;
+  padding: 0;
+  list-style: none;
+}
+.hearing-list li {
+  display: grid;
+  grid-template-columns: minmax(0, 220px) 1fr 44px;
+  gap: 10px;
+  align-items: center;
+  font-size: 13px;
+}
+.hearing-list.is-quiet {
+  opacity: 0.45;
+}
+.hearing-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hearing-num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  color: var(--muted);
+}
+.hearing-track {
+  position: relative;
+  height: 8px;
+  border-radius: 4px;
+  background: var(--raise-2);
+  overflow: hidden;
+}
+.hearing-level .hearing-track {
+  display: block;
+  height: 6px;
+}
+.hearing-fill {
+  position: absolute;
+  inset: 0;
+  transform-origin: left;
+  background: var(--line-strong);
+  transition: transform 300ms ease;
+}
+.hearing-level .hearing-fill,
+.hearing-fill.is-strong {
+  background: var(--text);
+}
+.hearing-threshold {
+  position: absolute;
+  top: -2px;
+  bottom: -2px;
+  width: 2px;
+  background: var(--signal);
+}
+@media (max-width: 520px) {
+  .hearing-list li {
+    grid-template-columns: minmax(0, 1fr) 80px 40px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hearing-fill {
+    transition: none;
+  }
+}

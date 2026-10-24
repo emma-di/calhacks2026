@@ -69,7 +69,8 @@ input,select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid #2
 </section>
 
 <script>
-const API = '';                       // same origin; use 'http://127.0.0.1:8765' from another dev server
+// Same origin, or through the companion's /api proxy when opened as /api/teach.
+const API = location.pathname.startsWith('/api/') ? '/api' : '';
 const $ = s => document.querySelector(s), log = t => $('#log').textContent = t;
 let soundId = null, recording = null;
 
