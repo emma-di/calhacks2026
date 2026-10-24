@@ -1,0 +1,97 @@
+{
+  "note": "Shared timeline fixtures. tests/test_alerts.py and frontend/src/lib/alerts.test.ts both replay these against their engine. Times are milliseconds. 'expect.active' is the id of the shown event or null.",
+  "scenarios": [
+    {
+      "name": "urgent interrupts, lower priority recorded, knock resumes only while fresh",
+      "steps": [
+        {"at": 0, "add": "knock", "id": "k1", "expect": {"reason": "displayed", "active": "k1"}},
+        {"at": 1000, "add": "smoke_alarm", "id": "s1", "expect": {"reason": "interrupted", "active": "s1", "queue": ["k1"]}},
+        {"at": 1500, "add": "dog_bark", "id": "d1", "expect": {"reason": "suppressed_lower_priority", "active": "s1"}},
+        {"at": 2000, "dismiss": "s1", "expect": {"dismissed": true, "active": "k1", "reason": "resumed_from_queue"}},
+        {"at": 5000, "tick": true, "expect": {"active": null}}
+      ]
+    },
+    {
+      "name": "stale queued cue is dropped instead of replayed",
+      "steps": [
+        {"at": 0, "add": "smoke_alarm", "id": "s1", "expect": {"active": "s1"}},
+        {"at": 100, "add": "knock", "id": "k1", "expect": {"reason": "queued", "queue": ["k1"]}},
+        {"at": 30000, "tick": true, "expect": {"active": null, "queue": []}}
+      ]
+    },
+    {
+      "name": "dismiss acknowledges an ongoing alarm; it can alert again after it stops",
+      "steps": [
+        {"at": 0, "add": "smoke_alarm", "id": "s1", "expect": {"active": "s1"}},
+        {"at": 1000, "dismiss": "s1", "expect": {"dismissed": true, "active": null}},
+        {"at": 3000, "add": "smoke_alarm", "id": "s2", "expect": {"reason": "acknowledged_repeat", "active": null}},
+        {"at": 15000, "add": "smoke_alarm", "id": "s3", "expect": {"reason": "acknowledged_repeat", "active": null}},
+        {"at": 31000, "add": "smoke_alarm", "id": "s4", "expect": {"reason": "displayed", "active": "s4"}}
+      ]
+    },
+    {
+      "name": "stale dismiss naming an older cue cannot clear a newer urgent cue",
+      "steps": [
+        {"at": 0, "add": "knock", "id": "k1", "expect": {"active": "k1"}},
+        {"at": 500, "add": "smoke_alarm", "id": "s1", "expect": {"active": "s1"}},
+        {"at": 600, "dismiss": "k1", "expect": {"dismissed": false, "active": "s1"}}
+      ]
+    },
+    {
+      "name": "repeated detections merge without restarting a nonurgent lifetime",
+      "steps": [
+        {"at": 0, "add": "knock", "id": "k1", "expect": {"active": "k1", "remaining": 3000, "sequence": 1}},
+        {"at": 1000, "add": "knock", "id": "k2", "expect": {"reason": "merged_repeat", "active": "k1", "remaining": 2000, "sequence": 1}},
+        {"at": 2500, "add": "knock", "id": "k3", "expect": {"reason": "merged_repeat", "active": "k1", "remaining": 500}},
+        {"at": 3000, "tick": true, "expect": {"active": null}}
+      ]
+    },
+    {
+      "name": "an ongoing urgent sound stays visible while it continues, up to the cap",
+      "steps": [
+        {"at": 0, "add": "smoke_alarm", "id": "s1", "expect": {"active": "s1", "sequence": 1}},
+        {"at": 20000, "add": "smoke_alarm", "id": "s2", "expect": {"reason": "merged_repeat", "active": "s1", "remaining": 30000, "sequence": 2}},
+        {"at": 100000, "add": "smoke_alarm", "id": "s3", "expect": {"active": "s3", "reason": "displayed"}}
+      ]
+    },
+    {
+      "name": "duplicate event ids are ignored",
+      "steps": [
+        {"at": 0, "add": "knock", "id": "k1", "expect": {"active": "k1"}},
+        {"at": 10, "add": "knock", "id": "k1", "expect": {"reason": "duplicate", "active": "k1", "events": 1}}
+      ]
+    },
+    {
+      "name": "profile overrides and presets decide the effective tier",
+      "profile": {"mode": "active", "event_tiers": {"dog_bark": 0}},
+      "steps": [
+        {"at": 0, "add": "dog_bark", "id": "d1", "expect": {"reason": "ignored_tier_zero", "tier": 0, "active": null}},
+        {"at": 100, "add": "knock", "id": "k1", "expect": {"reason": "displayed", "tier": 3, "active": "k1"}},
+        {"at": 200, "add": "siren", "id": "r1", "expect": {"reason": "interrupted", "tier": 4, "active": "r1"}}
+      ]
+    },
+    {
+      "name": "work mode holds everyday sounds but lets attention and urgent through",
+      "steps": [
+        {"at": 0, "add": "knock", "id": "k1", "expect": {"active": "k1"}},
+        {"at": 100, "controls": {"focus_mode": "work"}, "expect": {"active": null}},
+        {"at": 200, "add": "knock", "id": "k2", "expect": {"reason": "held_work_mode", "active": null}},
+        {"at": 300, "add": "name_called", "id": "n1", "expect": {"reason": "displayed", "active": "n1"}},
+        {"at": 400, "controls": {"focus_mode": "dnd"}, "expect": {"active": null}},
+        {"at": 500, "add": "siren", "id": "r1", "expect": {"reason": "held_dnd_mode", "active": null}},
+        {"at": 600, "add": "smoke_alarm", "id": "s1", "expect": {"reason": "displayed", "active": "s1"}}
+      ]
+    },
+    {
+      "name": "pause hides everything, including urgent, and clears the queue",
+      "steps": [
+        {"at": 0, "add": "smoke_alarm", "id": "s1", "expect": {"active": "s1"}},
+        {"at": 100, "add": "knock", "id": "k1", "expect": {"queue": ["k1"]}},
+        {"at": 200, "controls": {"paused": true}, "expect": {"active": null, "queue": []}},
+        {"at": 300, "add": "smoke_alarm", "id": "s2", "expect": {"reason": "paused", "active": null}},
+        {"at": 400, "controls": {"paused": false}, "expect": {"active": null}},
+        {"at": 500, "add": "knock", "id": "k2", "expect": {"reason": "displayed", "active": "k2"}}
+      ]
+    }
+  ]
+}

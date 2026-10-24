@@ -1,12 +1,11 @@
 """Dependency-free 128x64 monochrome renderer and transport-independent display state."""
-from collections import deque
 from dataclasses import dataclass
 import math
 from pathlib import Path
 import time
 
 WIDTH, HEIGHT = 128, 64
-ICON_IDS = frozenset(("knock", "bell", "dog", "name", "smoke"))
+ICON_IDS = frozenset(("knock", "bell", "dog", "name", "smoke", "siren", "clock"))
 
 # Original five-column, seven-row bitmap alphabet. Unknown characters become '?'.
 _GLYPHS = {
@@ -139,6 +138,10 @@ def draw_icon(bitmap, icon_id, x, y, size=24):
                                     (20, 17), (21, 22))],
         "smoke": [((12, 2), (23, 22), (1, 22), (12, 2)),
                   ((12, 9), (12, 15)), ((12, 18), (12, 19))],
+        "siren": [((5, 19), (5, 12), (8, 8), (12, 7), (16, 8), (19, 12), (19, 19), (5, 19)),
+                  ((3, 22), (21, 22)), ((12, 2), (12, 4)), ((3, 5), (5, 7)), ((21, 5), (19, 7))],
+        "clock": [((12, 3), (18, 5), (21, 11), (19, 18), (12, 21), (5, 18), (3, 11), (6, 5),
+                   (12, 3)), ((12, 7), (12, 12), (16, 14)), ((4, 2), (2, 4)), ((20, 2), (22, 4))],
     }
     for path in paths[icon_id]:
         for start, end in zip(path, path[1:]):
@@ -236,7 +239,6 @@ class DisplayState:
         self.sequence = -1
         self.active = None
         self.deadline = 0.0
-        self._seen = deque(maxlen=128)
 
     def connect(self, session_id):
         if not isinstance(session_id, str) or not 0 < len(session_id) <= 128:
@@ -244,7 +246,6 @@ class DisplayState:
         self.active, self.deadline = None, 0.0
         if session_id != self.session_id:
             self.sequence = -1
-            self._seen.clear()
         self.session_id, self.connected = session_id, True
 
     def disconnect(self):
@@ -263,14 +264,10 @@ class DisplayState:
         if cue.effective_tier == 0 or cue.remaining_ms == 0:
             self.active, self.deadline = None, 0.0
             return True
-        deadline = now + min(cue.remaining_ms, 30000) / 1000
-        if cue.event_id in self._seen:
-            # A repeated snapshot can shorten a visible cue, never extend or resurrect it.
-            if self.active and self.active.event_id == cue.event_id:
-                self.active, self.deadline = cue, min(self.deadline, deadline)
-            return True
-        self._seen.append(cue.event_id)
-        self.active, self.deadline = cue, deadline
+        # The backend bumps state_sequence only when the cue really changes (new cue, resume after
+        # an interruption, an ongoing urgent sound extending its lifetime, clear). Re-polled
+        # snapshots repeat their sequence and are rejected above, so they can never extend a cue.
+        self.active, self.deadline = cue, now + min(cue.remaining_ms, 30000) / 1000
         return True
 
     def tick(self, now=None):
@@ -293,7 +290,8 @@ def main():
     parser.add_argument("--icons-only", action="store_true", help="Hide nonurgent event labels; urgent text remains")
     parser.add_argument("--output", type=Path, default=Path(".cache/display-preview.pbm"))
     args = parser.parse_args()
-    labels = {"knock": "Door knock", "bell": "Bell / chime", "dog": "Dog barking", "name": "Your name", "smoke": "Smoke alarm"}
+    labels = {"knock": "Door knock", "bell": "Bell / chime", "dog": "Dog barking", "name": "Your name",
+              "smoke": "Smoke alarm", "siren": "Siren", "clock": "Alarm clock"}
     payload = json.loads(args.snapshot.read_text()) if args.snapshot else dict(
         schema_version=1, session_id="offline-demo", state_sequence=1, event_id="fake-cue",
         label=labels[args.event], icon_id=args.event, effective_tier=args.tier, remaining_ms=30000)

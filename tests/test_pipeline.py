@@ -1,3 +1,4 @@
+import time
 import unittest
 from audio.events import Detector, make_event, validate_event
 from audio.server import AlertState
@@ -29,15 +30,15 @@ class PipelineTests(unittest.TestCase):
         s.add(make_event('smoke_alarm', .9, 'mock'))
         s.add(make_event('dog_bark', .9, 'mock'))
         self.assertEqual(s.snapshot()['active']['type'], 'smoke_alarm')
-        s.expires = 0
-        self.assertIsNone(s.snapshot()['active'])
+        self.assertIsNone(s.snapshot(now=time.monotonic() + 31)['active'])
 
     def test_ignore(self):
+        # Ignore is a saved preference; the receiver, not the producer, decides the tier.
         s = AlertState()
-        e = make_event('knock', .9, 'mock')
-        e['priority_tier'] = 0
-        s.add(e)
+        s.engine.profile['notification_preferences']['event_tiers'] = {'knock': 0}
+        s.add(make_event('knock', .9, 'mock'))
         self.assertIsNone(s.snapshot()['active'])
+        self.assertEqual(s.snapshot()['decisions'][-1]['reason'], 'ignored_tier_zero')
 
     def test_custom_model_rules_are_applied(self):
         policy={'rules':{'dog_bark':{'labels':{'Bark':1,'Bow-wow':1},'threshold':.2}}}

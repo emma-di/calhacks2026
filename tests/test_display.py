@@ -95,18 +95,21 @@ class DisplayTests(unittest.TestCase):
         now[0] = 130.0
         self.assertFalse(any(state.frame().buffer))
 
-    def test_duplicate_does_not_extend_or_resurrect_expired_cue(self):
+    def test_repolled_snapshot_never_extends_but_new_sequence_is_authoritative(self):
         now = [0.0]
         state = DisplayState(clock=lambda: now[0])
         state.connect("run-a")
-        state.accept(snapshot())
+        state.accept(snapshot(remaining_ms=3000))
         now[0] = 2.0
-        state.accept(snapshot(state_sequence=2, remaining_ms=3000))
+        self.assertFalse(state.accept(snapshot(remaining_ms=3000)))
         self.assertEqual(state.deadline, 3.0)
         now[0] = 3.0
         self.assertIsNone(state.tick())
-        state.accept(snapshot(state_sequence=3, remaining_ms=3000))
+        self.assertFalse(state.accept(snapshot(remaining_ms=3000)))
         self.assertIsNone(state.tick())
+        # Backend resumed the interrupted cue with a newer sequence.
+        self.assertTrue(state.accept(snapshot(state_sequence=2, remaining_ms=3000)))
+        self.assertEqual(state.active.event_id, "event-a")
 
     def test_stale_sequence_cannot_replace_or_clear(self):
         state = DisplayState(clock=lambda: 0.0)

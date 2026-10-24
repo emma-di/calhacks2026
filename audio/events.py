@@ -15,6 +15,9 @@ TARGETS = {
     'alarm_clock': ('Alarm clock', 'Alarm clock', 2, 0.40),
     'bell': ('Bell', 'Bell / chime', 2, 0.30),
 }
+# Every type the receiver accepts. name_called comes from the planned speech worker, not the classifier.
+EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items()}
+EVENT_TYPES['name_called'] = ('Your name', 3)
 
 def runtime_model():
     path=Path(__file__).with_name('runtime.json')
@@ -60,7 +63,7 @@ def make_event(kind, confidence, source, timestamp_ms=None):
                 distance_meters=None, proximity='unknown')
 
 def validate_event(event):
-    if not isinstance(event, dict) or event.get('type') not in TARGETS:
+    if not isinstance(event, dict) or event.get('type') not in EVENT_TYPES:
         raise ValueError('Unknown event type')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
@@ -68,8 +71,9 @@ def validate_event(event):
         if not isinstance(event.get(key), str) or not 0 < len(event[key]) <= 120:
             raise ValueError(f'Invalid {key}')
     score = event.get('confidence')
-    if type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1:
-        raise ValueError('confidence must be finite and within 0..1')
+    # Nullable for workers without a calibrated score (NAME-04); the UI never formats a missing score.
+    if score is not None and (type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        raise ValueError('confidence must be null or finite within 0..1')
     if type(event.get('priority_tier')) is not int or not 0 <= event['priority_tier'] <= 4:
         raise ValueError('priority_tier must be 0..4')
     if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:

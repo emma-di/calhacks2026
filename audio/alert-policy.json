@@ -1,0 +1,16 @@
+{
+  "version": 1,
+  "note": "Single source for notification timing and preset tiers. Read by audio/alerts.py and frontend/src/lib/alerts.ts. Balanced is agreed; Gentle and Active are provisional.",
+  "lifetime_ms": {"1": 2000, "2": 3000, "3": 5000, "4": 30000},
+  "urgent_ongoing_cap_ms": 120000,
+  "acknowledge_hold_ms": 15000,
+  "queue_limit": 5,
+  "queue_fresh_ms": 10000,
+  "focus_minimum_tier": {"everyday": 1, "work": 3, "dnd": 4},
+  "presets": {
+    "balanced": {"dog_bark": 1, "knock": 2, "bell": 2, "name_called": 3, "smoke_alarm": 4, "alarm_clock": 2, "siren": 3},
+    "gentle": {"dog_bark": 1, "knock": 1, "bell": 1, "name_called": 2, "smoke_alarm": 4, "alarm_clock": 2, "siren": 3},
+    "active": {"dog_bark": 2, "knock": 3, "bell": 3, "name_called": 3, "smoke_alarm": 4, "alarm_clock": 3, "siren": 4}
+  },
+  "icons": {"knock": "knock", "bell": "bell", "bicycle_bell": "bell", "dog_bark": "dog", "name_called": "name", "smoke_alarm": "smoke", "siren": "siren", "alarm_clock": "clock"}
+}
