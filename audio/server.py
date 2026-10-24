@@ -80,13 +80,15 @@ class AlertState:
     def save_profile(self, value):
         profile = validate_profile(value, EVENT_TYPES)
         with self.lock:
-            profile = self.engine.set_profile(profile)
+            profile = dict(profile, revision=self.engine.profile['revision'] + 1)
             if self.profile_path:
                 self.profile_path.parent.mkdir(parents=True, exist_ok=True)
                 temporary = self.profile_path.with_suffix('.tmp')
                 temporary.write_text(json.dumps(profile, indent=2))
                 os.replace(temporary, self.profile_path)
-            return profile
+            # Apply only after persistence succeeds: a rejected save must not change live behavior.
+            self.engine.set_profile(profile)
+            return self.engine.profile
 
     def presentation(self, client=None, now=None):
         with self.lock:
@@ -160,6 +162,8 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, state.save_profile(self.read_json()))
         except (ValueError, TypeError) as exc:
             self.reply(400, {'error': str(exc)})
+        except OSError:
+            self.reply(503, {'error': 'Preferences could not be saved; previous settings remain active'})
 
     def do_POST(self):
         path = urlsplit(self.path).path

@@ -104,3 +104,14 @@ lives in [alert engine](alert-engine.md), [display renderer](display-renderer.md
 - **A "mic is listening" heartbeat** so silence is distinguishable from a stalled worker (audio side).
 - **Demo stage gesture via webcam** was considered before the glasses camera was confirmed; now the
   same gesture code serves both.
+
+## Codex review — October 24
+
+Retain the Night lens and edge-position approach. A Fortnite-style cue is a useful interaction reference;
+the 128×64 optical patch is not established as a full-field-of-view circumference. Keep unknown direction
+neutral and real directional output gated on measured localization. Queue/ack/urgent-extension timing
+remains provisional until wearer testing. Leave the proposed urgent pulse unbuilt pending that validation.
+
+A held thumbs-up now requires release before rearming, preventing one sustained gesture from resolving
+several queued sounds. “Display client connected” establishes polling, not verified OLED output. “Recent
+audio events” establishes recent detections, not microphone heartbeat. These distinctions are intentional.

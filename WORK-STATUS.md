@@ -1,13 +1,13 @@
 # Work status
 
-Checkpoint: October 23, 2026, Pacific time. This is a maintained milestone snapshot, **not a live
+Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snapshot, **not a live
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
 | Worker / lane | Work | Checkpoint status | Evidence / handoff |
 | --- | --- | --- | --- |
 | Main Codex agent | Preview consistency and reliable individual sound tests | Fixed and locally verified; PR branch | Same semantic icons/text/placement for mirror/OLED; bell replaces previous urgent sample; dog test override removed |
-| Preferences subagent | Defaults first, sound search, explicit exceptions, appearance controls | Design complete; consolidated into Mana onboarding | frontend/mana/AwareOnboarding.jsx; simulator-only, no live profile API |
+| Preferences subagent | Defaults first, sound search, explicit exceptions, appearance controls | Design complete; consolidated into Mana onboarding | frontend/mana/AwareOnboarding.jsx; local save plus receiver profile sync |
 | Hardware subagent | Specs, offline OLED renderer and display guards | Complete | [Renderer](docs/display-renderer.md), 13 tests; no physical driver tested |
 | Hardware subagent follow-up | Sponsor substitution matrix | Complete | [Decision matrix](docs/sponsor-decision-matrix.md); no infrastructure provisioned |
 | Mana | Onboarding app and standalone React export | Integrated and checked locally | [Mana handoff](docs/mana-onboarding.md), frontend/mana/AwareOnboarding.jsx |
@@ -85,3 +85,30 @@ merge PR #2 after teammate review.
   client on the Pi and add a capture/inference heartbeat.
 - New communication proposal reviewed: name/attention detection first, optional short companion captions
   as stretch. No new speech, camera, gesture, revoicing or ASL implementation was started by that review.
+
+## Codex return audit — October 24
+
+Reviewed Claude's code and design handoff; retained Night lens, shared pixel frames, four-way placement,
+queue/repeat/mode rules and the optional camera gesture. Timing values remain provisional product
+choices, not wearer-validated requirements. Real directional inference and look sensing are not running.
+
+Found and fixed:
+- Browser simulator accidentally routed test events to HTTP because event provenance shadowed session
+  mode. Separate delivery routing now has two boundary tests (sound + camera gesture, both modes).
+- A continuously held thumbs-up could fire again after cooldown and dismiss a newly resumed cue.
+  Recognition now requires release before another action; two hold/cooldown tests added.
+- Camera requests now discard late streams after unmount/switch and stop tracks directly on cleanup;
+  enumeration failure no longer discards a working feed. Physical camera recheck remains pending.
+- Receiver failure clears confirmation as well as the active cue; profile saves are serialized in edit
+  order and stale completions do not mark a newer draft applied.
+- Failed profile persistence now returns HTTP 503 without changing live settings, verified over HTTP.
+- Status wording distinguishes a polling display client from verified physical pixels, and recent audio
+  events from a confirmed listening microphone.
+
+Verified this audit: **38 Python tests**, **13 frontend tests**, production build, browser simulated
+left urgent cue in both views and local thumbs-up confirmation. Python socket tests require loopback
+binding permission in the Codex sandbox. No new microphone or camera capture was started. The existing
+Claude-started services/capture were not stopped. Full responsive/layout inspection was not rerun.
+
+Still required: physical OLED/optics and orientation, camera interface/model, real-hand gesture tests,
+second Mac, final mic/spatial/name workers, unfamiliar-tester review and full responsive accessibility QA.

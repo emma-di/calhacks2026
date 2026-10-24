@@ -1,17 +1,21 @@
+import { GestureHold } from "./gesture-hold";
 import { useEffect, useRef, useState, type RefObject } from "react";
 
 // Thumbs-up to dismiss, seen by whichever camera the lens shows (the glasses' camera when it appears
 // as a webcam, or the laptop's). Runs MediaPipe's hand-gesture model in this tab; nothing leaves it.
-const HOLD_MS = 330;
-const COOLDOWN_MS = 1500;
 const FRAME_MS = 66;
 const LOCAL_MODEL = "/mediapipe/gesture_recognizer.task";
 const REMOTE_MODEL =
   "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task";
 
-export type GestureStatus = "off" | "loading" | "watching" | "hand" | "holding" | "error";
+export type GestureStatus =
+  "off" | "loading" | "watching" | "hand" | "holding" | "error";
 
-export function useThumbsUp(video: RefObject<HTMLVideoElement | null>, active: boolean, onGesture: () => void) {
+export function useThumbsUp(
+  video: RefObject<HTMLVideoElement | null>,
+  active: boolean,
+  onGesture: () => void,
+) {
   const [status, setStatus] = useState<GestureStatus>("off");
   const callback = useRef(onGesture);
   callback.current = onGesture;
@@ -23,12 +27,14 @@ export function useThumbsUp(video: RefObject<HTMLVideoElement | null>, active: b
     }
     let cancelled = false;
     let frame = 0;
-    let recognizer: { recognizeForVideo: Function; close: () => void } | null = null;
+    let recognizer: { recognizeForVideo: Function; close: () => void } | null =
+      null;
     setStatus("loading");
     (async () => {
       try {
         const vision = await import("@mediapipe/tasks-vision");
-        const files = await vision.FilesetResolver.forVisionTasks("/mediapipe/wasm");
+        const files =
+          await vision.FilesetResolver.forVisionTasks("/mediapipe/wasm");
         const make = (modelAssetPath: string) =>
           vision.GestureRecognizer.createFromOptions(files, {
             baseOptions: { modelAssetPath },
@@ -39,28 +45,35 @@ export function useThumbsUp(video: RefObject<HTMLVideoElement | null>, active: b
         if (cancelled) return recognizer.close();
         setStatus("watching");
         let last = 0;
-        let heldSince = 0;
-        let firedAt = -COOLDOWN_MS;
+        const hold = new GestureHold();
         const loop = (now: number) => {
           frame = requestAnimationFrame(loop);
           const element = video.current;
-          if (!recognizer || !element || element.readyState < 2 || now - last < FRAME_MS) return;
+          if (
+            !recognizer ||
+            !element ||
+            element.readyState < 2 ||
+            now - last < FRAME_MS
+          )
+            return;
           last = now;
-          const result = recognizer.recognizeForVideo(element, now);
+          let result;
+          try {
+            result = recognizer.recognizeForVideo(element, now);
+          } catch {
+            cancelAnimationFrame(frame);
+            setStatus("error");
+            return;
+          }
           const top = result.gestures?.[0]?.[0];
           const thumb = top?.categoryName === "Thumb_Up" && top.score > 0.6;
+          const fire = hold.update(thumb, now);
           if (!thumb) {
-            heldSince = 0;
             setStatus(result.landmarks?.length ? "hand" : "watching");
             return;
           }
-          heldSince ||= now;
           setStatus("holding");
-          if (now - heldSince >= HOLD_MS && now - firedAt >= COOLDOWN_MS) {
-            firedAt = now;
-            heldSince = 0;
-            callback.current();
-          }
+          if (fire) callback.current();
         };
         frame = requestAnimationFrame(loop);
       } catch {

@@ -2,6 +2,7 @@ import json
 import tempfile
 import threading
 import unittest
+from unittest.mock import patch
 from pathlib import Path
 from urllib.request import Request, urlopen
 from urllib.error import HTTPError
@@ -176,6 +177,17 @@ class ReceiverHttpTests(unittest.TestCase):
         # Restart: a new receiver loads the persisted profile.
         restarted = self.module.AlertState(profile_path=self.profile_path)
         self.assertEqual(restarted.profile()['notification_preferences']['event_tiers'], {'dog_bark': 0, 'knock': 4})
+
+    def test_failed_disk_save_does_not_change_live_or_persisted_preferences(self):
+        original = self.call('/profile')
+        changed = json.loads(json.dumps(original))
+        changed['notification_preferences']['event_tiers']['knock'] = 0
+        with patch('audio.server.os.replace', side_effect=OSError('disk unavailable')):
+            with self.assertRaises(HTTPError) as caught:
+                self.call('/profile', changed, 'PUT')
+        self.assertEqual(caught.exception.code, 503)
+        self.assertEqual(self.call('/profile'), original)
+        self.assertEqual(self.call('/events', make_event('knock', .9, 'mock'))['priority_tier'], 2)
 
     def test_controls_dismiss_and_errors(self):
         alarm = make_event('smoke_alarm', .9, 'mock')

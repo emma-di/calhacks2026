@@ -120,8 +120,8 @@ export default function App() {
       ? "Test sounds"
       : connected
         ? state.health?.capture.live
-          ? "Hearing audio"
-          : "Waiting for audio"
+          ? "Recent audio events"
+          : "Receiver ready"
         : connection === "connecting"
           ? "Connecting…"
           : "Receiver offline";
@@ -145,7 +145,7 @@ export default function App() {
   const oledInset = (
     <figure className="oled-inset">
       <Oled event={lensEvent} labels={labels} direction={lensDirection} />
-      <figcaption>{glasses ? "On the glasses now" : "The panel · 128×64"}</figcaption>
+      <figcaption>{glasses ? "Display client online · preview" : "The panel · 128×64"}</figcaption>
     </figure>
   );
 
@@ -207,7 +207,7 @@ export default function App() {
           </span>
           <span className={`pill ${glasses ? "is-on" : "is-off"}`}>
             <span className="dot" />
-            {glasses ? "Lens connected" : "Lens offline"}
+            {glasses ? "Display client connected" : "Glasses not connected"}
           </span>
           <button className="pill pill-button" onClick={() => setAudience(true)}>
             <Expand size={13} /> Audience view

@@ -1,4 +1,10 @@
-import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { Camera, CameraOff } from "lucide-react";
 import Oled from "./Oled";
 import { useThumbsUp, type GestureStatus } from "../lib/gesture";
@@ -10,14 +16,17 @@ function useCamera() {
   const [devices, setDevices] = useState<MediaDeviceInfo[]>([]);
   const [deviceId, setDeviceId] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const current = useRef<MediaStream | null>(null);
+  const generation = useRef(0);
   const stop = useCallback(() => {
-    setStream((current) => {
-      current?.getTracks().forEach((track) => track.stop());
-      return null;
-    });
+    generation.current++;
+    current.current?.getTracks().forEach((track) => track.stop());
+    current.current = null;
+    setStream(null);
   }, []);
   const start = useCallback(
     async (id?: string) => {
+      const version = ++generation.current;
       setError(null);
       if (!navigator.mediaDevices?.getUserMedia) {
         setError("This browser cannot open a camera here.");
@@ -25,15 +34,45 @@ function useCamera() {
       }
       try {
         const next = await navigator.mediaDevices.getUserMedia({
-          video: id ? { deviceId: { exact: id } } : { facingMode: "environment" },
+          video: id
+            ? { deviceId: { exact: id } }
+            : { facingMode: "environment" },
           audio: false,
         });
-        stop();
+        if (version !== generation.current) {
+          next.getTracks().forEach((track) => track.stop());
+          return;
+        }
+        current.current?.getTracks().forEach((track) => track.stop());
+        current.current = next;
         setStream(next);
-        setDeviceId(next.getVideoTracks()[0]?.getSettings().deviceId ?? id ?? "");
-        const all = await navigator.mediaDevices.enumerateDevices();
-        setDevices(all.filter((d) => d.kind === "videoinput"));
+        setDeviceId(
+          next.getVideoTracks()[0]?.getSettings().deviceId ?? id ?? "",
+        );
+        next.getVideoTracks().forEach((track) =>
+          track.addEventListener(
+            "ended",
+            () => {
+              if (current.current === next) {
+                stop();
+                setError(
+                  "Camera disconnected. Reconnect it, then choose Show my room.",
+                );
+              }
+            },
+            { once: true },
+          ),
+        );
+        // Device enumeration failure must not discard a successfully opened camera.
+        try {
+          const all = await navigator.mediaDevices.enumerateDevices();
+          if (version === generation.current)
+            setDevices(all.filter((d) => d.kind === "videoinput"));
+        } catch {
+          /* The selected camera can still play. */
+        }
       } catch (e) {
+        if (version !== generation.current) return;
         const name = (e as DOMException).name;
         setError(
           name === "NotAllowedError"
@@ -46,7 +85,14 @@ function useCamera() {
     },
     [stop],
   );
-  useEffect(() => stop, [stop]);
+  useEffect(
+    () => () => {
+      generation.current++;
+      current.current?.getTracks().forEach((track) => track.stop());
+      current.current = null;
+    },
+    [],
+  );
   return { stream, devices, deviceId, error, start, stop };
 }
 
@@ -85,11 +131,23 @@ export default function Stage({
   useEffect(() => {
     if (video.current) video.current.srcObject = camera.stream;
   }, [camera.stream]);
-  const gesture = useThumbsUp(video, Boolean(camera.stream && onGesture), () => onGesture?.());
+  const gesture = useThumbsUp(video, Boolean(camera.stream && onGesture), () =>
+    onGesture?.(),
+  );
   return (
-    <section className={`stage ${large ? "stage-large" : ""}`} aria-label="Wearer's view">
+    <section
+      className={`stage ${large ? "stage-large" : ""}`}
+      aria-label="Wearer's view"
+    >
       {camera.stream && (
-        <video ref={video} className="stage-video" autoPlay muted playsInline aria-hidden="true" />
+        <video
+          ref={video}
+          className="stage-video"
+          autoPlay
+          muted
+          playsInline
+          aria-hidden="true"
+        />
       )}
       <div className="stage-bar">
         <span className="stage-caption">{caption}</span>
@@ -114,7 +172,9 @@ export default function Stage({
           )}
           <button
             className="stage-button"
-            onClick={() => (camera.stream ? camera.stop() : void camera.start())}
+            onClick={() =>
+              camera.stream ? camera.stop() : void camera.start()
+            }
             aria-pressed={Boolean(camera.stream)}
           >
             {camera.stream ? <CameraOff size={15} /> : <Camera size={15} />}

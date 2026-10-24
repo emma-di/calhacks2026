@@ -232,3 +232,11 @@ Owner / affected interface:
 Evidence or doc link:
 Status: proposed | decided | implemented | verified | superseded
 ```
+
+## Codex return audit — October 24
+
+Reviewed Claude handoff and retained Night lens and shared renderer. Fixed browser-to-receiver routing,
+held-gesture rearming, camera lifecycle, ordered profile saves and failed-save rollback. See WORK-STATUS
+for exact evidence and remaining physical checks. Fortnite-inspired placement means direction controls
+position around the available display edge; do not imply a full-field-of-view overlay or real spatial
+inference from the current simulator.

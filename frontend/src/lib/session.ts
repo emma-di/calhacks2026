@@ -1,5 +1,11 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertEngine, directionDegrees, type Direction, type FocusMode, type Preferences } from "./alerts";
+import {
+  AlertEngine,
+  directionDegrees,
+  type Direction,
+  type FocusMode,
+  type Preferences,
+} from "./alerts";
 import {
   makeMock,
   parseSnapshot,
@@ -7,6 +13,7 @@ import {
   type EventType,
   type ViewState,
 } from "./events";
+import { deliverEvent } from "./delivery";
 import type { ManaProfile } from "../../mana/AwareOnboarding.jsx";
 
 export type Source = "browser" | "receiver";
@@ -70,7 +77,11 @@ export function useSession(
   }, [prefs]);
   useEffect(() => {
     if (source !== "browser") return;
-    const tick = () => setView({ ...emptyView(), ...engine.current.snapshot(performance.now()) });
+    const tick = () =>
+      setView({
+        ...emptyView(),
+        ...engine.current.snapshot(performance.now()),
+      });
     tick();
     const timer = setInterval(tick, 100);
     return () => clearInterval(timer);
@@ -88,7 +99,9 @@ export function useSession(
       controller = new AbortController();
       const timeout = setTimeout(() => controller?.abort(), 2500);
       try {
-        const snapshot = parseSnapshot(await request("/state", undefined, controller.signal));
+        const snapshot = parseSnapshot(
+          await request("/state", undefined, controller.signal),
+        );
         if (!cancelled) {
           setView(snapshot);
           setConnection("connected");
@@ -96,7 +109,13 @@ export function useSession(
       } catch {
         if (!cancelled) {
           setConnection("disconnected");
-          setView((v) => ({ ...v, active: null, remaining_ms: 0, health: null }));
+          setView((v) => ({
+            ...v,
+            active: null,
+            confirm: null,
+            remaining_ms: 0,
+            health: null,
+          }));
         }
       } finally {
         clearTimeout(timeout);
@@ -113,7 +132,14 @@ export function useSession(
 
   // Saved preferences follow the receiver, including after it restarts with a new session.
   const synced = useRef<string | null>(null);
-  const profileKey = profile ? JSON.stringify([profile.notification_preferences, profile.name_detection, labels]) : null;
+  const saves = useRef<Promise<unknown>>(Promise.resolve());
+  const profileKey = profile
+    ? JSON.stringify([
+        profile.notification_preferences,
+        profile.name_detection,
+        labels,
+      ])
+    : null;
   useEffect(() => {
     if (source !== "receiver") {
       synced.current = null;
@@ -125,22 +151,55 @@ export function useSession(
     if (synced.current === key) return;
     synced.current = key;
     setSync({ kind: "saving" });
-    request("/profile", { ...profile, display: { labels } }, undefined, "PUT")
-      .then((saved) => setSync({ kind: "applied", revision: Number((saved as { revision: number }).revision) }))
-      .catch((e: Error) => {
-        synced.current = null;
-        setSync({ kind: "error", message: e.message });
+    let cancelled = false;
+    // Preserve edit order: an older, slower request must not overwrite the latest settings.
+    saves.current = saves.current
+      .catch(() => undefined)
+      .then(async () => {
+        if (cancelled) return;
+        try {
+          const saved = await request(
+            "/profile",
+            { ...profile, display: { labels } },
+            undefined,
+            "PUT",
+          );
+          if (!cancelled)
+            setSync({
+              kind: "applied",
+              revision: Number((saved as { revision: number }).revision),
+            });
+        } catch (e) {
+          if (synced.current === key) synced.current = null;
+          if (!cancelled)
+            setSync({ kind: "error", message: (e as Error).message });
+        }
       });
+    return () => {
+      cancelled = true;
+    };
   }, [source, connection, profile, profileKey, labels, view.session_id]);
 
   const send = useCallback(
-    async (type: EventType, direction: Direction | null = null, source = "mock") => {
-      const event = { ...makeMock(type, undefined, direction ? directionDegrees[direction] : null), source };
-      if (source === "browser") {
-        engine.current.add(event, performance.now());
-        return;
-      }
-      await request("/events", { ...event, confidence: null });
+    async (
+      type: EventType,
+      direction: Direction | null = null,
+      provenance = "mock",
+    ) => {
+      const event = {
+        ...makeMock(
+          type,
+          undefined,
+          direction ? directionDegrees[direction] : null,
+        ),
+        source: provenance,
+      };
+      await deliverEvent(
+        source,
+        event,
+        (input) => engine.current.add(input, performance.now()),
+        request,
+      );
     },
     [source],
   );
@@ -153,7 +212,9 @@ export function useSession(
       try {
         await send(type, direction);
       } catch {
-        setError("The receiver did not accept that sound. Check that it is running.");
+        setError(
+          "The receiver did not accept that sound. Check that it is running.",
+        );
       }
     },
     [source, send, stopSequence],
@@ -165,9 +226,17 @@ export function useSession(
     if (source === "browser") engine.current.reset(performance.now());
     setBusy(true);
     timers.current = busyMinute.map(([delay, type]) =>
-      setTimeout(() => void send(type).catch(() => setError("The receiver stopped answering.")), delay),
+      setTimeout(
+        () =>
+          void send(type).catch(() =>
+            setError("The receiver stopped answering."),
+          ),
+        delay,
+      ),
     );
-    timers.current.push(setTimeout(() => setBusy(false), busyMinute.at(-1)![0] + 100));
+    timers.current.push(
+      setTimeout(() => setBusy(false), busyMinute.at(-1)![0] + 100),
+    );
   }, [source, send, stopSequence]);
 
   const dismiss = useCallback(async () => {
@@ -185,13 +254,16 @@ export function useSession(
   }, [source, view.active]);
 
   // A dismiss gesture from the camera, or the dock button standing in for it.
-  const gesture = useCallback(async (source: "camera" | "mock" = "mock") => {
-    try {
-      await send("thumbs_up", null, source);
-    } catch {
-      setError("The gesture did not reach the receiver.");
-    }
-  }, [send]);
+  const gesture = useCallback(
+    async (source: "camera" | "mock" = "mock") => {
+      try {
+        await send("thumbs_up", null, source);
+      } catch {
+        setError("The gesture did not reach the receiver.");
+      }
+    },
+    [send],
+  );
 
   const look = useCallback(
     async (direction: Direction) => {
@@ -225,5 +297,18 @@ export function useSession(
 
   useEffect(() => stopSequence, [source, stopSequence]);
 
-  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, gesture, setControls };
+  return {
+    view,
+    connection,
+    sync,
+    busy,
+    error,
+    play,
+    playSequence,
+    stopSequence,
+    dismiss,
+    look,
+    gesture,
+    setControls,
+  };
 }
