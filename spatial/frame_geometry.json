@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "frame": {
+    "description": "EYLRIM classic thick square acetate frame",
+    "size_code": "50-17-142",
+    "lens_width_mm": 50,
+    "bridge_width_mm": 17,
+    "arm_length_mm": 142
+  },
+  "coordinate_system": {
+    "units": "mm",
+    "origin": "bridge of the nose, front face of the frame (no microphone here in the two-mic layout)",
+    "x": "positive toward the wearer's right",
+    "y": "positive in front of the wearer",
+    "plane": "horizontal (x, y only); z/elevation not modeled yet",
+    "angle_convention": "0 deg straight ahead, increasing clockwise toward the right; +90 right, -90 left, +/-180 behind; angle = atan2(x, y)"
+  },
+  "array": {
+    "layout": "two_mic",
+    "baseline_mm": 140,
+    "array_center_mm": {
+      "x": 0,
+      "y": -122
+    },
+    "measurable": "left/right angle only (-90 to +90 deg); front and back are mirror images across the M1-M2 axis and cannot be distinguished",
+    "note": "For distant sources the direction is the same from the bridge origin and the array center. M0 (nose bridge, 0, 0) can be added later to resolve front/back."
+  },
+  "microphones": [
+    {
+      "id": "M1",
+      "position": "right arm tip, behind ear",
+      "x_mm": 70,
+      "y_mm": -122,
+      "status": "estimated",
+      "uncertainty_mm": 10,
+      "note": "x: replace with half the worn tip-to-tip spacing. y: replace with measured bridge-to-capsule distance, glasses lying flat."
+    },
+    {
+      "id": "M2",
+      "position": "left arm tip, behind ear",
+      "x_mm": -70,
+      "y_mm": -122,
+      "status": "estimated",
+      "uncertainty_mm": 10,
+      "note": "Mirror of M1; measure separately in case mounting is asymmetric."
+    }
+  ],
+  "reference_points": [
+    {
+      "id": "hinge_right",
+      "x_mm": 63,
+      "y_mm": -10,
+      "status": "estimated",
+      "note": "From size code (about 6 mm frame past each lens) and product photo; not used by localization."
+    },
+    {
+      "id": "hinge_left",
+      "x_mm": -63,
+      "y_mm": -10,
+      "status": "estimated",
+      "note": "Mirror of hinge_right."
+    }
+  ]
+}

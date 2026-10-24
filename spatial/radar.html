@@ -1,0 +1,354 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sound map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@400;500;600&display=swap">
+<style>
+:root{
+  --chart:#0f2438;      /* night-mode chart water */
+  --chart-deep:#0a1a2a;
+  --grid:#1f3b55;
+  --ring:#2f5677;
+  --ink:#dce7f0;
+  --muted:#8ea6bb;
+  --sound:#ef4b4b;      /* where the sound really is */
+  --estimate:#f5b740;   /* where the mics think it is */
+  --mic:#5ed0e6;
+  --panel:#13304a;
+  --line:#24486a;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--chart-deep);color:var(--ink);font:16px/1.45 "Barlow Semi Condensed",system-ui,sans-serif;
+  display:grid;grid-template-columns:minmax(0,1fr) 360px;min-height:100vh}
+#map-wrap{position:relative;display:flex;align-items:center;justify-content:center;padding:16px;min-height:0}
+canvas{display:block;max-width:100%;max-height:calc(100vh - 32px);aspect-ratio:1;cursor:crosshair;border-radius:50%}
+canvas:focus-visible{outline:3px solid var(--mic);outline-offset:6px}
+#legend{position:absolute;left:20px;bottom:16px;display:flex;flex-wrap:wrap;gap:6px 18px;font-size:14px;color:var(--muted)}
+#legend span::before{content:"";display:inline-block;vertical-align:middle;margin-right:7px}
+.lg-sound::before{width:10px;height:10px;border-radius:50%;background:var(--sound)}
+.lg-est::before{width:18px;height:0;border-top:2px solid var(--estimate)}
+.lg-amb::before{width:18px;height:0;border-top:2px dashed var(--estimate)}
+.lg-mic::before{width:8px;height:8px;border-radius:50%;background:var(--mic)}
+aside{background:var(--panel);border-left:1px solid var(--line);padding:22px 22px 28px;overflow-y:auto;max-height:100vh}
+h1{font-weight:600;font-size:28px;line-height:1.1;margin:0 0 6px;letter-spacing:.01em}
+h2{font-weight:600;font-size:17px;margin:22px 0 8px}
+p{margin:0 0 8px}
+.lede{color:var(--muted);max-width:34ch}
+.hint{color:var(--muted);font-size:14px}
+#audio{display:flex;gap:8px;align-items:baseline;font-size:14px;margin-top:10px;padding:8px 10px;border:1px solid var(--line);border-radius:6px}
+#audio b{font-weight:600}
+#audio.connected b{color:var(--mic)}
+#audio.not-running b{color:var(--estimate)}
+button,select{font:inherit;color:var(--ink);background:var(--chart);border:1px solid var(--ring);border-radius:6px;padding:7px 12px;cursor:pointer}
+button:hover,select:hover{border-color:var(--mic)}
+button:focus-visible,select:focus-visible{outline:2px solid var(--mic);outline-offset:2px}
+.seg{display:inline-flex;border:1px solid var(--ring);border-radius:6px;overflow:hidden}
+.seg button{border:0;border-radius:0;background:transparent}
+.seg button+button{border-left:1px solid var(--ring)}
+.seg button[aria-pressed=true]{background:var(--mic);color:var(--chart-deep);font-weight:600}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+#facing{font-size:22px;font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
+label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
+select{width:100%}
+#sounds{list-style:none;margin:0;padding:0}
+#sounds li{border-top:1px solid var(--line);padding:11px 0}
+.s-head{display:flex;justify-content:space-between;gap:8px;align-items:baseline}
+.s-name{font-weight:600;font-size:18px}
+.s-state{font-size:13px;color:var(--muted)}
+.s-state.playing{color:var(--sound)}
+.s-line{font-size:15px}
+.s-line em{font-style:normal;color:var(--muted)}
+.s-est{color:var(--estimate)}
+.s-turn{font-size:14px;color:var(--estimate);margin-top:2px}
+.conf{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:4px}
+.conf i{flex:0 0 70px;height:5px;background:var(--chart);border-radius:3px;overflow:hidden}
+.conf i b{display:block;height:100%;background:var(--estimate)}
+.s-pairs{font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+#empty{color:var(--muted);font-size:15px}
+#error{color:var(--estimate);font-size:14px;min-height:1.4em;margin-top:6px}
+@media (max-width:860px){
+  body{grid-template-columns:1fr}
+  canvas{max-height:none}
+  aside{border-left:0;border-top:1px solid var(--line);max-height:none}
+  #legend{position:static;padding:0 4px 8px}
+  #map-wrap{flex-direction:column}
+}
+</style>
+
+<main id="map-wrap">
+  <canvas id="map" width="900" height="900" tabindex="0"
+    aria-label="Top-down sound map. The wearer is at the center. Click to place a sound. Left and right arrow keys turn the head."></canvas>
+  <div id="legend">
+    <span class="lg-sound">Sound position</span>
+    <span class="lg-est">Estimated direction</span>
+    <span class="lg-amb">Front or back unknown</span>
+    <span class="lg-mic">Microphone (glasses drawn enlarged)</span>
+  </div>
+</main>
+
+<aside>
+  <h1>Sound map</h1>
+  <p class="lede">You are at the center, wearing the glasses. Red dots are where sounds are. Amber lines are where the microphones think each sound came from.</p>
+  <div id="audio" role="status"><b>Audio program</b><span>Checking…</span></div>
+
+  <h2>Microphones</h2>
+  <div class="seg" role="group" aria-label="Microphone count">
+    <button type="button" data-mics="2" aria-pressed="true">Two, arm tips</button>
+    <button type="button" data-mics="3" aria-pressed="false">Three, add bridge</button>
+  </div>
+  <p class="hint" id="mic-hint"></p>
+
+  <h2>Head</h2>
+  <div class="row">
+    <button type="button" data-turn="-15">Turn left</button>
+    <button type="button" data-turn="15">Turn right</button>
+    <button type="button" id="face-start">Face start</button>
+    <span id="facing" aria-live="polite">0°</span>
+  </div>
+  <p class="hint">Arrow keys turn 15°. Turn while a sound is still playing to find out whether it is in front or behind.</p>
+
+  <h2>Place a sound</h2>
+  <label for="kind">Sound</label>
+  <select id="kind"></select>
+  <label for="noise">Room noise</label>
+  <select id="noise">
+    <option value="30">Quiet room</option>
+    <option value="15" selected>Normal room</option>
+    <option value="5">Loud room</option>
+  </select>
+  <p class="hint">Click anywhere on the map to play the sound there.</p>
+  <div id="error" role="alert"></div>
+
+  <h2>Sounds</h2>
+  <ul id="sounds"></ul>
+  <p id="empty">No sounds yet. Click the map, or send an event from the audio program.</p>
+  <button type="button" id="clear">Clear map</button>
+</aside>
+
+<script>
+const canvas=document.querySelector('#map'),ctx=canvas.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const C={chart:css('--chart'),deep:css('--chart-deep'),grid:css('--grid'),ring:css('--ring'),ink:css('--ink'),
+  muted:css('--muted'),sound:css('--sound'),est:css('--estimate'),mic:css('--mic')};
+const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const GLASS_PX_PER_MM=0.95;   // the glasses are drawn enlarged; the map itself is to scale
+let state=null,size=900,center=450,radiusPx=400;
+
+async function post(path,body){
+  const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+  const data=await r.json().catch(()=>({}));
+  document.querySelector('#error').textContent=r.ok?'':(data.error||'Request failed');
+  refresh();
+  return data;
+}
+
+// Bearings: 0 straight ahead (up), clockwise positive. World frame = the way the wearer faced at start.
+const rad=d=>d*Math.PI/180;
+function toPx(x,y){const s=radiusPx/state.map_radius_m;return[center+x*s,center-y*s]}
+function along(bearing,r){return[center+Math.sin(rad(bearing))*r,center-Math.cos(rad(bearing))*r]}
+function fmtBearing(b){
+  b=((b+540)%360)-180;const a=Math.round(Math.abs(b));
+  if(a<=2)return'straight ahead';if(a>=178)return'directly behind';
+  return`${a}° ${b>0?'right':'left'}`;
+}
+
+function resize(){
+  const box=canvas.getBoundingClientRect(),dpr=window.devicePixelRatio||1;
+  const px=Math.round(box.width*dpr);
+  if(px&&canvas.width!==px){canvas.width=canvas.height=px}
+  size=canvas.width;center=size/2;radiusPx=size*0.43;
+}
+
+function drawChart(){
+  const s=size/900;
+  ctx.fillStyle=C.deep;ctx.fillRect(0,0,size,size);
+  ctx.save();ctx.beginPath();ctx.arc(center,center,size/2,0,2*Math.PI);ctx.clip();
+  ctx.fillStyle=C.chart;ctx.fillRect(0,0,size,size);
+  // 1 m grid
+  const m=radiusPx/state.map_radius_m;
+  ctx.strokeStyle=C.grid;ctx.lineWidth=1;
+  for(let k=-7;k<=7;k++){
+    ctx.beginPath();ctx.moveTo(center+k*m,0);ctx.lineTo(center+k*m,size);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(0,center+k*m);ctx.lineTo(size,center+k*m);ctx.stroke();
+  }
+  // range rings
+  ctx.strokeStyle=C.ring;ctx.fillStyle=C.muted;ctx.font=`${14*s}px "Barlow Semi Condensed",system-ui`;
+  ctx.textAlign='left';ctx.textBaseline='middle';
+  for(let r=1;r<=state.map_radius_m;r++){
+    ctx.lineWidth=r===state.map_radius_m?2:1;
+    ctx.beginPath();ctx.arc(center,center,r*m,0,2*Math.PI);ctx.stroke();
+    if(r%2===0){const[x,y]=along(135,r*m);ctx.fillText(`${r} m`,x+4*s,y)}
+  }
+  // bearing ring
+  for(let b=0;b<360;b+=5){
+    const major=b%30===0,inner=radiusPx+(major?6:10)*s,outer=radiusPx+(major?20:15)*s;
+    const[x1,y1]=along(b,inner),[x2,y2]=along(b,outer);
+    ctx.strokeStyle=major?C.muted:C.ring;ctx.lineWidth=major?1.5:1;
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+  }
+  ctx.fillStyle=C.ink;ctx.textAlign='center';ctx.font=`500 ${15*s}px "Barlow Semi Condensed",system-ui`;
+  for(let b=0;b<360;b+=30){
+    const label=b===0?'0°':b===180?'180°':b<180?`${b}° R`:`${360-b}° L`;
+    const[x,y]=along(b,radiusPx+36*s);ctx.fillText(label,x,y);
+  }
+  ctx.restore();
+}
+
+function drawGlasses(){
+  const s=GLASS_PX_PER_MM*size/900,yaw=state.yaw;
+  ctx.save();ctx.translate(center,center);ctx.rotate(rad(yaw));
+  const P=(x,y)=>[x*s,-y*s];
+  // facing line
+  ctx.setLineDash([6,8]);ctx.strokeStyle='rgba(94,208,230,.45)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.moveTo(0,-12*s);ctx.lineTo(0,-radiusPx);ctx.stroke();ctx.setLineDash([]);
+  // head outline for scale and orientation
+  ctx.fillStyle='rgba(10,26,42,.85)';ctx.strokeStyle='rgba(220,231,240,.3)';ctx.lineWidth=1;
+  ctx.beginPath();ctx.ellipse(0,P(0,-90)[1],72*s,98*s,0,0,2*Math.PI);ctx.fill();ctx.stroke();
+  ctx.beginPath();ctx.ellipse(0,P(0,8)[1],9*s,12*s,0,0,2*Math.PI);ctx.stroke();
+  // frame front and arms
+  const f=state.frame,lens=f.lens_width_mm||50,bridge=f.bridge_width_mm||17;
+  const hinge=(state.reference_points.find(p=>p.id==='hinge_right')||{x_mm:63,y_mm:-10});
+  const tipR=state.mics.find(m=>m.id==='M1')||{x_mm:70,y_mm:-122};
+  ctx.strokeStyle=C.ink;ctx.lineWidth=3*size/900;ctx.lineCap='round';
+  ctx.beginPath();
+  for(const side of[-1,1]){
+    const x0=side*bridge/2,x1=side*(bridge/2+lens);
+    ctx.moveTo(...P(x0,0));ctx.lineTo(...P(x1,0));ctx.lineTo(...P(side*hinge.x_mm,hinge.y_mm));
+    ctx.lineTo(...P(side*Math.abs(tipR.x_mm),tipR.y_mm));
+  }
+  ctx.moveTo(...P(-bridge/2,0));ctx.lineTo(...P(bridge/2,0));
+  ctx.stroke();
+  // microphones
+  ctx.font=`600 ${13*size/900}px "Barlow Semi Condensed",system-ui`;ctx.textBaseline='middle';
+  for(const m of state.mics){
+    const[x,y]=P(m.x_mm,m.y_mm);
+    ctx.fillStyle=C.mic;ctx.beginPath();ctx.arc(x,y,6*size/900,0,2*Math.PI);ctx.fill();
+    ctx.fillStyle=C.mic;ctx.textAlign=m.x_mm>0?'left':m.x_mm<0?'right':'center';
+    const dx=m.x_mm>0?10:m.x_mm<0?-10:0,dy=m.x_mm===0?-14:0;
+    ctx.fillText(m.id,x+dx*size/900,y+dy*size/900);
+  }
+  for(const m of state.planned_mics){
+    const[x,y]=P(m.x_mm,m.y_mm);
+    ctx.setLineDash([3,3]);ctx.strokeStyle='rgba(94,208,230,.6)';ctx.lineWidth=1.5;
+    ctx.beginPath();ctx.arc(x,y,6*size/900,0,2*Math.PI);ctx.stroke();ctx.setLineDash([]);
+  }
+  ctx.restore();
+}
+
+function drawEstimate(src,emphasis){
+  const e=src.estimate,s=size/900;
+  ctx.strokeStyle=C.est;ctx.fillStyle=C.est;ctx.globalAlpha=src.sounding?1:.45;
+  e.world_bearings.forEach(b=>{
+    ctx.lineWidth=(emphasis?2.5:1.6)*s;ctx.setLineDash(e.resolved?[]:[10*s,7*s]);
+    const[x0,y0]=along(b,125*s),[x1,y1]=along(b,radiusPx-4*s);
+    ctx.beginPath();ctx.moveTo(x0,y0);ctx.lineTo(x1,y1);ctx.stroke();ctx.setLineDash([]);
+    // arrowhead at the rim
+    const[ax,ay]=along(b,radiusPx-4*s);
+    ctx.save();ctx.translate(ax,ay);ctx.rotate(rad(b));
+    ctx.beginPath();ctx.moveTo(0,-2*s);ctx.lineTo(-7*s,12*s);ctx.lineTo(7*s,12*s);ctx.closePath();ctx.fill();ctx.restore();
+    if(!e.resolved){
+      const[qx,qy]=along(b,radiusPx-26*s);
+      ctx.font=`600 ${15*s}px "Barlow Semi Condensed",system-ui`;ctx.textAlign='center';ctx.textBaseline='middle';
+      ctx.fillText('?',qx+(Math.cos(rad(b))*12*s),qy+(Math.sin(rad(b))*12*s));
+    }
+  });
+  ctx.globalAlpha=1;
+}
+
+function drawSource(src,t){
+  const s=size/900,[x,y]=toPx(src.x,src.y);
+  if(src.sounding&&!reduceMotion){
+    for(let k=0;k<2;k++){
+      const phase=((t/1100)+k/2)%1;
+      ctx.strokeStyle=`rgba(239,75,75,${(1-phase)*.7})`;ctx.lineWidth=2*s;
+      ctx.beginPath();ctx.arc(x,y,(9+phase*30)*s,0,2*Math.PI);ctx.stroke();
+    }
+  }
+  ctx.globalAlpha=src.sounding?1:.5;
+  ctx.fillStyle=C.sound;ctx.beginPath();ctx.arc(x,y,8*s,0,2*Math.PI);ctx.fill();
+  ctx.strokeStyle=C.deep;ctx.lineWidth=2*s;ctx.stroke();
+  ctx.fillStyle=C.ink;ctx.font=`600 ${15*s}px "Barlow Semi Condensed",system-ui`;
+  ctx.textAlign=x>center?'left':'right';ctx.textBaseline='middle';
+  const dx=(x>center?14:-14)*s;
+  ctx.fillText(src.label,x+dx,y-8*s);
+  ctx.fillStyle=C.muted;ctx.font=`${13*s}px "Barlow Semi Condensed",system-ui`;
+  ctx.fillText(`${src.distance.toFixed(1)} m`,x+dx,y+9*s);
+  ctx.globalAlpha=1;
+}
+
+function draw(t){
+  if(state){
+    resize();drawChart();
+    const newest=state.sources.find(s=>s.sounding&&s.estimate)||state.sources[0];
+    [...state.sources].reverse().forEach(s=>s.estimate&&drawEstimate(s,s===newest));
+    drawGlasses();
+    [...state.sources].reverse().forEach(s=>drawSource(s,t));
+  }
+  requestAnimationFrame(draw);
+}
+
+function renderPanel(){
+  const a=state.audio,box=document.querySelector('#audio');
+  box.className=a.status==='connected'?'connected':a.status==='not running'?'not-running':'';
+  box.querySelector('span').textContent=
+    a.status==='connected'?'Connected. New events appear on the map.':
+    a.status==='not running'?'Not running. Start python3 -m audio.server, or click the map.':
+    a.status==='off'?'Not followed. Click the map to add sounds.':'Checking…';
+  document.querySelectorAll('[data-mics]').forEach(b=>b.setAttribute('aria-pressed',String(+b.dataset.mics===state.mic_count)));
+  document.querySelector('#mic-hint').textContent=state.mic_count===2
+    ?'Two mics give left or right. Front and back look the same until you turn your head.'
+    :'The bridge mic breaks the front/back tie, so one sound is enough.';
+  document.querySelector('#facing').textContent=state.yaw===0?'Facing 0°':`Facing ${fmtBearing(state.yaw)}`;
+  const kind=document.querySelector('#kind');
+  if(!kind.options.length)state.sound_types.forEach(t=>kind.add(new Option(t.label,t.type)));
+  document.querySelector('#noise').value=String(state.snr_db);
+  const list=document.querySelector('#sounds');
+  document.querySelector('#empty').hidden=state.sources.length>0;
+  list.innerHTML='';
+  for(const s of state.sources){
+    const e=s.estimate,li=document.createElement('li');
+    const conf=e.confidence,word=conf>=.4?'High':conf>=.15?'Medium':'Low';
+    const est=e.resolved?fmtBearing(e.world_bearings[0])
+      :`${fmtBearing(e.world_bearings[0])} or ${fmtBearing(e.world_bearings[1])}`;
+    li.innerHTML=`
+      <div class="s-head"><span class="s-name"></span><span class="s-state ${s.sounding?'playing':''}">${s.sounding?'Playing':'Ended'}</span></div>
+      <div class="s-line"><em>Sound at</em> ${fmtBearing(s.bearing)}, ${s.distance.toFixed(1)} m</div>
+      <div class="s-line"><em>Mics estimate</em> <span class="s-est">${est}</span></div>
+      ${e.needs_head_turn?`<div class="s-turn">${s.sounding?'Front or back unknown. Turn your head now.':'Front or back unknown. The sound ended before a head turn.'}</div>`:''}
+      <div class="s-line"><em>Error</em> ${e.error_deg.toFixed(0)}°${e.resolved?'':' (closest of the two)'}</div>
+      <div class="conf"><i><b style="width:${Math.round(conf*100)}%"></b></i>${word} confidence</div>
+      <div class="s-pairs">${e.pairs.map(p=>`${p.pair} ${p.tdoa_us>0?'+':''}${p.tdoa_us} µs`).join(', ')}${s.origin==='audio program'?'. From the audio program, position simulated':''}</div>`;
+    li.querySelector('.s-name').textContent=s.label;
+    list.append(li);
+  }
+}
+
+async function refresh(){
+  try{
+    const r=await fetch('/state');if(!r.ok)throw Error();
+    state=await r.json();renderPanel();
+  }catch{document.querySelector('#audio span').textContent='Sound map server stopped. Restart python3 -m spatial.server.'}
+}
+
+canvas.addEventListener('click',ev=>{
+  if(!state)return;
+  const box=canvas.getBoundingClientRect(),dpr=canvas.width/box.width;
+  const px=(ev.clientX-box.left)*dpr,py=(ev.clientY-box.top)*dpr,s=radiusPx/state.map_radius_m;
+  post('/sources',{type:document.querySelector('#kind').value,x:(px-center)/s,y:(center-py)/s});
+});
+document.querySelectorAll('[data-turn]').forEach(b=>b.onclick=()=>post('/head',{turn:+b.dataset.turn}));
+document.querySelector('#face-start').onclick=()=>post('/head',{yaw:0});
+document.querySelectorAll('[data-mics]').forEach(b=>b.onclick=()=>post('/mics',{count:+b.dataset.mics}));
+document.querySelector('#noise').onchange=e=>post('/noise',{snr_db:+e.target.value});
+document.querySelector('#clear').onclick=()=>post('/clear',{});
+addEventListener('keydown',e=>{
+  if(e.target.closest('select'))return;
+  if(e.key==='ArrowLeft'){e.preventDefault();post('/head',{turn:-15})}
+  if(e.key==='ArrowRight'){e.preventDefault();post('/head',{turn:15})}
+});
+refresh();setInterval(refresh,300);requestAnimationFrame(draw);
+</script>
+</html>
