@@ -240,3 +240,10 @@ held-gesture rearming, camera lifecycle, ordered profile saves and failed-save r
 for exact evidence and remaining physical checks. Fortnite-inspired placement means direction controls
 position around the available display edge; do not imply a full-field-of-view overlay or real spatial
 inference from the current simulator.
+
+## Hardware correction — October 24
+
+The glasses have no camera. Optional POV camera video is a browser demonstration backdrop only.
+Automatic hand tracking and the test thumbs-up button are removed from the app flow; manual Dismiss
+and expiry remain. Earlier camera-on-glasses and physical gesture claims are superseded. Phone as
+OS-exposed webcam is a possible demo input, not a verified direct phone-to-site streaming feature.

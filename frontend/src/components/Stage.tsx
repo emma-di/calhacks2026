@@ -7,7 +7,6 @@ import {
 } from "react";
 import { Camera, CameraOff } from "lucide-react";
 import Oled from "./Oled";
-import { useThumbsUp, type GestureStatus } from "../lib/gesture";
 import type { SoundEvent } from "../lib/events";
 
 // The camera only ever starts from a click, stays in this tab and is never recorded or sent anywhere.
@@ -56,7 +55,7 @@ function useCamera() {
               if (current.current === next) {
                 stop();
                 setError(
-                  "Camera disconnected. Reconnect it, then choose Show my room.",
+                  "Camera disconnected. Reconnect it, then choose Use POV camera.",
                 );
               }
             },
@@ -96,16 +95,7 @@ function useCamera() {
   return { stream, devices, deviceId, error, start, stop };
 }
 
-const gestureText: Record<GestureStatus, string> = {
-  off: "",
-  loading: "Loading hand tracking…",
-  watching: "Thumbs up to dismiss",
-  hand: "Hand seen · thumbs up to dismiss",
-  holding: "Thumbs up…",
-  error: "Hand tracking unavailable",
-};
-
-// The wearer's view: the room (camera) or darkness, with the glasses' own 128x64 frame floating in it,
+// Simulated wearer view: an optional demo camera backdrop, not a camera on the glasses.
 // so the live view and the panel can never disagree.
 export default function Stage({
   event,
@@ -114,7 +104,6 @@ export default function Stage({
   caption,
   large = false,
   motion = "none",
-  onGesture,
   children,
 }: {
   event: SoundEvent | null;
@@ -123,7 +112,6 @@ export default function Stage({
   caption: string;
   large?: boolean;
   motion?: "none" | "gentle";
-  onGesture?: () => void;
   children?: ReactNode;
 }) {
   const camera = useCamera();
@@ -131,9 +119,6 @@ export default function Stage({
   useEffect(() => {
     if (video.current) video.current.srcObject = camera.stream;
   }, [camera.stream]);
-  const gesture = useThumbsUp(video, Boolean(camera.stream && onGesture), () =>
-    onGesture?.(),
-  );
   return (
     <section
       className={`stage ${large ? "stage-large" : ""}`}
@@ -150,12 +135,9 @@ export default function Stage({
         />
       )}
       <div className="stage-bar">
-        <span className="stage-caption">{caption}</span>
-        {gesture !== "off" && (
-          <span className={`gesture-status is-${gesture}`} role="status">
-            {gestureText[gesture]}
-          </span>
-        )}
+        <span className="stage-caption">
+          {camera.stream ? `Demo POV camera · ${caption}` : caption}
+        </span>
         <span className="stage-tools">
           {camera.stream && camera.devices.length > 1 && (
             <select
@@ -178,7 +160,7 @@ export default function Stage({
             aria-pressed={Boolean(camera.stream)}
           >
             {camera.stream ? <CameraOff size={15} /> : <Camera size={15} />}
-            {camera.stream ? "Stop camera" : "Show my room"}
+            {camera.stream ? "Stop camera" : "Use POV camera"}
           </button>
         </span>
       </div>

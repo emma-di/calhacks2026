@@ -86,3 +86,11 @@ The physical display and final room microphone remain untested.
 
 The [display UX notes](../docs/display-ux.md) explain defaults/search, icon-first cues and the optical
 questions for Yameen. The [alert engine doc](../docs/alert-engine.md) covers the rules, API and Pi bring-up.
+
+## Current camera scope — October 24
+
+The glasses have no camera. **Use POV camera** adds a demo backdrop from a browser-visible webcam
+(laptop, or a phone exposed by the OS as a webcam). It does not provide wearable gesture/head tracking.
+Camera video stays in the tab. Hand recognition is not loaded or run by the current app, and dev/build
+no longer downloads its model. The unused experimental code remains available for future evaluation.
+A direct remote phone-browser feed is not configured; laptop localhost is not a phone-accessible site.

@@ -112,3 +112,10 @@ Claude-started services/capture were not stopped. Full responsive/layout inspect
 
 Still required: physical OLED/optics and orientation, camera interface/model, real-hand gesture tests,
 second Mac, final mic/spatial/name workers, unfamiliar-tester review and full responsive accessibility QA.
+
+## Hardware correction — October 24
+
+The glasses have no camera. Optional POV camera video is a browser demonstration backdrop only.
+Automatic hand tracking and the test thumbs-up button are removed from the app flow; manual Dismiss
+and expiry remain. Earlier camera-on-glasses and physical gesture claims are superseded. Phone as
+OS-exposed webcam is a possible demo input, not a verified direct phone-to-site streaming feature.

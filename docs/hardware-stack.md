@@ -33,9 +33,9 @@ this original board; do not assume a Zero 2 W tutorial or an ML package wheel su
 
 ## Camera — reported October 24
 
-Emma reports the glasses include a camera (model, interface and resolution still to confirm with
-Yameen). It is used for the thumbs-up dismiss gesture; if it appears to the laptop as a webcam the
-companion can use it directly, otherwise a small worker can post `thumbs_up` events to the receiver.
+**Correction, October 24:** the glasses have **no camera**. Optional laptop/phone POV video is a
+browser demonstration backdrop only, not a wearable input. Camera gestures are not part of the
+physical MVP. Manual browser dismissal and cue expiry remain available.
 
 ## System split
 

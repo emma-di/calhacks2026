@@ -107,3 +107,10 @@ for 330 ms. Runtime and model are served from `frontend/public/mediapipe/` (fill
 `scripts/vendor-mediapipe.mjs` before dev/build; the 8 MB model stays out of Git and falls back to
 Google's copy if missing). Video never leaves the tab. The lens shows "Thumbs up to dismiss" while
 watching and turns amber while a thumbs-up is being held.
+
+## Camera correction — October 24 (current)
+
+The physical glasses have no camera. The camera backdrop is demonstration-only. The app no longer
+runs gesture recognition or exposes the thumbs-up button. Earlier camera-gesture sections describe
+experimental code retained outside the current flow, not the physical build. Use manual Dismiss or
+expiry. A future physical input adapter can reuse the receiver contract if hardware is supplied.

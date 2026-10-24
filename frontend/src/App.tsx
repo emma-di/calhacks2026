@@ -152,7 +152,7 @@ export default function App() {
   if (audience) {
     return (
       <div className="night audience">
-        <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} onGesture={() => void session.gesture("camera")} large>
+        <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} large>
           {oledInset}
         </Stage>
         <div className="audience-bar">
@@ -222,7 +222,7 @@ export default function App() {
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
           <div className="lens-wrap">
-            <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} onGesture={() => void session.gesture("camera")} />
+            <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} />
             <div className="lifeline" aria-hidden="true">
               <div
                 className={`lifeline-fill ${active?.priority_tier === 4 ? "is-urgent" : ""}`}
@@ -235,7 +235,7 @@ export default function App() {
               <p className="narration">{narration}</p>
               <p className="aside">
               {active
-                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction}, thumbs up or dismiss to resolve` : "thumbs up or dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
+                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `simulate looking ${direction}, or dismiss to resolve` : "dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
                 : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
               </p>
             </div>
@@ -305,17 +305,9 @@ export default function App() {
               </button>
               {direction ? (
                 <button className="key key-signal" onClick={() => void session.look(direction)}>
-                  Look {direction}
+                  Simulate look {direction}
                 </button>
               ) : null}
-              <button
-                className="key"
-                onClick={() => void session.gesture()}
-                disabled={offline}
-                title="Stands in for the camera seeing a thumbs-up"
-              >
-                <SoundIcon type="thumbs_up" size={16} /> Thumbs up
-              </button>
               <button className="key" onClick={session.dismiss} disabled={!active}>
                 Dismiss
               </button>
@@ -418,7 +410,7 @@ export default function App() {
           ))}
         </dl>
         <p className="aside">
-          Names and sound direction are not running yet. Show my room uses your camera only in this tab; nothing is
+          The glasses have no camera. Use POV camera adds an optional demo backdrop from this device; nothing is
           recorded. Aware can miss sounds or raise false alerts, so it is not a safety device.
         </p>
         <button className="key key-signal" autoFocus onClick={() => setHelp(false)}>

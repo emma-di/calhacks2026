@@ -115,3 +115,15 @@ remains provisional until wearer testing. Leave the proposed urgent pulse unbuil
 A held thumbs-up now requires release before rearming, preventing one sustained gesture from resolving
 several queued sounds. “Display client connected” establishes polling, not verified OLED output. “Recent
 audio events” establishes recent detections, not microphone heartbeat. These distinctions are intentional.
+
+## Camera assumption corrected — October 24 (supersedes camera/gesture claims above)
+
+Emma clarified there is no camera on the glasses. The optional camera background is a demo POV,
+using a laptop webcam or a phone exposed as a webcam. It does not establish wearable capture,
+spatial tracking, head tracking or gesture control. Automatic hand recognition and the thumbs-up
+button have been removed from the user flow. Gesture code remains unused experimental code.
+Manual Dismiss and timed expiry work; Look is explicitly a simulated input. No new camera is needed.
+
+A phone can act as a camera when the OS/browser exposes it as a webcam. Direct phone-browser access
+would require a reachable secure site and an agreed event connection; localhost on the laptop is
+not accessible from the phone. That remote-phone setup has not been implemented or tested here.
