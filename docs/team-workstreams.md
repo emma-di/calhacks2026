@@ -8,12 +8,15 @@ are still separate work items. See [current measured results](../reports/summary
 | --- | --- | --- |
 | Hardware / Yameen | Display, optics, mounting, microphone access, controller transport | A mock event appears on the physical display; document the audio interface |
 | Audio / ML | Environmental classification, false-alert evaluation, future name detection | Recorded/live audio emits normalized events; keep a reproducible test set |
-| Backend / integration | Schema, preferences → tier, alert state, hardware output | Same alert state reaches laptop and physical display |
-| UI/UX | Onboarding, settings, cue design, laptop simulator, dismiss/mute | Mock events show readable cues; onboarding saves the agreed profile |
+| Backend / integration — Emma after initial UI | Schema, preferences → tier, alert state, hardware output | Same alert state reaches laptop and physical display |
+| UI/UX — Emma | Audience mirror, companion, cue design, then onboarding/settings | Polished mock cues, then recorded events in the same UI |
 | Spatial audio | Mic geometry/synchronization, direction and confidence | A known-angle recording produces a measured direction or unknown |
 
-Only the hardware ownership above is confirmed. Agree on the other owners as a team;
+Emma's UI/backend work and Yameen's hardware work are confirmed. Agree on the other owners as a team;
 GitHub access does not assign anyone to a workstream.
+
+Use the [master TODO](../TODO.md) for status and the [UI → backend plan](ui-ux-backend-plan.md)
+for the judge-wears-glasses/audience-watches-mirror demo, implementation order and proposed APIs.
 
 ## Interfaces to keep stable
 

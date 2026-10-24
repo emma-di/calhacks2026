@@ -49,6 +49,9 @@ This repo does not claim Quest microphone access or headset display integration 
 
 ## Next build order
 
+The list below covers audio/hardware integration. Emma's parallel frontend-first work follows the
+[browser mirror → backend plan](ui-ux-backend-plan.md); track both paths in the [master TODO](../TODO.md).
+
 1. Five live trials of knock, bicycle bell, and barking, plus quiet/background conversation negatives.
    Record hits, misses, false alerts, and end-to-end delay. Tune per-class thresholds from those results.
 2. Add a physical display adapter consuming the same active alert state.
