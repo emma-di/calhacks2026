@@ -51,6 +51,9 @@ button:focus-visible,select:focus-visible{outline:2px solid var(--mic);outline-o
 .seg button[aria-pressed=true]{background:var(--mic);color:var(--chart-deep);font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 #facing{font-size:22px;font-weight:600;margin-left:auto;font-variant-numeric:tabular-nums}
+#trace-wrap{margin-top:10px;border:1px solid var(--line);border-radius:6px;padding:6px 8px 4px;background:var(--chart)}
+#trace-head{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+#trace{display:block;width:100%;height:56px}
 label{display:block;font-size:14px;color:var(--muted);margin:10px 0 4px}
 select{width:100%}
 #sounds{list-style:none;margin:0;padding:0}
@@ -106,9 +109,19 @@ select{width:100%}
     <button type="button" data-turn="-15">Turn left</button>
     <button type="button" data-turn="15">Turn right</button>
     <button type="button" id="face-start">Face start</button>
-    <span id="facing" aria-live="polite">0°</span>
+    <span id="facing">0°</span>
   </div>
-  <p class="hint">Arrow keys turn 15°. Turn while a sound is still playing to find out whether it is in front or behind.</p>
+  <label id="motion-label">Natural head motion</label>
+  <div class="seg" role="group" aria-labelledby="motion-label">
+    <button type="button" data-motion="still" aria-pressed="true">Still</button>
+    <button type="button" data-motion="walking" aria-pressed="false">Walking</button>
+    <button type="button" data-motion="looking" aria-pressed="false">Looking around</button>
+  </div>
+  <div id="trace-wrap">
+    <div id="trace-head"><span>Head yaw (gyro), last 6 s</span><span id="trace-range"></span></div>
+    <canvas id="trace" width="632" height="112" aria-hidden="true"></canvas>
+  </div>
+  <p class="hint" id="motion-hint"></p>
 
   <h2>Place a sound</h2>
   <label for="kind">Sound</label>
@@ -135,7 +148,7 @@ const C={chart:css('--chart'),deep:css('--chart-deep'),grid:css('--grid'),ring:c
   muted:css('--muted'),sound:css('--sound'),est:css('--estimate'),mic:css('--mic')};
 const reduceMotion=matchMedia('(prefers-reduced-motion: reduce)').matches;
 const GLASS_PX_PER_MM=0.95;   // the glasses are drawn enlarged; the map itself is to scale
-let state=null,size=900,center=450,radiusPx=400;
+let state=null,size=900,center=450,radiusPx=400,shownYaw=0;
 
 async function post(path,body){
   const r=await fetch(path,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
@@ -198,7 +211,7 @@ function drawChart(){
 }
 
 function drawGlasses(){
-  const s=GLASS_PX_PER_MM*size/900,yaw=state.yaw;
+  const s=GLASS_PX_PER_MM*size/900,yaw=shownYaw;
   ctx.save();ctx.translate(center,center);ctx.rotate(rad(yaw));
   const P=(x,y)=>[x*s,-y*s];
   // facing line
@@ -281,6 +294,8 @@ function drawSource(src,t){
 
 function draw(t){
   if(state){
+    // Ease toward the latest yaw so the head sway looks continuous between 0.1 s updates.
+    const diff=((state.yaw-shownYaw+540)%360)-180;shownYaw+=reduceMotion?diff:diff*0.35;
     resize();drawChart();
     const newest=state.sources.find(s=>s.sounding&&s.estimate)||state.sources[0];
     [...state.sources].reverse().forEach(s=>s.estimate&&drawEstimate(s,s===newest));
@@ -288,6 +303,23 @@ function draw(t){
     [...state.sources].reverse().forEach(s=>drawSource(s,t));
   }
   requestAnimationFrame(draw);
+}
+
+function drawTrace(){
+  const c=document.querySelector('#trace'),g=c.getContext('2d'),w=c.width,h=c.height;
+  const hist=state.yaw_history.map(y=>((y-state.base_yaw+540)%360)-180);
+  const peak=Math.max(4,...hist.map(Math.abs));
+  const range=Math.ceil(peak*1.2);
+  document.querySelector('#trace-range').textContent=`±${range}°`;
+  g.clearRect(0,0,w,h);
+  g.strokeStyle=C.ring;g.lineWidth=1;g.beginPath();g.moveTo(0,h/2);g.lineTo(w,h/2);g.stroke();
+  const n=Math.round(6/state.tick_seconds);
+  g.strokeStyle=C.mic;g.lineWidth=2.5;g.beginPath();
+  hist.forEach((v,k)=>{
+    const x=w-(hist.length-1-k)*(w/(n-1)),y=h/2-(v/range)*(h/2-4);
+    k?g.lineTo(x,y):g.moveTo(x,y);
+  });
+  g.stroke();
 }
 
 function renderPanel(){
@@ -301,7 +333,13 @@ function renderPanel(){
   document.querySelector('#mic-hint').textContent=state.mic_count===2
     ?'Two mics give left or right. Front and back look the same until you turn your head.'
     :'The bridge mic breaks the front/back tie, so one sound is enough.';
-  document.querySelector('#facing').textContent=state.yaw===0?'Facing 0°':`Facing ${fmtBearing(state.yaw)}`;
+  document.querySelector('#facing').textContent=state.base_yaw===0?'Facing 0°':`Facing ${fmtBearing(state.base_yaw)}`;
+  document.querySelectorAll('[data-motion]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.motion===state.motion)));
+  document.querySelector('#motion-hint').textContent={
+    still:'Arrow keys turn 15°. Turn while a sound is still playing to find out whether it is in front or behind.',
+    walking:'The head sways about 2.5° each way once per stride. Two mics compare that sway with how the sound shifts, so short sounds can be placed front or back without a deliberate turn.',
+    looking:'Slow, wider glances of about 12° each way. Front or back resolves quickly, even for low-pitched sounds.'}[state.motion];
+  drawTrace();
   const kind=document.querySelector('#kind');
   if(!kind.options.length)state.sound_types.forEach(t=>kind.add(new Option(t.label,t.type)));
   document.querySelector('#noise').value=String(state.snr_db);
@@ -317,13 +355,24 @@ function renderPanel(){
       <div class="s-head"><span class="s-name"></span><span class="s-state ${s.sounding?'playing':''}">${s.sounding?'Playing':'Ended'}</span></div>
       <div class="s-line"><em>Sound at</em> ${fmtBearing(s.bearing)}, ${s.distance.toFixed(1)} m</div>
       <div class="s-line"><em>Mics estimate</em> <span class="s-est">${est}</span></div>
-      ${e.needs_head_turn?`<div class="s-turn">${s.sounding?'Front or back unknown. Turn your head now.':'Front or back unknown. The sound ended before a head turn.'}</div>`:''}
+      ${frontBackNote(s)}
       <div class="s-line"><em>Error</em> ${e.error_deg.toFixed(0)}°${e.resolved?'':' (closest of the two)'}</div>
       <div class="conf"><i><b style="width:${Math.round(conf*100)}%"></b></i>${word} confidence</div>
       <div class="s-pairs">${e.pairs.map(p=>`${p.pair} ${p.tdoa_us>0?'+':''}${p.tdoa_us} µs`).join(', ')}${s.origin==='audio program'?'. From the audio program, position simulated':''}</div>`;
     li.querySelector('.s-name').textContent=s.label;
     list.append(li);
   }
+}
+
+function frontBackNote(s){
+  const e=s.estimate,sway=`${e.yaw_span_deg.toFixed(1)}°`;
+  if(e.decided_by==='head motion')
+    return`<div class="s-line"><em>Front or back</em> ${e.front_back}, from ${sway} of head movement over ${e.readings} readings</div>`;
+  if(!e.needs_head_turn)return'';
+  if(s.sounding)return`<div class="s-turn">${state.motion==='still'&&e.yaw_span_deg<0.1
+    ?'Front or back unknown. Turn your head, or set head motion to Walking.'
+    :`Front or back unknown. Listening to head movement: ${sway} so far.`}</div>`;
+  return`<div class="s-turn">Front or back unknown. The sound ended after ${sway} of head movement, which was not enough.</div>`;
 }
 
 async function refresh(){
@@ -342,6 +391,7 @@ canvas.addEventListener('click',ev=>{
 document.querySelectorAll('[data-turn]').forEach(b=>b.onclick=()=>post('/head',{turn:+b.dataset.turn}));
 document.querySelector('#face-start').onclick=()=>post('/head',{yaw:0});
 document.querySelectorAll('[data-mics]').forEach(b=>b.onclick=()=>post('/mics',{count:+b.dataset.mics}));
+document.querySelectorAll('[data-motion]').forEach(b=>b.onclick=()=>post('/motion',{mode:b.dataset.motion}));
 document.querySelector('#noise').onchange=e=>post('/noise',{snr_db:+e.target.value});
 document.querySelector('#clear').onclick=()=>post('/clear',{});
 addEventListener('keydown',e=>{
@@ -349,6 +399,6 @@ addEventListener('keydown',e=>{
   if(e.key==='ArrowLeft'){e.preventDefault();post('/head',{turn:-15})}
   if(e.key==='ArrowRight'){e.preventDefault();post('/head',{turn:15})}
 });
-refresh();setInterval(refresh,300);requestAnimationFrame(draw);
+refresh();setInterval(refresh,100);requestAnimationFrame(draw);
 </script>
 </html>

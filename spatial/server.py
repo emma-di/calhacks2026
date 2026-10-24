@@ -37,7 +37,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         routes = {'/sources': self.add_source, '/events': self.add_event, '/head': self.head,
-                  '/mics': self.mics, '/noise': self.noise, '/clear': self.clear}
+                  '/mics': self.mics, '/noise': self.noise, '/motion': self.motion, '/clear': self.clear}
         if self.path not in routes:
             return self.reply(404, {'error': 'Not found'})
         try:
@@ -71,6 +71,9 @@ class Handler(BaseHTTPRequestHandler):
     def noise(self, body):
         scene.set_noise(body.get('snr_db'))
 
+    def motion(self, body):
+        scene.set_motion(body.get('mode'))
+
     def clear(self, body):
         scene.clear()
 
@@ -103,6 +106,13 @@ def follow_audio_program(url, stop, interval=0.5):
         stop.wait(interval)
 
 
+def run_ticks(stop):
+    """Advance head motion and take mic readings of playing sounds, ten times a second."""
+    from spatial.scene import TICK_SECONDS
+    while not stop.wait(TICK_SECONDS):
+        scene.tick()
+
+
 def main():
     parser = argparse.ArgumentParser(description='Simulated sound map for the glasses')
     parser.add_argument('--port', type=int, default=8766)
@@ -112,6 +122,7 @@ def main():
     args = parser.parse_args()
     server = ThreadingHTTPServer(('127.0.0.1', args.port), Handler)
     stop = threading.Event()
+    threading.Thread(target=run_ticks, args=(stop,), daemon=True).start()
     if not args.no_audio:
         threading.Thread(target=follow_audio_program, args=(args.audio_url, stop), daemon=True).start()
     print(f'Sound map: http://127.0.0.1:{args.port}', flush=True)

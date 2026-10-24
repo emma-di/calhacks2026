@@ -7,6 +7,7 @@ synthesized from the geometry in frame_geometry.json and then localized for real
 import math
 import threading
 import time
+from collections import deque
 
 import numpy as np
 
@@ -19,6 +20,17 @@ from spatial.simulate import SAMPLE_RATE, SOUNDING_SECONDS, render, source_signa
 MAX_SOURCES = 10
 KEEP_AFTER_SOUNDING_SECONDS = 20
 MAP_RADIUS_M = 6.0
+TICK_SECONDS = 0.1          # one mic reading per sounding source per tick
+YAW_HISTORY_SECONDS = 6
+OBSERVATION_SECONDS = 0.12  # length of each simulated mic window
+
+# Natural head yaw as a sum of sways: (amplitude degrees, frequency Hz, phase radians).
+# Walking: the head yaws about +/-2.5 degrees once per stride, with a little faster jitter.
+HEAD_MOTION = {
+    'still': (),
+    'walking': ((2.5, 0.9, 0.0), (0.6, 2.3, 1.1)),
+    'looking': ((12.0, 0.15, 0.0), (3.0, 0.4, 0.7)),
+}
 
 
 class Scene:
@@ -28,7 +40,11 @@ class Scene:
         self.clock = clock
         self.lock = threading.RLock()
         self.sources = []
-        self.yaw = 0.0
+        self.base_yaw = 0.0   # where the wearer means to face (turn buttons)
+        self.yaw = 0.0        # base plus natural sway: what the IMU would report
+        self.motion = 'still'
+        self.motion_started = clock()
+        self.yaw_history = deque(maxlen=int(YAW_HISTORY_SECONDS / TICK_SECONDS))
         self.mic_count = 2
         self.snr_db = 15.0
         self.next_id = 1
@@ -61,7 +77,23 @@ class Scene:
 
     def turn(self, delta=None, yaw=None):
         with self.lock:
-            self.yaw = wrap180(float(yaw) if yaw is not None else self.yaw + float(delta))
+            self.base_yaw = wrap180(float(yaw) if yaw is not None else self.base_yaw + float(delta))
+            self._update_yaw()
+            self._reestimate_sounding()
+
+    def set_motion(self, mode):
+        if mode not in HEAD_MOTION:
+            raise ValueError(f'Head motion must be one of: {", ".join(HEAD_MOTION)}')
+        with self.lock:
+            self.motion = mode
+            self.motion_started = self.clock()
+            self._update_yaw()
+
+    def tick(self):
+        """Advance natural head motion and take one mic reading of every sound still playing."""
+        with self.lock:
+            self._update_yaw()
+            self.yaw_history.append(round(self.yaw, 2))
             self._reestimate_sounding()
 
     def set_mic_count(self, count):
@@ -85,6 +117,11 @@ class Scene:
             self.sources.clear()
 
     # Estimation ---------------------------------------------------------
+    def _update_yaw(self):
+        t = self.clock() - self.motion_started
+        sway = sum(a * math.sin(2 * math.pi * f * t + p) for a, f, p in HEAD_MOTION[self.motion])
+        self.yaw = wrap180(self.base_yaw + sway)
+
     def _mics(self):
         return mic_positions(self.geometry, include_bridge=self.mic_count == 3)
 
@@ -97,23 +134,27 @@ class Scene:
     def _estimate(self, source):
         ids, mic_xy = self._mics()
         head_xy = world_to_head((source['x'], source['y']), self.yaw)
-        channels = render(head_xy, mic_xy, source_signal(source['type'], rng=self.rng),
+        channels = render(head_xy, mic_xy, source_signal(source['type'], duration=OBSERVATION_SECONDS, rng=self.rng),
                           snr_db=self.snr_db, rng=self.rng)
         result = localize(channels, SAMPLE_RATE, mic_xy, ids)
         candidates = result['candidates']
+        resolver = source['resolver']
         if result['ambiguous']:
-            front_back = source['resolver'].update(self.yaw, result['lateral_deg'])
+            front_back = resolver.update(self.yaw, result['lateral_deg'])
             chosen = {'front': candidates[:1], 'back': candidates[1:]}.get(front_back, candidates)
+            decided_by = 'head motion' if front_back != 'unknown' else None
         else:
             chosen = candidates
             front_back = 'front' if abs(candidates[0]) <= 90 else 'back'
+            decided_by = 'three mics'
         world = [round(wrap180(c + self.yaw), 1) for c in chosen]
         source['estimate'] = dict(
             head_candidates=candidates, world_bearings=world, resolved=len(world) == 1,
             front_back=front_back, needs_head_turn=result['ambiguous'] and front_back == 'unknown',
             confidence=result['confidence'], lateral_deg=result['lateral_deg'], pairs=result['pairs'],
             score=result['score'], score_step_deg=result['score_step_deg'], yaw=round(self.yaw, 1),
-            mic_count=len(ids), error_deg=round(min(abs(wrap180(w - source['bearing'])) for w in world), 1))
+            mic_count=len(ids), decided_by=decided_by, readings=len(resolver.observations),
+            yaw_span_deg=round(resolver.yaw_span_deg, 2), error_deg=round(min(abs(wrap180(w - source['bearing'])) for w in world), 1))
 
     # Output -------------------------------------------------------------
     def _public(self, source, now):
@@ -128,7 +169,9 @@ class Scene:
             self.sources = [s for s in self.sources if now < s['sounding_until'] + KEEP_AFTER_SOUNDING_SECONDS]
             mics = microphones(self.geometry, include_bridge=self.mic_count == 3)
             return dict(
-                yaw=round(self.yaw, 1), mic_count=self.mic_count, snr_db=self.snr_db,
+                yaw=round(self.yaw, 2), base_yaw=round(self.base_yaw, 1), motion=self.motion,
+                yaw_history=list(self.yaw_history), tick_seconds=TICK_SECONDS,
+                mic_count=self.mic_count, snr_db=self.snr_db,
                 map_radius_m=MAP_RADIUS_M, audio=dict(self.audio),
                 mics=[dict(id=m['id'], x_mm=m['x_mm'], y_mm=m['y_mm'], status=m.get('status')) for m in mics],
                 planned_mics=[dict(id='M0', x_mm=0, y_mm=0)] if self.mic_count == 2 else [],

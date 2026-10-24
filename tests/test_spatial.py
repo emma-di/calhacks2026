@@ -1,4 +1,5 @@
 """Spatial checks on synthesized audio; NumPy only, no recordings or microphones."""
+import math
 import unittest
 
 import numpy as np
@@ -50,21 +51,35 @@ class LocalizeTests(unittest.TestCase):
             self.assertLess(angle_error(back, 180 - front), 1)
 
 
+def feed(resolver, bearing, yaws, noise_deg=0.0, seed=0):
+    """Feed what two mics would measure for a sound at `bearing` while the head is at each yaw."""
+    rng = np.random.default_rng(seed)
+    for yaw in yaws:
+        head = math.radians(bearing - yaw)
+        resolver.update(yaw, math.degrees(math.asin(math.sin(head))) + rng.normal(0, noise_deg))
+    return resolver.status
+
+
 class FrontBackTests(unittest.TestCase):
     def test_turn_right_front_sound_moves_left(self):
-        resolver = FrontBackResolver()
-        resolver.update(0, 20)
-        self.assertEqual(resolver.update(15, 5), 'front')
+        self.assertEqual(feed(FrontBackResolver(), 20, [0, 5, 10, 15]), 'front')
 
     def test_turn_right_back_sound_moves_right(self):
-        resolver = FrontBackResolver()
-        resolver.update(0, 20)  # true bearing 160: folds to 20
-        self.assertEqual(resolver.update(15, 35), 'back')
+        self.assertEqual(feed(FrontBackResolver(), 160, [0, 5, 10, 15]), 'back')
 
-    def test_small_turn_waits(self):
-        resolver = FrontBackResolver()
-        resolver.update(0, 20)
-        self.assertEqual(resolver.update(5, 15), 'unknown')
+    def test_small_natural_sway_is_enough(self):
+        sway = [2.5 * math.sin(2 * math.pi * 0.9 * k * 0.1) for k in range(6)]
+        self.assertEqual(feed(FrontBackResolver(), 30, sway, noise_deg=0.1), 'front')
+        self.assertEqual(feed(FrontBackResolver(), -140, sway, noise_deg=0.1), 'back')
+
+    def test_waits_without_enough_rotation(self):
+        self.assertEqual(feed(FrontBackResolver(), 20, [0, 0.3, 0.6, 0.9]), 'unknown')
+
+    def test_does_not_guess_on_noise(self):
+        self.assertEqual(feed(FrontBackResolver(), 20, [0, 1, 2, 1, 0], noise_deg=5, seed=3), 'unknown')
+
+    def test_sound_at_the_side_stays_unknown(self):
+        self.assertEqual(feed(FrontBackResolver(), 90, [0, 3, 6, 3, 0]), 'unknown')
 
     def test_head_rotation(self):
         ahead = world_to_head((0, 1), 90)  # facing right, the old "ahead" is now to the left
@@ -95,6 +110,33 @@ class SceneTests(unittest.TestCase):
         estimate = scene.add('dog_bark', x=1.0, y=-3.0)['estimate']
         self.assertTrue(estimate['resolved'])
         self.assertLess(estimate['error_deg'], 6)
+
+    def test_walking_sway_resolves_a_short_knock(self):
+        for bearing, expected in ((25, 'front'), (-150, 'back')):
+            now = [0.0]
+            scene = Scene(rng=np.random.default_rng(8), clock=lambda: now[0])
+            scene.set_motion('walking')
+            scene.add('knock', x=3 * math.sin(math.radians(bearing)), y=3 * math.cos(math.radians(bearing)))
+            for _ in range(6):  # a knock lasts 0.6 s
+                now[0] += 0.1
+                scene.tick()
+            estimate = scene.snapshot()['sources'][0]['estimate']
+            self.assertEqual(estimate['front_back'], expected, bearing)
+            self.assertEqual(estimate['decided_by'], 'head motion')
+            self.assertLess(estimate['error_deg'], 5)
+
+    def test_standing_still_cannot_resolve(self):
+        now = [0.0]
+        scene = Scene(rng=np.random.default_rng(9), clock=lambda: now[0])
+        scene.add('siren', x=1.0, y=-3.0)
+        for _ in range(10):
+            now[0] += 0.1
+            scene.tick()
+        self.assertEqual(scene.snapshot()['sources'][0]['estimate']['front_back'], 'unknown')
+
+    def test_rejects_unknown_motion(self):
+        with self.assertRaises(ValueError):
+            Scene(rng=np.random.default_rng(10)).set_motion('running')
 
     def test_rejects_unknown_type_and_out_of_range(self):
         scene = Scene(rng=np.random.default_rng(7))

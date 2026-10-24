@@ -48,9 +48,11 @@ def localize(channels, fs, mic_xy, ids=None, step_deg=1.0):
     max_tau = max_pair_delay(mic_xy) * 1.2
     score = np.zeros_like(azimuths)
     pairs = []
+    taus = {}
     for i in range(len(mic_xy)):
         for j in range(i + 1, len(mic_xy)):
             tau, lags, cc = gcc_phat(channels[i], channels[j], fs, max_tau=max_tau)
+            taus[i, j] = tau
             score += np.interp(predicted_delays(mic_xy, azimuths, i, j), lags, cc)
             pairs.append(dict(pair=f'{ids[i]}-{ids[j]}', tdoa_us=round(tau * 1e6, 1),
                               peak=round(float(cc.max()), 3)))
@@ -70,9 +72,16 @@ def localize(channels, fs, mic_xy, ids=None, step_deg=1.0):
     rival = max(rivals, default=0.0)
     confidence = 0.0 if best_score <= 0 else float(np.clip(best_score, 0, 1) *
                                                    np.clip(1 - max(rival, 0) / best_score, 0, 1))
-    front = candidates[0]
-    lateral = float(np.degrees(np.arcsin(np.clip(np.sin(np.radians(front)), -1, 1))))
+    if ambiguous:
+        # Read the left/right angle straight from the end pair's delay: finer than the
+        # bearing grid, which matters for the small shifts caused by head sway.
+        i, j = 0, len(mic_xy) - 1
+        axis = mic_xy[i] - mic_xy[j]
+        projection = np.clip(-SPEED_OF_SOUND * taus[i, j] / np.linalg.norm(axis), -1, 1)
+        lateral = float(np.degrees(np.arcsin(projection))) * (1 if axis[0] >= 0 else -1)
+    else:
+        lateral = float(np.degrees(np.arcsin(np.clip(np.sin(np.radians(candidates[0])), -1, 1))))
     return dict(candidates=[round(c, 1) for c in candidates], ambiguous=ambiguous,
-                confidence=round(confidence, 3), lateral_deg=round(lateral, 1),
+                confidence=round(confidence, 3), lateral_deg=round(lateral, 3),
                 pairs=pairs, score=[round(float(s), 3) for s in score[::int(round(2 / step_deg)) or 1]],
                 score_step_deg=2.0)

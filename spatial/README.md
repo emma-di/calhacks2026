@@ -28,6 +28,11 @@ Controls:
 - **Microphones**: two (arm tips, from `frame_geometry.json`) or three (adds the planned bridge mic at 0, 0).
 - **Head**: turn 15° with the buttons or arrow keys. With two mics, turning while a sound is still playing
   decides front or back: a sound in front shifts the opposite way to the turn, a sound behind shifts the same way.
+- **Natural head motion**: Still, Walking (about ±2.5° of yaw sway once per stride) or Looking around
+  (slower glances of about ±12°). The yaw trace shows what an IMU gyro would report. While a sound plays,
+  the mics take a reading every 0.1 s, and the resolver fits the left/right angle against the yaw. Front
+  predicts the angle moving opposite to the head, back predicts it moving with the head. It decides only
+  when the fit is clear and the slope is the size geometry predicts; otherwise it reports unknown.
 - **Room noise**: signal-to-noise ratio of the simulated mics (quiet 30 dB, normal 15 dB, loud 5 dB).
 
 ## How it works
@@ -39,7 +44,7 @@ Controls:
 | `simulate.py` | Synthesizes each mic's signal from a source position (free-field delay and 1/r, plus noise) |
 | `gcc_phat.py` | Time difference of arrival between two channels, with partial PHAT weighting |
 | `localize.py` | Scores every bearing against all mic pairs (SRP-PHAT); reports the mirror pair for two mics |
-| `front_back.py` | The head-turn rule for two mics |
+| `front_back.py` | Front/back from head rotation for two mics: fits angle against yaw, works with walking sway |
 | `scene.py`, `server.py`, `radar.html` | Simulator state, local HTTP server and the map page |
 
 Bearings: 0° straight ahead, positive clockwise toward the right, so ±180° is behind. Simulation uses
