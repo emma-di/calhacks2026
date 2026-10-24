@@ -20,7 +20,7 @@ import {
   type FocusMode,
   type Preferences,
 } from "./lib/alerts";
-import { soundCatalog, sounds, tierNames, type SoundEvent } from "./lib/events";
+import { soundCatalog, sounds, tierNames, type Health, type Observation, type SoundEvent } from "./lib/events";
 import { explain, outcome } from "./lib/explain";
 import { useSession, type Source, type SyncStatus } from "./lib/session";
 
@@ -127,6 +127,57 @@ function syncText(source: Source, sync: SyncStatus, connected: boolean) {
   return "Saved in this browser.";
 }
 
+const ruleLabel = (type: string) => soundCatalog.find((c) => c.type === type)?.label ?? type.replaceAll("_", " ");
+
+// Why a rule did or didn't fire, for the rules close enough to matter.
+function ruleNote(type: string, rule: { score: number; threshold: number; reason: string }) {
+  const name = ruleLabel(type);
+  const value = `${rule.score.toFixed(2)} / ${rule.threshold.toFixed(2)}`;
+  if (rule.reason === "emitted") return `${name} sent (${value})`;
+  if (rule.reason === "cooldown") return `${name} heard again, cooling down`;
+  if (rule.reason.startsWith("suppressed")) return `${name} held back by alarm context`;
+  if (rule.reason === "below_threshold") return `${name} close, below threshold (${value})`;
+  return `${name}: ${rule.reason.replaceAll("_", " ")}`;
+}
+
+// Live recognizer view: every analysis window, before the receiver decides anything.
+function SignalPanel({ observations, health }: { observations: Observation[]; health: Health | null }) {
+  const listening = health?.capture.listening;
+  return (
+    <section className="signal-panel" aria-labelledby="signal-title">
+      <h2 id="signal-title">What it's hearing</h2>
+      <p className="aside">
+        {listening
+          ? `Listening (${health?.capture.listening_source ?? "recognizer"}) · newest first, one row per second of audio`
+          : "Not listening. Start the microphone, a recording or a scene (audio/scene.py) to see live recognition."}
+      </p>
+      {observations.length > 0 && (
+        <ol className="signal-list">
+          {[...observations].reverse().slice(0, 8).map((o) => {
+            const notes = Object.entries(o.rules)
+              .filter(([, r]) => r.reason === "emitted" || r.reason === "cooldown" || r.reason.startsWith("suppressed")
+                || (r.reason === "below_threshold" && r.score >= 0.5 * r.threshold))
+              .map(([type, r]) => ruleNote(type, r));
+            return (
+              <li key={o.seq}>
+                <span className="signal-level" aria-label={`level ${o.level_dbfs} dBFS`}>
+                  <span style={{ width: `${Math.max(2, Math.min(100, (o.level_dbfs + 70) * (100 / 70)))}%` }} />
+                </span>
+                <span className="signal-top">
+                  {o.top.slice(0, 3).map((t) => `${t.label} ${t.score.toFixed(2)}`).join(" · ")}
+                </span>
+                <span className={notes.some((n) => n.includes(" sent")) ? "signal-note is-sent" : "signal-note"}>
+                  {notes.length ? notes.join("; ") : "No alert sound near its threshold"}
+                </span>
+              </li>
+            );
+          })}
+        </ol>
+      )}
+    </section>
+  );
+}
+
 export default function App() {
   const [view, setView] = useState<View>("live");
   const [audience, setAudience] = useState(false);
@@ -218,9 +269,11 @@ export default function App() {
     source === "browser"
       ? "Test sounds"
       : connected
-        ? state.health?.capture.live
-          ? "Recent audio events"
-          : "Receiver ready"
+        ? state.health?.capture.listening
+          ? "Listening"
+          : state.health?.capture.live
+            ? "Recent audio events"
+            : "Receiver ready"
         : connection === "connecting"
           ? "Connecting…"
           : "Receiver offline";
@@ -567,6 +620,7 @@ export default function App() {
             {state.events.length === 1 ? "sound" : "sounds"} this session ·{" "}
             {sourceSummary}
           </p>
+          <SignalPanel observations={state.observations} health={state.health} />
           {state.decisions.length === 0 ? (
             <p className="empty">
               Nothing yet. Sounds you play or the receiver hears appear here.

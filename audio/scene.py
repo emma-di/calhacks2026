@@ -77,6 +77,8 @@ def main():
     model = create_model(args.model)
     model.predict(np.zeros(model.window_samples, dtype=np.float32))
     endpoint = args.receiver.rstrip('/') + '/events'
+    from audio.observations import ObservationPublisher, build_observation
+    observer = ObservationPublisher(args.receiver.rstrip('/') + '/observations')
     print(f'Scene "{scene.get("name", args.scene.stem)}": {len(placed)} sounds over {len(signal) / RATE:.0f} s', flush=True)
     for p in placed:
         print(f'  {p["start"]:5.1f}s  {p["sound"]:<12} {p["direction"] or "no direction":<12} ({p["clip"]})', flush=True)
@@ -91,8 +93,14 @@ def main():
                 window = np.pad(window, (0, model.window_samples - len(window)))
             done = (offset + model.window_samples) / RATE  # scene time at the end of this window
             time.sleep(max(0, start + done / args.speed - time.monotonic()))
-            scores, _ = model.predict(window)
-            for event in detector.detect(scores, 'simulation', now=done, timestamp_ms=base + int(done * 1000)):
+            scores, elapsed = model.predict(window)
+            events = detector.detect(scores, 'simulation', now=done, timestamp_ms=base + int(done * 1000))
+            observer.publish(build_observation(
+                scores, source='simulation', model=args.model, timestamp_ms=base + int(done * 1000),
+                inference_ms=elapsed, window_rms=float(np.sqrt(np.mean(np.square(window)))),
+                rule_decisions=detector.decisions, events=events,
+                window_seconds=model.window_samples / RATE, hop_seconds=model.hop_samples / RATE))
+            for event in events:
                 # The scene sound playing in this window, if any, supplies the simulated direction.
                 source = next((p for p in placed if p['start'] - 0.5 <= done <= p['end'] + 2.5
                                and (p['sound'] == event['type'] or {p['sound'], event['type']} <= {'bell', 'bicycle_bell'})), None)

@@ -65,6 +65,11 @@ def main():
         window_samples=model.window_samples,hop_samples=model.hop_samples,sample_rate=16000))
     print(f'Decision log: {args.decision_log}',file=sys.stderr)
 
+    observer = None
+    if getattr(args, 'endpoint', None):
+        from audio.observations import ObservationPublisher
+        observer = ObservationPublisher(args.endpoint.rsplit('/events', 1)[0] + '/observations')
+
     def process(window, source, clock=None, timestamp=None):
         scores, elapsed = model.predict(window)
         if args.debug:
@@ -75,6 +80,12 @@ def main():
             event['inference_ms'] = round(elapsed, 1)
             event['model'] = args.model
             deliveries.append({'event_id':event['event_id'],'status':publish(event,args.endpoint)})
+        if observer:
+            from audio.observations import build_observation
+            observer.publish(build_observation(
+                scores, source=source, model=args.model, timestamp_ms=timestamp, inference_ms=elapsed,
+                window_rms=float(np.sqrt(np.mean(np.square(window)))), rule_decisions=detector.decisions,
+                events=events, window_seconds=model.window_samples / 16000, hop_seconds=model.hop_samples / 16000))
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
             top5=sorted(scores.items(),key=lambda x:x[1],reverse=True)[:5],

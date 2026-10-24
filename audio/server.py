@@ -7,6 +7,7 @@ Endpoints (JSON):
   GET  /profile   saved preferences;  PUT /profile  validate, apply and persist atomically
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
   POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
+  POST /observations, GET /observations?since=  per-window recognizer reports (John's format): signal panel + heartbeat
   POST /spatial   phone FOA reading {bearing_degrees, coherence, rms, calibrated, device}; matched to sounds
   POST /spatial/calibrate {examples: {front: [...], right: [...], behind: [...], left: [...]}}: phone bearings heard per side
 """
@@ -22,6 +23,35 @@ from urllib.parse import urlsplit, parse_qs
 from audio.alerts import AlertEngine, DEFAULT_PROFILE, direction_bucket, validate_profile
 from audio.events import EVENT_TYPES, validate_event
 from audio.spatial import SpatialBuffer, validate_reading
+from collections import deque
+from audio.observations import MAX_BYTES as MAX_OBSERVATION_BYTES, validate_observation
+
+
+class ObservationStore:
+    """Last two minutes of per-window observations, each numbered with an increasing `seq`.
+
+    Ported from John's johnaou/observations branch (8a440e1) into the current receiver.
+    """
+    def __init__(self, maxlen=120):
+        self.items = deque(maxlen=maxlen)
+        self.seq = 0
+        self.lock = threading.Lock()
+        self.started_ms = int(time.time()*1000)   # changes on restart, so clients can reset `since`
+
+    def add(self, observation):
+        with self.lock:
+            self.seq += 1
+            observation = dict(observation, seq=self.seq, received_ms=int(time.time()*1000))
+            self.items.append(observation)
+            return self.seq
+
+    def since(self, after=0, limit=20):
+        with self.lock:
+            selected = [o for o in self.items if o['seq'] > after][-limit:]
+            return dict(latest_seq=self.seq, server_started_ms=self.started_ms, observations=selected)
+
+
+observations = ObservationStore()
 
 ROOT = Path(__file__).resolve().parent.parent
 CAPTURE_SOURCES = ('microphone', 'replay', 'simulation')
@@ -128,11 +158,15 @@ class AlertState:
     def _health(self, at):
         displays = {name: round(at - seen) for name, seen in self.display_clients.items() if at - seen < 3000}
         recent = {source: round(at - seen) for source, seen in self.last_event.items()}
+        latest = observations.since(0, 1)['observations']
+        heard = latest[0] if latest and time.time() * 1000 - latest[0]['received_ms'] < 3000 else None
         return dict(
             receiver='ok', session_id=self.engine.session_id,
             # Receiver health never implies a listening microphone: only recent capture events do.
             capture=dict(last_event_ms_ago=recent, live=any(
-                recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES)),
+                recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES),
+                # Heartbeat: a recognizer reporting windows is listening, even in silence.
+                listening=bool(heard), listening_source=heard['source'] if heard else None),
             display=dict(connected=bool(displays), clients=displays),
             name_worker='unavailable', spatial=self.spatial.status(at))
 
@@ -140,6 +174,7 @@ class AlertState:
         with self.lock:
             at = self._ms(now)
             return dict(self.engine.snapshot(at), health=self._health(at),
+                        observations=observations.since(0, 10)['observations'],
                         display=self.engine.presentation(at))
 
 
@@ -171,6 +206,14 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, self.receiver_state.presentation(client))
         elif url.path == '/health':
             self.reply(200, self.receiver_state.health())
+        elif url.path == '/observations':
+            query = parse_qs(url.query)
+            try:
+                after = int(query.get('since', ['0'])[0])
+                limit = min(max(int(query.get('limit', ['20'])[0]), 1), 120)
+            except ValueError:
+                return self.reply(400, {'error': 'since and limit must be integers'})
+            self.reply(200, observations.since(after, limit))
         elif url.path == '/profile':
             self.reply(200, self.receiver_state.profile())
         else:
@@ -196,6 +239,17 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
+        if path == '/observations':
+            try:
+                length = int(self.headers.get('Content-Length', '0'))
+                if not 0 < length <= MAX_OBSERVATION_BYTES:
+                    raise ValueError(f'Expected body of 1..{MAX_OBSERVATION_BYTES} bytes')
+                if self.headers.get('Content-Type', '').split(';')[0].strip() != 'application/json':
+                    raise ValueError('Expected application/json')
+                payload = json.loads(self.rfile.read(length))
+                return self.reply(200, {'ok': True, 'seq': observations.add(validate_observation(payload))})
+            except (ValueError, TypeError) as exc:
+                return self.reply(400, {'error': str(exc)})
         if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial', '/spatial/calibrate'):
             return self.reply(404, {'error': 'Not found'})
         try:

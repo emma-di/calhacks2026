@@ -38,9 +38,24 @@ export interface Snapshot {
 }
 export interface Health {
   display: { connected: boolean; clients: Record<string, number> };
-  capture: { live: boolean; last_event_ms_ago: Record<string, number> };
+  capture: {
+    live: boolean;
+    last_event_ms_ago: Record<string, number>;
+    listening?: boolean;
+    listening_source?: string | null;
+  };
   name_worker: string;
   spatial: string | { connected: boolean; devices: Record<string, { age_ms: number; bearing_degrees: number | null; coherence: number; calibrated: boolean }> };
+}
+// One recognizer analysis window (audio/observations.py, John's format): what it heard and why.
+export interface Observation {
+  seq: number;
+  source: string;
+  received_ms: number;
+  level_dbfs: number;
+  top: { label: string; score: number }[];
+  rules: Record<string, { score: number; threshold: number; reason: string }>;
+  emitted: { event_id: string; type: string; label: string }[];
 }
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
@@ -57,6 +72,7 @@ export interface ViewState extends Snapshot {
   queue: { event_id: string; type: EventType; tier: Tier }[];
   health: Health | null;
   session_id: string | null;
+  observations: Observation[];
 }
 export const tierNames = [
   "Ignore",
@@ -327,6 +343,16 @@ export function parseSnapshot(input: unknown): ViewState {
     queue,
     health,
     session_id: typeof s.session_id === "string" ? s.session_id : null,
+    // Diagnostics only: malformed reports are dropped rather than failing the whole state.
+    observations: Array.isArray(s.observations)
+      ? (s.observations as Observation[])
+          .filter(
+            (o) =>
+              o && typeof o === "object" && Array.isArray(o.top) && typeof o.level_dbfs === "number" &&
+              o.rules && typeof o.rules === "object" && Array.isArray(o.emitted),
+          )
+          .slice(-10)
+      : [],
   };
 }
 export async function request(
