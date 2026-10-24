@@ -17,8 +17,9 @@ host the "teach a sound" onboarding.
 - **Raw stream:** `GET /observations` gives *everything the classifier heard* every second, including
   sounds that never become alerts. Use it for a live "what the glasses hear" view; the monitor's
   "Hearing now" meter is a working example.
-- **Not built yet:** name detection ("someone is saying your name"), user preferences / a real alert
-  queue, and direction (always `null`).
+- **Name detection** works: `type: "name_called"`, label "Your name", tier 3, **`confidence: null`**
+  (handle that). Onboarding saves the name with `PUT /profile`; see [name-detection.md](name-detection.md).
+- **Not built yet:** user preferences / a real alert queue, and direction (always `null`).
 
 ## How the pipeline fits together
 
@@ -29,7 +30,7 @@ mic / recording ──► classifier (Zipformer, every 1 s, 2 s window)
                         ├──► built-in rules (thresholds, cooldown)  ─┐
                         └──► custom-sound heads (user-taught)        ├─► event JSON ─► POST /events
                                                                      │
-   [planned] speech model ──► name matcher ──────────────────────────┘
+   name spotter (0.2 s blocks, profile keywords) ───────────────────┘
                                                                           │
                                        server: priority tiers, active alert, decision log
                                                                           │
@@ -165,12 +166,20 @@ runs with `--endpoint`. The server keeps the last 120 (two minutes) and numbers 
 | `alarm_clock` | Alarm clock | 2 | |
 | `bell` | Bell / chime | 2 | generic bell; still experimental (some false alerts) |
 | `dog_bark` | Dog barking | 1 | |
+| `name_called` | Your name | 3 | schema v2; `confidence` is `null`; has `matched_alias_id` |
 | `custom` | *the user's name for it* | user-chosen 1–4 | has `custom_sound_id` |
 | `bicycle_bell` | Bicycle bell | 2 | disabled in the default policy; may appear from `fake` |
 
 Display `event.label` and use `priority_tier` for urgency styling. Don't hard-code labels per type;
 custom sounds make labels user-defined. `confidence` is a model score, **not** a probability. Don't
 show it as "92% sure". `model` and `inference_ms` may be present on real events.
+
+### Name onboarding
+
+`GET /profile` / `PUT /profile` (whole JSON profile; `revision` auto-increments), and
+`POST /profile/name-samples` (WAV of a friend saying only the name; returns what was heard). Details and
+validation rules: [name-detection.md](name-detection.md#profile-and-routes). The `/teach` page has a
+working "Your name" section to copy from.
 
 ### Custom-sound onboarding
 
@@ -203,7 +212,5 @@ The site never needs to know which mode it's in. It always polls `/state`. Sugge
 
 ## Proposed next interfaces (not built; tell John what you need)
 
-1. **Name detection.** Planned `type: "name_called"`, label "Your name", tier 3, from a local speech model
-   reading the onboarding profile. See [name-detection-plan.md](name-detection-plan.md).
-2. **Preferences.** Per-type mute or tier override from the onboarding profile, applied in the server's
+1. **Preferences.** Per-type mute or tier override from the onboarding profile, applied in the server's
    priority stage, using the observation stream's raw scores where needed.

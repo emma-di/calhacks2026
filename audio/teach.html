@@ -1,6 +1,6 @@
 <!doctype html>
 <html lang="en"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Teach a sound</title>
+<title>Teach sounds and your name</title>
 <!--
   Reference onboarding flow for custom sounds. Served at http://127.0.0.1:8765/teach.
   The real onboarding UI can copy recordWav()/toWav16k() and the fetch calls; see docs/custom-sounds.md.
@@ -18,10 +18,25 @@ input,select{font:inherit;padding:8px 10px;border-radius:8px;border:1px solid #2
 .sound{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 0;border-top:1px solid #23372f}
 .ok{color:#8fe0ae}.bad{color:#f0a0a0}
 </style>
-<h1>Teach a sound</h1>
+<h1>Teach sounds and your name</h1>
 <p>Record a sound 5 times, train, then test it. Everything stays on this laptop. Live alerts appear on the
 <a href="/" style="color:#81c4a0">monitor</a> while the microphone CLI runs; new sounds load automatically.</p>
 <p id="log" role="status" aria-live="polite"></p>
+
+<section>
+  <h2>Your name</h2>
+  <p class="muted">Get an alert when someone says your name. Type it as people say it, plus any nicknames.</p>
+  <input id="name" placeholder="Name, e.g. Yameen" maxlength="40">
+  <input id="aliases" placeholder="Nicknames, comma-separated" maxlength="200">
+  <select id="sensitivity"><option value="low">Fewer false alerts</option><option value="balanced" selected>Balanced</option>
+    <option value="high">Catch more</option></select>
+  <label><input type="checkbox" id="nameOn"> on</label>
+  <button id="saveName">Save</button>
+  <p class="muted">Then have a friend say just your name, 3 times. This teaches the model how your name sounds,
+  which helps a lot for uncommon names.</p>
+  <button id="nameRec">● Record someone saying your name</button><button id="nameClear">Clear recordings</button>
+  <p id="nameStatus"></p>
+</section>
 
 <section>
   <h2>1 · Your room's background</h2>
@@ -108,6 +123,32 @@ async function guarded(button, work) {
   if (recording) return recording();          // second click stops the recording
   try { await work(); } catch (e) { log('Error: ' + e.message); }
 }
+
+// ---------- name ----------
+let profile = null;
+function showProfile(p) {
+  profile = p; const d = p.name_detection;
+  $('#name').value = d.primary_name; $('#aliases').value = d.aliases.join(', ');
+  $('#sensitivity').value = d.sensitivity; $('#nameOn').checked = d.enabled;
+  const learned = d.learned_spellings.map(l => l.text).join(', ');
+  $('#nameStatus').textContent = (d.enabled ? `Listening for ${[d.primary_name, ...d.aliases].join(', ')}` : 'Name alerts are off') +
+    (learned ? ` · also heard as: ${learned}` : '');
+}
+$('#saveName').onclick = () => guarded(null, async () => {
+  const aliases = $('#aliases').value.split(',').map(a => a.trim()).filter(Boolean);
+  showProfile(await api('PUT', '/profile', {...profile, display_name: profile.display_name || $('#name').value,
+    name_detection: {...profile.name_detection, enabled: $('#nameOn').checked, primary_name: $('#name').value,
+      aliases, sensitivity: $('#sensitivity').value}}));
+  log('Saved. A running microphone session picks this up within a few seconds.');
+});
+$('#nameRec').onclick = () => guarded($('#nameRec'), async () => {
+  log('Recording… have someone say only your name, then click Stop.');
+  const r = await api('POST', '/profile/name-samples', await recordWav($('#nameRec'), 5));
+  showProfile(r.profile);
+  log(r.added ? `Heard "${r.heard}". Added "${r.spelling}".` : `Heard "${r.heard}". ${r.note}.`);
+});
+$('#nameClear').onclick = () => guarded(null, async () => { showProfile(await api('DELETE', '/profile/name-samples')); log('Cleared name recordings.'); });
+api('GET', '/profile').then(showProfile).catch(e => $('#nameStatus').textContent = 'Profile unavailable: ' + e.message);
 
 // ---------- room background ----------
 $('#roomRec').onclick = () => guarded($('#roomRec'), async () => {

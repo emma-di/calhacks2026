@@ -34,6 +34,7 @@ def main():
         p.add_argument('--endpoint')
         p.add_argument('--debug', action='store_true')
         p.add_argument('--no-custom', action='store_true', help='ignore taught custom sounds')
+        p.add_argument('--no-names', action='store_true', help='turn off name detection')
         p.add_argument('--observations', help='URL for per-window observations (default: next to --endpoint)')
         p.add_argument('--no-observations', action='store_true', help='do not stream per-window observations')
         p.add_argument('--observe-top', type=int, default=10, help='labels per observation (1..25)')
@@ -92,6 +93,26 @@ def main():
         atexit.register(observer.flush)
         print(f'Observations: {observation_url}',file=sys.stderr)
 
+    names = None
+    if not args.no_names:
+        try:
+            from audio.names import NameDetector
+            names = NameDetector()
+        except (ImportError, RuntimeError) as exc:
+            print(f'Name detection off: {exc}', file=sys.stderr)
+    name_events = []   # emitted since the last window, so observations can report them
+
+    def hear_names(samples, source, clock=None, timestamp=None):
+        """Feed new audio to the name spotter as soon as it arrives (0.2 s blocks from the mic)."""
+        if names is None:
+            return
+        events = names.accept(samples, source, now=clock, timestamp_ms=timestamp)
+        deliveries = [{'event_id':e['event_id'],'status':publish(e,args.endpoint)} for e in events]
+        name_events.extend(events)
+        if names.decisions:
+            decision_log.write(dict(kind='name_detection',source=source,window_timestamp_ms=timestamp,
+                decisions=names.decisions,deliveries=deliveries))
+
     def process(window, source, clock=None, timestamp=None):
         scores, elapsed = model.predict(window)
         if args.debug:
@@ -107,6 +128,8 @@ def main():
             event['inference_ms'] = round(elapsed, 1)
             event['model'] = args.model
             deliveries.append({'event_id':event['event_id'],'status':publish(event,args.endpoint)})
+        events_for_observation = events+name_events
+        name_events.clear()
         if observer is not None:
             from audio.observations import build_observation
             from audio.custom_sounds import rms as window_rms
@@ -114,7 +137,7 @@ def main():
                 timestamp_ms=timestamp, inference_ms=elapsed, window_rms=window_rms(window),
                 rule_decisions=detector.decisions, custom_decisions=custom_decisions,
                 custom_labels={m['id']:m['label'] for m,_ in custom.heads} if custom is not None else None,
-                events=events, top_k=args.observe_top,
+                events=events_for_observation, top_k=args.observe_top,
                 window_seconds=model.window_samples/16000, hop_seconds=model.hop_samples/16000))
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
@@ -132,10 +155,17 @@ def main():
             position = offset/16000
             if args.realtime:
                 time.sleep(max(0, start+position+min(model.window_samples,len(data)-offset)/16000-time.monotonic()))
-            process(window, 'replay', position, base+int((position+min(model.window_samples,len(data)-offset)/16000)*1000))
+            end = position+min(model.window_samples,len(data)-offset)/16000
+            fresh = data[0 if offset == 0 else offset+model.window_samples-model.hop_samples:offset+model.window_samples]
+            if len(fresh):
+                hear_names(fresh, 'replay', end, base+int(end*1000))
+            process(window, 'replay', position, base+int(end*1000))
+        hear_names(np.zeros(8000, dtype=np.float32), 'replay', len(data)/16000+0.5, base+int(len(data)/16+500))
         return
     import sounddevice as sd
-    pending = queue.Queue(maxsize=4)
+    # 0.2 s blocks so the name spotter hears speech quickly; sound windows still run every hop.
+    block_samples = 3200 if model.hop_samples % 3200 == 0 else model.hop_samples
+    pending = queue.Queue(maxsize=max(4, 4*model.hop_samples//block_samples))
     def callback(indata, frames, timing, status):
         if status:
             print(f'Audio capture: {status}', file=sys.stderr)
@@ -150,13 +180,16 @@ def main():
     last_capture = None
     start = time.monotonic()
     with sd.InputStream(device=args.device, channels=1, samplerate=16000,
-                        blocksize=model.hop_samples, dtype='float32', callback=callback):
+                        blocksize=block_samples, dtype='float32', callback=callback):
         print('Microphone active; Ctrl+C stops. Raw audio is not saved.', file=sys.stderr)
         while not args.seconds or time.monotonic()-start < args.seconds:
             block, captured, wall = pending.get(timeout=3)
-            if last_capture is not None and captured-last_capture > 1.5*model.hop_samples/16000:
+            if last_capture is not None and captured-last_capture > 1.5*block_samples/16000:
                 buffer = np.empty(0, dtype=np.float32)
+                if names is not None:
+                    names.reset()
             last_capture = captured
+            hear_names(block, 'microphone', captured, wall)
             buffer = np.concatenate((buffer, block))
             if len(buffer) >= model.window_samples:
                 process(buffer[-model.window_samples:], 'microphone', captured, wall)

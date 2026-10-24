@@ -78,6 +78,7 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/model.py`, `audio/cli.py` | Local inference and capture/replay |
 | `audio/events.py`, `audio/policy-*.json` | Event contract, thresholds, cooldown and recent-context rules |
 | `audio/server.py` | Local event receiver and alert priority/state |
+| `audio/names.py` | Name detection (keyword spotter, profile, learned spellings) |
 | `audio/observations.py` | Per-window "what it heard" stream (`GET /observations`) for live views and post-processing |
 | `audio/embeddings.py`, `audio/custom_sounds.py`, `audio/teach.html` | User-taught custom sounds ("teach it your doorbell") |
 | `audio/monitor.html` | Browser cue simulator |
@@ -95,8 +96,9 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 - [Custom sounds](docs/custom-sounds.md): teach a sound from ~5 recordings; 92% recall at 0.35% false alerts
   in an offline ESC-50 test. Teach sounds at http://127.0.0.1:8765/teach or over HTTP; running mic
   sessions pick up new sounds automatically.
-- Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
-  from the saved onboarding profile; it does not require training a new model per user.
+- [Name detection](docs/name-detection.md) works: a streaming keyword spotter listens for the typed name,
+  nicknames, and spellings learned from a short recording. On synthetic voices it caught 62% of name
+  mentions, with ~2–3 false alerts per hour of conversation. Not yet validated with real voices.
 - Hardware output and spatial audio await the confirmed hardware stack. Direction is currently unknown.
 
 Read [measured results](reports/summary.md) for counts, misses and false alerts. This prototype is

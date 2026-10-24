@@ -8,3 +8,5 @@ sherpa-onnx==2.0.0
 onnx<2
 onnxruntime<2
 kaldi-native-fbank<2
+# Name detection (audio/names.py): keyword spotter tokenizer
+sentencepiece<1
