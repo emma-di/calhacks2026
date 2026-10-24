@@ -1,74 +1,150 @@
 import { useEffect, useRef } from "react";
-import { tierNames, type SoundEvent } from "../lib/events";
+import type { SoundEvent } from "../lib/events";
+import type { Appearance } from "../lib/appearance";
+import { SoundIcon } from "./Cue";
+import { cuePresentation } from "../lib/presentation";
 
-// Exact device dimensions. Threshold the raster to a one-bit image; no antialiasing or gray pixels.
-export default function Oled({ event }: { event: SoundEvent | null }) {
-  const ref = useRef<HTMLCanvasElement>(null);
+// Same semantic icon and display policy as Cue; rasterized to exactly 128x64 one-bit pixels.
+export default function Oled({
+  event,
+  appearance,
+  direction,
+}: {
+  event: SoundEvent | null;
+  appearance: Appearance;
+  direction: Appearance["direction"];
+}) {
+  const canvas = useRef<HTMLCanvasElement>(null);
+  const iconSource = useRef<SVGSVGElement>(null);
+  const presentation = cuePresentation(event, appearance, direction);
   useEffect(() => {
-    const ctx = ref.current?.getContext("2d", { willReadFrequently: true });
+    const ctx = canvas.current?.getContext("2d", { willReadFrequently: true });
     if (!ctx) return;
+    let cancelled = false;
     ctx.fillStyle = "#000";
     ctx.fillRect(0, 0, 128, 64);
-    ctx.fillStyle = "#fff";
-    ctx.strokeStyle = "#fff";
-    ctx.lineWidth = 1;
-    if (event && event.priority_tier > 0) {
-      if (event.priority_tier >= 3) ctx.strokeRect(0.5, 0.5, 127, 63);
-      if (event.priority_tier === 4) ctx.strokeRect(2.5, 2.5, 123, 59);
-      const glyph =
-        event.type === "smoke_alarm"
-          ? "!"
-          : event.type === "name_called"
-            ? "@"
-            : event.type === "dog_bark"
-              ? "~"
-              : event.type === "knock"
-                ? "+"
-                : "*";
-      ctx.font =
-        event.priority_tier === 1 ? "12px monospace" : "bold 19px monospace";
-      ctx.textAlign = "center";
-      ctx.fillText(glyph, 64, 23);
-      ctx.font = "10px monospace";
-      const words = event.label.toUpperCase().split(" ");
-      const lines: string[] = [];
-      let line = "";
-      for (const word of words) {
-        if (ctx.measureText(`${line} ${word}`.trim()).width > 116 && line) {
-          lines.push(line);
-          line = word;
-        } else line = `${line} ${word}`.trim();
+    const finish = () => {
+      const pixels = ctx.getImageData(0, 0, 128, 64);
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        const value = pixels.data[i] >= 128 ? 255 : 0;
+        pixels.data[i] = value;
+        pixels.data[i + 1] = value;
+        pixels.data[i + 2] = value;
+        pixels.data[i + 3] = 255;
       }
-      if (line) lines.push(line);
-      lines
-        .slice(0, 2)
-        .forEach((text, i) => ctx.fillText(text.slice(0, 19), 64, 39 + i * 12));
-      ctx.font = "6px monospace";
-      ctx.fillText(tierNames[event.priority_tier].toUpperCase(), 64, 59);
-    } else {
-      ctx.strokeRect(60.5, 17.5, 7, 7);
-      ctx.font = "8px monospace";
+      ctx.putImageData(pixels, 0, 0);
+    };
+    if (!presentation) {
+      ctx.fillStyle = "#fff";
+      ctx.font = "7px monospace";
       ctx.textAlign = "center";
-      ctx.fillText("NO ACTIVE CUE", 64, 42);
+      ctx.fillText("No active alerts", 64, 36);
+      finish();
+      return;
     }
-    const bitmap = ctx.getImageData(0, 0, 128, 64);
-    for (let i = 0; i < bitmap.data.length; i += 4) {
-      const value = bitmap.data[i] >= 128 ? 255 : 0;
-      bitmap.data[i] = value;
-      bitmap.data[i + 1] = value;
-      bitmap.data[i + 2] = value;
-      bitmap.data[i + 3] = 255;
+    const iconSize = presentation.tier === 1 ? 14 : 18;
+    ctx.font = "8px monospace";
+    const label = presentation.label;
+    const labelWidth = label ? Math.min(82, ctx.measureText(label).width) : 0;
+    const width = label
+      ? Math.min(120, iconSize + labelWidth + 15)
+      : iconSize + 12;
+    const height = presentation.tier === 4 ? 34 : iconSize + 12;
+    let x = (128 - width) / 2,
+      y = 64 * 0.76 - height / 2;
+    if (presentation.direction === "left") {
+      x = 4;
+      y = (64 - height) / 2;
     }
-    ctx.putImageData(bitmap, 0, 0);
-  }, [event]);
+    if (presentation.direction === "right") {
+      x = 124 - width;
+      y = (64 - height) / 2;
+    }
+    if (presentation.direction === "front") {
+      x = (128 - width) / 2;
+      y = 4;
+    }
+    if (presentation.direction === "behind") {
+      x = (128 - width) / 2;
+      y = 60 - height;
+    }
+    x = Math.round(x);
+    y = Math.max(2, Math.round(y));
+    const draw = (image?: HTMLImageElement) => {
+      if (cancelled) return;
+      ctx.strokeStyle = "#fff";
+      ctx.fillStyle = "#fff";
+      ctx.lineWidth = presentation.tier === 3 ? 2 : 1;
+      ctx.beginPath();
+      if (label) ctx.roundRect(x + 0.5, y + 0.5, width - 1, height - 1, 4);
+      else
+        ctx.ellipse(
+          x + width / 2,
+          y + height / 2,
+          (width - 1) / 2,
+          (height - 1) / 2,
+          0,
+          0,
+          Math.PI * 2,
+        );
+      ctx.stroke();
+      if (presentation.tier === 4)
+        ctx.strokeRect(x + 2.5, y + 2.5, width - 5, height - 5);
+      if (image)
+        ctx.drawImage(
+          image,
+          x + 6,
+          y + (height - iconSize) / 2,
+          iconSize,
+          iconSize,
+        );
+      if (label) {
+        ctx.textAlign = "left";
+        ctx.font = "8px monospace";
+        ctx.fillText(label, x + iconSize + 10, y + height / 2 + 3, labelWidth);
+      }
+      finish();
+    };
+    if (!iconSource.current) {
+      draw();
+      return;
+    }
+    const image = new Image();
+    image.onload = () => draw(image);
+    image.onerror = () => draw();
+    image.src =
+      "data:image/svg+xml;charset=utf-8," +
+      encodeURIComponent(
+        new XMLSerializer().serializeToString(iconSource.current),
+      );
+    return () => {
+      cancelled = true;
+    };
+  }, [event, appearance, direction]);
   return (
-    <canvas
-      ref={ref}
-      width={128}
-      height={64}
-      className="oled-bitmap"
-      role="img"
-      aria-label={`128 by 64 monochrome design preview: ${event?.priority_tier ? event.label : "no active cue"}`}
-    />
+    <>
+      <span hidden aria-hidden="true">
+        {presentation && (
+          <svg
+            ref={iconSource}
+            xmlns="http://www.w3.org/2000/svg"
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            style={{ color: "#fff" }}
+          >
+            <SoundIcon type={presentation.icon} size={24} />
+          </svg>
+        )}
+      </span>
+      <canvas
+        ref={canvas}
+        width={128}
+        height={64}
+        className="oled-bitmap"
+        role="img"
+        aria-label={`128 by 64 monochrome preview: ${presentation?.description ?? "no active alerts"}${presentation && direction !== "unknown" ? `, simulated ${direction}` : ""}`}
+      />
+    </>
   );
 }

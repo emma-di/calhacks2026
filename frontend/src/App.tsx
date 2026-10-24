@@ -24,13 +24,12 @@ import {
 import Cue, { SoundIcon } from "./components/Cue";
 import Scene from "./components/Scene";
 import Oled from "./components/Oled";
-import Preferences, {
-  defaultAppearance,
-  type Appearance,
-} from "./components/Preferences";
+import { defaultAppearance, type Appearance } from "./lib/appearance";
+import Onboarding, { type SetupChange } from "../mana/AwareOnboarding.jsx";
 import { mockPriority, type Preset } from "./lib/presets";
 import {
   applyMock,
+  previewMock,
   emptyMock,
   expireMock,
   makeMock,
@@ -72,6 +71,19 @@ export default function App() {
   const [scenario, setScenario] = useState(false);
   const [overrides, setOverrides] = useState<Partial<Record<EventType, Tier>>>(
     {},
+  );
+  const applySetup = useCallback(
+    ({ profile, display, direction }: SetupChange) => {
+      setPreset(profile.notification_preferences.mode);
+      setOverrides(profile.notification_preferences.event_tiers);
+      setAppearance({
+        text: display.labels ? "labels" : "icons",
+        motion: display.motion === "pulse" ? "gentle" : "none",
+        colors: { ...defaultAppearance.colors, ...display.colors },
+        direction,
+      });
+    },
+    [],
   );
   const [help, setHelp] = useState(false);
   const helpDialog = useRef<HTMLDialogElement>(null);
@@ -163,11 +175,12 @@ export default function App() {
       mode === "mock" ? mockPriority(type, preset, overrides) : undefined,
     );
     if (mode === "mock") {
-      setMock((s) => applyMock(s, event, performance.now()));
+      stopScenario();
+      setMock((s) => previewMock(s, event, performance.now()));
       setMessage(
         event.priority_tier === 0
           ? `${event.label} received. Tier 0 stays quietly in the background.`
-          : `${event.label} sent. Higher-priority cues stay in focus until cleared.`,
+          : `${event.label} preview. Use Play sequence to test competing priorities.`,
       );
       return;
     }
@@ -284,8 +297,8 @@ export default function App() {
             <button
               className={view === "preferences" ? "selected" : ""}
               onClick={() => setView("preferences")}
-              aria-label="Preview preferences"
-              title="Preview preferences"
+              aria-label="Set up Aware"
+              title="Set up Aware"
               aria-current={view === "preferences" ? "page" : undefined}
             >
               <Settings2 size={20} />
@@ -321,16 +334,10 @@ export default function App() {
             </div>
           </header>
         )}
-        {!focus && (
+        {!focus && view !== "preferences" && (
           <div className="page-heading">
             <div>
-              <h1>
-                {view === "events"
-                  ? "Event log"
-                  : view === "preferences"
-                    ? "Preview preferences"
-                    : "Sound overview"}
-              </h1>
+              <h1>{view === "events" ? "Event log" : "Sound overview"}</h1>
             </div>
             <button
               className="outline-button mirror-launch"
@@ -392,7 +399,13 @@ export default function App() {
                       <Glasses size={19} />
                     </div>
                     <div className="oled-screen">
-                      <Oled event={state.active} />
+                      <Oled
+                        event={state.active}
+                        appearance={appearance}
+                        direction={
+                          mode === "mock" ? appearance.direction : "unknown"
+                        }
+                      />
                     </div>
                     <div className="device-note">
                       <span className="outline-dot" /> Preview only · not
@@ -495,17 +508,15 @@ export default function App() {
           </>
         )}
 
-        {!focus && view === "preferences" && (
-          <Preferences
-            overrides={overrides}
-            onOverridesChange={setOverrides}
-            appearance={appearance}
-            onAppearanceChange={setAppearance}
-            preset={preset}
-            onPresetChange={setPreset}
-          />
-        )}
-
+        <div
+          className="onboarding-host"
+          hidden={focus || view !== "preferences"}
+        >
+          <button className="text-button" onClick={() => setView("companion")}>
+            Back to mirror <ArrowRight size={15} />
+          </button>
+          <Onboarding onChange={applySetup} />
+        </div>
         {!focus && view === "events" && (
           <section
             className={`activity-panel ${view === "events" ? "expanded-events" : ""}`}

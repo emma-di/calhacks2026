@@ -1148,3 +1148,35 @@ main {
     animation: none;
   }
 }
+
+.onboarding-host > .text-button {
+  margin-top: 22px;
+}
+.onboarding-cue-preview {
+  position: relative;
+  height: 220px;
+  overflow: hidden;
+  background: #25362b;
+  border-radius: 6px;
+}
+.onboarding-cue-preview .cue strong {
+  font-size: 18px;
+}
+.onboarding-oled {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080a08;
+}
+.onboarding-oled .oled-bitmap {
+  width: 256px;
+  height: 128px;
+  max-width: 100%;
+  image-rendering: pixelated;
+}
+.onboarding-cue-preview .cue-region.edge-front {
+  top: 18px;
+}
+.onboarding-cue-preview .cue-region.edge-behind {
+  bottom: 18px;
+}

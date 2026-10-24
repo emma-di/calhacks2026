@@ -176,6 +176,10 @@ export function applyMock(
     ].slice(-50),
   };
 }
+// A deliberate button preview is isolated from a previous sample; sequences retain real priority rules.
+export function previewMock(state: MockState,event:SoundEvent,now:number):MockState {
+ return applyMock({...state,active:null,expiresAt:0},event,now);
+}
 const knownTypes = new Set([
   "knock",
   "bell",

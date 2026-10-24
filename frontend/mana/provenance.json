@@ -1,0 +1,13 @@
+{
+  "tool": "Mana",
+  "source_app": "Aware",
+  "export_date": "2026-10-23",
+  "original_export_sha256": "dcdb11a234c22465c500a67d0d43d42241c9b8383425769c88c632f87f9016ec",
+  "integration_changes": [
+    "Canonical Cue/Oled replace independent Mana glyph/renderers",
+    "onChange callback applies draft to browser simulator only",
+    "Remove optional Mana globals for standalone host",
+    "Local-demo storage key scope"
+  ],
+  "live_backend_connected": false
+}

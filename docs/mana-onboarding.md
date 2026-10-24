@@ -1,8 +1,9 @@
 # Mana onboarding integration
 
-Status: Mana-built app exists; numeric-tier/defaults-first revision is under review. It is not connected
-to the running Python engine, physical glasses or a cloud profile API. This is actual Mana UI work;
-the existing browser mirror remains locally authored React.
+Status: Mana-built onboarding is integrated into the local Aware website under **Set up Aware**.
+Its presets, explicit sound exceptions and display choices control the browser simulator. Both preview
+renderers use the same Cue/Oled components as the companion. It does not save to the Python engine,
+physical glasses or a cloud profile API. The mirror itself remains locally authored React.
 
 ## Workspace artifacts
 
@@ -14,7 +15,7 @@ These are workspace links, not verified public judge links. Do not assume teamma
 access. No sharing settings were changed. The first generated draft used string priorities; it must
 not be imported. The revision requires numeric tiers 0–4 and generic Bell/chime labeling.
 
-## Required behavior before integration
+## Implemented behavior
 
 - Preset defaults first; optional name/aliases; search and add only explicit sound overrides.
 - Numeric tier 0 remains a real Ignore override, not a falsey “use default.”
@@ -26,10 +27,14 @@ not be imported. The revision requires numeric tiers 0–4 and generic Bell/chim
 
 ## Source handoff
 
-Mana reports a standalone React export at `/cloudspace/exports/aware/AwareOnboarding.jsx` in **its**
-workspace, not this local checkout. A downloadable export has been requested. Review it for numeric
-contract compatibility, undefined Mana globals, keyboard behavior and unsupported capability claims
-before adding it to the runtime. Keep provenance if adapting the exported component into this repo.
+The revised export is checked into `frontend/mana/AwareOnboarding.jsx`; `provenance.json` records
+its original hash and local adaptations. The adapter removes Mana-only globals and forwards draft
+changes to the simulator. Numeric preset defaults have one source shared with the simulator.
+The component stays mounted while hidden so saved preferences apply on page load. Draft storage is
+browser-local; display preferences are separate from the proposed profile export. Names are settings,
+not a working speech detector. Gentle/Active presets are provisional product defaults.
+
+A brief benefit sentence lives in onboarding; the detailed motivation belongs in the pitch/submission.
 
 Next integration is a deliberate saved-profile API, not a public tunnel to the diagnostic receiver.
 Mana Bridge has not been installed/paired. Sponsor eligibility and public submission requirements

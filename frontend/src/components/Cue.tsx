@@ -10,7 +10,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { tierNames, type EventType, type SoundEvent } from "../lib/events";
-import type { Appearance } from "./Preferences";
+import type { Appearance } from "../lib/appearance";
+import { cuePresentation } from "../lib/presentation";
 const icons: Record<EventType, LucideIcon> = {
   knock: DoorOpen,
   bell: Bell,
@@ -41,9 +42,9 @@ export default function Cue({
   appearance: Appearance;
   direction: Appearance["direction"];
 }) {
-  const visible = event && event.priority_tier > 0;
-  const text =
-    visible && (appearance.text === "labels" || event.priority_tier === 4);
+  const presentation = cuePresentation(event, appearance, direction);
+  const visible = presentation && event;
+  const text = presentation?.label;
   return (
     <div
       className={`cue-region edge-${visible ? direction : "unknown"}`}

@@ -64,7 +64,40 @@ test("non-success HTTP response is an error, not a connected empty state", async
 test("preset defaults remain separate from explicit tier-zero overrides", async () => {
   const { mockPriority } = await import("./presets.ts");
   assert.equal(mockPriority("dog_bark", "active", {}), 2);
-  assert.equal(mockPriority("dog_bark", "gentle", {}), 0);
+  assert.equal(mockPriority("dog_bark", "gentle", {}), 1);
   assert.equal(mockPriority("dog_bark", "active", { dog_bark: 0 }), 0);
   assert.equal(mockPriority("knock", "balanced", {}), 2);
+});
+
+test("shared presentation keeps icons, urgent text and mock placement consistent", async () => {
+  const { cuePresentation } = await import("./presentation.ts");
+  const appearance = {
+    text: "icons" as const,
+    motion: "none" as const,
+    direction: "left" as const,
+    colors: { 0: "#fff", 1: "#fff", 2: "#fff", 3: "#fff", 4: "#fff" },
+  };
+  const bell = cuePresentation(makeMock("bell"), appearance, "left");
+  assert.equal(bell?.icon, "bell");
+  assert.equal(bell?.label, null);
+  assert.equal(bell?.direction, "left");
+  assert.equal(
+    cuePresentation(makeMock("smoke_alarm"), appearance, "unknown")?.label,
+    "Smoke alarm",
+  );
+  assert.equal(
+    cuePresentation(makeMock("dog_bark", 0), appearance, "left"),
+    null,
+  );
+});
+
+test("manual sound previews replace previous samples without disabling sequence priority", async () => {
+  const { previewMock } = await import("./events.ts");
+  let state = previewMock(emptyMock(), makeMock("smoke_alarm"), 0);
+  state = previewMock(state, makeMock("bell"), 100);
+  assert.equal(state.active?.type, "bell");
+  state = previewMock(state, makeMock("dog_bark"), 200);
+  assert.equal(state.active?.type, "dog_bark");
+  state = previewMock(state, makeMock("dog_bark", 0), 300);
+  assert.equal(state.active, null);
 });
