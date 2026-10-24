@@ -1,6 +1,6 @@
 import type { ReactElement } from "react";
 import type { EventType, Tier } from "../src/lib/events";
-import type { Preset } from "../src/lib/presets";
+import type { Preset } from "../src/lib/alerts";
 import type { Appearance } from "../src/lib/appearance";
 export interface ManaDraft {
   name: string;

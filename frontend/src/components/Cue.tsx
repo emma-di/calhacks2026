@@ -71,7 +71,7 @@ export default function Cue({
       ) : (
         <div className="cue-idle">
           <span className="idle-orbit" />
-          <span>No active alerts</span>
+          <span>Quiet. Play a sound to see its cue here.</span>
         </div>
       )}
     </div>

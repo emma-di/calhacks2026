@@ -52,6 +52,8 @@ class SharedScenarioTests(unittest.TestCase):
                         self.assertEqual(snap['active'] and snap['active']['event_id'], expect['active'])
                     if 'reason' in expect:
                         self.assertEqual(result.get('reason'), expect['reason'])
+                    if 'replaced' in expect:
+                        self.assertEqual(result['active_type'], expect['replaced'])
                     if 'tier' in expect:
                         self.assertEqual(result['priority_tier'], expect['tier'])
                     if 'dismissed' in expect:

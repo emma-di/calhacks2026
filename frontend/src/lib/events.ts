@@ -27,11 +27,28 @@ export interface Decision {
   type: string;
   reason: string;
   priority_tier: Tier;
+  active_type?: string | null;
 }
 export interface Snapshot {
   active: SoundEvent | null;
   events: SoundEvent[];
   decisions: Decision[];
+}
+export interface Health {
+  display: { connected: boolean; clients: Record<string, number> };
+  capture: { live: boolean; last_event_ms_ago: Record<string, number> };
+  name_worker: string;
+  spatial: string;
+}
+// What every view renders, from either the browser engine or the receiver.
+export interface ViewState extends Snapshot {
+  remaining_ms: number;
+  state_sequence: number;
+  focus_mode: "everyday" | "work" | "dnd";
+  paused: boolean;
+  queue: { event_id: string; type: EventType; tier: Tier }[];
+  health: Health | null;
+  session_id: string | null;
 }
 export const tierNames = [
   "Ignore",
@@ -80,7 +97,7 @@ export const sounds: {
     label: "Your name",
     detail: "An invitation to connect",
     tier: 3,
-    receiver: false,
+    receiver: true,
   },
   {
     type: "smoke_alarm",
@@ -130,56 +147,6 @@ export function makeMock(type: EventType, tier?: Tier): SoundEvent {
     distance_meters: null,
   };
 }
-// Browser-only simulator. Receiver mode delegates ALL selection and timing to Python.
-export interface MockState extends Snapshot {
-  expiresAt: number;
-}
-export const emptyMock = (): MockState => ({
-  active: null,
-  events: [],
-  decisions: [],
-  expiresAt: 0,
-});
-export function expireMock(state: MockState, now: number): MockState {
-  return state.active && now >= state.expiresAt
-    ? { ...state, active: null, expiresAt: 0 }
-    : state;
-}
-export function applyMock(
-  state: MockState,
-  event: SoundEvent,
-  now: number,
-): MockState {
-  state = expireMock(state, now);
-  if (state.events.some((e) => e.event_id === event.event_id)) return state;
-  const tier = event.priority_tier;
-  const show =
-    tier > 0 && (!state.active || tier >= state.active.priority_tier);
-  const reason =
-    tier === 0
-      ? "ignored_tier_zero"
-      : show
-        ? "displayed"
-        : "suppressed_lower_priority";
-  return {
-    active: show ? event : state.active,
-    expiresAt: show ? now + lifetime[tier] : state.expiresAt,
-    events: [...state.events, event].slice(-50),
-    decisions: [
-      ...state.decisions,
-      {
-        event_id: event.event_id,
-        type: event.type,
-        priority_tier: tier,
-        reason,
-      },
-    ].slice(-50),
-  };
-}
-// A deliberate button preview is isolated from a previous sample; sequences retain real priority rules.
-export function previewMock(state: MockState,event:SoundEvent,now:number):MockState {
- return applyMock({...state,active:null,expiresAt:0},event,now);
-}
 const knownTypes = new Set([
   "knock",
   "bell",
@@ -225,7 +192,7 @@ export function parseEvent(input: unknown): SoundEvent {
     distance_meters: null,
   } as unknown as SoundEvent;
 }
-export function parseSnapshot(input: unknown): Snapshot {
+export function parseSnapshot(input: unknown): ViewState {
   if (!input || typeof input !== "object")
     throw new Error("Invalid receiver state");
   const s = input as Record<string, unknown>;
@@ -249,19 +216,30 @@ export function parseSnapshot(input: unknown): Snapshot {
       throw new Error("Invalid decision");
     return d as Decision;
   });
+  const focus = ["everyday", "work", "dnd"].includes(String(s.focus_mode))
+    ? (s.focus_mode as ViewState["focus_mode"])
+    : "everyday";
   return {
     active: s.active === null ? null : parseEvent(s.active),
     events: s.events.map(parseEvent),
     decisions,
+    remaining_ms: typeof s.remaining_ms === "number" ? s.remaining_ms : 0,
+    state_sequence: typeof s.state_sequence === "number" ? s.state_sequence : 0,
+    focus_mode: focus,
+    paused: s.paused === true,
+    queue: Array.isArray(s.queue) ? (s.queue as ViewState["queue"]) : [],
+    health: s.health && typeof s.health === "object" ? (s.health as Health) : null,
+    session_id: typeof s.session_id === "string" ? s.session_id : null,
   };
 }
 export async function request(
   path: string,
   body?: unknown,
   signal?: AbortSignal,
+  method?: "PUT",
 ): Promise<unknown> {
   const response = await fetch(`/api${path}`, {
-    method: body === undefined ? "GET" : "POST",
+    method: method ?? (body === undefined ? "GET" : "POST"),
     ...(body === undefined
       ? {}
       : {

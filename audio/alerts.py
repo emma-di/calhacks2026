@@ -81,7 +81,8 @@ class AlertEngine:
     def _decide(self, event, tier, reason, now, **extra):
         decision = dict(kind='alert_state', event_id=event['event_id'], type=event['type'],
                         priority_tier=tier, reason=reason, at_ms=round(now),
-                        active_type=self.active['event']['type'] if self.active else None, **extra)
+                        active_type=self.active['event']['type'] if self.active else None)
+        decision.update(extra)
         self.decisions.append(decision)
         if self.on_decision:
             self.on_decision(decision)
@@ -159,7 +160,8 @@ class AlertEngine:
                 # The interrupted cue may resume afterwards, but only while it is still fresh.
                 self.queue.append(dict(event=active['event'], tier=active['tier'], received=active['started']))
             self._show(logged, tier, now)
-            return self._decide(logged, tier, reason, now)
+            return self._decide(logged, tier, reason, now,
+                                active_type=active['event']['type'] if active else None)
         if tier == 1:
             return self._decide(logged, tier, 'suppressed_lower_priority', now)
         self.queue = [item for item in self.queue if item['event']['type'] != kind]

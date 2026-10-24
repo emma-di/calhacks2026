@@ -331,7 +331,7 @@ export function AwareCuePreview({
       className={`onboarding-cue-preview ${render === "oled" ? "onboarding-oled" : ""}`}
     >
       {render === "oled" ? (
-        <Oled event={event} appearance={appearance} direction={direction} />
+        <Oled event={event} labels={appearance.text === "labels"} />
       ) : (
         <Cue event={event} appearance={appearance} direction={direction} />
       )}
@@ -434,8 +434,7 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
         btnBg: "#1c1d19",
         btnFg: "#fafaf8",
       };
-  const font =
-    'ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif';
+  const font = '"Geist", Inter, ui-sans-serif, system-ui, sans-serif';
   const mono = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
   const s = {
@@ -619,7 +618,7 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
         <p style={{ fontSize: 16, margin: "8px 0 0" }}>
           Stay aware of the sounds that matter to you, without watching a
           screen. Start from a preset, then add exceptions. Changes apply to
-          this browser simulator; device settings are not connected yet.
+          the preview right away and to the receiver whenever it is connected.
         </p>
         <div
           role="status"
@@ -627,7 +626,6 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
           style={{ marginTop: 14, fontSize: 14, color: p.muted }}
         >
           <div>{statusText}</div>
-          <div>Preview mode · glasses sync is not connected yet.</div>
         </div>
 
         {/* Preset */}
@@ -1076,11 +1074,12 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
                   marginLeft: 6,
                 }}
               >
-                Browser mirror only
+                Labels reach the glasses
               </span>
             </summary>
             <p style={Object.assign({}, s.lead, { marginTop: 12 })}>
-              See how your cues will look. These choices apply to this preview.
+              See how your cues will look. Labels also apply to the glasses;
+              colors, motion and placement are browser-only.
             </p>
 
             <div style={{ marginTop: 20 }}>

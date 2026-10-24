@@ -1,0 +1,203 @@
+import { useCallback, useEffect, useRef, useState } from "react";
+import { AlertEngine, type FocusMode, type Preferences } from "./alerts";
+import {
+  makeMock,
+  parseSnapshot,
+  request,
+  type EventType,
+  type ViewState,
+} from "./events";
+import type { ManaProfile } from "../../mana/AwareOnboarding.jsx";
+
+export type Source = "browser" | "receiver";
+export type Connection = "idle" | "connecting" | "connected" | "disconnected";
+export type SyncStatus =
+  | { kind: "local" }
+  | { kind: "saving" }
+  | { kind: "applied"; revision: number }
+  | { kind: "error"; message: string };
+
+const emptyView = (): ViewState => ({
+  active: null,
+  events: [],
+  decisions: [],
+  remaining_ms: 0,
+  state_sequence: 0,
+  focus_mode: "everyday",
+  paused: false,
+  queue: [],
+  health: null,
+  session_id: null,
+});
+
+// Knock is skipped for nothing, name takes over, the alarm takes over and repeats; dismiss to see
+// the name come back. Each step is narrated by the decision explanations.
+const busyMinute: [number, EventType][] = [
+  [0, "knock"],
+  [900, "dog_bark"],
+  [1800, "name_called"],
+  [3600, "smoke_alarm"],
+  [5600, "smoke_alarm"],
+];
+
+export function useSession(
+  source: Source,
+  profile: ManaProfile | null,
+  labels: boolean,
+) {
+  const engine = useRef(new AlertEngine());
+  const [view, setView] = useState<ViewState>(emptyView);
+  const [connection, setConnection] = useState<Connection>("idle");
+  const [sync, setSync] = useState<SyncStatus>({ kind: "local" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const prefs: Preferences | null = profile
+    ? (profile.notification_preferences as Preferences)
+    : null;
+
+  const stopSequence = useCallback(() => {
+    timers.current.forEach(clearTimeout);
+    timers.current = [];
+    setBusy(false);
+  }, []);
+
+  // Browser simulator: same engine rules, local clock.
+  useEffect(() => {
+    if (prefs) engine.current.prefs = prefs;
+  }, [prefs]);
+  useEffect(() => {
+    if (source !== "browser") return;
+    const tick = () => setView({ ...emptyView(), ...engine.current.snapshot(performance.now()) });
+    tick();
+    const timer = setInterval(tick, 100);
+    return () => clearInterval(timer);
+  }, [source]);
+
+  // Receiver: poll the authoritative state; never keep a cue from a dead connection.
+  useEffect(() => {
+    if (source !== "receiver") return;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout>;
+    let controller: AbortController | undefined;
+    setConnection("connecting");
+    setView(emptyView());
+    async function poll() {
+      controller = new AbortController();
+      const timeout = setTimeout(() => controller?.abort(), 2500);
+      try {
+        const snapshot = parseSnapshot(await request("/state", undefined, controller.signal));
+        if (!cancelled) {
+          setView(snapshot);
+          setConnection("connected");
+        }
+      } catch {
+        if (!cancelled) {
+          setConnection("disconnected");
+          setView((v) => ({ ...v, active: null, remaining_ms: 0, health: null }));
+        }
+      } finally {
+        clearTimeout(timeout);
+        if (!cancelled) timer = setTimeout(poll, 250);
+      }
+    }
+    void poll();
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      controller?.abort();
+    };
+  }, [source]);
+
+  // Saved preferences follow the receiver, including after it restarts with a new session.
+  const synced = useRef<string | null>(null);
+  const profileKey = profile ? JSON.stringify([profile.notification_preferences, profile.name_detection, labels]) : null;
+  useEffect(() => {
+    if (source !== "receiver") {
+      synced.current = null;
+      setSync({ kind: "local" });
+      return;
+    }
+    if (connection !== "connected" || !profile || !profileKey) return;
+    const key = `${view.session_id}:${profileKey}`;
+    if (synced.current === key) return;
+    synced.current = key;
+    setSync({ kind: "saving" });
+    request("/profile", { ...profile, display: { labels } }, undefined, "PUT")
+      .then((saved) => setSync({ kind: "applied", revision: Number((saved as { revision: number }).revision) }))
+      .catch((e: Error) => {
+        synced.current = null;
+        setSync({ kind: "error", message: e.message });
+      });
+  }, [source, connection, profile, profileKey, labels, view.session_id]);
+
+  const send = useCallback(
+    async (type: EventType) => {
+      const event = makeMock(type);
+      if (source === "browser") {
+        engine.current.add(event, performance.now());
+        return;
+      }
+      await request("/events", { ...event, confidence: null });
+    },
+    [source],
+  );
+
+  const play = useCallback(
+    async (type: EventType) => {
+      stopSequence();
+      setError(null);
+      if (source === "browser") engine.current.reset(performance.now());
+      try {
+        await send(type);
+      } catch {
+        setError("The receiver did not accept that sound. Check that it is running.");
+      }
+    },
+    [source, send, stopSequence],
+  );
+
+  const playSequence = useCallback(() => {
+    stopSequence();
+    setError(null);
+    if (source === "browser") engine.current.reset(performance.now());
+    setBusy(true);
+    timers.current = busyMinute.map(([delay, type]) =>
+      setTimeout(() => void send(type).catch(() => setError("The receiver stopped answering.")), delay),
+    );
+    timers.current.push(setTimeout(() => setBusy(false), busyMinute.at(-1)![0] + 100));
+  }, [source, send, stopSequence]);
+
+  const dismiss = useCallback(async () => {
+    const id = view.active?.event_id;
+    if (!id) return;
+    if (source === "browser") {
+      engine.current.dismiss(performance.now(), id);
+      return;
+    }
+    try {
+      await request("/dismiss", { event_id: id });
+    } catch {
+      setError("Dismiss did not reach the receiver.");
+    }
+  }, [source, view.active]);
+
+  const setControls = useCallback(
+    async (changes: { focus_mode?: FocusMode; paused?: boolean }) => {
+      if (source === "browser") {
+        engine.current.setControls(performance.now(), changes);
+        return;
+      }
+      try {
+        await request("/controls", changes);
+      } catch {
+        setError("That change did not reach the receiver.");
+      }
+    },
+    [source],
+  );
+
+  useEffect(() => stopSequence, [source, stopSequence]);
+
+  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, setControls };
+}

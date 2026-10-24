@@ -1,33 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import {
-  applyMock,
-  emptyMock,
-  expireMock,
-  makeMock,
-  parseSnapshot,
-  request,
-} from "./events.ts";
+import { makeMock, parseSnapshot, request } from "./events.ts";
 
-test("urgent cue interrupts; lower priority is recorded but cannot replace it", () => {
-  let state = applyMock(emptyMock(), makeMock("knock"), 0);
-  const alarm = makeMock("smoke_alarm");
-  state = applyMock(state, alarm, 100);
-  state = applyMock(state, makeMock("dog_bark"), 200);
-  assert.equal(state.active?.event_id, alarm.event_id);
-  assert.equal(state.decisions.at(-1)?.reason, "suppressed_lower_priority");
-  assert.equal(expireMock(state, 30100).active, null);
-});
-test("tier zero never replaces active and duplicate IDs never extend lifetime", () => {
-  const event = makeMock("knock");
-  let state = applyMock(emptyMock(), event, 0);
-  state = applyMock(state, makeMock("conversation"), 100);
-  assert.equal(state.active?.event_id, event.event_id);
-  assert.equal(state.decisions.at(-1)?.reason, "ignored_tier_zero");
-  state = applyMock(state, event, 500);
-  assert.equal(state.expiresAt, 3000);
-  assert.equal(state.events.length, 2);
-});
 test("receiver state accepts nullable confidence but rejects malformed or out-of-range data", () => {
   const event = makeMock("name_called");
   assert.equal(
@@ -61,14 +35,6 @@ test("non-success HTTP response is an error, not a connected empty state", async
   }
 });
 
-test("preset defaults remain separate from explicit tier-zero overrides", async () => {
-  const { mockPriority } = await import("./presets.ts");
-  assert.equal(mockPriority("dog_bark", "active", {}), 2);
-  assert.equal(mockPriority("dog_bark", "gentle", {}), 1);
-  assert.equal(mockPriority("dog_bark", "active", { dog_bark: 0 }), 0);
-  assert.equal(mockPriority("knock", "balanced", {}), 2);
-});
-
 test("shared presentation keeps icons, urgent text and mock placement consistent", async () => {
   const { cuePresentation } = await import("./presentation.ts");
   const appearance = {
@@ -91,13 +57,3 @@ test("shared presentation keeps icons, urgent text and mock placement consistent
   );
 });
 
-test("manual sound previews replace previous samples without disabling sequence priority", async () => {
-  const { previewMock } = await import("./events.ts");
-  let state = previewMock(emptyMock(), makeMock("smoke_alarm"), 0);
-  state = previewMock(state, makeMock("bell"), 100);
-  assert.equal(state.active?.type, "bell");
-  state = previewMock(state, makeMock("dog_bark"), 200);
-  assert.equal(state.active?.type, "dog_bark");
-  state = previewMock(state, makeMock("dog_bark", 0), 300);
-  assert.equal(state.active, null);
-});

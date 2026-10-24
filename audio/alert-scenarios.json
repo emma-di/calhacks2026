@@ -5,7 +5,7 @@
       "name": "urgent interrupts, lower priority recorded, knock resumes only while fresh",
       "steps": [
         {"at": 0, "add": "knock", "id": "k1", "expect": {"reason": "displayed", "active": "k1"}},
-        {"at": 1000, "add": "smoke_alarm", "id": "s1", "expect": {"reason": "interrupted", "active": "s1", "queue": ["k1"]}},
+        {"at": 1000, "add": "smoke_alarm", "id": "s1", "expect": {"reason": "interrupted", "replaced": "knock", "active": "s1", "queue": ["k1"]}},
         {"at": 1500, "add": "dog_bark", "id": "d1", "expect": {"reason": "suppressed_lower_priority", "active": "s1"}},
         {"at": 2000, "dismiss": "s1", "expect": {"dismissed": true, "active": "k1", "reason": "resumed_from_queue"}},
         {"at": 5000, "tick": true, "expect": {"active": null}}

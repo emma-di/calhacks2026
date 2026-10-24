@@ -153,5 +153,13 @@ class DisplayTests(unittest.TestCase):
             self.assertEqual(len(output.read_bytes()), 1034)
 
 
+class SharedFixtureTests(unittest.TestCase):
+    def test_render_fixtures_are_current(self):
+        import json
+        from hardware.render_fixtures import PATH, frames
+        self.assertEqual(json.loads(PATH.read_text()), frames(),
+                         'Run python3 -m hardware.render_fixtures and commit the result')
+
+
 if __name__ == "__main__":
     unittest.main()
