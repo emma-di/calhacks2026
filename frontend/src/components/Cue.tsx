@@ -1,37 +1,34 @@
-import {
-  Bell,
-  DoorOpen,
-  Dog,
-  Flame,
-  MessageCircle,
-  Radio,
-  UserRound,
-  Clock3,
-  type LucideIcon,
-} from "lucide-react";
+import assets from "../../../hardware/oled-assets.json";
+import policy from "../../../audio/alert-policy.json";
 import { tierNames, type EventType, type SoundEvent } from "../lib/events";
 import type { Appearance } from "../lib/appearance";
 import { cuePresentation } from "../lib/presentation";
-const icons: Record<EventType, LucideIcon> = {
-  knock: DoorOpen,
-  bell: Bell,
-  bicycle_bell: Bell,
-  dog_bark: Dog,
-  name_called: UserRound,
-  smoke_alarm: Flame,
-  conversation: MessageCircle,
-  siren: Radio,
-  alarm_clock: Clock3,
-};
-export function SoundIcon({
-  type,
-  size = 22,
-}: {
-  type: EventType;
-  size?: number;
-}) {
-  const Icon = icons[type];
-  return <Icon size={size} strokeWidth={1.7} aria-hidden="true" />;
+
+const bitmaps = assets.bitmaps as Record<string, string[]>;
+const iconIds = policy.icons as Record<string, string>;
+// Each icon becomes one SVG path of pixel runs, so the site uses the glasses' own pixel art.
+const paths: Record<string, string> = Object.fromEntries(
+  Object.entries(bitmaps).map(([id, rows]) => [
+    id,
+    rows
+      .flatMap((bits, y) => [...bits.matchAll(/1+/g)].map((m) => `M${m.index} ${y}h${m[0].length}v1h-${m[0].length}z`))
+      .join(""),
+  ]),
+);
+
+export function SoundIcon({ type, size = 24 }: { type: EventType; size?: number }) {
+  return (
+    <svg
+      className="pixel-icon"
+      width={size}
+      height={size}
+      viewBox="0 0 32 32"
+      shapeRendering="crispEdges"
+      aria-hidden="true"
+    >
+      <path d={paths[iconIds[type] ?? "bell"]} fill="currentColor" />
+    </svg>
+  );
 }
 export default function Cue({
   event,

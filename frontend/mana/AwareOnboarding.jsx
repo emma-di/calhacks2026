@@ -234,7 +234,7 @@ export function buildAwareProfile(draft) {
 export const AWARE_DISPLAY_DEFAULTS = {
   labels: false,
   motion: "off",
-  colors: { 1: "#9aa0a6", 2: "#7fb2ff", 3: "#f2c14e", 4: "#ff6b5b" },
+  colors: { 1: "#b4b2aa", 2: "#f4f2ea", 3: "#f4f2ea", 4: "#ffb547" },
 };
 
 export function sanitizeAwareDisplay(raw) {
@@ -257,7 +257,7 @@ export function sanitizeAwareDisplay(raw) {
 
 const AWARE_DRAFT_KEY = "aware.profile-draft.v2";
 const AWARE_LEGACY_KEY = "aware.profile-draft.v1";
-const AWARE_DISPLAY_KEY = "aware.display-prefs.v1";
+const AWARE_DISPLAY_KEY = "aware.display-prefs.v2"; // v2: night-lens palette
 
 function awareKey(base) {
   return base + ":local-demo";
@@ -339,8 +339,8 @@ export function AwareCuePreview({
   );
 }
 
-export default function AwareOnboarding({ onChange, onComplete } = {}) {
-  const isDark = false; // Host app currently supplies the light theme.
+export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
+  const isDark = theme === "dark";
   const uid = useId();
   const [storageOk] = useState(() => awareStorageAvailable());
   const [restored] = useState(() =>
@@ -415,8 +415,8 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
 
   const p = isDark
     ? {
-        ink: "#ececea",
-        muted: "#a3a49d",
+        ink: "#f4f2ea",
+        muted: "#9a988f",
         line: "rgba(236,236,234,0.12)",
         lineStrong: "rgba(236,236,234,0.32)",
         field: "rgba(236,236,234,0.04)",
@@ -434,7 +434,7 @@ export default function AwareOnboarding({ onChange, onComplete } = {}) {
         btnBg: "#1c1d19",
         btnFg: "#fafaf8",
       };
-  const font = '"Geist", Inter, ui-sans-serif, system-ui, sans-serif';
+  const font = '"Instrument Sans", Inter, ui-sans-serif, system-ui, sans-serif';
   const mono = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
   const s = {

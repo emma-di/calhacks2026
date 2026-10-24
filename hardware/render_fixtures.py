@@ -4,11 +4,11 @@ The browser preview (frontend/src/lib/oled.ts) must reproduce these frames byte 
 """
 import json
 from pathlib import Path
-from hardware.display import ICON_IDS, Presentation, render
+from hardware.display import DIRECTIONS, ICON_IDS, Presentation, render
 
 PATH = Path(__file__).with_name('render-fixtures.json')
 LABELS = {'knock': 'Door knock', 'bell': 'Bell / chime', 'dog': 'Dog barking', 'name': 'Your name',
-          'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock'}
+          'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock', 'chat': 'Conversation'}
 
 
 def cases():
@@ -18,6 +18,12 @@ def cases():
                 yield dict(icon_id=icon, label=LABELS[icon], effective_tier=tier, remaining_ms=3000, show_labels=labels)
     yield dict(icon_id='knock', label='A very long label that needs wrapping onto two lines', effective_tier=2,
                remaining_ms=3000, show_labels=True)
+    for direction in DIRECTIONS:
+        for tier in range(1, 5):
+            yield dict(icon_id='smoke', label='Smoke alarm', effective_tier=tier, remaining_ms=3000,
+                       show_labels=True, direction=direction)
+        yield dict(icon_id='knock', label='A very long label that needs wrapping onto two lines', effective_tier=2,
+                   remaining_ms=3000, show_labels=True, direction=direction)
 
 
 def frames():
@@ -27,7 +33,8 @@ def frames():
                                       event_id='fixture' if case['effective_tier'] else None,
                                       label=case['label'] if case['effective_tier'] else '',
                                       icon_id=case['icon_id'] if case['effective_tier'] else None,
-                                      effective_tier=case['effective_tier'], remaining_ms=case['remaining_ms']))
+                                      effective_tier=case['effective_tier'], remaining_ms=case['remaining_ms'],
+                                      direction=case.get('direction')))
         out.append(dict(case, frame=render(cue, case['show_labels']).buffer.hex()))
     return out
 

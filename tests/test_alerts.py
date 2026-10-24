@@ -12,18 +12,21 @@ from hardware.display import DisplayState, Presentation
 SCENARIOS = json.loads((Path(__file__).resolve().parent.parent / 'audio' / 'alert-scenarios.json').read_text())
 
 
-def fixture_event(kind, event_id, at):
+def fixture_event(kind, event_id, at, direction=None):
     label, tier = EVENT_TYPES[kind]
+    degrees, confidence = direction or (None, None)
     return dict(schema_version=1, event_id=event_id, type=kind, label=label, confidence=None,
-                source='mock', priority_tier=tier, timestamp_ms=at, direction_degrees=None,
-                direction_confidence=None, distance_meters=None)
+                source='mock', priority_tier=tier, timestamp_ms=at, direction_degrees=degrees,
+                direction_confidence=confidence, distance_meters=None)
 
 
 def run_step(engine, step):
     at = step['at']
     result = {}
     if 'add' in step:
-        result = engine.add(fixture_event(step['add'], step['id'], at), at)
+        result = engine.add(fixture_event(step['add'], step['id'], at, step.get('direction')), at)
+    elif 'look' in step:
+        result = dict(resolved=engine.look(at, step['look']))
     elif 'dismiss' in step:
         result = dict(dismissed=engine.dismiss(at, step['dismiss']))
         if engine.decisions and engine.decisions[-1]['at_ms'] == at:
@@ -64,6 +67,12 @@ class SharedScenarioTests(unittest.TestCase):
                         self.assertEqual(snap['remaining_ms'], expect['remaining'])
                     if 'sequence' in expect:
                         self.assertEqual(snap['state_sequence'], expect['sequence'])
+                    if 'resolved' in expect:
+                        self.assertEqual(result['resolved'], expect['resolved'])
+                    if 'direction' in expect:
+                        self.assertEqual(snap['direction'], expect['direction'])
+                    if 'last_reason' in expect:
+                        self.assertEqual(snap['decisions'][-1]['reason'], expect['last_reason'])
                     if 'events' in expect:
                         self.assertEqual(len(snap['events']), expect['events'])
 
@@ -159,7 +168,15 @@ class ReceiverHttpTests(unittest.TestCase):
         self.assertEqual(self.call('/events', make_event('knock', .9, 'mock'))['reason'], 'held_dnd_mode')
         state = self.call('/state')
         self.assertEqual((state['focus_mode'], state['active'], state['health']['capture']['live']), ('dnd', None, False))
+        knock = make_event('knock', .9, 'mock')
+        knock.update(direction_degrees=95, direction_confidence=.8)
+        self.call('/controls', {'focus_mode': 'everyday'})
+        self.call('/events', knock)
+        self.assertEqual(self.call('/display')['direction'], 'right')
+        self.assertFalse(self.call('/look', {'heading_degrees': -90})['resolved'])
+        self.assertTrue(self.call('/look', {'heading_degrees': 80})['resolved'])
         for path, body, method in (('/controls', {'focus_mode': 'party'}, 'POST'),
+                                   ('/look', {'direction': 'up'}, 'POST'),
                                    ('/profile', {'schema_version': 1}, 'PUT'),
                                    ('/events', {'type': 'thunder'}, 'POST')):
             with self.subTest(path=path), self.assertRaises(HTTPError) as caught:

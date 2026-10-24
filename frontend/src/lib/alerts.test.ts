@@ -6,7 +6,7 @@ import { soundCatalog, type EventType } from "./events.ts";
 import { AWARE_PRESET_DEFAULTS } from "../../mana/AwareOnboarding.jsx";
 import { explain } from "./explain.ts";
 
-const fixtureEvent = (type: EventType, id: string, at: number) => {
+const fixtureEvent = (type: EventType, id: string, at: number, direction?: [number, number]) => {
   const sound = soundCatalog.find((s) => s.type === type)!;
   return {
     schema_version: 1,
@@ -17,8 +17,8 @@ const fixtureEvent = (type: EventType, id: string, at: number) => {
     source: "mock",
     priority_tier: sound.tier,
     timestamp_ms: at,
-    direction_degrees: null,
-    direction_confidence: null,
+    direction_degrees: direction?.[0] ?? null,
+    direction_confidence: direction?.[1] ?? null,
     distance_meters: null,
   };
 };
@@ -31,7 +31,8 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       const label = `${scenario.name} / step ${index}`;
       let result: Record<string, unknown> = {};
       if (step.add)
-        result = { ...engine.add(fixtureEvent(step.add, step.id, step.at), step.at) };
+        result = { ...engine.add(fixtureEvent(step.add, step.id, step.at, step.direction), step.at) };
+      else if (step.look) result = { resolved: engine.look(step.at, step.look) };
       else if (step.dismiss) {
         result = { dismissed: engine.dismiss(step.at, step.dismiss) };
         const last = engine.decisions.at(-1);
@@ -50,6 +51,9 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
         assert.deepEqual(snap.queue.map((q) => q.event_id), expect.queue, label);
       if ("remaining" in expect) assert.equal(snap.remaining_ms, expect.remaining, label);
       if ("sequence" in expect) assert.equal(snap.state_sequence, expect.sequence, label);
+      if ("resolved" in expect) assert.equal(result.resolved, expect.resolved, label);
+      if ("direction" in expect) assert.equal(snap.direction, expect.direction, label);
+      if ("last_reason" in expect) assert.equal(snap.decisions.at(-1)?.reason, expect.last_reason, label);
       if ("events" in expect) assert.equal(snap.events.length, expect.events, label);
     });
   }
@@ -64,6 +68,7 @@ test("every engine decision has a plain-language explanation", () => {
     "displayed", "interrupted", "queued", "resumed_from_queue", "expired_in_queue",
     "dropped_queue_full", "merged_repeat", "acknowledged_repeat", "dismissed", "duplicate",
     "paused", "ignored_tier_zero", "suppressed_lower_priority", "held_work_mode", "held_dnd_mode",
+    "expired", "resolved_looked",
   ];
   for (const reason of reasons) {
     const text = explain({ event_id: "a", type: "knock", priority_tier: 2, reason, active_type: "smoke_alarm" });

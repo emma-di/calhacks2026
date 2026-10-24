@@ -52,4 +52,5 @@ export function resolveAwareTier(
 export default function AwareOnboarding(props: {
   onChange?: (change: SetupChange) => void;
   onComplete?: () => void;
+  theme?: "light" | "dark";
 }): ReactElement;

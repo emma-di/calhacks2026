@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AlertEngine, type FocusMode, type Preferences } from "./alerts";
+import { AlertEngine, directionDegrees, type Direction, type FocusMode, type Preferences } from "./alerts";
 import {
   makeMock,
   parseSnapshot,
@@ -22,6 +22,7 @@ const emptyView = (): ViewState => ({
   events: [],
   decisions: [],
   remaining_ms: 0,
+  direction: null,
   state_sequence: 0,
   focus_mode: "everyday",
   paused: false,
@@ -132,8 +133,8 @@ export function useSession(
   }, [source, connection, profile, profileKey, labels, view.session_id]);
 
   const send = useCallback(
-    async (type: EventType) => {
-      const event = makeMock(type);
+    async (type: EventType, direction: Direction | null = null) => {
+      const event = makeMock(type, undefined, direction ? directionDegrees[direction] : null);
       if (source === "browser") {
         engine.current.add(event, performance.now());
         return;
@@ -144,12 +145,12 @@ export function useSession(
   );
 
   const play = useCallback(
-    async (type: EventType) => {
+    async (type: EventType, direction: Direction | null = null) => {
       stopSequence();
       setError(null);
       if (source === "browser") engine.current.reset(performance.now());
       try {
-        await send(type);
+        await send(type, direction);
       } catch {
         setError("The receiver did not accept that sound. Check that it is running.");
       }
@@ -182,6 +183,21 @@ export function useSession(
     }
   }, [source, view.active]);
 
+  const look = useCallback(
+    async (direction: Direction) => {
+      if (source === "browser") {
+        engine.current.look(performance.now(), direction);
+        return;
+      }
+      try {
+        await request("/look", { direction });
+      } catch {
+        setError("The look did not reach the receiver.");
+      }
+    },
+    [source],
+  );
+
   const setControls = useCallback(
     async (changes: { focus_mode?: FocusMode; paused?: boolean }) => {
       if (source === "browser") {
@@ -199,5 +215,5 @@ export function useSession(
 
   useEffect(() => stopSequence, [source, stopSequence]);
 
-  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, setControls };
+  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, setControls };
 }

@@ -78,9 +78,16 @@ def validate_event(event):
         raise ValueError('priority_tier must be 0..4')
     if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
         raise ValueError('timestamp_ms must be a nonnegative integer')
-    # Direction is deliberately unsupported until a localization adapter is validated.
-    if any(event.get(k) is not None for k in ('direction_degrees', 'direction_confidence', 'distance_meters')):
-        raise ValueError('Spatial estimates are not supported yet')
+    # Direction from a localization worker: degrees relative to the face (0 front, +90 right), with a
+    # confidence. The alert engine ignores low-confidence directions. Distance stays unsupported.
+    degrees, certainty = event.get('direction_degrees'), event.get('direction_confidence')
+    if degrees is not None or certainty is not None:
+        if type(degrees) not in (int, float) or not math.isfinite(degrees) or not -180 <= degrees <= 180:
+            raise ValueError('direction_degrees must be within -180..180')
+        if type(certainty) not in (int, float) or not math.isfinite(certainty) or not 0 <= certainty <= 1:
+            raise ValueError('direction_confidence must accompany direction_degrees, within 0..1')
+    if event.get('distance_meters') is not None:
+        raise ValueError('Distance estimates are not supported yet')
     return event
 
 class Detector:

@@ -6,6 +6,7 @@ Endpoints (JSON):
   GET  /health    receiver, capture, display and worker availability
   GET  /profile   saved preferences;  PUT /profile  validate, apply and persist atomically
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
+  POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
 """
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -15,7 +16,7 @@ import os
 import threading
 import time
 from urllib.parse import urlsplit, parse_qs
-from audio.alerts import AlertEngine, DEFAULT_PROFILE, validate_profile
+from audio.alerts import AlertEngine, DEFAULT_PROFILE, direction_bucket, validate_profile
 from audio.events import EVENT_TYPES, validate_event
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -63,6 +64,10 @@ class AlertState:
     def dismiss(self, event_id=None, now=None):
         with self.lock:
             return self.engine.dismiss(self._ms(now), event_id)
+
+    def look(self, direction, now=None):
+        with self.lock:
+            return self.engine.look(self._ms(now), direction)
 
     def controls(self, now=None, **changes):
         with self.lock:
@@ -158,7 +163,7 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
-        if path not in ('/events', '/dismiss', '/controls'):
+        if path not in ('/events', '/dismiss', '/controls', '/look'):
             return self.reply(404, {'error': 'Not found'})
         try:
             payload = self.read_json()
@@ -169,6 +174,14 @@ class Handler(BaseHTTPRequestHandler):
                 if event_id is not None and not isinstance(event_id, str):
                     raise ValueError('event_id must be a string')
                 return self.reply(200, {'ok': True, 'dismissed': state.dismiss(event_id)})
+            if path == '/look':
+                direction = payload.get('direction')
+                if direction is None and payload.get('heading_degrees') is not None:
+                    heading = payload['heading_degrees']
+                    if type(heading) not in (int, float):
+                        raise ValueError('heading_degrees must be a number')
+                    direction = direction_bucket(heading, 1.0)
+                return self.reply(200, {'ok': True, 'resolved': state.look(direction)})
             if path == '/controls':
                 state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'))
                 return self.reply(200, {'ok': True})

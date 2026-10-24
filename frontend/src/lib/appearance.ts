@@ -9,11 +9,11 @@ export const defaultAppearance: Appearance = {
   text: "icons",
   motion: "none",
   colors: {
-    0: "#ffffff",
-    1: "#dcebd8",
-    2: "#ffffff",
-    3: "#ffe3a3",
-    4: "#ffbba8",
+    0: "#f4f2ea",
+    1: "#b4b2aa",
+    2: "#f4f2ea",
+    3: "#f4f2ea",
+    4: "#ffb547",
   },
   direction: "unknown",
 };

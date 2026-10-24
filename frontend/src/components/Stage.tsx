@@ -1,8 +1,7 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Camera, CameraOff } from "lucide-react";
-import Cue from "./Cue";
+import Oled from "./Oled";
 import type { SoundEvent } from "../lib/events";
-import type { Appearance } from "../lib/appearance";
 
 // The camera only ever starts from a click, stays in this tab and is never recorded or sent anywhere.
 function useCamera() {
@@ -50,18 +49,24 @@ function useCamera() {
   return { stream, devices, deviceId, error, start, stop };
 }
 
+// The wearer's view: the room (camera) or darkness, with the glasses' own 128x64 frame floating in it,
+// so the live view and the panel can never disagree.
 export default function Stage({
   event,
-  appearance,
+  labels,
   direction,
   caption,
   large = false,
+  motion = "none",
+  children,
 }: {
   event: SoundEvent | null;
-  appearance: Appearance;
-  direction: Appearance["direction"];
+  labels: boolean;
+  direction: string | null;
   caption: string;
   large?: boolean;
+  motion?: "none" | "gentle";
+  children?: ReactNode;
 }) {
   const camera = useCamera();
   const video = useRef<HTMLVideoElement>(null);
@@ -104,7 +109,14 @@ export default function Stage({
           {camera.error}
         </p>
       )}
-      <Cue event={event} appearance={appearance} direction={direction} />
+      <div
+        key={event?.event_id ?? "idle"}
+        className={`lens-frame ${event ? "is-lit" : ""} ${event?.priority_tier === 4 ? "is-urgent" : ""} ${motion === "gentle" ? "gentle-cue" : ""}`}
+      >
+        <Oled event={event} labels={labels} direction={direction} lens />
+      </div>
+      {!event && <p className="lens-idle">Quiet</p>}
+      {children}
     </section>
   );
 }

@@ -191,6 +191,17 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
 - Companion redesigned around "What the wearer sees" per `.taste-skill/direction.json`; Scene illustration
   removed; Show my room uses the browser camera behind the cue (click-to-start, never recorded).
 
+## Night lens redesign, direction, resolution and icons — October 23 (latest)
+
+- Companion restyled ("Night lens"): dark lens is the page, Instrument Sans + Silkscreen, amber as the
+  only signal colour. The live view now draws the glasses' own 128×64 frame (black = see-through), so
+  the lens and the panel cannot disagree. Status: implemented.
+- Panel layout is fixed for every tier (icon same place, label same row); tier changes only the frame.
+  New 32×32 pixel icons from `hardware/icons.py`, also used for the site's sound buttons.
+- Direction contract ready for spatial work: `direction_degrees` + `direction_confidence` on events;
+  left/right only (two mics), confidence ≥ 0.6. Cues resolve by expiry, Dismiss, or `POST /look`
+  (no head sensor yet; the UI's Look button simulates it). See docs/alert-engine.md.
+
 ## Add a note
 
 ```text

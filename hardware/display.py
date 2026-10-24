@@ -8,11 +8,12 @@ import time
 WIDTH, HEIGHT = 128, 64
 
 
-# Original 5x7 bitmap alphabet and 24x24 line icons, shared with the browser preview.
+# Original 5x7 bitmap alphabet and 32x32 icons (hardware/icons.py), shared with the browser preview.
 # Unknown characters become '?'.
 _ASSETS = json.loads((Path(__file__).with_name("oled-assets.json")).read_text())
 _GLYPHS = _ASSETS["glyphs"]
-ICON_IDS = frozenset(_ASSETS["icons"])
+ICON_IDS = frozenset(_ASSETS["bitmaps"])
+DIRECTIONS = ("left", "right")
 FONT = {char: rows.split() for char, rows in _GLYPHS.items()}
 
 
@@ -80,16 +81,16 @@ class Bitmap:
                      for page in range(8) for x in range(WIDTH))
 
 
-def draw_icon(bitmap, icon_id, x, y, size=24):
-    """Original line pictograms on a 24x24 logical grid; small variant uses 16px."""
-    def line(a, b, c, d):
-        bitmap.line(x + round(a * size / 24), y + round(b * size / 24),
-                    x + round(c * size / 24), y + round(d * size / 24))
+ICON_SIZE = 32
+ICON_X, ICON_Y = (WIDTH - ICON_SIZE) // 2, 7
+LABEL_Y = 46
 
-    paths = _ASSETS["icons"]
-    for path in paths[icon_id]:
-        for start, end in zip(path, path[1:]):
-            line(*start, *end)
+
+def draw_icon(bitmap, icon_id, x=ICON_X, y=ICON_Y):
+    for row, bits in enumerate(_ASSETS["bitmaps"][icon_id]):
+        for column, bit in enumerate(bits):
+            if bit == "1":
+                bitmap.pixel(x + column, y + row)
 
 
 @dataclass(frozen=True)
@@ -102,12 +103,13 @@ class Presentation:
     icon_id: str | None
     effective_tier: int
     remaining_ms: int
+    direction: str | None = None  # left/right/front/behind once localization is measured
 
     @classmethod
     def parse(cls, value):
         if not isinstance(value, dict):
             raise ValueError("Presentation must be an object")
-        if not set(cls.__dataclass_fields__).issubset(value):
+        if not (set(cls.__dataclass_fields__) - {"direction"}).issubset(value):
             raise ValueError("Presentation is missing required fields")
         if type(value.get("schema_version")) is not int or value["schema_version"] != 1:
             raise ValueError("Expected presentation schema_version 1")
@@ -127,49 +129,51 @@ class Presentation:
             raise ValueError("Unknown icon_id")
         if value["effective_tier"] > 0 and (event_id is None or icon_id is None or not value["label"].strip()):
             raise ValueError("Visible cue needs event_id, icon_id and label")
-        fields = cls.__dataclass_fields__
-        return cls(**{key: value[key] for key in fields})
+        direction = value.get("direction")
+        if direction not in (None, *DIRECTIONS):
+            raise ValueError("direction must be left, right or null")
+        fields = [key for key in cls.__dataclass_fields__ if key != "direction"]
+        return cls(**{key: value[key] for key in fields}, direction=direction)
 
 
-def label_lines(label, width=19):
-    # Hard wrapping also bounds a long unbroken word. Two lines, explicit truncation.
-    remaining, lines = " ".join(label.upper().split()), []
-    while remaining and len(lines) < 2:
-        cut = len(remaining) if len(remaining) <= width else remaining.rfind(" ", 0, width + 1)
-        if cut <= 0:
-            cut = width
-        lines.append(remaining[:cut])
-        remaining = remaining[cut:].lstrip()
-    if remaining:
-        lines[-1] = lines[-1][:width - 3].rstrip() + "..."
-    return lines
+def fit_label(label, width=18):
+    text = " ".join(label.upper().split())
+    return text if len(text) <= width else text[:width - 3].rstrip() + "..."
+
+
+def draw_direction(bitmap, direction):
+    """A solid arrow beside the icon, on the side nearest the sound."""
+    if direction not in DIRECTIONS:
+        return
+    middle = ICON_Y + ICON_SIZE // 2
+    for k in range(-6, 7):
+        for x in range(6 + abs(k), 13):
+            bitmap.pixel(x if direction == "left" else WIDTH - 1 - x, middle + k)
 
 
 def render(presentation=None, show_labels=True):
+    """One fixed layout for every tier: icon in the same place, label on the same row.
+
+    Tier only changes the frame: 1 none, 2 thin frame, 3 double frame, 4 double frame and an
+    inverted label bar (Urgent always shows its label).
+    """
     bitmap = Bitmap()
     if presentation is None or presentation.effective_tier == 0 or presentation.remaining_ms == 0:
         return bitmap
     tier = presentation.effective_tier
-    if tier == 1:
-        draw_icon(bitmap, presentation.icon_id, 8, 42, 16)
-        if show_labels:
-            bitmap.text(presentation.label.upper()[:14], 34, 48)
-        return bitmap
+    if tier >= 2:
+        bitmap.rect(1, 1, 126, 62)
     if tier >= 3:
-        bitmap.rect(0, 0, 128, 64)
-    if tier == 4:
-        bitmap.rect(2, 2, 124, 60)
-        bitmap.rect(3, 3, 122, 11, fill=True)
-        bitmap.centered("URGENT", 5, value=0)
-        icon_y, text_y = 16, 43
-    else:
-        if tier == 3:
-            bitmap.centered("ATTENTION", 4)
-        icon_y, text_y = (14, 42) if tier == 3 else (5, 35)
-    draw_icon(bitmap, presentation.icon_id, 52, icon_y)
+        bitmap.rect(3, 3, 122, 58)
+    draw_icon(bitmap, presentation.icon_id)
     if show_labels or tier == 4:
-        for index, line in enumerate(label_lines(presentation.label)):
-            bitmap.centered(line, text_y + 9 * index)
+        text = fit_label(presentation.label)
+        if tier == 4:
+            bitmap.rect(6, LABEL_Y - 3, 116, 13, fill=True)
+            bitmap.centered(text, LABEL_Y, value=0)
+        else:
+            bitmap.centered(text, LABEL_Y)
+    draw_direction(bitmap, presentation.direction)
     return bitmap
 
 
@@ -235,7 +239,7 @@ def main():
     parser.add_argument("--output", type=Path, default=Path(".cache/display-preview.pbm"))
     args = parser.parse_args()
     labels = {"knock": "Door knock", "bell": "Bell / chime", "dog": "Dog barking", "name": "Your name",
-              "smoke": "Smoke alarm", "siren": "Siren", "clock": "Alarm clock"}
+              "smoke": "Smoke alarm", "siren": "Siren", "clock": "Alarm clock", "chat": "Conversation"}
     payload = json.loads(args.snapshot.read_text()) if args.snapshot else dict(
         schema_version=1, session_id="offline-demo", state_sequence=1, event_id="fake-cue",
         label=labels[args.event], icon_id=args.event, effective_tier=args.tier, remaining_ms=30000)

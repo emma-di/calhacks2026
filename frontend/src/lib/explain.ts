@@ -6,6 +6,7 @@ export interface Explainable {
   priority_tier: Tier;
   reason: string;
   active_type?: string | null;
+  direction?: string;
 }
 
 const name = (type?: string | null) =>
@@ -32,6 +33,10 @@ export function explain(d: Explainable): string {
       return `${sound} again. Same cue kept, not restarted.`;
     case "acknowledged_repeat":
       return `${sound} still going. Already dismissed, so it stays quiet.`;
+    case "expired":
+      return `${sound} cleared on its own.`;
+    case "resolved_looked":
+      return `You looked ${d.direction ?? "toward it"}, so ${sound} is resolved.`;
     case "dismissed":
       return `${sound} dismissed. Repeats stay quiet for 15 seconds.`;
     case "duplicate":
@@ -64,6 +69,8 @@ export function outcome(reason: string): string {
       merged_repeat: "Repeat, merged",
       acknowledged_repeat: "Repeat, already dismissed",
       dismissed: "Dismissed",
+      expired: "Cleared",
+      resolved_looked: "Resolved, looked",
       duplicate: "Duplicate",
       paused: "Paused",
       ignored_tier_zero: "Ignored",

@@ -43,6 +43,7 @@ export interface Health {
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
   remaining_ms: number;
+  direction: "left" | "right" | null;
   state_sequence: number;
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
@@ -131,7 +132,8 @@ export const soundCatalog = [
     receiver: true,
   },
 ];
-export function makeMock(type: EventType, tier?: Tier): SoundEvent {
+// A simulated direction is labeled as a test sound and carries full confidence.
+export function makeMock(type: EventType, tier?: Tier, directionDegrees: number | null = null): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
   return {
     schema_version: 1,
@@ -142,8 +144,8 @@ export function makeMock(type: EventType, tier?: Tier): SoundEvent {
     source: "mock",
     priority_tier: tier ?? sound.tier,
     timestamp_ms: Date.now(),
-    direction_degrees: null,
-    direction_confidence: null,
+    direction_degrees: directionDegrees,
+    direction_confidence: directionDegrees === null ? null : 1,
     distance_meters: null,
   };
 }
@@ -184,11 +186,16 @@ export function parseEvent(input: unknown): SoundEvent {
   ) {
     throw new Error("Receiver returned an invalid event");
   }
-  // No spatial rendering until a validated adapter and coordinate frame are agreed.
+  // Direction is kept only as a validated pair; the engine decides whether it is confident enough.
+  const degrees = e.direction_degrees;
+  const certainty = e.direction_confidence;
+  const directed =
+    typeof degrees === "number" && Number.isFinite(degrees) && Math.abs(degrees) <= 180 &&
+    typeof certainty === "number" && certainty >= 0 && certainty <= 1;
   return {
     ...e,
-    direction_degrees: null,
-    direction_confidence: null,
+    direction_degrees: directed ? degrees : null,
+    direction_confidence: directed ? certainty : null,
     distance_meters: null,
   } as unknown as SoundEvent;
 }
@@ -224,6 +231,9 @@ export function parseSnapshot(input: unknown): ViewState {
     events: s.events.map(parseEvent),
     decisions,
     remaining_ms: typeof s.remaining_ms === "number" ? s.remaining_ms : 0,
+    direction: ["left", "right"].includes(String(s.direction))
+      ? (s.direction as ViewState["direction"])
+      : null,
     state_sequence: typeof s.state_sequence === "number" ? s.state_sequence : 0,
     focus_mode: focus,
     paused: s.paused === true,

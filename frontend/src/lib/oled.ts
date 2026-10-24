@@ -9,19 +9,16 @@ export interface Cue {
   label: string;
   effective_tier: number;
   remaining_ms: number;
+  direction?: string | null;
 }
 const font: Record<string, string[]> = Object.fromEntries(
   Object.entries(assets.glyphs).map(([char, rows]) => [char, rows.split(" ")]),
 );
-const icons = assets.icons as Record<string, number[][][]>;
-
-// Python's round() rounds halves to even; match it so icon pixels agree exactly.
-function pyRound(value: number) {
-  const floor = Math.floor(value);
-  const diff = value - floor;
-  if (Math.abs(diff - 0.5) < 1e-9) return floor % 2 === 0 ? floor : floor + 1;
-  return Math.round(value);
-}
+const bitmaps = assets.bitmaps as Record<string, string[]>;
+const ICON_SIZE = 32;
+const ICON_X = (WIDTH - ICON_SIZE) / 2;
+const ICON_Y = 7;
+const LABEL_Y = 46;
 
 export class Bitmap {
   buffer = new Uint8Array((WIDTH * HEIGHT) / 8);
@@ -80,54 +77,42 @@ export class Bitmap {
   }
 }
 
-function drawIcon(bitmap: Bitmap, id: string, x: number, y: number, size = 24) {
-  const scale = (v: number) => pyRound((v * size) / 24);
-  for (const path of icons[id] ?? []) {
-    for (let i = 1; i < path.length; i++) {
-      const [a, b] = path[i - 1];
-      const [c, d] = path[i];
-      bitmap.line(x + scale(a), y + scale(b), x + scale(c), y + scale(d));
-    }
-  }
+function drawIcon(bitmap: Bitmap, id: string) {
+  (bitmaps[id] ?? []).forEach((bits, row) => {
+    for (let column = 0; column < bits.length; column++)
+      if (bits[column] === "1") bitmap.pixel(ICON_X + column, ICON_Y + row);
+  });
 }
 
-export function labelLines(label: string, width = 19) {
-  let remaining = label.toUpperCase().split(/\s+/).filter(Boolean).join(" ");
-  const lines: string[] = [];
-  while (remaining && lines.length < 2) {
-    let cut = remaining.length <= width ? remaining.length : remaining.lastIndexOf(" ", width);
-    if (cut <= 0) cut = width;
-    lines.push(remaining.slice(0, cut));
-    remaining = remaining.slice(cut).trimStart();
-  }
-  if (remaining) lines[lines.length - 1] = lines[lines.length - 1].slice(0, width - 3).trimEnd() + "...";
-  return lines;
+export function fitLabel(label: string, width = 18) {
+  const text = label.toUpperCase().split(/\s+/).filter(Boolean).join(" ");
+  return text.length <= width ? text : text.slice(0, width - 3).trimEnd() + "...";
 }
 
+// A solid arrow beside the icon, on the side nearest the sound.
+function drawDirection(bitmap: Bitmap, direction?: string | null) {
+  if (direction !== "left" && direction !== "right") return;
+  const middle = ICON_Y + ICON_SIZE / 2;
+  for (let k = -6; k <= 6; k++)
+    for (let x = 6 + Math.abs(k); x < 13; x++) bitmap.pixel(direction === "left" ? x : WIDTH - 1 - x, middle + k);
+}
+
+// One fixed layout for every tier; tier only changes the frame (see hardware/display.py render()).
 export function render(cue: Cue | null, showLabels = true): Bitmap {
   const bitmap = new Bitmap();
   if (!cue || cue.effective_tier === 0 || cue.remaining_ms === 0 || !cue.icon_id) return bitmap;
   const tier = cue.effective_tier;
-  if (tier === 1) {
-    drawIcon(bitmap, cue.icon_id, 8, 42, 16);
-    if (showLabels) bitmap.text(cue.label.toUpperCase().slice(0, 14), 34, 48);
-    return bitmap;
+  if (tier >= 2) bitmap.rect(1, 1, 126, 62);
+  if (tier >= 3) bitmap.rect(3, 3, 122, 58);
+  drawIcon(bitmap, cue.icon_id);
+  if (showLabels || tier === 4) {
+    const text = fitLabel(cue.label);
+    if (tier === 4) {
+      bitmap.rect(6, LABEL_Y - 3, 116, 13, true);
+      bitmap.centered(text, LABEL_Y, 0);
+    } else bitmap.centered(text, LABEL_Y);
   }
-  if (tier >= 3) bitmap.rect(0, 0, 128, 64);
-  let iconY: number;
-  let textY: number;
-  if (tier === 4) {
-    bitmap.rect(2, 2, 124, 60);
-    bitmap.rect(3, 3, 122, 11, true);
-    bitmap.centered("URGENT", 5, 0);
-    [iconY, textY] = [16, 43];
-  } else {
-    if (tier === 3) bitmap.centered("ATTENTION", 4);
-    [iconY, textY] = tier === 3 ? [14, 42] : [5, 35];
-  }
-  drawIcon(bitmap, cue.icon_id, 52, iconY);
-  if (showLabels || tier === 4)
-    labelLines(cue.label).forEach((line, index) => bitmap.centered(line, textY + 9 * index));
+  drawDirection(bitmap, cue.direction);
   return bitmap;
 }
 

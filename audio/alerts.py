@@ -6,6 +6,7 @@ Times are monotonic milliseconds supplied by the caller so tests and replays are
 """
 from collections import deque
 import json
+import math
 from pathlib import Path
 import uuid
 
@@ -54,6 +55,23 @@ def validate_profile(value, known_types):
                 display=dict(labels=display.get('labels', False)))
 
 
+DIRECTIONS = ('left', 'right')
+
+
+def direction_bucket(degrees, confidence):
+    """Left or right of the wearer, or None when unmeasured, weak, or near the front/back axis.
+
+    Two microphones (the current hardware) resolve the lateral angle only, so front and behind
+    are deliberately not distinguished.
+    """
+    if degrees is None or confidence is None or confidence < POLICY['direction_min_confidence']:
+        return None
+    lateral = math.sin(math.radians(degrees))
+    if abs(lateral) < 0.5:
+        return None
+    return 'right' if lateral > 0 else 'left'
+
+
 def effective_tier(kind, producer_tier, profile):
     """Explicit override, then the selected preset, then the producer's legacy default."""
     prefs = profile['notification_preferences']
@@ -90,7 +108,9 @@ class AlertEngine:
 
     def _show(self, event, tier, now):
         self.active = dict(event=event, tier=tier, started=now,
-                           expires=now + POLICY['lifetime_ms'][str(tier)], repeats=0)
+                           expires=now + POLICY['lifetime_ms'][str(tier)], repeats=0,
+                           direction=direction_bucket(event.get('direction_degrees'),
+                                                      event.get('direction_confidence')))
         self.sequence += 1
 
     def _clear(self):
@@ -114,6 +134,7 @@ class AlertEngine:
     def tick(self, now):
         """Expire the active cue and resume the best fresh queued cue. Call before reading."""
         if self.active and now >= self.active['expires']:
+            self._decide(self.active['event'], self.active['tier'], 'expired', now)
             self._clear()
         self._fresh_queue(now)
         if self.active is None and self.queue:
@@ -186,6 +207,24 @@ class AlertEngine:
         self.tick(now)
         return True
 
+    def look(self, now, direction):
+        """The wearer turned toward the sound: the cue is resolved, like a dismiss.
+
+        `direction` comes from a head-orientation source (none in the current hardware) or a
+        simulated control. Only a cue with a measured direction can be resolved this way.
+        """
+        if direction not in DIRECTIONS:
+            raise ValueError(f'direction must be one of {", ".join(DIRECTIONS)}')
+        self.tick(now)
+        if self.active is None or self.active['direction'] != direction:
+            return False
+        shown = self.active['event']
+        self.acks[shown['type']] = now + POLICY['acknowledge_hold_ms']
+        self._decide(shown, self.active['tier'], 'resolved_looked', now, direction=direction)
+        self._clear()
+        self.tick(now)
+        return True
+
     def set_controls(self, now, focus_mode=None, paused=None):
         self.tick(now)
         if focus_mode is not None:
@@ -221,12 +260,13 @@ class AlertEngine:
         if active is None:
             return dict(schema_version=1, session_id=self.session_id, state_sequence=self.sequence,
                         event_id=None, label='', icon_id=None, effective_tier=0, remaining_ms=0,
-                        show_labels=self.profile['display']['labels'])
+                        direction=None, show_labels=self.profile['display']['labels'])
         event = active['event']
         return dict(schema_version=1, session_id=self.session_id, state_sequence=self.sequence,
                     event_id=event['event_id'], label=event['label'],
                     icon_id=POLICY['icons'].get(event['type']), effective_tier=active['tier'],
-                    remaining_ms=self.remaining_ms(now), show_labels=self.profile['display']['labels'],
+                    remaining_ms=self.remaining_ms(now), direction=active['direction'],
+                    show_labels=self.profile['display']['labels'],
                     age_ms=round(now - active['started']), repeats=active['repeats'])
 
     def snapshot(self, now):
@@ -235,7 +275,8 @@ class AlertEngine:
             active=self.active['event'] if self.active else None,
             events=list(self.events), decisions=list(self.decisions),
             session_id=self.session_id, state_sequence=self.sequence,
-            remaining_ms=self.remaining_ms(now), focus_mode=self.focus_mode, paused=self.paused,
+            remaining_ms=self.remaining_ms(now), direction=self.active['direction'] if self.active else None,
+            focus_mode=self.focus_mode, paused=self.paused,
             queue=[dict(event_id=i['event']['event_id'], type=i['event']['type'], tier=i['tier'])
                    for i in self.queue],
             profile_revision=self.profile['revision'],

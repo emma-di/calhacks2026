@@ -48,10 +48,21 @@ class DisplayTests(unittest.TestCase):
                   for tier in range(1, 5)]
         self.assertEqual(len(set(frames)), 4)
         self.assertTrue(all(any(frame) for frame in frames))
-        urgent = render(Presentation.parse(snapshot(effective_tier=4)))
-        self.assertEqual(urgent.get(0, 0), 1)
-        self.assertEqual(urgent.get(2, 2), 1)
-        self.assertEqual(urgent.get(4, 4), 1)
+        ambient, notify, attention, urgent = (render(Presentation.parse(snapshot(effective_tier=t)))
+                                              for t in range(1, 5))
+        self.assertEqual((ambient.get(1, 1), notify.get(1, 1), notify.get(3, 3)), (0, 1, 0))
+        self.assertEqual((attention.get(1, 1), attention.get(3, 3)), (1, 1))
+        self.assertEqual(urgent.get(6, 43), 1)  # inverted label bar
+
+    def test_icon_sits_in_the_same_place_at_every_tier_and_direction(self):
+        def icon_pixels(**changes):
+            frame = render(Presentation.parse(snapshot(**changes)), show_labels=False)
+            return [frame.get(x, y) for y in range(7, 39) for x in range(48, 80)]
+        reference = icon_pixels(effective_tier=1)
+        self.assertTrue(any(reference))
+        for tier in range(1, 5):
+            for direction in (None, "left", "right"):
+                self.assertEqual(icon_pixels(effective_tier=tier, direction=direction), reference)
 
     def test_icons_are_distinct_and_long_labels_are_bounded(self):
         frames = [bytes(render(Presentation.parse(snapshot(icon_id=icon))).buffer)
@@ -60,16 +71,14 @@ class DisplayTests(unittest.TestCase):
         self.assertEqual(len(render(Presentation.parse(snapshot(label="X" * 128))).buffer), 1024)
 
     def test_optional_nonurgent_labels_preserve_icon_and_urgent_text(self):
-        for tier, icon_y in ((1, 42), (2, 5), (3, 14)):
+        for tier in (1, 2, 3):
             cue = Presentation.parse(snapshot(effective_tier=tier))
             labeled = render(cue)
             icon_only = render(cue, show_labels=False)
             self.assertNotEqual(labeled.buffer, icon_only.buffer)
-            x0, x1 = (8, 25) if tier == 1 else (52, 77)
-            bottom = icon_y + (17 if tier == 1 else 25)
             self.assertEqual(
-                [labeled.get(x, y) for y in range(icon_y, bottom) for x in range(x0, x1)],
-                [icon_only.get(x, y) for y in range(icon_y, bottom) for x in range(x0, x1)],
+                [labeled.get(x, y) for y in range(7, 39) for x in range(48, 80)],
+                [icon_only.get(x, y) for y in range(7, 39) for x in range(48, 80)],
             )
             self.assertTrue(any(icon_only.buffer))
         urgent = Presentation.parse(snapshot(effective_tier=4))

@@ -17,6 +17,7 @@ export interface AlertDecision {
   at_ms: number;
   active_type: EventType | null;
   shown_event_id?: string;
+  direction?: Direction;
 }
 export interface LoggedEvent extends SoundEvent {
   producer_tier?: Tier;
@@ -27,6 +28,7 @@ interface Active {
   started: number;
   expires: number;
   repeats: number;
+  direction: Direction | null;
 }
 interface Queued {
   event: LoggedEvent;
@@ -39,6 +41,7 @@ export interface EngineSnapshot {
   decisions: AlertDecision[];
   state_sequence: number;
   remaining_ms: number;
+  direction: Direction | null;
   focus_mode: FocusMode;
   paused: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
@@ -54,6 +57,17 @@ export const focusMinimum = policy.focus_minimum_tier as Record<
   FocusMode,
   Tier
 >;
+
+// Two microphones resolve left/right only, so front and behind are not distinguished.
+export type Direction = "left" | "right";
+export const directionDegrees: Record<Direction, number> = { right: 90, left: -90 };
+
+export function directionBucket(degrees: number | null, confidence: number | null): Direction | null {
+  if (degrees === null || confidence === null || confidence < policy.direction_min_confidence) return null;
+  const lateral = Math.sin((degrees * Math.PI) / 180);
+  if (Math.abs(lateral) < 0.5) return null;
+  return lateral > 0 ? "right" : "left";
+}
 
 export function effectiveTier(
   type: EventType,
@@ -95,7 +109,14 @@ export class AlertEngine {
     return decision;
   }
   private show(event: LoggedEvent, tier: Tier, now: number) {
-    this.active = { event, tier, started: now, expires: now + lifetime(tier), repeats: 0 };
+    this.active = {
+      event,
+      tier,
+      started: now,
+      expires: now + lifetime(tier),
+      repeats: 0,
+      direction: directionBucket(event.direction_degrees, event.direction_confidence),
+    };
     this.sequence += 1;
   }
   private clear() {
@@ -119,7 +140,10 @@ export class AlertEngine {
   }
 
   tick(now: number) {
-    if (this.active && now >= this.active.expires) this.clear();
+    if (this.active && now >= this.active.expires) {
+      this.decide(this.active.event, this.active.tier, "expired", now);
+      this.clear();
+    }
     this.freshQueue(now);
     if (!this.active && this.queue.length) {
       const best = this.best(this.queue, (b, a) =>
@@ -200,6 +224,18 @@ export class AlertEngine {
     return true;
   }
 
+  // The wearer turned toward the sound (a head-orientation source, or the simulated control).
+  look(now: number, direction: Direction): boolean {
+    this.tick(now);
+    if (!this.active || this.active.direction !== direction) return false;
+    const shown = this.active.event;
+    this.acks.set(shown.type, now + policy.acknowledge_hold_ms);
+    this.decide(shown, this.active.tier, "resolved_looked", now, { direction });
+    this.clear();
+    this.tick(now);
+    return true;
+  }
+
   setControls(now: number, changes: { focus_mode?: FocusMode; paused?: boolean }) {
     this.tick(now);
     if (changes.focus_mode !== undefined) this.focusMode = changes.focus_mode;
@@ -232,6 +268,7 @@ export class AlertEngine {
       decisions: this.decisions,
       state_sequence: this.sequence,
       remaining_ms: this.active ? Math.max(0, Math.round(this.active.expires - now)) : 0,
+      direction: this.active?.direction ?? null,
       focus_mode: this.focusMode,
       paused: this.paused,
       queue: this.queue.map((item) => ({
