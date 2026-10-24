@@ -177,6 +177,20 @@ physical sound-to-cue loop, settings/policy integration and names. Captions can 
 because 128×64 is constrained. Do not infer that nearby speech is addressed to the wearer. Revoicing,
 voice cloning and continuous ASL translation are outside current weekend scope. No new model added.
 
+## Alert engine, glasses client and companion redesign — October 23 (late)
+
+- Receiver now decides effective tier from saved preferences (producers' tiers are legacy defaults).
+  Behavior table, API and Pi steps: [alert engine](docs/alert-engine.md). Owner: Emma. Status: implemented.
+- Shared contracts to review: `GET /display` envelope (+`show_labels`), `PUT /profile`, `POST /controls`,
+  `name_called` with `confidence: null` accepted by `/events`. Existing `/state` fields kept.
+- `DisplayState` now trusts a newer `state_sequence` for the same event (needed for resume and urgent
+  extension); re-polled snapshots still cannot extend a cue. Icons `siren` and `clock` added. Glyphs and
+  icons moved to `hardware/oled-assets.json`, shared with the browser preview (byte-identical, tested).
+- Yameen: `python3 -m hardware.oled_client --sink ssd1306 --self-test` is the first wiring check;
+  `--flip-x` if the combiner mirrors the image. Status: awaiting physical evidence.
+- Companion redesigned around "What the wearer sees" per `.taste-skill/direction.json`; Scene illustration
+  removed; Show my room uses the browser camera behind the cue (click-to-start, never recorded).
+
 ## Add a note
 
 ```text

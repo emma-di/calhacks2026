@@ -37,7 +37,10 @@ npm ci --prefix frontend
 npm run dev --prefix frontend
 ```
 
-Open http://127.0.0.1:5173. Simulator mode needs no microphone or model.
+Open http://127.0.0.1:5173. "This browser" mode needs no microphone or model. With
+`python3 -m audio.server` running, choose Receiver: saved preferences, Work/Do not disturb, pause and
+dismiss then drive the real receiver. The [alert engine doc](docs/alert-engine.md) covers the rules,
+API and the Pi glasses client (`python3 -m hardware.oled_client`).
 Read [AGENTS.md](AGENTS.md) for the agent entry point and [hardware stack](docs/hardware-stack.md)
 for the original Pi Zero W + two INMP441s + SSD1306 plan. The [offline OLED renderer](docs/display-renderer.md)
 can export fake 128×64 cues before device integration. Read [display UX](docs/display-ux.md) for
@@ -114,7 +117,10 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 - Smoke-alarm evidence is limited; the final microphone and room still need testing.
 - Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
   from the saved onboarding profile; it does not require training a new model per user.
-- Hardware output and spatial audio await the confirmed hardware stack. Direction is currently unknown.
+- Notification policy is implemented in one receiver engine (preferences, repeats, dismiss, Work/DND,
+  pause, queue) with a matching browser simulator. A glasses client and SSD1306 driver exist and are
+  tested in software; they have not yet driven the physical OLED.
+- Spatial audio awaits synchronized capture. Direction is currently unknown.
 
 Read [measured results](reports/summary.md) for counts, misses and false alerts. This prototype is
 an awareness aid, not a certified emergency alert system.

@@ -10,7 +10,8 @@ Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and upd
 1. Read [README.md](README.md) for runnable setup and actual readiness.
 2. Read [TODO.md](TODO.md) for the whole-project checklist; update relevant IDs with evidence in your PR.
 3. Read [team workstreams](docs/team-workstreams.md) and [distilled build instructions](docs/team-build-instructions.md).
-4. Read [integration contract](docs/integration.md) before changing events or transports.
+4. Read [integration contract](docs/integration.md) and [alert engine](docs/alert-engine.md) before changing
+   events, notification rules or transports. Change audio/alert-scenarios.json first; both engines test it.
 5. Read [UI/backend plan](docs/ui-ux-backend-plan.md), [hardware stack](docs/hardware-stack.md),
    [display UX](docs/display-ux.md), [offline display renderer](docs/display-renderer.md),
    and [sponsor decisions](docs/sponsor-build-guide.md) for the task you are implementing.

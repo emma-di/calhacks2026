@@ -23,31 +23,41 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [x] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
 - [x] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
 - [x] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
-- [ ] UI-04 — Complete deterministic mock scenarios (all tiers and interruption built; remaining states pending): all tiers, interruption, repeated/long labels, idle,
-  paused, unknown direction, disconnection and reconnect. Label simulated inputs.
+- [x] UI-04 — Deterministic scenarios: all tiers, interruption, skip, queue/resume, repeats, idle, paused,
+  Work/DND, unknown direction, disconnect and reconnect. Shared fixtures in audio/alert-scenarios.json;
+  Play a busy minute in the UI. Sources labeled (Test sound / Recording / Microphone).
 - [x] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
-- [ ] UI-06 — Taste source lint and desktop review complete; finish responsive, keyboard, reduced-motion and wearer/readability checks. See docs/display-ux.md.
+- [ ] UI-06 — Redesigned Live screen; taste lint and inspector pass (0 FAIL) at 1440/768/390; keyboard focus,
+  reduced motion and phone order checked. Remaining: wearer readability through the optics and an
+  unfamiliar tester. See docs/display-ux.md.
 - [x] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
 - [x] UI-08 — Capture screenshots and short demo evidence for teammate review.
 
 ## Then: setup and preferences — Emma
 
-- [ ] SET-01 — Core decision: defaults → searchable exception rules; keep numeric 0–4 overrides separate from presets. Confirm remaining profile and enable/disable semantics.
+- [x] SET-01 — Defaults → searchable exception rules; numeric 0–4 overrides separate from presets; Ignore (0) is
+  the disable. Receiver validates and applies the same semantics.
 - [x] SET-02 — Mana onboarding integrated: defaults, searchable exceptions, optional name/aliases, display preview and Start preview. Automatic browser-local saving; no user-facing JSON. Eight frontend tests plus browser Ignore/reset flow verified. Name recognition itself remains pending.
-- [ ] SET-03 — Browser-local editable settings and storage failure messaging implemented; backend saved/applied/error and device sync states still pending.
-- [ ] SET-04 — Connect saved profile to backend; show name worker availability accurately.
+- [x] SET-03 — Browser-local settings plus receiver saved/applied/error states (version shown) and glasses
+  connection from /health.
+- [x] SET-04 — Profile pushed via PUT /profile on connect/change, persisted atomically, reloaded on restart.
+  /health reports name_worker unavailable; the UI says names are not running yet.
 
 ## Backend/integration — Emma after initial UI
 
-- [ ] API-01 — Agree versioned output state and backward-compatible event/profile contracts with teammates.
-- [ ] API-02 — Implement profile validation, revision handling and atomic local persistence.
-- [ ] API-03 — Compute effective priority from defaults, mode and user overrides in one backend location.
-- [ ] API-04 — Add event deduplication, bounded fresh queue, interruption/resume and repeated-sound behavior.
-- [ ] API-05 — Add sequence/freshness/expiry state and event-specific dismiss; prevent stale cue replay.
-- [ ] API-06 — Add capture/inference/display health and capabilities; silence must not imply disconnection.
-- [ ] API-07 — Implement real pause/resume and visible acknowledgement; do not fake worker controls.
-- [ ] API-08 — Verify mirror/hardware state alignment, timeout clearing and reconnect snapshots.
-- [ ] API-09 — Test full settings → detected event → effective tier → mirrored cue flow.
+- [ ] API-01 — Implemented backward-compatible /state, /display, /profile, /controls (docs/alert-engine.md);
+  awaiting teammate review before calling the contract agreed.
+- [x] API-02 — Profile validation, server revision, atomic .cache/profile.json persistence (tests/test_alerts.py).
+- [x] API-03 — audio/alerts.py effective_tier: rule → preset → producer default; focus modes applied after.
+- [x] API-04 — Dedup, 5-item queue with 10 s freshness, interruption/resume, repeat merging, urgent ongoing cap.
+- [x] API-05 — state_sequence, remaining_ms, session_id, event-specific dismiss; restart does not replay.
+- [ ] API-06 — /health reports per-source event recency and display clients; silence ≠ disconnect. Inference
+  heartbeat from the capture worker still pending (needs audio/cli change).
+- [ ] API-07 — Pause/resume and acknowledgement implemented in the receiver and labeled honestly (pause hides
+  alerts; it does not stop capture). Stopping capture itself still needs a worker control.
+- [ ] API-08 — Verified in software: browser and hardware/oled_client follow one envelope, clear on timeout and
+  disconnect, ignore re-polled sequences. Repeat on the physical OLED.
+- [x] API-09 — Browser Ignore rule → receiver → dog ignored, knock drawn by the glasses client in 71 ms.
 
 ## Environmental audio / ML — John and Leo (proposed)
 
@@ -72,8 +82,11 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
 - [ ] HW-03 — Display a fake cue on actual hardware independently of recognition.
-- [ ] HW-04 — Offline renderer implemented with 13 tests; finalize icon parity and connect actual SSD1306 driver before marking complete. See docs/display-renderer.md.
-- [ ] HW-05 — Connect authoritative backend state; compare event IDs with audience mirror.
+- [ ] HW-04 — Renderer + browser preview byte-identical (render fixtures); SSD1306 I²C driver and
+  hardware/oled_client.py with self-test written and tested against a fake bus. Mark complete after it
+  drives the real module. See docs/alert-engine.md.
+- [ ] HW-05 — Client polls /display (event IDs and sequence match the mirror) and the companion shows it as
+  connected. Pending: run on the Pi against the laptop receiver (--host 0.0.0.0).
 - [ ] HW-06 — Validate optical readability, refresh, mounting, power and reconnect/clear behavior.
 - [ ] HW-07 — Feed final audio device into capture adapter and complete the physical end-to-end demo.
 
