@@ -78,6 +78,7 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/model.py`, `audio/cli.py` | Local inference and capture/replay |
 | `audio/events.py`, `audio/policy-*.json` | Event contract, thresholds, cooldown and recent-context rules |
 | `audio/server.py` | Local event receiver and alert priority/state |
+| `audio/observations.py` | Per-window "what it heard" stream (`GET /observations`) for live views and post-processing |
 | `audio/embeddings.py`, `audio/custom_sounds.py`, `audio/teach.html` | User-taught custom sounds ("teach it your doorbell") |
 | `audio/monitor.html` | Browser cue simulator |
 | `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |

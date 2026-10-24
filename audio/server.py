@@ -13,6 +13,7 @@ import re
 import threading
 import time
 from audio.events import validate_event
+from audio.observations import MAX_BYTES as MAX_OBSERVATION_BYTES, validate_observation
 
 class AlertState:
     def __init__(self, decision_log=None):
@@ -49,6 +50,28 @@ class AlertState:
             return {'active':self.active, 'events':list(self.events),'decisions':list(self.decisions)}
 
 state = AlertState()
+
+class ObservationStore:
+    """Last two minutes of per-window observations, each numbered with an increasing `seq`."""
+    def __init__(self, maxlen=120):
+        self.items = deque(maxlen=maxlen)
+        self.seq = 0
+        self.lock = threading.Lock()
+        self.started_ms = int(time.time()*1000)   # changes on restart, so clients can reset `since`
+
+    def add(self, observation):
+        with self.lock:
+            self.seq += 1
+            observation = dict(observation, seq=self.seq, received_ms=int(time.time()*1000))
+            self.items.append(observation)
+            return self.seq
+
+    def since(self, after=0, limit=20):
+        with self.lock:
+            selected = [o for o in self.items if o['seq'] > after][-limit:]
+            return dict(latest_seq=self.seq, server_started_ms=self.started_ms, observations=selected)
+
+observations = ObservationStore()
 
 MAX_JSON_BYTES = 8192
 MAX_AUDIO_BYTES = 8*1024*1024   # 30 s of 48 kHz stereo 16-bit WAV is ~5.8 MB
@@ -206,6 +229,15 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, Path(__file__).with_name('teach.html').read_bytes(), 'text/html; charset=utf-8')
         elif self.path == '/state':
             self.reply(200, state.snapshot())
+        elif self.path.split('?')[0] == '/observations':
+            from urllib.parse import parse_qs, urlparse
+            query = parse_qs(urlparse(self.path).query)
+            try:
+                after = int(query.get('since', ['0'])[0])
+                limit = min(max(int(query.get('limit', ['20'])[0]), 1), 120)
+            except ValueError:
+                return self.reply(400, {'error': 'since and limit must be integers'})
+            self.reply(200, observations.since(after, limit))
         elif self.is_custom():
             self.custom('GET')
         else:
@@ -214,6 +246,14 @@ class Handler(BaseHTTPRequestHandler):
     def do_POST(self):
         if self.is_custom():
             return self.custom('POST')
+        if self.path == '/observations':
+            try:
+                payload = json.loads(self.read_body(MAX_OBSERVATION_BYTES))
+                if (self.headers.get('Content-Type') or '').split(';')[0].strip() != 'application/json':
+                    raise ValueError('Expected application/json')
+                return self.reply(200, {'ok': True, 'seq': observations.add(validate_observation(payload))})
+            except (ValueError, TypeError) as exc:
+                return self.reply(400, {'error': str(exc)})
         if self.path not in ('/events', '/dismiss'):
             return self.reply(404, {'error':'Not found'})
         try:

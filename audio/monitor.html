@@ -3,11 +3,14 @@
 <title>Audio pipeline monitor</title>
 <style>
 body{background:#101716;color:#e7f7ee;font:18px system-ui;max-width:900px;margin:50px auto;padding:24px}h1{font-size:26px}small,p{color:#a9c3b7}#cue{border:2px solid #81c4a0;border-radius:20px;padding:48px;font-size:46px;min-height:100px}button{padding:12px 24px;font:inherit;margin:16px 0;cursor:pointer}pre{white-space:pre-wrap;font-size:13px}#status{color:#c6db8b}
+#hearing .row{display:grid;grid-template-columns:220px 1fr 52px;gap:10px;align-items:center;font-size:15px;margin:3px 0}
+#hearing .bar{height:10px;border-radius:5px;background:#81c4a0}#hearing .num{color:#a9c3b7;text-align:right}
 </style>
 <h1>Sound → event → alert</h1><p id="status">Connecting…</p>
 <p>This monitor receives events. Start the microphone CLI separately. “Ready” does not mean a microphone is listening.</p>
 <div id="cue" role="status" aria-live="polite">Waiting for an event</div>
 <p id="meta"></p><button id="dismiss">Dismiss alert</button>
+<h2>Hearing now</h2><p id="hearingMeta">No observations yet: start the CLI with --endpoint.</p><div id="hearing"></div>
 <h2>Latest event JSON</h2><pre id="json">No events received</pre>
 <script>
 const cue=document.querySelector('#cue'),meta=document.querySelector('#meta');
@@ -26,4 +29,20 @@ async function poll(){
  }catch(e){document.querySelector('#status').textContent='Disconnected — receiver unavailable';cue.textContent='Disconnected';meta.textContent='';lastId=null;}
  setTimeout(poll,250);
 }poll();
+let since=0,started=null;
+async function hear(){
+ try{
+  const r=await (await fetch('/observations?since='+since+'&limit=5')).json();
+  if(started!==r.server_started_ms){started=r.server_started_ms;since=0;}
+  const o=r.observations.at(-1);
+  if(o){
+   since=o.seq;
+   const heard=o.top.slice(0,6).map(t=>[t.label,t.score]).concat(o.custom.map(c=>['★ '+c.label,c.score]));
+   document.querySelector('#hearing').innerHTML=heard.map(([l,v])=>`<div class="row"><span></span><div class="bar" style="width:${Math.max(1,v*100)}%"></div><span class="num">${v.toFixed(2)}</span></div>`).join('');
+   document.querySelectorAll('#hearing .row span:first-child').forEach((e,i)=>e.textContent=heard[i][0]);
+   document.querySelector('#hearingMeta').textContent=`${o.source} · level ${o.level_dbfs} dBFS · ${o.inference_ms} ms`+(o.emitted.length?` · alert: ${o.emitted.map(e=>e.label).join(', ')}`:'');
+  }
+ }catch(e){}
+ setTimeout(hear,400);
+}hear();
 </script></html>
