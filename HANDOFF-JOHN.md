@@ -52,8 +52,18 @@ Tests: `.venv/bin/python -m unittest discover -s tests` (55 pass) and `npm test 
    set for tuning), **phone ringing / ringtone**, **appliance beep** (microwave/oven).
 4. **Real-room tuning:** several thresholds are very low (alarm_clock 0.05, knock/bell 0.075) — fine
    offline, risky for false alarms live. Use the signal panel + `audio/benchmark.py` with the final mic.
-5. Your **custom sounds** branch (`johnaou/custom-sounds`) still needs porting onto the current
-   receiver: custom event ids through the parser, repeat/ack identity, a generic icon.
+5. **Let people add any sound the model already knows (Emma's request).** Onboarding already saves
+   custom sounds (e.g. "saxophone") but marks them *Recognition pending*. Zipformer scores ~527
+   AudioSet classes every window (`Saxophone` is one; see
+   `.cache/models/sherpa-onnx-zipformer-small-audio-tagging-2024-04-15/class_labels_indices.csv`), so a
+   typed name can map to one or more model labels with no training:
+   - match the typed name against the class list (exact/synonym, then fuzzy) and let the person confirm;
+   - create a rule on the fly (labels + a default threshold, tighten with the signal panel), with the
+     person's chosen priority from the profile and a generic icon on the glasses;
+   - show "Recognized from the model's sound list" vs "needs teaching" in onboarding.
+   Your custom-sounds branch (trained heads) then covers sounds *outside* the model's list. Both need the
+   same receiver plumbing: custom event ids through the parser, per-custom-id repeat/ack identity,
+   profile tier lookup and a generic OLED icon.
 
 **Checklist for each new signal** (so the site, rules and glasses stay consistent):
 - `audio/events.py` `TARGETS`: label, display name, default tier, base threshold.
