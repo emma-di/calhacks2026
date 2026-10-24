@@ -54,14 +54,17 @@ def main():
     print(f'Loading {args.model}…', file=sys.stderr)
     custom = None
     if args.command in ('file', 'mic') and not args.no_custom and args.model == 'zipformer':
-        from audio.custom_sounds import CustomSoundDetector
-        custom = CustomSoundDetector() or None
-    if custom:
-        # Same scores as the sherpa-onnx path, plus the embedding custom heads need.
-        from audio.embeddings import ZipformerEmbedder
-        model = ZipformerEmbedder()
-        print('Custom sounds: '+', '.join(meta['label'] for meta, _ in custom.heads), file=sys.stderr)
-    else:
+        try:
+            # Same scores as the sherpa-onnx path, plus the embedding custom heads need.
+            from audio.embeddings import ZipformerEmbedder
+            model = ZipformerEmbedder()
+            from audio.custom_sounds import CustomSoundDetector
+            custom = CustomSoundDetector()
+            print('Custom sounds: '+(', '.join(meta['label'] for meta, _ in custom.heads) or
+                  'none yet (new ones load automatically)'), file=sys.stderr)
+        except ImportError as exc:
+            print(f'Custom sounds off ({exc.name} not installed; see requirements-audio.txt)', file=sys.stderr)
+    if custom is None:
         model = create_model(args.model)
     model.predict(np.zeros(model.window_samples, dtype=np.float32))
     print(f'{args.model} ready', file=sys.stderr)
@@ -82,7 +85,7 @@ def main():
             print(json.dumps({'inference_ms':round(elapsed, 1), 'top5':sorted(scores.items(), key=lambda x:x[1], reverse=True)[:5]}), file=sys.stderr)
         events=detector.detect(scores, source, now=clock, timestamp_ms=timestamp)
         custom_decisions=[]
-        if custom:
+        if custom is not None:
             from audio.custom_sounds import rms
             events+=custom.detect(model.last_embedding, rms(window), source, now=clock, timestamp_ms=timestamp)
             custom_decisions=custom.decisions

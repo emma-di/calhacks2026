@@ -78,7 +78,7 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/model.py`, `audio/cli.py` | Local inference and capture/replay |
 | `audio/events.py`, `audio/policy-*.json` | Event contract, thresholds, cooldown and recent-context rules |
 | `audio/server.py` | Local event receiver and alert priority/state |
-| `audio/embeddings.py`, `audio/custom_sounds.py` | User-taught custom sounds ("teach it your doorbell") |
+| `audio/embeddings.py`, `audio/custom_sounds.py`, `audio/teach.html` | User-taught custom sounds ("teach it your doorbell") |
 | `audio/monitor.html` | Browser cue simulator |
 | `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |
 | `tests/` | Fast unit checks; no weights or microphone required |
@@ -92,7 +92,8 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 - Generic bells improved, but false alerts remain. Bicycle-specific labeling stays disabled.
 - Smoke-alarm evidence is limited; the final microphone and room still need testing.
 - [Custom sounds](docs/custom-sounds.md): teach a sound from ~5 recordings; 92% recall at 0.35% false alerts
-  in an offline ESC-50 test. CLI and live detection work; onboarding HTTP routes are proposed.
+  in an offline ESC-50 test. Teach sounds at http://127.0.0.1:8765/teach or over HTTP; running mic
+  sessions pick up new sounds automatically.
 - Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
   from the saved onboarding profile; it does not require training a new model per user.
 - Hardware output and spatial audio await the confirmed hardware stack. Direction is currently unknown.
