@@ -35,12 +35,12 @@ The original Pi Zero W remains the planned capture/display endpoint; another Mac
 All work is pushed to `codex/browser-mirror` (PR #2, not merged to main).
 
 **Built and verified (automated tests + browser checks):**
-- Receiver alert engine (audio/alerts.py) and identical browser port; 12 shared scenarios run by both.
+- Receiver alert engine (audio/alerts.py) and identical browser port; 14 shared scenarios run by both.
   Preferences → effective tier, interrupt/queue/resume, repeat merging, acknowledgement, Work/DND,
   pause, duplicate IDs, expiry logging, four-way direction (confidence ≥ 0.6), look-to-resolve,
   thumbs-up gesture dismiss, 0.6 s check-mark confirmation.
 - Receiver API: /state, /display, /health, GET/PUT /profile (atomic, survives restart), /events,
-  /dismiss {event_id}, /controls, /look. 38 Python tests incl. HTTP and restart.
+  /dismiss {event_id}, /controls, /look. 37 Python + 9 frontend tests incl. HTTP and restart.
 - Glasses: edge-placed panel layout (icon hugs the sound's edge, unknown centred, tier = box only),
   32×32 pixel icons; browser renderer byte-identical to Python (render fixtures). oled_client + SSD1306
   driver tested against a fake I²C bus and live against the receiver (pbm sink).
