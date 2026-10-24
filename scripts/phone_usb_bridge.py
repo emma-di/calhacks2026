@@ -70,6 +70,8 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--receiver', default='http://127.0.0.1:8766')
     parser.add_argument('--udid', help='Pick one phone when several are plugged in')
+    parser.add_argument('--log', default='.cache/spatial-readings.jsonl',
+                        help='Confident readings with wall-clock time, for calibrating sides (numbers only)')
     args = parser.parse_args()
     receiver = args.receiver.rstrip('/')
     sent, last_note = 0, ''
@@ -102,12 +104,17 @@ def main():
                         if not line.strip() or len(line) > 512:
                             continue
                         try:
+                            reading = json.loads(line)
+                            if reading.get('bearing_degrees') is not None:
+                                with open(args.log, 'a') as log:
+                                    log.write(json.dumps(dict(reading, at=round(time.time(), 2))) + '\n')
                             post(receiver, line)
                             sent += 1
                             if sent % 50 == 1:
-                                reading = json.loads(line)
                                 note(f'{sent} readings forwarded · latest bearing {reading.get("bearing_degrees")} '
                                      f'coherence {reading.get("coherence", 0):.2f}')
+                        except ValueError:
+                            continue
                         except (URLError, OSError):
                             note('Receiver unavailable; readings dropped until it is back.')
         except socket.timeout:

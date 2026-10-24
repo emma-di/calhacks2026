@@ -35,26 +35,24 @@ class SpatialTests(unittest.TestCase):
         state.add(make_event('bell', .9, 'mock'), now=30.0)
         self.assertIsNone(state.snapshot(now=30.0)['direction'])
 
-    def test_right_reference_unmirrors_and_unsqueezes_portrait_phones(self):
-        from audio.spatial import stretch
-        # John's iPhone in portrait: right knocks read about -29, left about +31.
-        self.assertAlmostEqual(stretch(-29, -29), 90)
-        self.assertLess(stretch(31, -29), -45)            # left lands on the left
-        self.assertEqual((abs(stretch(0, -29)), abs(stretch(180, -29))), (0, 180))  # front, behind
+    def test_four_side_examples_fix_mirroring_uneven_sides_and_front_back(self):
+        from audio.spatial import calibrated_bearing
+        # John's iPhone with doorbells: right reads negative, left positive, behind not at 180.
+        points = dict(front=2, right=-60, behind=150, left=50)
+        side = lambda raw: min(('front', 0), ('right', 90), ('behind', 180), ('left', -90),
+                               key=lambda s: abs((calibrated_bearing(raw, points) - s[1] + 180) % 360 - 180))[0]
+        self.assertEqual([side(r) for r in (0, -65, -22 - 30, 155, -170, 48, 90)],
+                         ['front', 'right', 'right', 'behind', 'behind', 'left', 'left'])
+        self.assertEqual(calibrated_bearing(33.0, {}), 33.0)
         buffer = SpatialBuffer()
-        buffer.calibrate(-29)
-        buffer.add(reading(-30, 0.8), 100)
-        self.assertGreater(buffer.match(200)['bearing_degrees'], 45)
-        with self.assertRaises(ValueError):
-            buffer.calibrate(3)
-        # Weaker left side gets its own reference: John's +9 left knock must land left, not front.
-        self.assertGreater(abs(stretch(9, -29)), 0)
-        self.assertGreater(-45, stretch(9, -29, 15))
-        self.assertGreater(-45, stretch(17, -29, 15))
-        self.assertLess(abs(stretch(4, -29, 15)), 45)     # near-front noise stays front
-        self.assertGreater(stretch(-32, -29, 15), 45)     # right unchanged
-        with self.assertRaises(ValueError):
-            buffer.calibrate(-29, -15)
+        buffer.calibrate(dict(front=[0, 4], right=[-58, -62], left=[50], behind=[150]))
+        buffer.add(reading(-61, 0.8), 100)
+        self.assertAlmostEqual(buffer.match(200)['bearing_degrees'], 90, delta=3)
+        for bad in (dict(right=[-60]), dict(front=[0], up=[5]), dict(front=[]), dict(front=[0], right=['x'])):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                buffer.calibrate(bad)
+        buffer.calibrate({})
+        self.assertEqual(buffer.points, {})
 
     def test_invalid_readings_are_rejected(self):
         for bad in (dict(bearing_degrees=400, coherence=.5, rms=0, calibrated=True),

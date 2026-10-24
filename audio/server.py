@@ -8,7 +8,7 @@ Endpoints (JSON):
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
   POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
   POST /spatial   phone FOA reading {bearing_degrees, coherence, rms, calibrated, device}; matched to sounds
-  POST /spatial/calibrate {right_degrees, left_degrees?}: bearings the phone reported for sounds at the right/left
+  POST /spatial/calibrate {examples: {front: [...], right: [...], behind: [...], left: [...]}}: phone bearings heard per side
 """
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -75,10 +75,10 @@ class AlertState:
                                  direction_source=f"{reading['device']}_foa")
             return self.engine.add(event, at)
 
-    def spatial_calibrate(self, right_degrees, left_degrees=None):
+    def spatial_calibrate(self, examples):
         with self.lock:
-            self.spatial.calibrate(right_degrees, left_degrees)
-            return dict(right_degrees=self.spatial.right_reference, left_degrees=self.spatial.left_reference)
+            self.spatial.calibrate(examples)
+            return dict(calibration=self.spatial.points)
 
     def spatial_reading(self, value, now=None):
         reading = validate_reading(value)
@@ -217,7 +217,7 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, {'ok': True, 'resolved': self.receiver_state.look(direction)})
             if path == '/spatial/calibrate':
                 return self.reply(200, dict(ok=True, **self.receiver_state.spatial_calibrate(
-                    payload.get('right_degrees'), payload.get('left_degrees'))))
+                    payload.get('examples', {}))))
             if path == '/spatial':
                 self.receiver_state.spatial_reading(payload)
                 return self.reply(200, {'ok': True})
