@@ -16,6 +16,18 @@ signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/produ
 - **Simulated scenes:** `python -m audio.scene audio/scenes/demo.json --receiver http://127.0.0.1:8766`.
 - Phone spatial handed to John ([docs/phone-spatial-handoff.md](docs/phone-spatial-handoff.md)).
 
+## First thing on resume: check John's live audio → signal work
+
+John has been getting live audio → signal translation working. On resume: `git fetch` and look at his
+newest `johnaou/*` branch before building more. Port it onto the current receiver (as with observations
+and names — don't merge his older server.py), then **post-process** the signals as needed, e.g.:
+- smoothing / requiring 2 consecutive windows above threshold before alerting (fewer one-off false alarms);
+- per-sound thresholds tuned with the signal panel on the real mic (alarm_clock 0.05 and knock/bell 0.075
+  are very low);
+- hysteresis so an ongoing sound stays one cue (the engine already merges repeats; check timing);
+- confidence floor or ignore lists for background classes (speech, music) unless the person picked them.
+Verify with `audio/scene.py` plus the live mic, watching the signal panel and the real glasses.
+
 ## In progress: pick ANY sound the model knows (feature 1+2)
 
 Built and committed, **not wired in yet**:
