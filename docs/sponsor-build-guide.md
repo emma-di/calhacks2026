@@ -3,10 +3,18 @@
 Read this before choosing frontend tools, backend infrastructure, or demo scope.
 This guide distills the sponsor/track discussion supplied by Emma on October 23, 2026.
 It records **candidate opportunities, not verified eligibility or a commitment to use a sponsor**.
-The supplied discussion references a separate prize list that is not included here. Confirm the
+A later user-supplied prize snapshot is summarized in the decision matrix; the earlier discussion alone was incomplete. Confirm the
 official challenge briefs before relying on required technologies, judging criteria, deadlines,
 multi-track entry rules, or submission formats. Prize amounts and scoring percentages are omitted
 until verified. Nobody is assigned a sponsor integration by this document alone.
+
+## Standing selection policy
+
+Before choosing any required API, storage, backend, hosting or AI service, check the [prize-based
+decision matrix](sponsor-decision-matrix.md). Prefer a sponsor only when usage is meaningful, loss/change
+is small, and the actual cash or strategic benefit is worthwhile. Keep urgent delivery local and reliable.
+The user has now supplied the prize snapshot (updated Oct 23, 9:55 PM); amounts in the matrix are
+attributed to that snapshot, while missing/ambiguous rules remain unverified.
 
 ## TLDR for builders
 

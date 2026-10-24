@@ -126,6 +126,43 @@ If you already have that local branch, use `git switch codex/browser-mirror` ins
   page conversion, stale/duplicate/expiry/disconnect guards. Thirteen tests pass; no physical driver
   or display output is connected. [Handoff](docs/display-renderer.md).
 
+## OLED image follow-up — October 23
+
+- Close-up confirms visible GND/VCC/SCL/SDA labels and white-on-black graphics; controller/resolution
+  still rely on the actual module specification. Manufacturer confirms SSD1306 128×64, I²C and 1KB
+  one-bit display RAM. [Spec check](docs/hardware-stack.md#oled-photo-and-cad-follow-up--october-23).
+- CAD includes an optical assembly, but no readable optical dimensions/FOV. It does not yet establish
+  that an icon can appear at the edge of the wearer's entire field of vision. Ask for a through-optics
+  test at the intended eye position; do not equate a zoomed OLED photo with wearable readability.
+
+## Latest integration checkpoint — October 23
+
+- [Work status](WORK-STATUS.md) lists actual worker/task states. Internal subagents are not separate
+  teammate chats; their context is published through repo artifacts and notes.
+- **Preview bug fixed:** each manual sound button starts an isolated mock preview; Play sequence
+  retains interruption behavior. Receiver mode still follows backend priority. A dog Ignore override
+  left by agent testing was removed from the current browser; future QA must restore test settings.
+- Browser and OLED now share cue content/placement decisions and the same semantic Lucide icon.
+  The canvas thresholds that icon to one bit. Do not claim this means physical firmware is connected.
+- Mana's revised JSX is integrated under Set up Aware in the same local website. Presets, exceptions
+  and appearance apply to the simulator; a tested Ignore rule was reset after QA. No Bridge pairing
+  or live profile API exists. Provenance is saved under frontend/mana.
+- Inference will move to **another Mac**. [Fresh setup](docs/mac-setup.md) records runtimes, assets,
+  architecture caveat and recorded smoke test. Do not copy virtual environments across machines.
+- New standing policy: check meaningful sponsor substitutions for every required API/storage/backend
+  choice. Prefer low-cost, high-fit substitutions with worthwhile rewards; no unrelated prize features.
+  [Prize-based matrix](docs/sponsor-decision-matrix.md) uses the supplied Oct 23, 9:55 PM snapshot.
+- Final combiner supplied: listed BK-7, 25.4 mm diameter, 2 mm thick, 50:50 transmission/reflection.
+  This does not determine virtual-image size, angular field, focus or the magnifying lens. Confirm with Yameen.
+- Next requested backend slice: tier durations/prominence, dismiss/ack, ongoing-sound repeat suppression,
+  Work/DND modes and explicit sound overrides. Design review started; current server behavior unchanged.
+
+## Team update practice — October 23
+
+- Commit and push coherent, verified slices frequently; main stays runnable and branch status stays explicit.
+- Keep a short benefit sentence in onboarding. Put the fuller problem, motivation and impact story in
+  the submission/pitch; keep the live mirror focused on detections.
+
 ## Add a note
 
 ```text

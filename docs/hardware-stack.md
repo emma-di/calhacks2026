@@ -149,3 +149,34 @@ Record checkpoint evidence in the [master TODO](../TODO.md). See the
 [integration handoff](integration.md) and [UI/backend plan](ui-ux-backend-plan.md) for software boundaries.
 
 See [display UX / optical questions](display-ux.md) before promising full-field peripheral placement, and the [offline pixel renderer](display-renderer.md) for software frames ready for driver integration.
+
+## OLED photo and CAD follow-up — October 23
+
+Emma supplied a close-up showing a white monochrome OLED breakout labeled `GND VCC SCL SDA`,
+and a CAD screenshot of the glasses/optical assembly. The images are consistent with the supplied
+four-pin I²C module; a photo alone does not establish controller identity, exact resolution or voltage
+requirements. Those still come from the actual module specification and verification on the board.
+
+The [controller manufacturer's SSD1306 page](https://www.solomon-systech.com/product/ssd1306)
+confirms 128×64 display RAM, I²C support and contrast control. One one-bit frame is 1,024 bytes,
+matching the offline renderer. Contrast adjustment does not make this white panel a color display.
+The controller chip's supply specifications must not be confused with a breakout board's VCC pin.
+
+At the supplied nominal 0.96-inch active diagonal and a 2:1 active aspect ratio, the lit area would
+be approximately 22×11 mm; this is a geometric estimate, not a measurement of the PCB or optics.
+A 24×24 pixel pictogram leaves useful room for a short urgent label. The photographed examples
+support the simple-icon design direction, but magnified photographs do not prove near-eye focus,
+contrast in the venue, eye box or angular coverage.
+
+The CAD suggests optical elements are planned, but no readable focal lengths, spacing or angular
+coverage are supplied. Keep browser edge placement marked as simulated. Yameen should provide
+a through-the-optics view from the intended eye position and confirm whether the virtual image is
+a small fixed patch or a wide overlay. See [display UX questions](display-ux.md).
+
+## Combiner supplied — October 23
+
+Yameen's screenshot identifies the final plate as an Azure Spy listing: BK-7 glass, 25.4 mm diameter,
+2 mm thick, 50:50 transmission/reflection. These are supplied listing claims, not measured optical
+performance. The plate combines light paths; its aperture does not specify magnification, focal
+distance or angular field of view. Confirm the actual focusing lens and display/lens/plate/eye
+geometry before claiming a full-field directional overlay.

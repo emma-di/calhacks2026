@@ -10,6 +10,8 @@ and the full onboarding UI are still being built. The default audio model is pre
 
 ## Start here
 
+**[Current work status](WORK-STATUS.md)** · [Another Mac setup](docs/mac-setup.md)
+
 **Latest decisions and caveats: [TEAM-NOTES.md](TEAM-NOTES.md). Coding agents start at [AGENTS.md](AGENTS.md).**
 
 1. Accept your GitHub invitation and clone the repo.
