@@ -22,6 +22,10 @@ until verified. Nobody is assigned a sponsor integration by this document alone.
 - Keep sponsor choices behind clear interfaces. Do not block the basic demo or replace working
   infrastructure solely to collect another track. Record an explicit adopt/defer decision below.
 - Only claim features and sponsor usage that the final demo and repository can substantiate.
+- The additional team handoff proposes **Cartesia for live name transcription** and **Convex for
+  persistent/reactive application state**. Evaluate these as real product integrations; neither is
+  installed or adopted just because it appears in the handoff. Choose Convex **or** SpacetimeDB
+  for cloud synchronization, not both. See [team build instructions](team-build-instructions.md).
 
 ## Candidate tracks and what to build/show
 
@@ -58,11 +62,12 @@ Owner: Emma. Status: **evaluate; not adopted**.
 The [UI/backend plan](ui-ux-backend-plan.md) proposes React/Vite, but that choice remains subject
 to this early trial. Do not build two full frontends in parallel for the same screen.
 
-### SpacetimeDB — synchronization decision
+### Convex versus SpacetimeDB — synchronization decision
 
 Owner: Emma for backend coordination, with the hardware owner. Status: **evaluate; not adopted**.
 
-1. Verify official challenge eligibility, runtime/client support and deployment requirements.
+1. Evaluate the new handoff's preferred candidate, Convex, alongside SpacetimeDB. Verify official
+   challenge eligibility, runtime/client support and deployment requirements for the selected option.
 2. Timebox a small proof (target: 30–45 minutes): a Python detection updates canonical active state;
    a browser and a second subscriber or hardware bridge receive it; verify clear/expiry and reconnect.
 3. Check target compute compatibility, connection/authentication setup and demo network reliability.
@@ -72,13 +77,34 @@ Owner: Emma for backend coordination, with the hardware owner. Status: **evaluat
 
 Hardware transport is still unknown, so actual display compatibility cannot yet be claimed.
 The proof can use a second subscriber, with physical bridge validation remaining a separate gate.
+If Convex is selected, use it for saved profiles, event metadata/history and reactive preference
+updates. Keep the local alert engine authoritative and the local detection-to-display path functional
+without a cloud round trip. Do not let a cloud subscriber independently recompute competing cues.
+
+### Cartesia — name recognition decision
+
+Proposed owners: John and Leo. Status: **evaluate; not adopted**.
+
+The additional handoff identifies a useful fit: streaming speech-to-text feeding configured-name
+matching. This is a stronger use case than adding speech output to a visual product.
+Verify the current model/endpoint (the handoff names Ink-2), streaming format, keyterm support,
+credentials, cost and challenge rules against official documentation before implementation.
+Demonstrate microphone → transcript → name match → real `name_called` event, including nonmatching
+names and background-conversation negatives. Streaming sends speech to a provider: make that clear
+in setup and do not store raw speech/transcripts by default. Keep keys server-side.
+Timebox connection debugging to 60–90 minutes, then establish the independent local ASR fallback
+described in the [name plan](name-detection-plan.md). Provider choice must not change the event contract.
 
 ## Other sponsor opportunities
 
 - **MLH Best Use of Gen AI:** verify the actual rules and whether the product's use qualifies.
   Using a coding assistant or a pretrained sound classifier does not by itself establish eligibility.
-- **Cartesia:** consider only if it powers a useful core capability. The current product produces
-  visual cues, so do not add speech output simply to target a voice sponsor.
+- **Cartesia:** evaluate the live transcription use case above; visual output does not rule out a
+  meaningful speech-input integration. No working integration is claimed yet.
+- **Anthropic/Claude:** optional natural-language preferences → proposed structured settings → user
+  review → save. Keep it outside urgent-alert handling and defer until ordinary settings work.
+- **Moss, Apify, Bright Data:** defer unless a real retrieval or web-data requirement emerges. A
+  deterministic event-to-tier lookup needs neither semantic retrieval nor scraping.
 - **Microsoft — Built for the Real World:** the supplied notes describe an AI-agent focus.
   Verify this before investing; do not relabel the existing classifier pipeline as an agent.
 - **Other AI-first tracks:** check required sponsor technology against what actually runs in the product.
@@ -99,5 +125,7 @@ The proof can use a second subscriber, with physical bridge validation remaining
 | --- | --- | --- |
 | Official track rules and eligibility | Unverified | Need official briefs; supplied summary alone is insufficient |
 | Mana for frontend workflow | Evaluate | No integration or qualifying usage claimed |
-| SpacetimeDB for shared state | Evaluate | Existing local receiver works; no SpacetimeDB integration claimed |
+| Convex versus SpacetimeDB for cloud state | Evaluate | Handoff prefers Convex; select one or defer both; local receiver works |
+| Cartesia for streaming name transcription | Evaluate | Handoff proposes Ink-2; endpoint and live performance still need verification |
+| Claude for preference interpretation | Optional | After basic settings; user reviews proposed values before saving |
 | Final submission tracks | Pending | Choose after eligibility and working capabilities are confirmed |

@@ -49,16 +49,16 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] API-08 — Verify mirror/hardware state alignment, timeout clearing and reconnect snapshots.
 - [ ] API-09 — Test full settings → detected event → effective tier → mirrored cue flow.
 
-## Environmental audio / ML — owner to confirm
+## Environmental audio / ML — John and Leo (proposed)
 
-- [ ] ML-01 — Confirm workstream owner and preserve benchmark/tuning versus evaluation separation.
+- [ ] ML-01 — Confirm John/Leo task split and preserve benchmark/tuning versus evaluation separation.
 - [ ] ML-02 — Evaluate final microphone in final room: knocks, barking, generic bells, alarms and negatives.
 - [ ] ML-03 — Investigate bell versus alarm confusions using scores, context and decision logs.
 - [ ] ML-04 — Measure misses, false alerts and complete sound-to-screen latency; tune rules from evidence.
 - [ ] ML-05 — Keep bicycle-specific labeling disabled until supported by independent evidence.
 - [ ] ML-06 — Consider training only if measured remaining errors justify it; no per-user model training for settings.
 
-## Name recognition — owner to confirm
+## Name recognition — John and Leo (proposed)
 
 - [ ] NAME-01 — Implement shared capture fanout and bounded worker queues; avoid opening the mic twice.
 - [ ] NAME-02 — Benchmark the speech model and VAD on target compute before choosing the final configuration.
@@ -77,7 +77,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] HW-06 — Validate optical readability, refresh, mounting, power and reconnect/clear behavior.
 - [ ] HW-07 — Feed final audio device into capture adapter and complete the physical end-to-end demo.
 
-## Spatial audio — owner to confirm; synchronized capture gate
+## Spatial audio — John and Leo (proposed); synchronized capture gate
 
 - [ ] SPACE-01 — Prove synchronized multichannel capture and document microphone geometry.
 - [ ] SPACE-02 — Prototype GCC-PHAT with known-angle recordings and measure error/confidence.
@@ -91,6 +91,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] DEMO-03 — Rehearse urgent interruption, dismiss, preference changes, silence, failure and reconnect.
 - [ ] DEMO-04 — Prepare labeled recorded/mock fallback and one-command startup instructions.
 - [ ] DEMO-05 — Rehearse judge wearing glasses while audience follows the mirror; capture measured latency.
+- [ ] DEMO-07 — Verify supplied Sunday October 25, 9 AM PDT deadline; target internal submission by 8 AM PDT.
 - [ ] DEMO-06 — Verify presentation claims match measured capabilities; prepare final demo/pitch.
 
 ## Stretch after the integrated demo
@@ -105,8 +106,10 @@ See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluat
 
 - [ ] SPONSOR-01 — Verify official briefs, eligibility, required technology, submission links, deadlines and multi-track rules.
 - [ ] SPONSOR-02 — Emma: timebox Mana frontend trial before committing to the builder; record adopt/defer and evidence.
-- [ ] SPONSOR-03 — Emma + hardware owner: evaluate SpacetimeDB before choosing new synchronization infrastructure;
+- [ ] SPONSOR-03 — Emma + hardware owner: evaluate Convex versus SpacetimeDB before choosing new synchronization infrastructure;
   prove event delivery, expiry and reconnect, or explicitly defer while retaining the local receiver.
+- [ ] SPONSOR-06 — John/Leo: evaluate Cartesia streaming STT for names; verify endpoint, live accuracy and local fallback.
+- [ ] SPONSOR-07 — Optional Claude preference interpretation only after editable settings work; require user review.
 - [ ] SPONSOR-04 — Preserve sponsor usage artifacts and judge-accessible links for integrations actually adopted.
 - [ ] SPONSOR-05 — Select final tracks from verified eligibility and implemented demo capabilities; tailor submission narratives.
 

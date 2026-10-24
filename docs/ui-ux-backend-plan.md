@@ -1,7 +1,7 @@
 # Browser mirror, companion, and backend plan
 
 Status: implementation plan; the polished frontend and backend extensions below are **not built yet**.
-Owner: Emma, UI/UX first, then backend/integration. Hardware: Yameen. Other owners remain team-assigned.
+Owner: Emma, UI/UX first, then backend/integration. Hardware: Yameen. John and Leo are proposed for audio/ML, names and spatial work; their internal split remains to confirm.
 Track execution in the [master TODO](../TODO.md). Existing handoffs remain linked from the [README](../README.md).
 
 ## Demo we are building
@@ -190,8 +190,8 @@ evidence, not a guarantee that every bell-like sound was an alarm.
 
 ## Team handoffs and merge order
 
-- Emma owns frontend first, then shared backend integration. Yameen owns hardware. Confirm who
-  owns name recognition and spatial work; GitHub collaborator access does not assign these roles.
+- Emma owns frontend first, then shared backend integration. Yameen owns hardware. The supplied handoff proposes John and Leo
+  for audio/name and spatial work; confirm their internal split. GitHub access alone does not assign roles.
 - UI can develop mock views while ML emits v1 events and hardware displays fake cues. Avoid
   simultaneous uncoordinated edits to `audio/events.py`, `audio/server.py`, and profile schemas.
 - Merge small PRs: contracts/fixtures → mirror → receiver adapter → companion/setup → backend

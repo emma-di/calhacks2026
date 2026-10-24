@@ -7,12 +7,12 @@ are still separate work items. See [current measured results](../reports/summary
 | Workstream | Responsibility | First handoff |
 | --- | --- | --- |
 | Hardware / Yameen | Display, optics, mounting, microphone access, controller transport | A mock event appears on the physical display; document the audio interface |
-| Audio / ML | Environmental classification, false-alert evaluation, future name detection | Recorded/live audio emits normalized events; keep a reproducible test set |
+| Audio / ML — John and Leo (proposed) | Environmental classification, false-alert evaluation, future name detection | Recorded/live audio emits normalized events; keep a reproducible test set |
 | Backend / integration — Emma after initial UI | Schema, preferences → tier, alert state, hardware output | Same alert state reaches laptop and physical display |
 | UI/UX — Emma | Audience mirror, companion, cue design, then onboarding/settings | Polished mock cues, then recorded events in the same UI |
-| Spatial audio | Mic geometry/synchronization, direction and confidence | A known-angle recording produces a measured direction or unknown |
+| Spatial audio — John and Leo (proposed) | Mic geometry/synchronization, direction and confidence | A known-angle recording produces a measured direction or unknown |
 
-Emma's UI/backend work and Yameen's hardware work are confirmed. Agree on the other owners as a team;
+Emma's UI/backend work and Yameen's hardware work are confirmed. The supplied assignment proposes John and Leo for audio/ML and spatial work; confirm their split as a team;
 GitHub access does not assign anyone to a workstream.
 
 Use the [master TODO](../TODO.md) for status and the [UI → backend plan](ui-ux-backend-plan.md)
@@ -41,3 +41,5 @@ separate task branches without reorganizing the current Python package first.
 Provide the controller, compute device/OS, microphone model/interface, channel count/sample rate,
 synchronization capability, display model/resolution/driver, audio and alert transports, and any
 dismiss/mute controls. Then implement the selected adapters against the existing event contract.
+
+Read the [distilled team build instructions](team-build-instructions.md) for the latest supplied handoff, sponsor candidates, contract reconciliations and demo acceptance evidence.
