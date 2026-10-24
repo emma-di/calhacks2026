@@ -47,6 +47,14 @@ class SpatialTests(unittest.TestCase):
         self.assertGreater(buffer.match(200)['bearing_degrees'], 45)
         with self.assertRaises(ValueError):
             buffer.calibrate(3)
+        # Weaker left side gets its own reference: John's +9 left knock must land left, not front.
+        self.assertGreater(abs(stretch(9, -29)), 0)
+        self.assertGreater(-45, stretch(9, -29, 15))
+        self.assertGreater(-45, stretch(17, -29, 15))
+        self.assertLess(abs(stretch(4, -29, 15)), 45)     # near-front noise stays front
+        self.assertGreater(stretch(-32, -29, 15), 45)     # right unchanged
+        with self.assertRaises(ValueError):
+            buffer.calibrate(-29, -15)
 
     def test_invalid_readings_are_rejected(self):
         for bad in (dict(bearing_degrees=400, coherence=.5, rms=0, calibrated=True),
