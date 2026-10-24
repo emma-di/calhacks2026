@@ -67,7 +67,9 @@ def make_sink(name, args):
         except ImportError:
             raise SystemExit('smbus2 is missing: pip install smbus2 (and enable I2C with raspi-config)')
         driver = SSD1306(SMBus(args.bus), int(args.address, 16), args.flip_x, args.flip_y)
-        return lambda bitmap: driver.show(bitmap.ssd1306_pages()), driver.off
+        # On exit leave the panel on (the last frame drawn is blank): another program, such as the
+        # DETECT bear demo service, may share this display and should not find it switched off.
+        return lambda bitmap: driver.show(bitmap.ssd1306_pages()), (lambda: None)
     if name == 'ascii':
         sink = AsciiSink()
         return sink.show, lambda: None
