@@ -280,3 +280,10 @@ use, so Safari alert viewing on that same phone is a separate mode.
 Fetched John's johnaou/custom-sounds at 87aff0d and ran 14 targeted tests in isolation, all passing.
 It is not merged: its older server must not replace the current priority/settings engine. Custom
 per-ID identity, TS parser and OLED icon are key integration gaps. See docs/john-audio-review.md.
+
+### iPhone camera working; microphone prepared — October 24
+
+Emma confirmed USB Continuity Camera video works. Audio input is separate: Mac lists “Emma Microphone”
+(index 0 this session) plus built-in Mac mic. Input-format check accepts 16 kHz mono float32 without
+capture. Bounded microphone command is in docs/iphone-camera.md; live phone-audio trial not run yet.
+This is a mono demo path, not validation of glasses stereo/spatial capture. Re-enumerate indices on reconnect.
