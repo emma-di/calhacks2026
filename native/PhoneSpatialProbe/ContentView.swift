@@ -22,6 +22,9 @@ struct ContentView: View {
 
                 Divider()
                 Text("Send to Mac").font(.headline)
+                Text(probe.usbStatus).font(.callout)
+                Text("Over the cable: keep the phone plugged into the Mac and run scripts/phone_usb_bridge.py there. Wi-Fi below is optional.")
+                    .font(.footnote).foregroundStyle(.secondary)
                 TextField("Relay address", text: $probe.macAddress)
                     .textFieldStyle(.roundedBorder).keyboardType(.URL)
                     .textInputAutocapitalization(.never).autocorrectionDisabled()

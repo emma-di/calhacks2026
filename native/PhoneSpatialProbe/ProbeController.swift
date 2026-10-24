@@ -2,6 +2,7 @@ import AVFoundation
 import AudioToolbox
 import Combine
 import Foundation
+import Network
 
 /// Spatial-direction probe: listens with the phone's FOA microphones until Stop (3 minute cap),
 /// shows the dominant-sound direction, and can stream readings to the Mac receiver via the relay.
@@ -19,6 +20,8 @@ import Foundation
         didSet { UserDefaults.standard.set(pairingCode, forKey: "pairingCode") }
     }
     @Published var sending = false
+    @Published var usbStatus = "USB: waiting for the Mac bridge."
+    private let usb = UsbStream()
 
     private var engine: SpatialProbeEngine?
     private var generation = 0
@@ -131,26 +134,34 @@ import Foundation
         send(result, at: now)
     }
 
-    private func send(_ result: FOADirection, at now: Date) {
-        guard sending else { return }
-        // Confident readings go out at up to 5 per second; otherwise one heartbeat per second.
-        let interval = result.bearing == nil ? 1.0 : 0.2
-        guard now.timeIntervalSince(lastSent) >= interval,
-              let url = URL(string: macAddress.trimmingCharacters(in: .whitespaces) + "/spatial") else { return }
-        lastSent = now
+    private func body(_ result: FOADirection) -> [String: Any] {
         let bearing = result.bearing.flatMap(calibrated)
-        let body: [String: Any] = [
+        return [
             "bearing_degrees": bearing as Any? ?? NSNull(),
             "coherence": min(1, max(0, result.coherence)),
             "rms": min(10, max(0, result.rms)),
             "calibrated": frontOffset != nil,
             "device": "johns-phone",
         ]
+    }
+
+    private func send(_ result: FOADirection, at now: Date) {
+        // USB: every reading goes to any connected Mac bridge (scripts/phone_usb_bridge.py).
+        if let line = try? JSONSerialization.data(withJSONObject: body(result)) {
+            let clients = usb.send(line + Data([10]))
+            usbStatus = clients > 0 ? "USB: streaming to the Mac." : "USB: waiting for the Mac bridge."
+        }
+        guard sending else { return }
+        // Confident readings go out at up to 5 per second; otherwise one heartbeat per second.
+        let interval = result.bearing == nil ? 1.0 : 0.2
+        guard now.timeIntervalSince(lastSent) >= interval,
+              let url = URL(string: macAddress.trimmingCharacters(in: .whitespaces) + "/spatial") else { return }
+        lastSent = now
         var request = URLRequest(url: url, timeoutInterval: 1.5)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(pairingCode.uppercased(), forHTTPHeaderField: "X-Aware-Code")
-        request.httpBody = try? JSONSerialization.data(withJSONObject: body)
+        request.httpBody = try? JSONSerialization.data(withJSONObject: body(result))
         URLSession.shared.dataTask(with: request) { [weak self] _, response, error in
             let code = (response as? HTTPURLResponse)?.statusCode
             Task { @MainActor in
@@ -166,6 +177,51 @@ import Foundation
                 }
             }
         }.resume()
+    }
+}
+
+/// Newline-delimited JSON readings on TCP 5178. The Mac reaches it through the USB cable (usbmux),
+/// so no Wi-Fi is involved. Only direction numbers are sent, never audio.
+final class UsbStream: @unchecked Sendable {
+    private let queue = DispatchQueue(label: "aware.usb.stream")
+    private var listener: NWListener?
+    private var clients: [NWConnection] = []
+    private var count = 0
+
+    init() {
+        guard let port = NWEndpoint.Port(rawValue: 5178), let listener = try? NWListener(using: .tcp, on: port) else { return }
+        listener.newConnectionHandler = { [weak self] connection in
+            guard let self else { return }
+            connection.stateUpdateHandler = { [weak self, weak connection] state in
+                guard let self, let connection else { return }
+                if case .failed = state { self.drop(connection) }
+                if case .cancelled = state { self.drop(connection) }
+            }
+            connection.start(queue: self.queue)
+            self.clients.append(connection)
+            self.count = self.clients.count
+        }
+        listener.start(queue: queue)
+        self.listener = listener
+    }
+
+    private func drop(_ connection: NWConnection) {
+        clients.removeAll { $0 === connection }
+        count = clients.count
+    }
+
+    /// Returns how many bridges were connected when the line was queued.
+    func send(_ data: Data) -> Int {
+        queue.async {
+            for connection in self.clients {
+                connection.send(content: data, completion: .contentProcessed { [weak self, weak connection] error in
+                    guard error != nil, let self, let connection else { return }
+                    connection.cancel()
+                    self.drop(connection)
+                })
+            }
+        }
+        return count
     }
 }
 
