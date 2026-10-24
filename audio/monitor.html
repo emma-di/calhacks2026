@@ -23,7 +23,7 @@ async function poll(){
   const event=state.active;
   if((event?.event_id??null)!==lastId){
    lastId=event?.event_id??null;cue.textContent=event?event.label:'Waiting for an event';
-   meta.textContent=event?`Tier ${event.priority_tier} · ${event.source} · model score ${event.confidence.toFixed(2)} · direction unknown`:'';
+   meta.textContent=event?`Tier ${event.priority_tier} · ${event.source} · ${event.confidence==null?'keyword match':'model score '+event.confidence.toFixed(2)} · direction unknown`:'';
   }
   const latest=state.events.at(-1);document.querySelector('#json').textContent=latest?JSON.stringify(latest,null,2):'No events received';
  }catch(e){document.querySelector('#status').textContent='Disconnected — receiver unavailable';cue.textContent='Disconnected';meta.textContent='';lastId=null;}

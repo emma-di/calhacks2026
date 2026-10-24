@@ -69,9 +69,31 @@ def make_custom_event(sound, confidence, source, timestamp_ms=None):
                 direction_degrees=None, direction_confidence=None,
                 distance_meters=None, proximity='unknown')
 
+def validate_name_event(event):
+    """v2 name event (audio/names.py). Keyword spotting has no calibrated score: confidence may be null."""
+    if event.get('schema_version') != 2:
+        raise ValueError('name_called events use schema_version 2')
+    for key in ('event_id', 'label', 'source', 'matched_alias_id'):
+        if not isinstance(event.get(key), str) or not 0 < len(event[key]) <= 120:
+            raise ValueError(f'Invalid {key}')
+    score = event.get('confidence')
+    if score is not None and (type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        raise ValueError('confidence must be null or within 0..1')
+    if type(event.get('profile_revision')) is not int or event['profile_revision'] < 0:
+        raise ValueError('profile_revision must be a nonnegative integer')
+    if type(event.get('priority_tier')) is not int or not 0 <= event['priority_tier'] <= 4:
+        raise ValueError('priority_tier must be 0..4')
+    if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
+        raise ValueError('timestamp_ms must be a nonnegative integer')
+    if any(event.get(k) is not None for k in ('direction_degrees', 'direction_confidence', 'distance_meters')):
+        raise ValueError('Spatial estimates are not supported yet')
+    return event
+
 def validate_event(event):
     if not isinstance(event, dict):
         raise ValueError('Unknown event type')
+    if event.get('type') == 'name_called':
+        return validate_name_event(event)
     if event.get('type') == 'custom':
         sound_id = event.get('custom_sound_id')
         if not isinstance(sound_id, str) or not 0 < len(sound_id) <= 64:

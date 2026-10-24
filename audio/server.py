@@ -101,8 +101,35 @@ class HttpError(Exception):
         super().__init__(message)
         self.status = status
 
+def profile_route(method, parts, body_json, body_audio):
+    """Onboarding profile: typed name, aliases, sensitivity, learned spellings (audio/names.py)."""
+    from audio import names
+    if parts == ['profile']:
+        if method == 'GET':
+            return 200, names.load_profile()
+        if method == 'PUT':
+            try:
+                return 200, names.save_profile(body_json())
+            except (ImportError, FileNotFoundError, OSError) as exc:
+                raise RuntimeError(f'name model or sentencepiece missing ({exc}); run python -m audio.download_model --names') from None
+    if parts == ['profile', 'name-samples']:
+        if method == 'POST':
+            with custom.lock:
+                try:
+                    profile, report = names.learn_spelling(body_audio())
+                except (ImportError, FileNotFoundError) as exc:
+                    raise RuntimeError(f'name model missing ({exc}); run python -m audio.download_model --names') from None
+            return 200, dict(report, profile=profile)
+        if method == 'DELETE':
+            profile = names.load_profile()
+            profile['name_detection']['learned_spellings'] = []
+            return 200, names.save_profile(profile)
+    raise HttpError(404, 'Not found')
+
 def custom_route(method, parts, body_json, body_audio):
-    """Dispatch /custom-sounds and /background. Returns (status, payload)."""
+    """Dispatch /custom-sounds, /background and /profile. Returns (status, payload)."""
+    if parts and parts[0] == 'profile':
+        return profile_route(method, parts, body_json, body_audio)
     from audio import custom_sounds as cs
     if parts == ['background']:
         if method == 'GET':
@@ -151,7 +178,7 @@ def custom_route(method, parts, body_json, body_audio):
         elif method == 'POST' and action == 'test':
             with custom.lock:
                 return 200, cs.test_clip(sound_id, custom.get_embedder(), body_audio())
-    raise HttpError(404 if method in ('GET', 'POST', 'PATCH', 'DELETE') else 405, 'Not found')
+    raise HttpError(404 if method in ('GET', 'POST', 'PUT', 'PATCH', 'DELETE') else 405, 'Not found')
 
 class Handler(BaseHTTPRequestHandler):
     def cors_headers(self):
@@ -159,7 +186,7 @@ class Handler(BaseHTTPRequestHandler):
         if origin and (LOCAL_ORIGIN.match(origin) or origin in EXTRA_ORIGINS):
             self.send_header('Access-Control-Allow-Origin', origin)
             self.send_header('Vary', 'Origin')
-            self.send_header('Access-Control-Allow-Methods', 'GET, POST, PATCH, DELETE, OPTIONS')
+            self.send_header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS')
             self.send_header('Access-Control-Allow-Headers', 'Content-Type')
             self.send_header('Access-Control-Max-Age', '600')
 
@@ -208,13 +235,16 @@ class Handler(BaseHTTPRequestHandler):
 
     def is_custom(self):
         first = self.path.split('?')[0].strip('/').split('/')[0]
-        return first in ('custom-sounds', 'background')
+        return first in ('custom-sounds', 'background', 'profile')
 
     def do_OPTIONS(self):
         self.send_response(204)
         self.cors_headers()
         self.send_header('Content-Length', '0')
         self.end_headers()
+
+    def do_PUT(self):
+        self.custom('PUT') if self.is_custom() else self.reply(404, {'error':'Not found'})
 
     def do_PATCH(self):
         self.custom('PATCH') if self.is_custom() else self.reply(404, {'error':'Not found'})

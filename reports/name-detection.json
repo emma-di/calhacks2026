@@ -1,0 +1,2575 @@
+{
+ "status": "synthetic evaluation; not validated on real voices or the demo microphone",
+ "model": "sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01 (int8)",
+ "protocol": [
+  "10 names; 534 synthetic utterances (piper en_US LibriTTS-R, 904 voices, speeds 0.9-1.1)",
+  "per name: 24 utterances with the name in 8 sentence positions, 15 sound-alike utterances",
+  "144 name-free sentences; the other 9 names act as additional negatives",
+  "one continuous stream per name (shuffled, 1.2 s gaps), like a live microphone",
+  "noise condition: everyday ESC-50 sounds (typing, footsteps, vacuum, rain...) at 10 dB SNR",
+  "learned spellings: 3 held-out voices saying only the name, decoded by the KWS model, common-word filtered",
+  "caveat: test and learning voices share the TTS pronunciation of each name, so learned spellings are optimistic"
+ ],
+ "default": {
+  "sensitivity": "balanced",
+  "threshold": 0.15,
+  "boost": 1.5
+ },
+ "false_alert_breakdown_balanced_learned_quiet": {
+  "sound_alike": 18,
+  "sound_alike_utterances": 150,
+  "other_names": 1,
+  "generic_speech": 2,
+  "generic_speech_minutes": 75,
+  "note": "~2-3 false alerts per hour of continuous name-free speech"
+ },
+ "summaries": [
+  {
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.383,
+   "false_alerts": 27,
+   "per_name": {
+    "John": 0.71,
+    "Emma": 0.0,
+    "Yameen": 0.0,
+    "Priya": 0.04,
+    "Mateo": 0.75,
+    "Grace": 0.88,
+    "Kai": 0.54,
+    "Siddharth": 0.0,
+    "Wei": 0.0,
+    "Olivia": 0.92
+   }
+  },
+  {
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.433,
+   "false_alerts": 18,
+   "per_name": {
+    "John": 0.75,
+    "Emma": 0.46,
+    "Yameen": 0.0,
+    "Priya": 0.04,
+    "Mateo": 0.67,
+    "Grace": 0.83,
+    "Kai": 0.67,
+    "Siddharth": 0.0,
+    "Wei": 0.0,
+    "Olivia": 0.92
+   }
+  },
+  {
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.625,
+   "false_alerts": 22,
+   "per_name": {
+    "Emma": 0.46,
+    "John": 0.75,
+    "Yameen": 0.83,
+    "Priya": 0.17,
+    "Mateo": 0.79,
+    "Grace": 0.83,
+    "Kai": 0.67,
+    "Siddharth": 0.83,
+    "Wei": 0.0,
+    "Olivia": 0.92
+   }
+  },
+  {
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.646,
+   "false_alerts": 26,
+   "per_name": {
+    "John": 0.75,
+    "Emma": 0.46,
+    "Yameen": 0.92,
+    "Priya": 0.17,
+    "Mateo": 0.83,
+    "Grace": 0.83,
+    "Kai": 0.75,
+    "Siddharth": 0.75,
+    "Wei": 0.04,
+    "Olivia": 0.96
+   }
+  },
+  {
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.4,
+   "false_alerts": 19,
+   "per_name": {
+    "John": 0.75,
+    "Emma": 0.42,
+    "Yameen": 0.0,
+    "Priya": 0.0,
+    "Mateo": 0.58,
+    "Grace": 0.79,
+    "Kai": 0.54,
+    "Siddharth": 0.0,
+    "Olivia": 0.88,
+    "Wei": 0.04
+   }
+  },
+  {
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.554,
+   "false_alerts": 26,
+   "per_name": {
+    "John": 0.75,
+    "Emma": 0.42,
+    "Yameen": 0.75,
+    "Priya": 0.0,
+    "Mateo": 0.71,
+    "Grace": 0.79,
+    "Kai": 0.54,
+    "Siddharth": 0.67,
+    "Wei": 0.04,
+    "Olivia": 0.88
+   }
+  },
+  {
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.567,
+   "false_alerts": 32,
+   "per_name": {
+    "John": 0.75,
+    "Emma": 0.42,
+    "Yameen": 0.83,
+    "Priya": 0.0,
+    "Mateo": 0.71,
+    "Grace": 0.79,
+    "Kai": 0.58,
+    "Siddharth": 0.67,
+    "Wei": 0.04,
+    "Olivia": 0.88
+   }
+  }
+ ],
+ "runs": [
+  {
+   "name": "John",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.708,
+   "hits": 17,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ]
+   ],
+   "median_delay_s": -0.08,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "Hey John, can you come here?"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 18,
+   "false_examples": [
+    [
+     70.9,
+     "Wait, John, hold on."
+    ],
+    [
+     267.1,
+     "Over here, John!"
+    ],
+    [
+     271.6,
+     "I think John left a bag here."
+    ],
+    [
+     368.8,
+     "John!"
+    ]
+   ],
+   "median_delay_s": null,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Emma, look behind you.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on."
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     23.2,
+     "Over here, Priya!"
+    ]
+   ],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Yameen!",
+    "Over here, Yameen!",
+    "Wait, Yameen, hold on.",
+    "Yameen, your order is ready."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.39,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?",
+    "Priya!"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ]
+   ],
+   "median_delay_s": -0.15,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo, your order is ready.",
+    "Mateo!",
+    "Mateo, look behind you."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.875,
+   "hits": 21,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     1091.7,
+     "Grayson!"
+    ]
+   ],
+   "median_delay_s": -0.18,
+   "missed_examples": [
+    "Grace!",
+    "Grace, your order is ready.",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.542,
+   "hits": 13,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": -0.02,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Hey Kai, can you come here?",
+    "Kai!"
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Hey Siddharth, can you come here?",
+    "Wait, Siddharth, hold on.",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.25,
+   "boost": 1.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.917,
+   "hits": 22,
+   "positives": 24,
+   "false_alerts": 4,
+   "false_examples": [
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     673.2,
+     "oblivion!"
+    ],
+    [
+     860.0,
+     "Hey Bolivia, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.16,
+   "missed_examples": [
+    "Hey Olivia, can you come here?",
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ]
+   ],
+   "median_delay_s": -0.09,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "John, your order is ready."
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.458,
+   "hits": 11,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     895.6,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.48,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Yameen!",
+    "Over here, Yameen!",
+    "Wait, Yameen, hold on.",
+    "Yameen, your order is ready."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.39,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?",
+    "Priya!"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.667,
+   "hits": 16,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": 0.01,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo, your order is ready.",
+    "Mateo!",
+    "Mateo, look behind you."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ],
+    [
+     1091.7,
+     "Grayson!"
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Grace!",
+    "Grace, your order is ready.",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.667,
+   "hits": 16,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": -0.03,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Kai!",
+    "Kai, your order is ready."
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Hey Siddharth, can you come here?",
+    "Wait, Siddharth, hold on.",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.917,
+   "hits": 22,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     673.2,
+     "oblivion!"
+    ]
+   ],
+   "median_delay_s": -0.16,
+   "missed_examples": [
+    "Hey Olivia, can you come here?",
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ],
+    [
+     990.0,
+     "I think Don is over there."
+    ]
+   ],
+   "median_delay_s": -0.09,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "John, your order is ready."
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.458,
+   "hits": 11,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     660.0,
+     "The demo is at three o clock."
+    ],
+    [
+     895.6,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.48,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Yameen!",
+    "Over here, Yameen!",
+    "Wait, Yameen, hold on.",
+    "Yameen, your order is ready."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.39,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?",
+    "Priya!"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.708,
+   "hits": 17,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.12,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo, your order is ready.",
+    "Mateo!",
+    "Mateo, look behind you."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     604.0,
+     "Hey Grayson, can you come here?"
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ]
+   ],
+   "median_delay_s": -0.08,
+   "missed_examples": [
+    "Grace!",
+    "Grace, your order is ready.",
+    "Grace, your order is ready.",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     561.8,
+     "Hey kite, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.05,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Kai!",
+    "Kai, your order is ready."
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Hey Siddharth, can you come here?",
+    "Wait, Siddharth, hold on.",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": 0.36,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.958,
+   "hits": 23,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     816.8,
+     "Olive!"
+    ]
+   ],
+   "median_delay_s": -0.17,
+   "missed_examples": [
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ],
+    [
+     990.0,
+     "I think Don is over there."
+    ]
+   ],
+   "median_delay_s": -0.09,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "John!"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.5,
+   "hits": 12,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     41.2,
+     "Emily!"
+    ],
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     660.0,
+     "The demo is at three o clock."
+    ],
+    [
+     874.8,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.37,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.64,
+   "missed_examples": [
+    "Over here, Yameen!",
+    "Wait, Yameen, hold on.",
+    "Yameen, your order is ready.",
+    "I think Yameen left a bag here."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.39,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?",
+    "Priya!"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.18,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo!",
+    "Mateo, look behind you.",
+    "Wait, Mateo, hold on."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.917,
+   "hits": 22,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     604.0,
+     "Hey Grayson, can you come here?"
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     561.8,
+     "Hey kite, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.06,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Kai!",
+    "Kai, your order is ready."
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Hey Siddharth, can you come here?",
+    "Wait, Siddharth, hold on.",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.125,
+   "hits": 3,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": 0.42,
+   "missed_examples": [
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on.",
+    "Wei, your order is ready."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.05,
+   "boost": 2.5,
+   "noise_snr_db": null,
+   "learned_spellings": false,
+   "recall": 0.958,
+   "hits": 23,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     673.2,
+     "oblivion!"
+    ]
+   ],
+   "median_delay_s": -0.17,
+   "missed_examples": [
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.458,
+   "hits": 11,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     895.6,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.48,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ]
+   ],
+   "median_delay_s": -0.09,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "John, your order is ready."
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     307.7,
+     "Yasmin!"
+    ],
+    [
+     662.9,
+     "Hey Gemma, can you come here?"
+    ],
+    [
+     743.2,
+     "Hey Yasmin, can you come here?"
+    ]
+   ],
+   "median_delay_s": 0.02,
+   "missed_examples": [
+    "I think Yameen left a bag here.",
+    "Yameen, your order is ready.",
+    "I think Yameen left a bag here.",
+    "I think Yameen left a bag here."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.167,
+   "hits": 4,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.36,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Excuse me, Priya?",
+    "Priya!",
+    "Priya, your order is ready."
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.08,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo, look behind you.",
+    "Mateo!",
+    "Mateo, look behind you."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     520.8,
+     "I think brace is over there."
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Grace!",
+    "Grace, your order is ready.",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.667,
+   "hits": 16,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": -0.03,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Kai!",
+    "Kai, your order is ready."
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.02,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Siddharth, your order is ready.",
+    "Wait, Siddharth, hold on.",
+    "Hey Siddharth, can you come here?"
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.917,
+   "hits": 22,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     673.2,
+     "oblivion!"
+    ]
+   ],
+   "median_delay_s": -0.16,
+   "missed_examples": [
+    "Hey Olivia, can you come here?",
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     495.6,
+     "Mateo!"
+    ]
+   ],
+   "median_delay_s": 0.01,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "Hey John, can you come here?"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.417,
+   "hits": 10,
+   "positives": 24,
+   "false_alerts": 8,
+   "false_examples": [
+    [
+     41.2,
+     "Emily!"
+    ],
+    [
+     115.7,
+     "The demo is at three o clock."
+    ],
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     648.2,
+     "Anna!"
+    ]
+   ],
+   "median_delay_s": 0.33,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Emma, look behind you."
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     379.1,
+     "Over here, Emma!"
+    ],
+    [
+     422.9,
+     "This coffee is way too hot."
+    ],
+    [
+     743.2,
+     "Hey Yasmin, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.07,
+   "missed_examples": [
+    "I think Yameen left a bag here.",
+    "Yameen!",
+    "Yameen, your order is ready.",
+    "Yameen!"
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.708,
+   "hits": 17,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     640.2,
+     "We should order pizza for the team."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.08,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo!",
+    "Mateo, look behind you.",
+    "Wait, Mateo, hold on."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     520.8,
+     "I think brace is over there."
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Over here, Grace!",
+    "Hey Grace, can you come here?",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.542,
+   "hits": 13,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.25,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai, look behind you.",
+    "I think Kai left a bag here.",
+    "Kai!"
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.667,
+   "hits": 16,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.09,
+   "missed_examples": [
+    "Hey Siddharth, can you come here?",
+    "Excuse me, Siddharth?",
+    "I think Siddharth left a bag here.",
+    "Siddharth, your order is ready."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": -0.15,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wei, your order is ready."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.875,
+   "hits": 21,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ]
+   ],
+   "median_delay_s": -0.3,
+   "missed_examples": [
+    "Olivia!",
+    "Olivia!",
+    "Excuse me, Olivia?"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     494.9,
+     "Joan!"
+    ],
+    [
+     990.0,
+     "I think Don is over there."
+    ]
+   ],
+   "median_delay_s": -0.09,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "John, your order is ready."
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.458,
+   "hits": 11,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     660.0,
+     "The demo is at three o clock."
+    ],
+    [
+     895.6,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.48,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.917,
+   "hits": 22,
+   "positives": 24,
+   "false_alerts": 4,
+   "false_examples": [
+    [
+     307.7,
+     "Yasmin!"
+    ],
+    [
+     458.4,
+     "Gemma!"
+    ],
+    [
+     662.9,
+     "Hey Gemma, can you come here?"
+    ],
+    [
+     743.2,
+     "Hey Yasmin, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.07,
+   "missed_examples": [
+    "I think Yameen left a bag here.",
+    "I think Yameen left a bag here."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.167,
+   "hits": 4,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.36,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Excuse me, Priya?",
+    "Priya!",
+    "Priya, your order is ready."
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.14,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo!",
+    "Mateo, look behind you.",
+    "Wait, Mateo, hold on."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 7,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     520.8,
+     "I think brace is over there."
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     604.0,
+     "Hey Grayson, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.08,
+   "missed_examples": [
+    "Grace!",
+    "Grace, your order is ready.",
+    "Grace, your order is ready.",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     561.8,
+     "Hey kite, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.05,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai!",
+    "Kai!",
+    "Kai, your order is ready."
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.02,
+   "missed_examples": [
+    "Hey Siddharth, can you come here?",
+    "Siddharth, your order is ready.",
+    "Siddharth!",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": 0.36,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wait, Wei, hold on."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": null,
+   "learned_spellings": true,
+   "recall": 0.958,
+   "hits": 23,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     228.4,
+     "Bolivia!"
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ],
+    [
+     816.8,
+     "Olive!"
+    ]
+   ],
+   "median_delay_s": -0.17,
+   "missed_examples": [
+    "Olivia!"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     495.6,
+     "Mateo!"
+    ],
+    [
+     784.5,
+     "Lets grab lunch after the presentation."
+    ],
+    [
+     990.0,
+     "I think Don is over there."
+    ]
+   ],
+   "median_delay_s": 0.01,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "Hey John, can you come here?"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.417,
+   "hits": 10,
+   "positives": 24,
+   "false_alerts": 8,
+   "false_examples": [
+    [
+     41.2,
+     "Emily!"
+    ],
+    [
+     115.7,
+     "The demo is at three o clock."
+    ],
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     648.2,
+     "Anna!"
+    ]
+   ],
+   "median_delay_s": 0.33,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Hey Emma, can you come here?"
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.833,
+   "hits": 20,
+   "positives": 24,
+   "false_alerts": 4,
+   "false_examples": [
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     379.1,
+     "Over here, Emma!"
+    ],
+    [
+     422.9,
+     "This coffee is way too hot."
+    ],
+    [
+     743.2,
+     "Hey Yasmin, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.07,
+   "missed_examples": [
+    "I think Yameen left a bag here.",
+    "Yameen!",
+    "Yameen, your order is ready.",
+    "I think Yameen left a bag here."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.708,
+   "hits": 17,
+   "positives": 24,
+   "false_alerts": 5,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     640.2,
+     "We should order pizza for the team."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.18,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo!",
+    "Mateo, look behind you.",
+    "Wait, Mateo, hold on."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     520.8,
+     "I think brace is over there."
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     604.0,
+     "Hey Grayson, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Over here, Grace!",
+    "Grace!",
+    "Hey Grace, can you come here?"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.583,
+   "hits": 14,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.1,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai, look behind you.",
+    "I think Kai left a bag here.",
+    "Kai!"
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.667,
+   "hits": 16,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     385.8,
+     "I left my keys in the car."
+    ],
+    [
+     1254.6,
+     "cigar!"
+    ]
+   ],
+   "median_delay_s": 0.09,
+   "missed_examples": [
+    "Hey Siddharth, can you come here?",
+    "Excuse me, Siddharth?",
+    "I think Siddharth left a bag here.",
+    "Siddharth, your order is ready."
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ],
+    [
+     1124.4,
+     "Wait, Olivia, hold on."
+    ]
+   ],
+   "median_delay_s": -0.15,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wei, your order is ready."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.1,
+   "boost": 2.0,
+   "noise_snr_db": 10,
+   "learned_spellings": true,
+   "recall": 0.875,
+   "hits": 21,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ]
+   ],
+   "median_delay_s": -0.3,
+   "missed_examples": [
+    "Olivia!",
+    "Olivia!",
+    "Excuse me, Olivia?"
+   ]
+  },
+  {
+   "name": "John",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.75,
+   "hits": 18,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     495.6,
+     "Mateo!"
+    ]
+   ],
+   "median_delay_s": 0.01,
+   "missed_examples": [
+    "I think John left a bag here.",
+    "John!",
+    "Hey John, can you come here?",
+    "Hey John, can you come here?"
+   ]
+  },
+  {
+   "name": "Emma",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.417,
+   "hits": 10,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     41.2,
+     "Emily!"
+    ],
+    [
+     115.7,
+     "The demo is at three o clock."
+    ],
+    [
+     127.9,
+     "The demo is at three o clock."
+    ],
+    [
+     659.7,
+     "The demo is at three o clock."
+    ]
+   ],
+   "median_delay_s": 0.33,
+   "missed_examples": [
+    "I think Emma left a bag here.",
+    "Hey Emma, can you come here?",
+    "Wait, Emma, hold on.",
+    "Emma, look behind you."
+   ]
+  },
+  {
+   "name": "Yameen",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Yameen!",
+    "Over here, Yameen!",
+    "Wait, Yameen, hold on.",
+    "Yameen, your order is ready."
+   ]
+  },
+  {
+   "name": "Priya",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Over here, Priya!",
+    "Over here, Priya!",
+    "Priya, look behind you.",
+    "Excuse me, Priya?"
+   ]
+  },
+  {
+   "name": "Mateo",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.583,
+   "hits": 14,
+   "positives": 24,
+   "false_alerts": 3,
+   "false_examples": [
+    [
+     325.6,
+     "tomato!"
+    ],
+    [
+     533.0,
+     "I think tomato is over there."
+    ],
+    [
+     738.4,
+     "Hey tomato, can you come here?"
+    ]
+   ],
+   "median_delay_s": -0.15,
+   "missed_examples": [
+    "Mateo!",
+    "Mateo, your order is ready.",
+    "Mateo!",
+    "Mateo, look behind you."
+   ]
+  },
+  {
+   "name": "Grace",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.792,
+   "hits": 19,
+   "positives": 24,
+   "false_alerts": 6,
+   "false_examples": [
+    [
+     113.5,
+     "Hey brace, can you come here?"
+    ],
+    [
+     520.8,
+     "I think brace is over there."
+    ],
+    [
+     550.6,
+     "I think race is over there."
+    ],
+    [
+     936.2,
+     "I think Grayson is over there."
+    ]
+   ],
+   "median_delay_s": -0.19,
+   "missed_examples": [
+    "Grace!",
+    "Over here, Grace!",
+    "Hey Grace, can you come here?",
+    "Grace!"
+   ]
+  },
+  {
+   "name": "Kai",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.542,
+   "hits": 13,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": 0.25,
+   "missed_examples": [
+    "Kai, your order is ready.",
+    "Kai, look behind you.",
+    "I think Kai left a bag here.",
+    "Kai!"
+   ]
+  },
+  {
+   "name": "Siddharth",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.0,
+   "hits": 0,
+   "positives": 24,
+   "false_alerts": 0,
+   "false_examples": [],
+   "median_delay_s": null,
+   "missed_examples": [
+    "Siddharth, your order is ready.",
+    "Hey Siddharth, can you come here?",
+    "Wait, Siddharth, hold on.",
+    "Siddharth, look behind you."
+   ]
+  },
+  {
+   "name": "Olivia",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.875,
+   "hits": 21,
+   "positives": 24,
+   "false_alerts": 2,
+   "false_examples": [
+    [
+     31.6,
+     "I think Olive is over there."
+    ],
+    [
+     587.1,
+     "I think Bolivia is over there."
+    ]
+   ],
+   "median_delay_s": -0.3,
+   "missed_examples": [
+    "Olivia!",
+    "Olivia!",
+    "Excuse me, Olivia?"
+   ]
+  },
+  {
+   "name": "Wei",
+   "threshold": 0.15,
+   "boost": 1.5,
+   "noise_snr_db": 10,
+   "learned_spellings": false,
+   "recall": 0.042,
+   "hits": 1,
+   "positives": 24,
+   "false_alerts": 1,
+   "false_examples": [
+    [
+     239.2,
+     "Wait, Mateo, hold on."
+    ]
+   ],
+   "median_delay_s": -0.15,
+   "missed_examples": [
+    "Excuse me, Wei?",
+    "Wei, look behind you.",
+    "I think Wei left a bag here.",
+    "Wei, your order is ready."
+   ]
+  }
+ ]
+}
