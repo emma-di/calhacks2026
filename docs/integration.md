@@ -34,6 +34,7 @@ Recognition thresholds and label groups live in `audio/policy-<model>.json`.
 Current notification tier defaults are in `audio/events.py`; user preference overrides belong in the priority stage.
 The optional `model` field identifies the classifier. Generic `bell` means Bell / chime;
 the `bicycle_bell` subtype is disabled in the default recognition policy.
+User-taught sounds use `type: "custom"` with a `custom_sound_id`; see [custom sounds](custom-sounds.md).
 
 ## Yameen's handoff
 

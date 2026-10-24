@@ -33,6 +33,7 @@ def main():
         p = sub.add_parser(name)
         p.add_argument('--endpoint')
         p.add_argument('--debug', action='store_true')
+        p.add_argument('--no-custom', action='store_true', help='ignore taught custom sounds')
         p.add_argument('--decision-log',type=Path,default=Path(__file__).resolve().parent.parent/'.cache'/'recognition-decisions.jsonl')
         if name == 'file':
             p.add_argument('path')
@@ -51,7 +52,17 @@ def main():
     import numpy as np
     from audio.model import create_model, load_audio
     print(f'Loading {args.model}…', file=sys.stderr)
-    model = create_model(args.model)
+    custom = None
+    if args.command in ('file', 'mic') and not args.no_custom and args.model == 'zipformer':
+        from audio.custom_sounds import CustomSoundDetector
+        custom = CustomSoundDetector() or None
+    if custom:
+        # Same scores as the sherpa-onnx path, plus the embedding custom heads need.
+        from audio.embeddings import ZipformerEmbedder
+        model = ZipformerEmbedder()
+        print('Custom sounds: '+', '.join(meta['label'] for meta, _ in custom.heads), file=sys.stderr)
+    else:
+        model = create_model(args.model)
     model.predict(np.zeros(model.window_samples, dtype=np.float32))
     print(f'{args.model} ready', file=sys.stderr)
     if args.command == 'warmup':
@@ -70,6 +81,11 @@ def main():
         if args.debug:
             print(json.dumps({'inference_ms':round(elapsed, 1), 'top5':sorted(scores.items(), key=lambda x:x[1], reverse=True)[:5]}), file=sys.stderr)
         events=detector.detect(scores, source, now=clock, timestamp_ms=timestamp)
+        custom_decisions=[]
+        if custom:
+            from audio.custom_sounds import rms
+            events+=custom.detect(model.last_embedding, rms(window), source, now=clock, timestamp_ms=timestamp)
+            custom_decisions=custom.decisions
         deliveries=[]
         for event in events:
             event['inference_ms'] = round(elapsed, 1)
@@ -78,7 +94,7 @@ def main():
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
             top5=sorted(scores.items(),key=lambda x:x[1],reverse=True)[:5],
-            decisions=detector.decisions,deliveries=deliveries))
+            decisions=detector.decisions+custom_decisions,deliveries=deliveries))
 
     if args.command == 'file':
         data = load_audio(args.path)

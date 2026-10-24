@@ -59,8 +59,24 @@ def make_event(kind, confidence, source, timestamp_ms=None):
                 direction_degrees=None, direction_confidence=None,
                 distance_meters=None, proximity='unknown')
 
+def make_custom_event(sound, confidence, source, timestamp_ms=None):
+    """Event for a user-taught sound (audio/custom_sounds.py). Same v1 shape plus custom_sound_id;
+    `label` is the user's own name for the sound, e.g. "Front doorbell"."""
+    return dict(schema_version=1, event_id=str(uuid.uuid4()), type='custom',
+                custom_sound_id=sound['id'], label=sound['label'], confidence=float(confidence),
+                source=source, priority_tier=int(sound['priority_tier']),
+                timestamp_ms=timestamp_ms if timestamp_ms is not None else int(time.time()*1000),
+                direction_degrees=None, direction_confidence=None,
+                distance_meters=None, proximity='unknown')
+
 def validate_event(event):
-    if not isinstance(event, dict) or event.get('type') not in TARGETS:
+    if not isinstance(event, dict):
+        raise ValueError('Unknown event type')
+    if event.get('type') == 'custom':
+        sound_id = event.get('custom_sound_id')
+        if not isinstance(sound_id, str) or not 0 < len(sound_id) <= 64:
+            raise ValueError('custom events need custom_sound_id')
+    elif event.get('type') not in TARGETS:
         raise ValueError('Unknown event type')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
