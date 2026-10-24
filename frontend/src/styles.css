@@ -272,6 +272,24 @@ code {
   letter-spacing: 0.04em;
   color: rgba(244, 242, 234, 0.7);
 }
+.gesture-status {
+  margin-right: auto;
+  margin-left: 12px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  font-family: var(--pixel);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: rgba(244, 242, 234, 0.75);
+}
+.gesture-status.is-holding {
+  background: var(--signal);
+  color: var(--signal-ink);
+}
+.gesture-status.is-error {
+  color: var(--muted);
+}
 .stage-tools {
   display: flex;
   gap: 8px;

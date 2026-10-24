@@ -211,6 +211,13 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
 - One snap dismisses only while a cue is showing (double-snap is a policy setting; 1 s hops make quick
   double snaps merge). Resolving shows a 0.6 s check mark at the cue's position on glasses and lens.
 
+## Visual dismiss gesture replaces audio snap — October 24
+
+- Decision (Emma): dismissing must be visual. Not everyone can snap loudly, and a real alarm would mask
+  a snap. Thumbs-up held ⅓ s, seen by the glasses' camera (reported Oct 24) or the demo webcam,
+  dismisses the showing cue; MediaPipe runs in the browser. Audio snap rule disabled, code kept.
+- Yameen: please confirm the camera model/interface and whether it can appear to the laptop as a webcam.
+
 ## Add a note
 
 ```text

@@ -69,7 +69,7 @@ test("every engine decision has a plain-language explanation", () => {
     "displayed", "interrupted", "queued", "resumed_from_queue", "expired_in_queue",
     "dropped_queue_full", "merged_repeat", "acknowledged_repeat", "dismissed", "duplicate",
     "paused", "ignored_tier_zero", "suppressed_lower_priority", "held_work_mode", "held_dnd_mode",
-    "expired", "resolved_looked", "snap_ignored", "snap_waiting", "dismissed_snap",
+    "expired", "resolved_looked", "gesture_ignored", "gesture_waiting", "dismissed_gesture",
   ];
   for (const reason of reasons) {
     const text = explain({ event_id: "a", type: "knock", priority_tier: 2, reason, active_type: "smoke_alarm" });

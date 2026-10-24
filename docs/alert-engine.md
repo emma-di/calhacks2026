@@ -27,9 +27,9 @@ the Mana onboarding defaults.
 | Lifetimes | Ambient 2 s, Notify 3 s, Attention 5 s, Urgent 30 s (unchanged from before). |
 
 | Direction | Optional `direction_degrees` (0 front, +90 right, -90 left, 180 behind) with `direction_confidence`. At confidence ≥ 0.6 the cue moves to that edge of the display (each side covers 90°); otherwise it stays centred. A two-microphone worker cannot tell front from behind and should send null rather than guess. |
-| Snap to dismiss | A `finger_snap` event (recognizer rule on the models' "Finger snapping" class) dismisses the showing cue; with nothing showing it is ignored. One snap by default; `snap_to_dismiss.snaps: 2` requires two within 3 s (about a second apart, because windows advance once per second). The threshold is provisional: there are no snap recordings in the benchmark, so test it in the demo room. |
-| Confirmation | Whenever the wearer resolves a cue (snap, Dismiss, Look) the glasses and lens show a check mark for 0.6 s where the cue was; a waiting cue resumes after it. Expiry shows nothing. |
-| Resolution | A cue ends by **expiring** (logged), **Dismiss**, a **snap**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
+| Gesture to dismiss | A `thumbs_up` event (hand held up for ⅓ s, seen by a camera) dismisses the showing cue; with nothing showing it is ignored. The companion runs MediaPipe's hand-gesture model in the browser on the lens camera (the glasses' camera when it appears as a webcam, or the laptop's) and posts the event with `source: "camera"`; any other camera worker can post the same event. Audio `finger_snap` is still accepted but its recognizer rule is disabled: quiet snappers and loud alarms make it unreliable. `gesture_to_dismiss.count: 2` would require two. |
+| Confirmation | Whenever the wearer resolves a cue (thumbs-up, Dismiss, Look) the glasses and lens show a check mark for 0.6 s where the cue was; a waiting cue resumes after it. Expiry shows nothing. |
+| Resolution | A cue ends by **expiring** (logged), **Dismiss**, a **thumbs-up**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
 
 Every decision has a reason code and a plain-language sentence (`frontend/src/lib/explain.ts`) shown
 on the Live screen and in the Event log.
@@ -98,3 +98,12 @@ Send direction on the normal event: `direction_degrees` in −180..180 relative 
 rejected. Nothing else changes: the engine buckets it, the cue moves to that edge of the glasses,
 the browser shows the same frame, and `/look` resolution starts working. Until measured, leave both
 null and every cue stays undirected, which is today's honest behavior.
+
+## Camera gesture
+
+`frontend/src/lib/gesture.ts` loads MediaPipe Tasks Vision 1.1.1 only while the lens camera is on,
+checks about 15 frames a second, and fires once per 1.5 s when "Thumb_Up" (score > 0.6) is held
+for 330 ms. Runtime and model are served from `frontend/public/mediapipe/` (filled by
+`scripts/vendor-mediapipe.mjs` before dev/build; the 8 MB model stays out of Git and falls back to
+Google's copy if missing). Video never leaves the tab. The lens shows "Thumbs up to dismiss" while
+watching and turns amber while a thumbs-up is being held.

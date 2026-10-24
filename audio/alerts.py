@@ -11,7 +11,7 @@ import uuid
 
 POLICY = json.loads(Path(__file__).with_name('alert-policy.json').read_text())
 FOCUS_MODES = tuple(POLICY['focus_minimum_tier'])
-GESTURES = frozenset({'finger_snap'})  # control input from the wearer, never an alert
+GESTURES = frozenset({'thumbs_up', 'finger_snap'})  # wearer input, never an alert
 PRESETS = tuple(POLICY['presets'])
 DEFAULT_PROFILE = dict(schema_version=1, profile_id='local', revision=0, display_name='',
                        name_detection=dict(enabled=False, primary_name='', aliases=[], language='en'),
@@ -95,7 +95,7 @@ class AlertEngine:
         self.active = None  # dict(event, tier, started, expires, repeats)
         self.queue = []
         self.acks = {}
-        self.snaps = []           # recent snap times while a cue is showing
+        self.gestures = []        # recent dismiss-gesture times while a cue is showing
         self.confirm = None       # brief check mark after the wearer resolves a cue
         self.seen = deque(maxlen=256)
         self.events = deque(maxlen=50)
@@ -144,19 +144,20 @@ class AlertEngine:
         decision = self._decide(shown, self.active['tier'], reason, now, **extra)
         self.confirm = dict(until=now + POLICY['confirm_ms'], direction=self.active['direction'],
                             event_id=shown['event_id'])
-        self.snaps = []
+        self.gestures = []
         self._clear()
         self.tick(now)
         return decision
 
-    def _snap(self, event, now):
+    def _gesture(self, event, now):
+        """A thumbs-up (camera) or snap dismisses the showing cue; with nothing showing it does nothing."""
         if self.active is None:
-            return self._decide(event, 0, 'snap_ignored', now)
-        window = POLICY['snap_to_dismiss']['window_ms']
-        self.snaps = [t for t in self.snaps if now - t <= window] + [now]
-        if len(self.snaps) < POLICY['snap_to_dismiss']['snaps']:
-            return self._decide(event, 0, 'snap_waiting', now)
-        return self._resolve(now, 'dismissed_snap')
+            return self._decide(event, 0, 'gesture_ignored', now, gesture=event['type'])
+        rule = POLICY['gesture_to_dismiss']
+        self.gestures = [t for t in self.gestures if now - t <= rule['window_ms']] + [now]
+        if len(self.gestures) < rule['count']:
+            return self._decide(event, 0, 'gesture_waiting', now, gesture=event['type'])
+        return self._resolve(now, 'dismissed_gesture', gesture=event['type'])
 
     def tick(self, now):
         """Expire the active cue and resume the best fresh queued cue. Call before reading."""
@@ -179,7 +180,7 @@ class AlertEngine:
             return self._decide(event, event['priority_tier'], 'duplicate', now)
         self.seen.append(event['event_id'])
         if event['type'] in GESTURES:
-            return self._snap(event, now)
+            return self._gesture(event, now)
         producer = event['priority_tier']
         tier = effective_tier(event['type'], producer, self.profile)
         logged = dict(event, priority_tier=tier, producer_tier=producer)

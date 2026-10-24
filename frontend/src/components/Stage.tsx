@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { Camera, CameraOff } from "lucide-react";
 import Oled from "./Oled";
+import { useThumbsUp, type GestureStatus } from "../lib/gesture";
 import type { SoundEvent } from "../lib/events";
 
 // The camera only ever starts from a click, stays in this tab and is never recorded or sent anywhere.
@@ -49,6 +50,15 @@ function useCamera() {
   return { stream, devices, deviceId, error, start, stop };
 }
 
+const gestureText: Record<GestureStatus, string> = {
+  off: "",
+  loading: "Loading hand tracking…",
+  watching: "Thumbs up to dismiss",
+  hand: "Hand seen · thumbs up to dismiss",
+  holding: "Thumbs up…",
+  error: "Hand tracking unavailable",
+};
+
 // The wearer's view: the room (camera) or darkness, with the glasses' own 128x64 frame floating in it,
 // so the live view and the panel can never disagree.
 export default function Stage({
@@ -58,6 +68,7 @@ export default function Stage({
   caption,
   large = false,
   motion = "none",
+  onGesture,
   children,
 }: {
   event: SoundEvent | null;
@@ -66,6 +77,7 @@ export default function Stage({
   caption: string;
   large?: boolean;
   motion?: "none" | "gentle";
+  onGesture?: () => void;
   children?: ReactNode;
 }) {
   const camera = useCamera();
@@ -73,6 +85,7 @@ export default function Stage({
   useEffect(() => {
     if (video.current) video.current.srcObject = camera.stream;
   }, [camera.stream]);
+  const gesture = useThumbsUp(video, Boolean(camera.stream && onGesture), () => onGesture?.());
   return (
     <section className={`stage ${large ? "stage-large" : ""}`} aria-label="Wearer's view">
       {camera.stream && (
@@ -80,6 +93,11 @@ export default function Stage({
       )}
       <div className="stage-bar">
         <span className="stage-caption">{caption}</span>
+        {gesture !== "off" && (
+          <span className={`gesture-status is-${gesture}`} role="status">
+            {gestureText[gesture]}
+          </span>
+        )}
         <span className="stage-tools">
           {camera.stream && camera.devices.length > 1 && (
             <select

@@ -18,3 +18,4 @@ dist/
 *.tsbuildinfo
 
 .taste-skill/
+frontend/public/mediapipe/

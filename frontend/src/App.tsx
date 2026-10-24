@@ -16,7 +16,7 @@ import { useSession, type Source, type SyncStatus } from "./lib/session";
 type View = "live" | "preferences" | "log";
 
 const sourceLabel = (source: string) =>
-  ({ microphone: "Microphone", mock: "Test sound", replay: "Recording", simulation: "Simulation" })[
+  ({ microphone: "Microphone", mock: "Test sound", replay: "Recording", simulation: "Simulation", camera: "Camera" })[
     source
   ] ?? source;
 const presetName = { balanced: "Balanced", gentle: "Gentle", active: "Active" } as const;
@@ -152,7 +152,7 @@ export default function App() {
   if (audience) {
     return (
       <div className="night audience">
-        <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} large>
+        <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} onGesture={() => void session.gesture("camera")} large>
           {oledInset}
         </Stage>
         <div className="audience-bar">
@@ -222,7 +222,7 @@ export default function App() {
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
           <div className="lens-wrap">
-            <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} />
+            <Stage event={lensEvent} labels={labels} direction={lensDirection} caption={stageCaption} motion={appearance.motion} onGesture={() => void session.gesture("camera")} />
             <div className="lifeline" aria-hidden="true">
               <div
                 className={`lifeline-fill ${active?.priority_tier === 4 ? "is-urgent" : ""}`}
@@ -235,7 +235,7 @@ export default function App() {
               <p className="narration">{narration}</p>
               <p className="aside">
               {active
-                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction}, snap or dismiss to resolve` : "snap or dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
+                ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `look ${direction}, thumbs up or dismiss to resolve` : "thumbs up or dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
                 : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
               </p>
             </div>
@@ -310,11 +310,11 @@ export default function App() {
               ) : null}
               <button
                 className="key"
-                onClick={() => void session.snap()}
+                onClick={() => void session.gesture()}
                 disabled={offline}
-                title="Stands in for the glasses hearing a finger snap"
+                title="Stands in for the camera seeing a thumbs-up"
               >
-                <SoundIcon type="finger_snap" size={16} /> Snap
+                <SoundIcon type="thumbs_up" size={16} /> Thumbs up
               </button>
               <button className="key" onClick={session.dismiss} disabled={!active}>
                 Dismiss

@@ -70,7 +70,8 @@
       },
       "threshold": 0.3,
       "cooldown_seconds": 0.9,
-      "status": "provisional_untuned: no snap recordings in the benchmark; test in the demo room before relying on it"
+      "status": "disabled: superseded by the camera thumbs-up; quiet snappers and loud alarms make audio snaps unreliable",
+      "enabled": false
     }
   }
 }

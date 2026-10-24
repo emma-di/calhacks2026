@@ -31,6 +31,12 @@ That makes a lightweight endpoint the practical MVP choice; this is an architect
 not an inference-speed benchmark on the Pi. Select a Raspberry Pi OS image compatible with
 this original board; do not assume a Zero 2 W tutorial or an ML package wheel supports it.
 
+## Camera — reported October 24
+
+Emma reports the glasses include a camera (model, interface and resolution still to confirm with
+Yameen). It is used for the thumbs-up dismiss gesture; if it appears to the laptop as a webcam the
+companion can use it directly, otherwise a small worker can post `thumbs_up` events to the receiver.
+
 ## System split
 
 ```text

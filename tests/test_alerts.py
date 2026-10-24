@@ -126,7 +126,7 @@ class ConfirmationTests(unittest.TestCase):
         knock.update(direction_degrees=-90, direction_confidence=1)
         engine.add(knock, 0)
         state.accept(engine.presentation(0))
-        engine.add(make_event('finger_snap', .9, 'microphone'), 500)
+        engine.add(fixture_event('thumbs_up', 'g1', 500), 500)
         envelope = engine.presentation(500)
         self.assertEqual((envelope['icon_id'], envelope['direction']), ('check', 'left'))
         self.assertTrue(state.accept(envelope))

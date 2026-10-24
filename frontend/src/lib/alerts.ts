@@ -18,6 +18,7 @@ export interface AlertDecision {
   active_type: EventType | null;
   shown_event_id?: string;
   direction?: Direction;
+  gesture?: string;
 }
 export interface LoggedEvent extends SoundEvent {
   producer_tier?: Tier;
@@ -54,7 +55,7 @@ export const presets = policy.presets as Record<
   Preset,
   Partial<Record<EventType, Tier>>
 >;
-export const GESTURES = new Set<string>(["finger_snap"]); // wearer input, never an alert
+export const GESTURES = new Set<string>(["thumbs_up", "finger_snap"]); // wearer input, never an alert
 export const focusMinimum = policy.focus_minimum_tier as Record<
   FocusMode,
   Tier
@@ -90,7 +91,7 @@ export class AlertEngine {
   active: Active | null = null;
   queue: Queued[] = [];
   acks = new Map<EventType, number>();
-  snaps: number[] = [];
+  gestures: number[] = [];
   confirm: { until: number; direction: Direction | null; event_id: string } | null = null;
   seen: string[] = [];
   events: LoggedEvent[] = [];
@@ -152,18 +153,20 @@ export class AlertEngine {
     this.acks.set(active.event.type, now + policy.acknowledge_hold_ms);
     const decision = this.decide(active.event, active.tier, reason, now, extra);
     this.confirm = { until: now + policy.confirm_ms, direction: active.direction, event_id: active.event.event_id };
-    this.snaps = [];
+    this.gestures = [];
     this.clear();
     this.tick(now);
     return decision;
   }
 
-  private snap(event: SoundEvent, now: number): AlertDecision {
-    if (!this.active) return this.decide(event, 0, "snap_ignored", now);
-    const window = policy.snap_to_dismiss.window_ms;
-    this.snaps = [...this.snaps.filter((t) => now - t <= window), now];
-    if (this.snaps.length < policy.snap_to_dismiss.snaps) return this.decide(event, 0, "snap_waiting", now);
-    return this.resolve(now, "dismissed_snap");
+  // A thumbs-up (camera) or snap dismisses the showing cue; with nothing showing it does nothing.
+  private gesture(event: SoundEvent, now: number): AlertDecision {
+    const extra = { gesture: event.type };
+    if (!this.active) return this.decide(event, 0, "gesture_ignored", now, extra);
+    const rule = policy.gesture_to_dismiss;
+    this.gestures = [...this.gestures.filter((t) => now - t <= rule.window_ms), now];
+    if (this.gestures.length < rule.count) return this.decide(event, 0, "gesture_waiting", now, extra);
+    return this.resolve(now, "dismissed_gesture", extra);
   }
 
   tick(now: number) {
@@ -191,7 +194,7 @@ export class AlertEngine {
     if (this.seen.includes(event.event_id))
       return this.decide(event, event.priority_tier, "duplicate", now);
     this.seen = [...this.seen, event.event_id].slice(-256);
-    if (GESTURES.has(event.type)) return this.snap(event, now);
+    if (GESTURES.has(event.type)) return this.gesture(event, now);
     const producer = event.priority_tier;
     const tier = effectiveTier(event.type, producer, this.prefs);
     const logged: LoggedEvent = { ...event, priority_tier: tier, producer_tier: producer };

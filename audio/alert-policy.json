@@ -7,8 +7,8 @@
   "queue_limit": 5,
   "queue_fresh_ms": 10000,
   "direction_min_confidence": 0.6,
-  "snap_to_dismiss": {"snaps": 1, "window_ms": 3000},
-  "snap_note": "Snaps only act while a cue is showing. Windows advance once per second, so with snaps 2 the two snaps must be about a second apart.",
+  "gesture_to_dismiss": {"count": 1, "window_ms": 3000},
+  "gesture_note": "A camera-seen thumbs-up (or the disabled audio snap) dismisses the showing cue and does nothing otherwise. count 2 requires two within window_ms.",
   "confirm_ms": 600,
   "direction_note": "Degrees relative to the wearer's face: 0 front, +90 right, -90 left, 180 behind; each side covers 90 degrees and puts the cue on that edge of the display. A two-microphone worker cannot tell front from behind and should send null rather than guess. Below the confidence floor the cue stays centred.",
   "focus_minimum_tier": {"everyday": 1, "work": 3, "dnd": 4},
@@ -17,5 +17,5 @@
     "gentle": {"dog_bark": 1, "knock": 1, "bell": 1, "name_called": 2, "smoke_alarm": 4, "alarm_clock": 2, "siren": 3},
     "active": {"dog_bark": 2, "knock": 3, "bell": 3, "name_called": 3, "smoke_alarm": 4, "alarm_clock": 3, "siren": 4}
   },
-  "icons": {"knock": "knock", "bell": "bell", "bicycle_bell": "bell", "dog_bark": "dog", "name_called": "name", "smoke_alarm": "smoke", "siren": "siren", "alarm_clock": "clock", "conversation": "chat", "resolved": "check", "finger_snap": "check"}
+  "icons": {"knock": "knock", "bell": "bell", "bicycle_bell": "bell", "dog_bark": "dog", "name_called": "name", "smoke_alarm": "smoke", "siren": "siren", "alarm_clock": "clock", "conversation": "chat", "resolved": "check", "finger_snap": "check", "thumbs_up": "check"}
 }

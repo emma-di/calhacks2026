@@ -583,14 +583,14 @@
    ]
   },
   {
-   "name": "a snap dismisses only while a cue is showing, then a check mark confirms it",
+   "name": "a gesture dismisses only while a cue is showing, then a check mark confirms it",
    "steps": [
     {
      "at": 0,
-     "add": "finger_snap",
+     "add": "thumbs_up",
      "id": "f1",
      "expect": {
-      "reason": "snap_ignored",
+      "reason": "gesture_ignored",
       "active": null,
       "events": 0
      }
@@ -609,10 +609,10 @@
     },
     {
      "at": 1100,
-     "add": "finger_snap",
+     "add": "thumbs_up",
      "id": "f2",
      "expect": {
-      "reason": "dismissed_snap",
+      "reason": "dismissed_gesture",
       "active": null,
       "confirm": true,
       "events": 1

@@ -9,7 +9,8 @@ export type EventType =
   | "siren"
   | "alarm_clock"
   | "bicycle_bell"
-  | "finger_snap";
+  | "finger_snap"
+  | "thumbs_up";
 export interface SoundEvent {
   schema_version: number;
   event_id: string;
@@ -136,7 +137,14 @@ export const soundCatalog = [
   {
     type: "finger_snap" as EventType,
     label: "Finger snap",
-    detail: "Dismisses the cue that is showing",
+    detail: "Dismisses the cue that is showing (audio, disabled)",
+    tier: 0 as Tier,
+    receiver: true,
+  },
+  {
+    type: "thumbs_up" as EventType,
+    label: "Thumbs up",
+    detail: "Dismisses the cue that is showing (camera)",
     tier: 0 as Tier,
     receiver: true,
   },
@@ -169,6 +177,7 @@ const knownTypes = new Set([
   "alarm_clock",
   "bicycle_bell",
   "finger_snap",
+  "thumbs_up",
 ]);
 export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");

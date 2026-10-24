@@ -4,12 +4,15 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
+    "predev": "node scripts/vendor-mediapipe.mjs",
     "dev": "vite --host 127.0.0.1",
+    "prebuild": "node scripts/vendor-mediapipe.mjs",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 127.0.0.1",
     "test": "node --import tsx --test src/lib/*.test.ts"
   },
   "dependencies": {
+    "@mediapipe/tasks-vision": "1.1.1",
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"

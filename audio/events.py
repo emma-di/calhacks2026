@@ -20,6 +20,8 @@ TARGETS = {
 # Every type the receiver accepts. name_called comes from the planned speech worker, not the classifier.
 EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items()}
 EVENT_TYPES['name_called'] = ('Your name', 3)
+# Wearer gestures seen by a camera (glasses camera or the demo webcam); never displayed.
+EVENT_TYPES['thumbs_up'] = ('Thumbs up', 0)
 
 def runtime_model():
     path=Path(__file__).with_name('runtime.json')

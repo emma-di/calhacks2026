@@ -134,8 +134,8 @@ export function useSession(
   }, [source, connection, profile, profileKey, labels, view.session_id]);
 
   const send = useCallback(
-    async (type: EventType, direction: Direction | null = null) => {
-      const event = makeMock(type, undefined, direction ? directionDegrees[direction] : null);
+    async (type: EventType, direction: Direction | null = null, source = "mock") => {
+      const event = { ...makeMock(type, undefined, direction ? directionDegrees[direction] : null), source };
       if (source === "browser") {
         engine.current.add(event, performance.now());
         return;
@@ -184,12 +184,12 @@ export function useSession(
     }
   }, [source, view.active]);
 
-  // Stands in for the recognizer hearing a finger snap; no microphone is involved.
-  const snap = useCallback(async () => {
+  // A dismiss gesture from the camera, or the dock button standing in for it.
+  const gesture = useCallback(async (source: "camera" | "mock" = "mock") => {
     try {
-      await send("finger_snap");
+      await send("thumbs_up", null, source);
     } catch {
-      setError("The snap did not reach the receiver.");
+      setError("The gesture did not reach the receiver.");
     }
   }, [send]);
 
@@ -225,5 +225,5 @@ export function useSession(
 
   useEffect(() => stopSequence, [source, stopSequence]);
 
-  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, snap, setControls };
+  return { view, connection, sync, busy, error, play, playSequence, stopSequence, dismiss, look, gesture, setControls };
 }

@@ -7,8 +7,10 @@ export interface Explainable {
   reason: string;
   active_type?: string | null;
   direction?: string;
+  gesture?: string;
 }
 
+const gestureName = (gesture?: string) => (gesture === "finger_snap" ? "Snap" : "Thumbs up");
 const name = (type?: string | null) =>
   soundCatalog.find((s) => s.type === type)?.label ?? type ?? "another cue";
 
@@ -37,12 +39,12 @@ export function explain(d: Explainable): string {
       return `${sound} cleared on its own.`;
     case "resolved_looked":
       return `You looked ${d.direction ?? "toward it"}, so ${sound} is resolved.`;
-    case "snap_ignored":
-      return "Snap heard, but nothing is showing.";
-    case "snap_waiting":
-      return "One snap heard. Snap again to dismiss.";
-    case "dismissed_snap":
-      return `Snapped. ${sound} dismissed.`;
+    case "gesture_ignored":
+      return `${gestureName(d.gesture)} seen, but nothing is showing.`;
+    case "gesture_waiting":
+      return `${gestureName(d.gesture)} seen. Once more to dismiss.`;
+    case "dismissed_gesture":
+      return `${gestureName(d.gesture)}. ${sound} dismissed.`;
     case "dismissed":
       return `${sound} dismissed. Repeats stay quiet for 15 seconds.`;
     case "duplicate":
@@ -75,9 +77,9 @@ export function outcome(reason: string): string {
       merged_repeat: "Repeat, merged",
       acknowledged_repeat: "Repeat, already dismissed",
       dismissed: "Dismissed",
-      dismissed_snap: "Dismissed, snap",
-      snap_ignored: "Snap, nothing showing",
-      snap_waiting: "Snap, waiting for second",
+      dismissed_gesture: "Dismissed, gesture",
+      gesture_ignored: "Gesture, nothing showing",
+      gesture_waiting: "Gesture, waiting for another",
       expired: "Cleared",
       resolved_looked: "Resolved, looked",
       duplicate: "Duplicate",
