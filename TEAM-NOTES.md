@@ -169,6 +169,14 @@ User-facing onboarding must not ask testers to download, copy or manage JSON. Se
 automatically, and Start preview returns to the companion. Internal profile helpers remain for future
 backend integration; the interface explicitly says glasses syncing is not connected.
 
+## Communication idea review — October 23
+
+The supplied discussion proposes optional name/attention-keyword triggers and short captions. Treat
+this as a proposal, not a new committed feature or evidence of sponsor eligibility. Prioritize the
+physical sound-to-cue loop, settings/policy integration and names. Captions can be companion-first
+because 128×64 is constrained. Do not infer that nearby speech is addressed to the wearer. Revoicing,
+voice cloning and continuous ASL translation are outside current weekend scope. No new model added.
+
 ## Add a note
 
 ```text

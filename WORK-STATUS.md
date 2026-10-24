@@ -27,3 +27,19 @@ The original Pi Zero W remains the planned capture/display endpoint; another Mac
 - Subagents are internal workers, not separate user-owned chats. Root can report their actual status
   when asked; repository notes contain their outputs rather than automatically inheriting chat state.
 - Do not mark another teammate's task complete without their evidence.
+
+## Verification limits and next acceptance checks
+
+- Last verified local build: TypeScript/Vite success; eight frontend behavior tests; 24 Python tests.
+  Browser checks cover search → Ignore → simulator suppression → reset, and Start preview navigation.
+  These are implementation checks, not comprehensive accessibility or wearer usability validation.
+- Recorded inference → receiver → polished browser was exercised previously. Live final-mic → Pi OLED
+  and second-Mac portability have not been demonstrated here. No microphone was started by this UI work.
+- Before calling UI finished: keyboard-only setup, narrow screens, reduced motion, all tiers, expiration,
+  urgent interruption, disconnect/reconnect, and audience/preview event consistency need a full QA pass.
+- Before calling recognition finished: final-mic positives/negatives in the demo room, overlapping/repeated
+  sounds, bell/alarm confusion and measured end-to-end latency. See reports/summary.md for offline limits.
+- Backend next acceptance slice: browser preferences actually change receiver priority; repeated detections
+  do not restart an acknowledged alarm; event-specific dismiss, pause and DND behave consistently.
+- New communication proposal reviewed: name/attention detection first, optional short companion captions
+  as stretch. No new speech, camera, gesture, revoicing or ASL implementation was started by that review.

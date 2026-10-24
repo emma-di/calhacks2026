@@ -33,8 +33,8 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 ## Then: setup and preferences — Emma
 
 - [ ] SET-01 — Core decision: defaults → searchable exception rules; keep numeric 0–4 overrides separate from presets. Confirm remaining profile and enable/disable semantics.
-- [ ] SET-02 — Local searchable exception/appearance preview built. Mana onboarding revision in progress; integrate optional name/aliases and verify export before completion.
-- [ ] SET-03 — Support editable settings and clear draft/saved/applied/error states.
+- [x] SET-02 — Mana onboarding integrated: defaults, searchable exceptions, optional name/aliases, display preview and Start preview. Automatic browser-local saving; no user-facing JSON. Eight frontend tests plus browser Ignore/reset flow verified. Name recognition itself remains pending.
+- [ ] SET-03 — Browser-local editable settings and storage failure messaging implemented; backend saved/applied/error and device sync states still pending.
 - [ ] SET-04 — Connect saved profile to backend; show name worker availability accurately.
 
 ## Backend/integration — Emma after initial UI
@@ -67,7 +67,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] NAME-05 — Test uncommon names, similar-sounding negatives, background conversation and repeated mentions.
 - [ ] NAME-06 — Demonstrate configured name → “Your name” cue; log evidence without storing raw speech by default.
 
-## Hardware and display — Yameen; stack pending
+## Hardware and display — Yameen; stack supplied, device validation pending
 
 - [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
@@ -99,13 +99,14 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] EXTRA-01 — Distance estimation, only after sensor feasibility and accuracy are demonstrated.
 - [ ] EXTRA-02 — Gestures or extra input controls supported by the final hardware.
 - [ ] EXTRA-03 — Additional AI/personalization beyond names and saved notification preferences.
+- [ ] EXTRA-04 — Proposed optional attention-keyword triggers and short, on-demand companion captions, only after name detection and the physical loop. Nearby speech does not establish that someone is addressing the wearer. Revoicing/ASL translation are outside current scope.
 
 ## Sponsor and track decisions
 
 See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluation tasks, not adopted integrations.
 
 - [ ] SPONSOR-01 — Verify official briefs, eligibility, required technology, submission links, deadlines and multi-track rules.
-- [ ] SPONSOR-02 — Mana signed in; Bridge assistant queried. Pairing not performed; onboarding/export and authenticated event integration proof still pending. React mirror built meanwhile.
+- [ ] SPONSOR-02 — Mana-built onboarding exported and integrated locally with provenance. Bridge pairing/authenticated device integration and verified public submission links remain pending. React mirror remains locally authored.
 - [ ] SPONSOR-03 — Emma + hardware owner: evaluate Convex versus SpacetimeDB before choosing new synchronization infrastructure;
   prove event delivery, expiry and reconnect, or explicitly defer while retaining the local receiver.
 - [ ] SPONSOR-06 — John/Leo: evaluate Cartesia streaming STT for names; verify endpoint, live accuracy and local fallback.
