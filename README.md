@@ -10,6 +10,8 @@ and the full onboarding UI are still being built. The default audio model is pre
 
 ## Start here
 
+**Latest decisions and caveats: [TEAM-NOTES.md](TEAM-NOTES.md). Coding agents start at [AGENTS.md](AGENTS.md).**
+
 1. Accept your GitHub invitation and clone the repo.
 2. Choose the mock-only or audio setup below.
 3. Read [CONTRIBUTING.md](CONTRIBUTING.md) and create your task branch before editing.
@@ -22,6 +24,20 @@ gh repo clone emma-di/calhacks2026
 cd calhacks2026
 git switch -c yourname/short-task-name
 ```
+
+## Polished browser companion
+
+The [frontend guide](frontend/README.md) covers the simulator, audience mirror, exact 128×64 OLED
+preview and connection to the existing receiver. Use Node 22.12+ to run it:
+
+```sh
+npm ci --prefix frontend
+npm run dev --prefix frontend
+```
+
+Open http://127.0.0.1:5173. Simulator mode needs no microphone or model.
+Read [AGENTS.md](AGENTS.md) for the agent entry point and [hardware stack](docs/hardware-stack.md)
+for the original Pi Zero W + two INMP441s + SSD1306 plan.
 
 ## UI / hardware: run mock alerts immediately
 

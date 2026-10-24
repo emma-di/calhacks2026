@@ -1,6 +1,6 @@
 # Browser mirror, companion, and backend plan
 
-Status: implementation plan; the polished frontend and backend extensions below are **not built yet**.
+Status: first browser companion/mirror and receiver adapter are implemented; see [frontend evidence](../frontend/README.md). Backend extensions and remaining screens/flows below are still planned.
 Owner: Emma, UI/UX first, then backend/integration. Hardware: Yameen. John and Leo are proposed for audio/ML, names and spatial work; their internal split remains to confirm.
 Track execution in the [master TODO](../TODO.md). Existing handoffs remain linked from the [README](../README.md).
 
@@ -199,9 +199,9 @@ evidence, not a guarantee that every bell-like sound was an alarm.
 - Each PR updates relevant [TODO IDs](../TODO.md), includes screenshots or behavioral evidence,
   and notes schema/dependency changes. “Planned” is never “implemented.”
 
-## Hardware information still needed
+## Hardware inventory received; confirmations still needed
 
-Compute device/OS; controller; display model, pixel dimensions and driver; audio device/interface;
+The [supplied hardware stack](hardware-stack.md) is original Pi Zero W, two INMP441s and a 128×64 SSD1306. Confirm OS/kernel, capture driver and actual device configuration;
 native sample rate, channel order/count and synchronization; alert/audio transport; available controls;
 whether the laptop remains connected during the demo. If Quest 3 is selected, verify its actual
 capture/display APIs before choosing those adapters. Preserve synchronized multichannel audio for

@@ -20,15 +20,15 @@ name recognition, or a polished UI. None of those should be presented as complet
 
 Before selecting the frontend builder, complete SPONSOR-02 below. The mirror work remains the first product milestone.
 
-- [ ] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
-- [ ] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
-- [ ] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
-- [ ] UI-04 — Add deterministic mock scenarios: all tiers, interruption, repeated/long labels, idle,
+- [x] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
+- [x] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
+- [x] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
+- [ ] UI-04 — Complete deterministic mock scenarios (all tiers and interruption built; remaining states pending): all tiers, interruption, repeated/long labels, idle,
   paused, unknown direction, disconnection and reconnect. Label simulated inputs.
-- [ ] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
+- [x] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
 - [ ] UI-06 — Review contrast, keyboard access, reduced motion, responsive layout and audience-distance readability.
-- [ ] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
-- [ ] UI-08 — Capture screenshots and short demo evidence for teammate review.
+- [x] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
+- [x] UI-08 — Capture screenshots and short demo evidence for teammate review.
 
 ## Then: setup and preferences — Emma
 
@@ -69,7 +69,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 
 ## Hardware and display — Yameen; stack pending
 
-- [ ] HW-01 — Supply compute/OS, controller, display/driver/resolution, transports and controls.
+- [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
 - [ ] HW-03 — Display a fake cue on actual hardware independently of recognition.
 - [ ] HW-04 — Implement device renderer for agreed icon IDs, labels, tiers, clear and expiry.
@@ -105,7 +105,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluation tasks, not adopted integrations.
 
 - [ ] SPONSOR-01 — Verify official briefs, eligibility, required technology, submission links, deadlines and multi-track rules.
-- [ ] SPONSOR-02 — Emma: timebox Mana frontend trial before committing to the builder; record adopt/defer and evidence.
+- [ ] SPONSOR-02 — Mana signed in; Bridge assistant queried. Pairing not performed; onboarding/export and authenticated event integration proof still pending. React mirror built meanwhile.
 - [ ] SPONSOR-03 — Emma + hardware owner: evaluate Convex versus SpacetimeDB before choosing new synchronization infrastructure;
   prove event delivery, expiry and reconnect, or explicitly defer while retaining the local receiver.
 - [ ] SPONSOR-06 — John/Leo: evaluate Cartesia streaming STT for names; verify endpoint, live accuracy and local fallback.
@@ -115,6 +115,6 @@ See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluat
 
 ## Current dependencies
 
-Browser design, mock scenarios and receiver integration can proceed now. Physical rendering depends
-on HW-01; spatial localization depends on HW-02 and SPACE-01. Name setup can be designed now,
+Browser companion, mock scenarios and recorded-audio receiver integration are implemented; see [frontend evidence](frontend/README.md). Physical rendering depends
+on the remaining HW-01 confirmations; spatial localization depends on HW-02 and SPACE-01. Name setup can be designed now,
 but recognition depends on NAME-01–05. No live microphone session is required for the first UI pass.

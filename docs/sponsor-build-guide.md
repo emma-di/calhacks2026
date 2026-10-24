@@ -124,8 +124,22 @@ described in the [name plan](name-detection-plan.md). Provider choice must not c
 | Decision | Status | Evidence / outcome |
 | --- | --- | --- |
 | Official track rules and eligibility | Unverified | Need official briefs; supplied summary alone is insufficient |
-| Mana for frontend workflow | Evaluate | No integration or qualifying usage claimed |
+| Mana for frontend workflow | Evaluation | Signed in; assistant queried about Bridge. No pairing, export or live event proof completed; React mirror runs locally |
 | Convex versus SpacetimeDB for cloud state | Evaluate | Handoff prefers Convex; select one or defer both; local receiver works |
 | Cartesia for streaming name transcription | Evaluate | Handoff proposes Ink-2; endpoint and live performance still need verification |
 | Claude for preference interpretation | Optional | After basic settings; user reviews proposed values before saving |
 | Final submission tracks | Pending | Choose after eligibility and working capabilities are confirmed |
+
+## Mana Bridge follow-up
+
+A sponsor contact supplied by Emma suggested Mana Bridge for connecting the hardware and frontend.
+Treat this as a lead, not verified transport capability. After sign-in, inspect official Bridge setup,
+source/API access, deployment model and permission scope. Prove local event → Mana view with mock
+data first; do not expose the current unauthenticated loopback receiver publicly or grant broad
+filesystem/network access without understanding the bridge. Final track demo should show actual
+nearby sound → physical display, with a clearly labeled recorded fallback.
+
+Mana assistant follow-up: Bridge was described as remote terminal/file access, not a generic HTTP
+tunnel. Generated React was described as adaptable outside Mana, with platform-specific dependencies
+to replace. These are assistant-reported capabilities, not independently validated export/runtime
+integrations. No Bridge installation or pairing was performed. See [team notepad](../TEAM-NOTES.md).
