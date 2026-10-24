@@ -15,6 +15,7 @@ and the full onboarding UI are still being built. The default audio model is pre
 3. Read [CONTRIBUTING.md](CONTRIBUTING.md) and create your task branch before editing.
 4. Use [team workstreams](docs/team-workstreams.md) to coordinate interfaces and ownership.
 5. Follow the [master TODO](TODO.md) and [browser/UI → backend build plan](docs/ui-ux-backend-plan.md).
+6. Read [sponsor and track build instructions](docs/sponsor-build-guide.md) before choosing frontend tools or a new backend.
 
 ```sh
 gh repo clone emma-di/calhacks2026

@@ -96,6 +96,11 @@ one recorded sound must reach that same UI automatically. Physical display work 
 
 ## Frontend structure
 
+First complete the timeboxed Mana evaluation in the [sponsor build guide](sponsor-build-guide.md).
+The stack below is the proposed direct-code path, not an instruction to skip that decision.
+Likewise, evaluate SpacetimeDB before adopting new synchronization infrastructure; keep the existing
+receiver usable throughout the trial. Track both decisions in the master TODO.
+
 Proposed stack: React + TypeScript + Vite, accessible shadcn/Radix controls, and Lucide SVG icons.
 These provide reusable components while leaving layout and visual design under our control.
 See the official [Vite guide](https://vite.dev/guide/), [shadcn documentation](https://ui.shadcn.com/docs),

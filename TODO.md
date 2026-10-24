@@ -18,6 +18,8 @@ name recognition, or a polished UI. None of those should be presented as complet
 
 ## First: browser mirror and cue design — Emma
 
+Before selecting the frontend builder, complete SPONSOR-02 below. The mirror work remains the first product milestone.
+
 - [ ] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
 - [ ] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
 - [ ] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
@@ -96,6 +98,17 @@ name recognition, or a polished UI. None of those should be presented as complet
 - [ ] EXTRA-01 — Distance estimation, only after sensor feasibility and accuracy are demonstrated.
 - [ ] EXTRA-02 — Gestures or extra input controls supported by the final hardware.
 - [ ] EXTRA-03 — Additional AI/personalization beyond names and saved notification preferences.
+
+## Sponsor and track decisions
+
+See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluation tasks, not adopted integrations.
+
+- [ ] SPONSOR-01 — Verify official briefs, eligibility, required technology, submission links, deadlines and multi-track rules.
+- [ ] SPONSOR-02 — Emma: timebox Mana frontend trial before committing to the builder; record adopt/defer and evidence.
+- [ ] SPONSOR-03 — Emma + hardware owner: evaluate SpacetimeDB before choosing new synchronization infrastructure;
+  prove event delivery, expiry and reconnect, or explicitly defer while retaining the local receiver.
+- [ ] SPONSOR-04 — Preserve sponsor usage artifacts and judge-accessible links for integrations actually adopted.
+- [ ] SPONSOR-05 — Select final tracks from verified eligibility and implemented demo capabilities; tailor submission narratives.
 
 ## Current dependencies
 
