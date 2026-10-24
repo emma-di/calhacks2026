@@ -1212,3 +1212,176 @@ code {
     transition: none;
   }
 }
+
+/* Teach: custom sounds, your name and room background, recorded in the browser. */
+.teach {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 16px;
+  background: var(--raise);
+  scroll-margin-top: 16px;
+}
+.teach-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.teach-card {
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 12px;
+  background: var(--raise-2);
+}
+.teach-card h3 {
+  font-size: 14px;
+  font-weight: 600;
+}
+.teach-card .key {
+  background: #27271f;
+  height: 34px;
+  font-size: 13px;
+}
+.teach-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.teach-row input,
+.teach-row select {
+  min-width: 0;
+  flex: 1 1 120px;
+  height: 34px;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--ground);
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+}
+.teach-row select {
+  flex: 0 0 auto;
+}
+.teach-note {
+  font-size: 13px;
+  color: var(--muted);
+}
+.teach-note b {
+  color: var(--text);
+  font-weight: 500;
+}
+.teach-message {
+  font-size: 13px;
+  color: var(--text);
+}
+.teach-message.is-ok {
+  color: #9fd8b0;
+}
+.teach-message.is-bad {
+  color: var(--signal);
+}
+.teach-dots {
+  display: flex;
+  gap: 6px;
+}
+.teach-dots span {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--line-strong);
+}
+.teach-dots span.is-on {
+  background: var(--text);
+}
+.key.is-recording {
+  background: #5a2a1c;
+  color: var(--text);
+}
+.teach-sounds {
+  display: grid;
+  gap: 6px;
+  padding: 0;
+  list-style: none;
+}
+.teach-sounds li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: var(--raise-2);
+  font-size: 14px;
+}
+.teach-sounds b {
+  font-weight: 500;
+}
+.teach-sounds .key {
+  height: 30px;
+  font-size: 13px;
+  background: #27271f;
+}
+.teach-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+/* Live microphone meter while recording */
+.mic-meter {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--ground);
+}
+.mic-meter canvas {
+  flex: 1 1 200px;
+  min-width: 0;
+  max-width: 100%;
+  height: 36px;
+}
+.mic-meter-label {
+  font-size: 13px;
+}
+.mic-meter-time {
+  font-family: var(--pixel);
+  font-size: 11px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.mic-meter-hint {
+  flex-basis: 100%;
+  font-size: 12px;
+  color: var(--signal);
+}
+.rec-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #ff5d47;
+  animation: rec-pulse 1s ease-in-out infinite;
+}
+@keyframes rec-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+@media (max-width: 860px) {
+  .teach-grid {
+    grid-template-columns: 1fr;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .rec-dot {
+    animation: none;
+  }
+}

@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { ExternalLink } from "lucide-react";
 import { levelFraction, type Hearing } from "../lib/observations";
 
 const STALE_MS = 4000;
@@ -47,8 +46,8 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
         <span className="hearing-status">{status}</span>
         {o && !stale && <span className="hearing-meta">{o.level_dbfs > -100 ? `${o.level_dbfs} dBFS` : "silence"}</span>}
         <span className="dock-spacer" />
-        <a className="key" href="/api/teach" target="_blank" rel="noreferrer">
-          Teach sounds &amp; your name <ExternalLink size={13} />
+        <a className="key" href="#teach">
+          Teach sounds &amp; your name
         </a>
       </header>
 

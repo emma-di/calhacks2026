@@ -25,6 +25,7 @@ import { explain, outcome } from "./lib/explain";
 import { useSession, type Source, type SyncStatus } from "./lib/session";
 import { useHearing } from "./lib/observations";
 import HearingPanel from "./components/Hearing";
+import TeachPanel from "./components/TeachPanel";
 
 type View = "live" | "preferences" | "log";
 
@@ -546,6 +547,7 @@ export default function App() {
             </p>
           </section>
           {source === "receiver" && <HearingPanel hearing={hearing} />}
+          {source === "receiver" && connected && <TeachPanel />}
         </main>
       )}
 
