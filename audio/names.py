@@ -278,9 +278,9 @@ def learn_spelling(waveform, profile):
 # ---------- detection ----------
 
 def make_name_event(profile, alias_id, source, timestamp_ms=None):
-    """Name event in the receiver's v1 contract. Keyword spotting gives no calibrated score, so
-    confidence is null (the receiver and companion accept a null score for name_called)."""
-    return dict(schema_version=1, event_id=str(uuid.uuid4()), type='name_called', label='Your name',
+    """Schema-v2 name event (audio/events.py validate_name_event). Keyword spotting gives no calibrated
+    score, so confidence is null with confidence_kind 'unavailable'."""
+    return dict(schema_version=2, event_id=str(uuid.uuid4()), type='name_called', label='Your name',
                 source=source, recognizer='sherpa-onnx-kws-zipformer-3.3M', confidence=None,
                 confidence_kind='unavailable', matched_alias_id=alias_id,
                 profile_revision=profile.get('revision', 0), priority_tier=3,

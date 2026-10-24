@@ -53,14 +53,10 @@ class BuildAndValidateTests(unittest.TestCase):
 
 class StoreAndRouteTests(unittest.TestCase):
     def setUp(self):
-        import tempfile
-        from pathlib import Path
-        self.tmp = tempfile.TemporaryDirectory()
-        self.patch = mock.patch.object(server, 'ObservationStore', lambda: server.__dict__['_Store'](maxlen=5))
-        server._Store = type(server.observations)
+        self.store = server.ObservationStore(maxlen=5)
+        self.patch = mock.patch.object(server, 'observations', self.store)
         self.patch.start()
-        self.httpd = server.create_server(port=0, profile_path=Path(self.tmp.name)/'profile.json')
-        self.store = self.httpd.observations
+        self.httpd = ThreadingHTTPServer(('127.0.0.1', 0), server.Handler)
         threading.Thread(target=self.httpd.serve_forever, daemon=True).start()
         self.base = f'http://127.0.0.1:{self.httpd.server_address[1]}'
 
@@ -68,7 +64,6 @@ class StoreAndRouteTests(unittest.TestCase):
         self.httpd.shutdown()
         self.httpd.server_close()
         self.patch.stop()
-        self.tmp.cleanup()
 
     def request(self, method, path, body=None):
         data = json.dumps(body).encode() if body is not None else None

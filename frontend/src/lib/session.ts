@@ -38,6 +38,7 @@ const emptyView = (): ViewState => ({
   queue: [],
   health: null,
   session_id: null,
+  observations: [],
 });
 
 // Knock is skipped for nothing, name takes over, the alarm takes over and repeats; dismiss to see

@@ -74,11 +74,15 @@ class DisplayTests(unittest.TestCase):
             self.assertEqual(icon_pixels(direction, 2, labels=True), icon_pixels(direction, 2))
             self.assertEqual(icon_pixels(direction, 4, labels=True), icon_pixels(direction, 2))
 
-    def test_directed_cues_draw_compass_arrows(self):
-        for direction, (x, y) in (("left", (27, 26)), ("right", (101, 26)), ("front", (64, 0)), ("behind", (64, 51))):
+    def test_directed_cues_draw_solid_triangles_beside_the_centered_icon(self):
+        # (tip, a point inside the filled body, a point just past the base where a line arrow's shaft was)
+        cases = {"left": ((30, 26), (34, 26), (37, 26)), "right": ((97, 26), (93, 26), (90, 26)),
+                 "front": ((64, 0), (64, 4), (64, 6)), "behind": ((64, 53), (64, 49), (64, 47))}
+        for direction, (tip, body, past_base) in cases.items():
             frame = render(Presentation.parse(snapshot(direction=direction)), show_labels=False)
-            self.assertEqual(frame.get(x, y), 1, direction)
-        self.assertEqual(render(Presentation.parse(snapshot()), show_labels=False).get(27, 26), 0)
+            self.assertEqual((frame.get(*tip), frame.get(*body), frame.get(*past_base)), (1, 1, 0), direction)
+        unknown = render(Presentation.parse(snapshot()), show_labels=False)
+        self.assertEqual(unknown.get(34, 26) + unknown.get(64, 0), 0)  # no triangle without a direction
 
     def test_icons_are_distinct_and_long_labels_are_bounded(self):
         frames = [bytes(render(Presentation.parse(snapshot(icon_id=icon))).buffer)

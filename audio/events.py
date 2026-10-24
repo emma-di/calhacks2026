@@ -23,10 +23,11 @@ EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items(
 EVENT_TYPES['name_called'] = ('Your name', 3)
 # Wearer gestures seen by a camera (glasses camera or the demo webcam); never displayed.
 EVENT_TYPES['thumbs_up'] = ('Thumbs up', 0)
-# User-taught sounds (audio/custom_sounds.py): the label and tier come from the user; custom_sound_id
-# identifies which taught sound, so acknowledging one never silences another.
+# Custom sounds: taught by recording (audio/custom_sounds.py) or picked from the model's catalog
+# (audio/custom_rules.py). The label and tier come from the person; custom_sound_id says which sound,
+# so acknowledging one never silences another. icon_id optionally picks a glasses icon.
 EVENT_TYPES['custom'] = ('Custom sound', 2)
-CUSTOM_ID = re.compile(r'^[a-z0-9-]{1,64}$')
+ICON_ID = re.compile(r'^[a-z][a-z0-9_]{0,39}$')
 
 def runtime_model():
     path=Path(__file__).with_name('runtime.json')
@@ -72,7 +73,7 @@ def make_event(kind, confidence, source, timestamp_ms=None):
                 distance_meters=None, proximity='unknown')
 
 def make_custom_event(sound, confidence, source, timestamp_ms=None):
-    """Event for a user-taught sound. `label` is the user's own name for it, e.g. "Front doorbell"."""
+    """Event for a user-taught sound. `label` is the person's own name for it, e.g. "Front doorbell"."""
     return dict(schema_version=1, event_id=str(uuid.uuid4()), type='custom',
                 custom_sound_id=sound['id'], label=sound['label'], confidence=float(confidence),
                 source=source, priority_tier=int(sound['priority_tier']),
@@ -80,11 +81,38 @@ def make_custom_event(sound, confidence, source, timestamp_ms=None):
                 direction_degrees=None, direction_confidence=None,
                 distance_meters=None, proximity='unknown')
 
+def validate_name_event(event):
+    """v2 name event (audio/names.py, John). Keyword spotting has no calibrated score: confidence may be null."""
+    if event.get('schema_version') != 2:
+        raise ValueError('name_called events use schema_version 2')
+    for key in ('event_id', 'label', 'source', 'matched_alias_id'):
+        if not isinstance(event.get(key), str) or not 0 < len(event[key]) <= 120:
+            raise ValueError(f'Invalid {key}')
+    score = event.get('confidence')
+    if score is not None and (type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        raise ValueError('confidence must be null or within 0..1')
+    if type(event.get('profile_revision')) is not int or event['profile_revision'] < 0:
+        raise ValueError('profile_revision must be a nonnegative integer')
+    if type(event.get('priority_tier')) is not int or not 0 <= event['priority_tier'] <= 4:
+        raise ValueError('priority_tier must be 0..4')
+    if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
+        raise ValueError('timestamp_ms must be a nonnegative integer')
+    if any(event.get(k) is not None for k in ('direction_degrees', 'direction_confidence', 'distance_meters')):
+        raise ValueError('Spatial estimates are not supported for names yet')
+    return event
+
+
 def validate_event(event):
+    if isinstance(event, dict) and event.get('type') == 'name_called':
+        return validate_name_event(event)
     if not isinstance(event, dict) or event.get('type') not in EVENT_TYPES:
         raise ValueError('Unknown event type')
-    if event['type'] == 'custom' and not CUSTOM_ID.match(str(event.get('custom_sound_id', ''))):
-        raise ValueError('custom events need a custom_sound_id of 1..64 lowercase letters, digits or dashes')
+    if event['type'] == 'custom':
+        sound_id = event.get('custom_sound_id')
+        if not isinstance(sound_id, str) or not 0 < len(sound_id) <= 120 or not sound_id.isprintable():
+            raise ValueError('custom events need a custom_sound_id of 1..120 printable characters')
+        if event.get('icon_id') is not None and not ICON_ID.match(str(event['icon_id'])):
+            raise ValueError('icon_id must be a short lowercase icon name')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
     for key in ('event_id', 'label', 'source'):

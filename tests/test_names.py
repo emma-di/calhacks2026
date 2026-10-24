@@ -51,6 +51,24 @@ class ProfileTests(unittest.TestCase):
             self.assertEqual((loaded['revision'], loaded['name_detection']['sensitivity']), (4, 'high'))
             self.assertEqual(loaded['notification_preferences'], saved['notification_preferences'])
 
+class ProfileCompatibilityTests(unittest.TestCase):
+    """(Emma) The receiver's /profile (audio/alerts.py) is the shared one; the name spotter must read what it saves."""
+    def test_receiver_saved_profile_drives_the_name_spotter(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'profile.json'
+            state = AlertState(profile_path=path)
+            profile = dict(schema_version=1, profile_id='demo', notification_preferences=dict(mode='balanced'),
+                           name_detection=dict(enabled=True, primary_name='Samira', aliases=['Sam'],
+                                               sensitivity='high', learned_spellings=[]))
+            saved = state.save_profile(profile)
+            self.assertEqual(saved['name_detection']['sensitivity'], 'high')
+            with mock.patch.object(names, 'PROFILE', path):
+                loaded = names.load_profile()
+            self.assertTrue(loaded['name_detection']['enabled'])
+            self.assertEqual(loaded['name_detection']['primary_name'], 'Samira')
+            self.assertEqual(loaded['name_detection']['aliases'], ['Sam'])
+
+
 class SpellingTests(unittest.TestCase):
     def setUp(self):
         self.patches = [mock.patch.object(names, 'model_vocabulary', return_value=VOCAB),
@@ -109,8 +127,8 @@ class EventTests(unittest.TestCase):
         self.assertEqual(state.snapshot()['active']['type'], 'smoke_alarm')   # cannot replace tier 4
 
     def test_name_event_rules(self):
-        for change in ({'schema_version': 2}, {'confidence': 1.5}, {'priority_tier': 7},
-                       {'direction_degrees': 10}, {'distance_meters': 2}):
+        for change in ({'schema_version': 1}, {'confidence': 1.5}, {'priority_tier': 7}, {'profile_revision': -1},
+                       {'matched_alias_id': ''}, {'direction_degrees': 10}, {'distance_meters': 2}):
             event = dict(names.make_name_event(self.profile, 'primary', 'replay'), **change)
             with self.subTest(change=change), self.assertRaises(ValueError):
                 validate_event(event)
@@ -151,7 +169,9 @@ class ProfileRouteTests(unittest.TestCase):
         self.assertEqual(saved['name_detection']['learned_spellings'][0]['text'], 'SAMIRAH')
         self.assertEqual(names.load_profile()['name_detection']['aliases'], ['Sam'])   # the worker's view
         bad = json.loads(json.dumps(profile)); bad['name_detection']['sensitivity'] = 'max'
-        self.assertEqual(self.call('PUT', '/profile', bad)[0], 400)
+        status, saved = self.call('PUT', '/profile', bad)   # invalid name settings are dropped, never fatal
+        self.assertEqual(status, 200)
+        self.assertNotEqual(saved['name_detection'].get('sensitivity'), 'max')
         self.assertEqual(self.call('DELETE', '/profile/name-samples')[1]['name_detection']['learned_spellings'], [])
         self.assertIn(self.call('GET', '/health')[1]['name_worker'], ('model_missing', 'idle'))
 

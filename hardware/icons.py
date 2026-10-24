@@ -184,19 +184,113 @@ def check():
     return c
 
 
-def sound():
-    """Generic cue for a user-taught custom sound: a speaker with two sound waves."""
+def person():
     c = Canvas()
-    c.round_rect(3, 12, 9, 20, 1)                       # speaker body
-    c.polygon([(9, 12), (16, 5), (16, 27), (9, 20)])    # cone
-    c.arc(17, 16, 7, 300, 60, 2)                        # near wave
-    c.arc(17, 16, 12, 305, 55, 2)                       # far wave
-    c.ellipse(28.5, 7.5, 1.2, 1.2)                      # small sparkle: "learned" sound
+    c.ring(16, 9, 6, 6, 2)                              # head
+    c.ellipse(13.8, 8.5, 1.1, 1.3); c.ellipse(18.2, 8.5, 1.1, 1.3)   # eyes
+    c.round_frame(6, 17, 25, 30, 7)                     # shoulders
+    c.rect(6, 28, 25, 29)
+    return c
+
+
+def paw():
+    c = Canvas()
+    c.ellipse(16, 21, 7.5, 6.5)                         # pad
+    for x, y in ((7, 13), (12.5, 7), (19.5, 7), (25, 13)):
+        c.ellipse(x, y, 3, 3.6)                         # toes
+    return c
+
+
+def music():
+    c = Canvas()
+    c.ellipse(9, 25, 4.5, 3.5)                          # two notes on a beam
+    c.ellipse(23, 22, 4.5, 3.5)
+    c.rect(12, 6, 13, 24)
+    c.rect(26, 3, 27, 21)
+    c.polygon([(12, 6), (27, 3), (27, 8), (12, 11)])
+    return c
+
+
+def cloud():
+    c = Canvas()
+    for x, y, r in ((10, 18, 6), (17, 13, 7.5), (24, 18, 6)):
+        c.ellipse(x, y, r, r)
+    c.rect(5, 18, 29, 23)
+    for x, y, r in ((10, 18, 4), (17, 13, 5.5), (24, 18, 4)):
+        c.ellipse(x, y, r, r, 0)
+    c.rect(7, 18, 27, 21, 0)
+    for x in (10, 16, 22):                              # rain marks
+        c.rect(x, 26, x + 1, 29)
+    return c
+
+
+def drop():
+    c = Canvas()
+    c.ellipse(16, 20, 9, 9)
+    c.polygon([(16, 2), (8.2, 16), (23.8, 16)])
+    c.ellipse(16, 20, 7, 7, 0)
+    c.polygon([(16, 6.5), (10.2, 17), (21.8, 17)], 0)
+    c.arc(16, 20, 4.5, 110, 170, 2)                     # shine
+    return c
+
+
+def car():
+    c = Canvas()
+    c.round_frame(3, 14, 28, 24, 3)                     # body
+    c.polygon([(8, 14), (11, 7), (21, 7), (24, 14)])    # cabin
+    c.polygon([(10.5, 14), (12.5, 9.5), (19.5, 9.5), (21.5, 14)], 0)
+    c.rect(15, 9, 16, 14)
+    c.ring(9, 25, 3.5, 3.5, 2); c.ring(23, 25, 3.5, 3.5, 2)   # wheels
+    return c
+
+
+def house():
+    c = Canvas()
+    c.polygon([(16, 2), (2, 15), (30, 15)])             # roof
+    c.polygon([(16, 6), (6.5, 14), (25.5, 14)], 0)
+    c.rect(6, 14, 25, 29)                               # walls
+    c.rect(8, 16, 23, 27, 0)
+    c.rect(13, 20, 18, 29)                              # door
+    c.rect(14, 22, 17, 29, 0)
+    return c
+
+
+def gear():
+    c = Canvas()
+    for k in range(8):                                  # teeth
+        import math as _m
+        a = k * _m.pi / 4
+        c.ellipse(16 + 11 * _m.cos(a), 16 + 11 * _m.sin(a), 2.8, 2.8)
+    c.ellipse(16, 16, 10, 10)
+    c.ellipse(16, 16, 4, 4, 0)
+    return c
+
+
+def bang():
+    c = Canvas()
+    import math as _m
+    points = []
+    for k in range(16):                                 # starburst
+        r = 14 if k % 2 == 0 else 7
+        a = k * _m.pi / 8 - _m.pi / 2
+        points.append((16 + r * _m.cos(a), 16 + r * _m.sin(a)))
+    c.polygon(points)
+    inner = [(16 + (x - 16) * 0.62, 16 + (y - 16) * 0.62) for x, y in points]
+    c.polygon(inner, 0)
+    return c
+
+
+def wave():
+    c = Canvas()
+    for x, height in ((4, 6), (9, 14), (14, 22), (19, 16), (24, 10), (28, 4)):
+        top = 16 - height // 2
+        c.round_rect(x - 1, top, x + 1, top + height, 1)
     return c
 
 
 ICONS = dict(dog=dog, knock=knock, bell=bell, name=name, smoke=smoke, siren=siren, clock=clock,
-             chat=conversation, check=check, sound=sound)
+             chat=conversation, check=check, person=person, paw=paw, music=music, cloud=cloud, drop=drop,
+             car=car, house=house, gear=gear, bang=bang, wave=wave)
 
 
 def build():

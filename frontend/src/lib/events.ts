@@ -26,6 +26,7 @@ export interface SoundEvent {
   distance_meters: number | null;
   // Present only on type "custom": which user-taught sound (label is the user's own name for it).
   custom_sound_id?: string;
+  icon_id?: string; // a custom sound may pick its glasses icon (falls back to the policy icon)
 }
 export interface Decision {
   event_id: string;
@@ -41,9 +42,24 @@ export interface Snapshot {
 }
 export interface Health {
   display: { connected: boolean; clients: Record<string, number> };
-  capture: { live: boolean; last_event_ms_ago: Record<string, number> };
+  capture: {
+    live: boolean;
+    last_event_ms_ago: Record<string, number>;
+    listening?: boolean;
+    listening_source?: string | null;
+  };
   name_worker: string;
   spatial: string | { connected: boolean; devices: Record<string, { age_ms: number; bearing_degrees: number | null; coherence: number; calibrated: boolean }> };
+}
+// One recognizer analysis window (audio/observations.py, John's format): what it heard and why.
+export interface Observation {
+  seq: number;
+  source: string;
+  received_ms: number;
+  level_dbfs: number;
+  top: { label: string; score: number }[];
+  rules: Record<string, { score: number; threshold: number; reason: string }>;
+  emitted: { event_id: string; type: string; label: string }[];
 }
 // What every view renders, from either the browser engine or the receiver.
 export interface ViewState extends Snapshot {
@@ -60,6 +76,7 @@ export interface ViewState extends Snapshot {
   queue: { event_id: string; type: EventType; tier: Tier }[];
   health: Health | null;
   session_id: string | null;
+  observations: Observation[];
 }
 export const tierNames = [
   "Ignore",
@@ -163,6 +180,23 @@ export function makeMock(
   directionDegrees: number | null = null,
 ): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
+  if (type === "name_called")
+    // John's name events are schema v2 (audio/names.py): no score, no direction, which alias matched.
+    return {
+      schema_version: 2,
+      event_id: crypto.randomUUID(),
+      type,
+      label: sound.label,
+      confidence: null,
+      source: "mock",
+      priority_tier: tier ?? sound.tier,
+      timestamp_ms: Date.now(),
+      direction_degrees: null,
+      direction_confidence: null,
+      distance_meters: null,
+      matched_alias_id: "primary",
+      profile_revision: 0,
+    } as SoundEvent;
   return {
     schema_version: 1,
     event_id: crypto.randomUUID(),
@@ -195,7 +229,7 @@ export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");
   const e = input as Record<string, unknown>;
   if (
-    e.schema_version !== 1 ||
+    !(e.schema_version === 1 || (e.schema_version === 2 && e.type === "name_called")) ||
     typeof e.event_id !== "string" ||
     !e.event_id ||
     typeof e.label !== "string" ||
@@ -217,7 +251,7 @@ export function parseEvent(input: unknown): SoundEvent {
   ) {
     throw new Error("Receiver returned an invalid event");
   }
-  if (e.type === "custom" && !(typeof e.custom_sound_id === "string" && /^[a-z0-9-]{1,64}$/.test(e.custom_sound_id)))
+  if (e.type === "custom" && !(typeof e.custom_sound_id === "string" && e.custom_sound_id.length > 0 && e.custom_sound_id.length <= 120))
     throw new Error("Receiver returned a custom sound without an id");
   // Direction is kept only as a validated pair; the engine decides whether it is confident enough.
   const degrees = e.direction_degrees;
@@ -333,6 +367,16 @@ export function parseSnapshot(input: unknown): ViewState {
     queue,
     health,
     session_id: typeof s.session_id === "string" ? s.session_id : null,
+    // Diagnostics only: malformed reports are dropped rather than failing the whole state.
+    observations: Array.isArray(s.observations)
+      ? (s.observations as Observation[])
+          .filter(
+            (o) =>
+              o && typeof o === "object" && Array.isArray(o.top) && typeof o.level_dbfs === "number" &&
+              o.rules && typeof o.rules === "object" && Array.isArray(o.emitted),
+          )
+          .slice(-10)
+      : [],
   };
 }
 export async function request(

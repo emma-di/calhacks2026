@@ -118,22 +118,15 @@ export function layout(
 }
 
 function drawEdge(bitmap: Bitmap, direction?: string | null) {
-  if (direction === "left") {
-    bitmap.line(27, 26, 37, 26);
-    bitmap.line(27, 26, 32, 21);
-    bitmap.line(27, 26, 32, 31);
-  } else if (direction === "right") {
-    bitmap.line(91, 26, 101, 26);
-    bitmap.line(101, 26, 96, 21);
-    bitmap.line(101, 26, 96, 31);
+  // Solid triangle beside the stationary icon, pointing toward the sound (see hardware/display.py).
+  if (direction === "left" || direction === "right") {
+    for (let k = -6; k <= 6; k++)
+      for (let x = 30 + Math.abs(k); x < 37; x++)
+        bitmap.pixel(direction === "left" ? x : WIDTH - 1 - x, 26 + k);
   } else if (direction === "front") {
-    bitmap.line(64, 0, 64, 5);
-    bitmap.line(64, 0, 60, 4);
-    bitmap.line(64, 0, 68, 4);
+    for (let row = 0; row < 6; row++) for (let x = 64 - row; x < 65 + row; x++) bitmap.pixel(x, row);
   } else if (direction === "behind") {
-    bitmap.line(64, 47, 64, 51);
-    bitmap.line(64, 51, 60, 47);
-    bitmap.line(64, 51, 68, 47);
+    for (let row = 0; row < 6; row++) for (let x = 64 - row; x < 65 + row; x++) bitmap.pixel(x, 53 - row);
   }
 }
 

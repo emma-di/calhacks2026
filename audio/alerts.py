@@ -47,14 +47,6 @@ def validate_profile(value, known_types):
     if not isinstance(aliases, list) or len(aliases) > 8 or not all(
             isinstance(a, str) and 0 < len(a) <= 60 for a in aliases):
         raise ValueError('aliases must be up to 8 short strings')
-    sensitivity = names.get('sensitivity', 'balanced')
-    if sensitivity not in ('low', 'balanced', 'high'):
-        raise ValueError('name_detection.sensitivity must be low, balanced or high')
-    learned = names.get('learned_spellings', [])
-    if not isinstance(learned, list) or len(learned) > 8 or not all(
-            isinstance(i, dict) and isinstance(i.get('text'), str) and isinstance(i.get('tokens'), str)
-            and 0 < len(i['text']) <= 60 and 0 < len(i['tokens']) <= 200 for i in learned):
-        raise ValueError('learned_spellings must be up to 8 {text, tokens} entries')
     requests = value.get('custom_sound_requests', [])
     if not isinstance(requests, list) or len(requests) > 20:
         raise ValueError('custom_sound_requests must contain at most 20 pending requests')
@@ -83,8 +75,7 @@ def validate_profile(value, known_types):
                 revision=0, custom_sound_requests=custom, display_name=str(value.get('display_name', ''))[:60],
                 name_detection=dict(enabled=bool(names.get('enabled', False)), primary_name=primary,
                                     aliases=list(aliases), language=str(names.get('language', 'en'))[:12],
-                                    sensitivity=sensitivity,
-                                    learned_spellings=[dict(text=i['text'], tokens=i['tokens']) for i in learned]),
+                                    **name_extras(names)),
                 notification_preferences=dict(mode=prefs['mode'], event_tiers=dict(tiers), category_tiers=dict(categories)),
                 display=dict(labels=display.get('labels', False)))
 
@@ -108,6 +99,17 @@ def direction_bucket(degrees, confidence):
     if -135 <= d < -45:
         return 'left'
     return 'behind'
+
+
+def name_extras(names):
+    """John's name spotter settings (audio/names.py): kept when valid so saving preferences never drops them."""
+    extras = {}
+    if names.get('sensitivity') in ('low', 'balanced', 'high'):
+        extras['sensitivity'] = names['sensitivity']
+    learned = names.get('learned_spellings')
+    if isinstance(learned, list) and len(learned) <= 8 and all(isinstance(x, (str, dict)) for x in learned):
+        extras['learned_spellings'] = learned
+    return extras
 
 
 def sound_key(event):
@@ -351,7 +353,7 @@ class AlertEngine:
         event = active['event']
         return dict(schema_version=1, session_id=self.session_id, state_sequence=self.sequence,
                     event_id=event['event_id'], label=event['label'],
-                    icon_id=POLICY['icons'].get(event['type']), effective_tier=active['tier'],
+                    icon_id=event.get('icon_id') or POLICY['icons'].get(event['type']), effective_tier=active['tier'],
                     remaining_ms=self.remaining_ms(now), direction=active['direction'],
                     show_labels=self.profile['display']['labels'],
                     age_ms=round(now - active['started']), repeats=active['repeats'])

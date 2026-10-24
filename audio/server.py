@@ -7,13 +7,14 @@ Endpoints (JSON):
   GET  /profile   saved preferences;  PUT /profile  validate, apply and persist atomically
   POST /events    detection events;   POST /dismiss {event_id?};  POST /controls {focus_mode?, paused?}
   POST /look      {direction} or {heading_degrees}: the wearer turned toward the sound, resolving it
+  POST /observations, GET /observations?since=  per-window recognizer reports (John's format): signal panel + heartbeat
   POST /spatial   phone FOA reading {bearing_degrees, coherence, rms, calibrated, device}; matched to sounds
+  POST /spatial/calibrate {examples: {front: [...], right: [...], behind: [...], left: [...]}}: phone bearings heard per side
 
-Audio features (loopback clients only, so a network display client can never record or upload):
-  GET  /teach                      reference page: room background, custom sounds, your name
-  GET  /observations?since=&limit= per-window "what it heard" stream;  POST /observations (recognizer)
-  /custom-sounds[/{id}[/clips|/train|/test]], /background[/clips]   see docs/custom-sounds.md
-  POST /profile/name-samples (WAV), DELETE /profile/name-samples    see docs/name-detection.md
+Audio teaching (laptop/loopback clients only, so a network display client can never record or upload):
+  /custom-sounds[/{id}[/clips|/train|/test]], /background[/clips]   docs/custom-sounds.md
+  POST /profile/name-samples (WAV), DELETE /profile/name-samples    docs/name-detection.md
+  GET  /teach  standalone reference page (the companion has the same tools under Live → Teach)
 """
 import argparse
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -23,13 +24,40 @@ import math
 import os
 import threading
 import time
-import re
-from collections import deque
 from urllib.parse import urlsplit, parse_qs
 from audio.alerts import AlertEngine, DEFAULT_PROFILE, direction_bucket, validate_profile
 from audio.events import EVENT_TYPES, validate_event
-from audio.observations import MAX_BYTES as MAX_OBSERVATION_BYTES, validate_observation
 from audio.spatial import SpatialBuffer, validate_reading
+import re
+from collections import deque
+from audio.observations import MAX_BYTES as MAX_OBSERVATION_BYTES, validate_observation
+
+
+class ObservationStore:
+    """Last two minutes of per-window observations, each numbered with an increasing `seq`.
+
+    Ported from John's johnaou/observations branch (8a440e1) into the current receiver.
+    """
+    def __init__(self, maxlen=120):
+        self.items = deque(maxlen=maxlen)
+        self.seq = 0
+        self.lock = threading.Lock()
+        self.started_ms = int(time.time()*1000)   # changes on restart, so clients can reset `since`
+
+    def add(self, observation):
+        with self.lock:
+            self.seq += 1
+            observation = dict(observation, seq=self.seq, received_ms=int(time.time()*1000))
+            self.items.append(observation)
+            return self.seq
+
+    def since(self, after=0, limit=20):
+        with self.lock:
+            selected = [o for o in self.items if o['seq'] > after][-limit:]
+            return dict(latest_seq=self.seq, server_started_ms=self.started_ms, observations=selected)
+
+
+observations = ObservationStore()
 
 ROOT = Path(__file__).resolve().parent.parent
 CAPTURE_SOURCES = ('microphone', 'replay', 'simulation')
@@ -52,7 +80,7 @@ class AlertState:
                                   on_decision=decision_log.write if decision_log else None)
         self.last_event = {}       # source -> monotonic ms
         self.display_clients = {}  # client name -> monotonic ms of last /display poll
-        self.spatial = SpatialBuffer()
+        self.spatial = SpatialBuffer(Path(profile_path).with_name('spatial-calibration.json') if profile_path else None)
 
     @property
     def decisions(self):
@@ -79,10 +107,16 @@ class AlertState:
                 reading = self.spatial.match(at)
                 if reading:
                     # Same moment, separate device: direction comes from the phone's FOA microphones.
-                    event = dict(event, direction_degrees=reading['bearing_degrees'],
+                    event = dict(event, direction_degrees=round(reading['bearing_degrees'], 1),
+                                 phone_degrees=reading['phone_degrees'],
                                  direction_confidence=round(reading['coherence'], 3),
                                  direction_source=f"{reading['device']}_foa")
             return self.engine.add(event, at)
+
+    def spatial_calibrate(self, examples):
+        with self.lock:
+            self.spatial.calibrate(examples)
+            return dict(calibration=self.spatial.points)
 
     def spatial_reading(self, value, now=None):
         reading = validate_reading(value)
@@ -134,34 +168,38 @@ class AlertState:
     def _health(self, at):
         displays = {name: round(at - seen) for name, seen in self.display_clients.items() if at - seen < 3000}
         recent = {source: round(at - seen) for source, seen in self.last_event.items()}
+        latest = observations.since(0, 1)['observations']
+        heard = latest[0] if latest and time.time() * 1000 - latest[0]['received_ms'] < 3000 else None
         return dict(
             receiver='ok', session_id=self.engine.session_id,
             # Receiver health never implies a listening microphone: only recent capture events do.
             capture=dict(last_event_ms_ago=recent, live=any(
-                recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES)),
+                recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES),
+                # Heartbeat: a recognizer reporting windows is listening, even in silence.
+                listening=bool(heard), listening_source=heard['source'] if heard else None),
             display=dict(connected=bool(displays), clients=displays),
-            name_worker=self._name_worker(recent), spatial=self.spatial.status(at))
+            name_worker=self._name_worker(bool(heard)), spatial=self.spatial.status(at))
 
-    def _name_worker(self, recent):
-        """'off' unless enabled in the profile; 'listening' only while a capture source is live."""
+    def _name_worker(self, listening):
+        """'off' unless enabled in the profile; 'listening' only while a recognizer is reporting."""
         names = self.engine.profile.get('name_detection', {})
         if not names.get('enabled') or not names.get('primary_name'):
             return 'off'
         from audio.names import KWS_DIR
         if not (KWS_DIR / 'tokens.txt').exists():
             return 'model_missing'
-        live = any(recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES)
-        return 'listening' if live else 'idle'
+        return 'listening' if listening else 'idle'
 
     def snapshot(self, now=None):
         with self.lock:
             at = self._ms(now)
             return dict(self.engine.snapshot(at), health=self._health(at),
+                        observations=observations.since(0, 10)['observations'],
                         display=self.engine.presentation(at))
 
 
 def carry_name_fields(value, current):
-    """Clients that don't know the name worker's own fields (the companion's onboarding) must not erase
+    """Clients that don't know the name spotter's own fields (the companion's onboarding) must not erase
     them: keep sensitivity, and keep learned spellings while the name itself is unchanged."""
     if not isinstance(value, dict) or not isinstance(value.get('name_detection'), dict):
         return value
@@ -178,29 +216,8 @@ def carry_name_fields(value, current):
 state = AlertState()
 
 
-class ObservationStore:
-    """Last two minutes of per-window observations, each numbered with an increasing `seq`."""
-
-    def __init__(self, maxlen=120):
-        self.items = deque(maxlen=maxlen)
-        self.seq = 0
-        self.lock = threading.Lock()
-        self.started_ms = int(time.time() * 1000)   # changes on restart, so clients can reset `since`
-
-    def add(self, observation):
-        with self.lock:
-            self.seq += 1
-            self.items.append(dict(observation, seq=self.seq, received_ms=int(time.time() * 1000)))
-            return self.seq
-
-    def since(self, after=0, limit=20):
-        with self.lock:
-            selected = [o for o in self.items if o['seq'] > after][-limit:]
-            return dict(latest_seq=self.seq, server_started_ms=self.started_ms, observations=selected)
-
-
 class Embedder:
-    """Loads the embedding model on the first audio request, so the receiver itself still needs only
+    """Loads the embedding model on the first teaching request, so the receiver itself still needs only
     the standard library; one lock serializes training and room-background updates."""
 
     def __init__(self):
@@ -217,7 +234,6 @@ class Embedder:
         return self.model
 
 
-observations = ObservationStore()
 embedder = Embedder()
 
 
@@ -306,11 +322,7 @@ def is_audio_route(parts):
 class Handler(BaseHTTPRequestHandler):
     @property
     def receiver_state(self):
-        return self.server.alert_state
-
-    @property
-    def observation_store(self):
-        return getattr(self.server, 'observations', observations)
+        return getattr(self.server, 'alert_state', state)
 
     def parts(self):
         return [p for p in urlsplit(self.path).path.split('/') if p]
@@ -329,7 +341,7 @@ class Handler(BaseHTTPRequestHandler):
         return decode_audio(self.rfile.read(length))
 
     def audio(self, method):
-        """Dispatch an audio route; recording, training and uploads are refused off the laptop."""
+        """Dispatch a teaching route; recording, training and uploads are refused off the laptop."""
         if not self.from_loopback():
             return self.reply(403, {'error': 'Audio routes are only available on the laptop running the receiver'})
         try:
@@ -357,20 +369,12 @@ class Handler(BaseHTTPRequestHandler):
         url = urlsplit(self.path)
         if is_audio_route(self.parts()):
             return self.audio('GET')
-        if url.path == '/':
-            self.reply(200, Path(__file__).with_name('monitor.html').read_bytes(), 'text/html; charset=utf-8')
-        elif url.path == '/teach':
+        if url.path == '/teach':
             if not self.from_loopback():
                 return self.reply(403, {'error': 'The teach page is only available on the laptop'})
-            self.reply(200, Path(__file__).with_name('teach.html').read_bytes(), 'text/html; charset=utf-8')
-        elif url.path == '/observations':
-            query = parse_qs(url.query)
-            try:
-                after = int(query.get('since', ['0'])[0])
-                limit = min(max(int(query.get('limit', ['20'])[0]), 1), 120)
-            except ValueError:
-                return self.reply(400, {'error': 'since and limit must be integers'})
-            self.reply(200, self.observation_store.since(after, limit))
+            return self.reply(200, Path(__file__).with_name('teach.html').read_bytes(), 'text/html; charset=utf-8')
+        if url.path == '/':
+            self.reply(200, Path(__file__).with_name('monitor.html').read_bytes(), 'text/html; charset=utf-8')
         elif url.path == '/state':
             self.reply(200, self.receiver_state.snapshot())
         elif url.path == '/display':
@@ -378,6 +382,14 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(200, self.receiver_state.presentation(client))
         elif url.path == '/health':
             self.reply(200, self.receiver_state.health())
+        elif url.path == '/observations':
+            query = parse_qs(url.query)
+            try:
+                after = int(query.get('since', ['0'])[0])
+                limit = min(max(int(query.get('limit', ['20'])[0]), 1), 120)
+            except ValueError:
+                return self.reply(400, {'error': 'since and limit must be integers'})
+            self.reply(200, observations.since(after, limit))
         elif url.path == '/profile':
             self.reply(200, self.receiver_state.profile())
         else:
@@ -424,11 +436,11 @@ class Handler(BaseHTTPRequestHandler):
                     raise ValueError(f'Expected body of 1..{MAX_OBSERVATION_BYTES} bytes')
                 if self.headers.get('Content-Type', '').split(';')[0].strip() != 'application/json':
                     raise ValueError('Expected application/json')
-                observation = validate_observation(json.loads(self.rfile.read(length)))
-                return self.reply(200, {'ok': True, 'seq': self.observation_store.add(observation)})
+                payload = json.loads(self.rfile.read(length))
+                return self.reply(200, {'ok': True, 'seq': observations.add(validate_observation(payload))})
             except (ValueError, TypeError) as exc:
                 return self.reply(400, {'error': str(exc)})
-        if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial'):
+        if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial', '/spatial/calibrate'):
             return self.reply(404, {'error': 'Not found'})
         try:
             payload = self.read_json()
@@ -447,6 +459,9 @@ class Handler(BaseHTTPRequestHandler):
                         raise ValueError('heading_degrees must be a finite number')
                     direction = direction_bucket(heading, 1.0)
                 return self.reply(200, {'ok': True, 'resolved': self.receiver_state.look(direction)})
+            if path == '/spatial/calibrate':
+                return self.reply(200, dict(ok=True, **self.receiver_state.spatial_calibrate(
+                    payload.get('examples', {}))))
             if path == '/spatial':
                 self.receiver_state.spatial_reading(payload)
                 return self.reply(200, {'ok': True})
@@ -468,7 +483,6 @@ def create_server(port=8765, host='127.0.0.1', profile_path=None):
     server = ThreadingHTTPServer((host, port), Handler)
     server.alert_state = AlertState(decision_log=DecisionLog(ROOT / '.cache' / 'alert-decisions.jsonl'),
                                     profile_path=profile_path or ROOT / '.cache' / 'profile.json')
-    server.observations = ObservationStore()
     state = server.alert_state  # legacy callers; each HTTP handler uses its own server's state
     return server
 

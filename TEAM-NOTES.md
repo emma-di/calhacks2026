@@ -223,6 +223,15 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
 Full reasoning, rejected alternatives and open questions from the redesign sessions:
 [docs/design-decisions.md](docs/design-decisions.md).
 
+## Real OLED driven by the receiver — October 24
+
+- `glasses-pi` (Pi Zero W, Python 3.13): OLED answers at 0x3C. `scripts/glasses_up.sh selftest` drew six
+  cues; `scripts/glasses_up.sh live` followed the Mac receiver through an SSH tunnel (receiver stays on
+  127.0.0.1). Demo scene → recognizer → receiver → OLED, 40–118 ms receiver-to-display.
+- Yameen's `detect-oled.service` (bear demo) shares the display. Pause it while testing live cues
+  (`kill -STOP <pid>` as pi, resume with `kill -CONT`; stopping the unit needs sudo). Our client no
+  longer switches the panel off on exit. Status: verified on hardware; optics/readability still untested.
+
 ## Add a note
 
 ```text

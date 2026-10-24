@@ -22,8 +22,8 @@ export default function Oled({
 }) {
   const canvas = useRef<HTMLCanvasElement>(null);
   const cue =
-    event && event.priority_tier > 0 && iconIds[event.type]
-      ? { icon_id: iconIds[event.type], label: event.label, effective_tier: event.priority_tier, remaining_ms: 1, direction }
+    event && event.priority_tier > 0 && (event.icon_id ?? iconIds[event.type])
+      ? { icon_id: event.icon_id ?? iconIds[event.type], label: event.label, effective_tier: event.priority_tier, remaining_ms: 1, direction }
       : null;
   const key = cue ? `${event!.event_id}:${cue.effective_tier}:${labels}:${direction}` : "blank";
   useEffect(() => {

@@ -68,7 +68,7 @@
     "resolved": "check",
     "finger_snap": "check",
     "thumbs_up": "check",
-    "custom": "sound"
+    "custom": "wave"
   },
   "categories": {
     "home": "Home & devices",

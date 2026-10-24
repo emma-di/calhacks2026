@@ -50,11 +50,11 @@ Other keys (e.g. `notification_preferences`) are preserved, so the onboarding UI
 `language` (`"en"` only), `sensitivity` (`"low"`, `"balanced"`, `"high"`), `learned_spellings`
 (`[{text, tokens}]`, ≤ 8, written by the server).
 
-## Event
+## Event (schema v2)
 
 ```json
 {
-  "schema_version": 1,
+  "schema_version": 2,
   "event_id": "uuid",
   "type": "name_called",
   "label": "Your name",
@@ -73,8 +73,8 @@ Other keys (e.g. `notification_preferences`) are preserved, so the onboarding UI
 }
 ```
 
-`confidence` is `null`: keyword spotting gives a yes/no match, not a score (the receiver and companion
-accept a null score for `name_called`). `matched_alias_id` is `primary`, `alias-N` or `learned-N`.
+`confidence` is `null`: keyword spotting gives a yes/no match, not a score. The receiver validates name
+events as schema v2 (`validate_name_event` in audio/events.py) and the companion parses them. `matched_alias_id` is `primary`, `alias-N` or `learned-N`.
 Name alerts also appear in the observation stream's `emitted` list.
 
 **Who owns the profile:** the receiver (`audio/server.py`, schema in `audio/alerts.py`). The companion

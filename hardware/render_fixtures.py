@@ -9,7 +9,9 @@ from hardware.display import DIRECTIONS, ICON_IDS, Presentation, render
 PATH = Path(__file__).with_name('render-fixtures.json')
 LABELS = {'knock': 'Door knock', 'bell': 'Bell / chime', 'dog': 'Dog barking', 'name': 'Your name',
           'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock', 'chat': 'Conversation', 'check': 'Done',
-          'sound': 'Front doorbell'}
+          'person': 'Baby cry', 'paw': 'Cat', 'music': 'Saxophone', 'cloud': 'Thunder', 'drop': 'Water tap',
+          'car': 'Vehicle horn', 'house': 'Microwave oven', 'gear': 'Power tool', 'bang': 'Gunshot',
+          'wave': 'Sound'}
 
 
 def cases():
