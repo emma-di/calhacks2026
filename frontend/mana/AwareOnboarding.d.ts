@@ -7,8 +7,18 @@ export interface ManaDraft {
   aliasesText: string;
   mode: Preset;
   rules: { key: string; tier: Tier }[];
+  custom_rules?: CustomSound[];
+  category_rules?: Record<string, Tier>;
 }
+export interface CustomSound {
+  id: string;
+  label: string;
+  tier: Tier;
+  status: "pending";
+}
+export function sanitizeCustomSounds(raw: unknown): CustomSound[];
 export interface ManaProfile {
+  custom_sound_requests?: CustomSound[];
   schema_version: 1;
   profile_id: string;
   revision: number;
@@ -22,6 +32,9 @@ export interface ManaProfile {
   notification_preferences: {
     mode: Preset;
     event_tiers: Partial<Record<EventType, Tier>>;
+    category_tiers?: Partial<
+      Record<"home" | "animals" | "people" | "safety", Tier>
+    >;
   };
 }
 export interface SetupChange {
@@ -48,7 +61,7 @@ export function removeAwareRule(draft: unknown, key: string): ManaDraft;
 export function resolveAwareTier(
   draft: unknown,
   key: string,
-): { tier: Tier; source: "rule" | "preset" };
+): { tier: Tier; source: "rule" | "category" | "preset" };
 export default function AwareOnboarding(props: {
   onChange?: (change: SetupChange) => void;
   onComplete?: () => void;

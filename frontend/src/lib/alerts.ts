@@ -8,6 +8,7 @@ export type Preset = keyof typeof policy.presets;
 export interface Preferences {
   mode: Preset;
   event_tiers: Partial<Record<EventType, Tier>>;
+  category_tiers?: Partial<Record<keyof typeof policy.categories, Tier>>;
 }
 export interface AlertDecision {
   event_id: string;
@@ -93,7 +94,15 @@ export function effectiveTier(
   producer: Tier,
   prefs: Preferences,
 ): Tier {
-  return prefs.event_tiers[type] ?? presets[prefs.mode][type] ?? producer;
+  const category = (
+    policy.event_categories as Record<string, keyof typeof policy.categories>
+  )[type];
+  return (
+    prefs.event_tiers[type] ??
+    prefs.category_tiers?.[category] ??
+    presets[prefs.mode][type] ??
+    producer
+  );
 }
 
 export class AlertEngine {

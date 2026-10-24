@@ -6,7 +6,7 @@ import { HEIGHT, WIDTH, render } from "../lib/oled";
 const iconIds = policy.icons as Record<string, string>;
 
 // Draws the exact frame hardware/display.py sends to the SSD1306 (tests compare them byte for byte).
-// The glasses have no direction or colour, so neither appears here.
+// The monochrome panel uses compass arrows only when direction is supplied.
 // `lens` draws the same frame as the wearer sees it through the 50:50 combiner: unlit pixels are
 // see-through instead of black.
 export default function Oled({

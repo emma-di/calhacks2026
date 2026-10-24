@@ -19,6 +19,9 @@ Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and upd
 6. Name work uses [the name plan](docs/name-detection-plan.md); environmental ML uses
    [the audio guide](docs/audio-guide.md) and [measured results](reports/summary.md).
 
+Current UI/backend checkpoint: [simulator freeze](docs/simulator-freeze.md),
+[integration revisit list](docs/integration-revisit.md), and [phone mirror](docs/phone-mirror.md).
+
 These files contain shared context. Agents do not automatically inherit Emma's chat history.
 Some plans remain proposals: inspect code and current PRs before assuming an API exists.
 

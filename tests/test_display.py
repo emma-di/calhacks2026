@@ -56,17 +56,14 @@ class DisplayTests(unittest.TestCase):
         self.assertEqual((attention.get(x - 2, y - 2), attention.get(x - 4, y - 4)), (1, 1))
         self.assertGreater(sum(map(int.bit_count, urgent.buffer)), sum(map(int.bit_count, attention.buffer)))
 
-    def test_direction_is_the_position_and_tier_never_moves_the_icon(self):
+    def test_compass_direction_and_tier_never_move_the_centered_icon(self):
         def icon_pixels(direction, tier, labels=False):
             frame = render(Presentation.parse(snapshot(effective_tier=tier, direction=direction)), labels)
             ix, iy = layout(direction, "Door knock" if labels else None)["icon"]
             return [frame.get(ix + dx, iy + dy) for dy in range(32) for dx in range(32)]
         origins = {d: layout(d, None)["icon"] for d in (None, "left", "right", "front", "behind")}
-        self.assertEqual(len(set(origins.values())), 5)
-        self.assertEqual(origins["left"][0], 6)
-        self.assertEqual(origins["right"][0], 128 - 6 - 32)
-        self.assertLess(origins["front"][1], origins[None][1])
-        self.assertGreater(origins["behind"][1], origins[None][1])
+        self.assertEqual(len(set(origins.values())), 1)
+        self.assertEqual(origins[None], (48, 10))
         for direction in origins:
             reference = icon_pixels(direction, 1)
             self.assertTrue(any(reference))
@@ -77,11 +74,11 @@ class DisplayTests(unittest.TestCase):
             self.assertEqual(icon_pixels(direction, 2, labels=True), icon_pixels(direction, 2))
             self.assertEqual(icon_pixels(direction, 4, labels=True), icon_pixels(direction, 2))
 
-    def test_directed_cues_mark_their_edge(self):
-        for direction, (x, y) in (("left", (0, 32)), ("right", (127, 32)), ("front", (64, 0)), ("behind", (64, 63))):
+    def test_directed_cues_draw_compass_arrows(self):
+        for direction, (x, y) in (("left", (27, 26)), ("right", (101, 26)), ("front", (64, 0)), ("behind", (64, 51))):
             frame = render(Presentation.parse(snapshot(direction=direction)), show_labels=False)
             self.assertEqual(frame.get(x, y), 1, direction)
-        self.assertEqual(render(Presentation.parse(snapshot()), show_labels=False).get(0, 32), 0)
+        self.assertEqual(render(Presentation.parse(snapshot()), show_labels=False).get(27, 26), 0)
 
     def test_icons_are_distinct_and_long_labels_are_bounded(self):
         frames = [bytes(render(Presentation.parse(snapshot(icon_id=icon))).buffer)

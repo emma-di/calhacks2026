@@ -25,3 +25,27 @@ test("interrupted or brief gestures never dismiss and cooldown survives release"
   assert.equal(hold.update(true, 1080), false);
   assert.equal(hold.update(true, 2230), true);
 });
+
+test("camera hold is scoped to a cue and cannot spill onto a replacement", () => {
+  const hold = new GestureHold(500, 1500, 250);
+  hold.update(true, 0, "old");
+  assert.equal(hold.update(true, 500, "new"), false);
+  assert.equal(hold.update(true, 3000, "new"), false);
+  hold.update(false, 3100, "new");
+  hold.update(false, 3350, "new");
+  assert.equal(hold.update(true, 3400, "new"), false);
+  assert.equal(hold.update(true, 3900, "new"), true);
+});
+
+test("a hand held before an alert and a one-frame dropout cannot dismiss a new cue", () => {
+  const hold = new GestureHold(500, 1500, 250);
+  hold.update(true, 0, null);
+  assert.equal(hold.update(true, 1000, "cue"), false);
+  hold.update(false, 1100, "cue");
+  assert.equal(hold.update(true, 1166, "cue"), false);
+  assert.equal(hold.update(true, 2000, "cue"), false);
+  hold.update(false, 2100, "cue");
+  hold.update(false, 2350, "cue");
+  hold.update(true, 2400, "cue");
+  assert.equal(hold.update(true, 2900, "cue"), true);
+});

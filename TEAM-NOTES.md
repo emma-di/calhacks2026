@@ -254,3 +254,18 @@ See docs/overnight-verification.md for repeatable tests, fixes, screenshots and 
 Stress time is simulated, not hardware uptime. Camera/snapping remain inactive. Use one settings-owning
 companion for the demo: automatic browser→receiver profile syncing has no cross-client conflict policy.
 Shared policy/hardware changes now trigger frontend CI as well as Python checks.
+
+## Simulator freeze checkpoint — October 24
+
+See docs/simulator-freeze.md for D/E role coverage and docs/integration-revisit.md for blocked/deferred
+checks. Latest: centered icon + compass arrows inside fixed right-side patch; category inheritance;
+pending custom-sound requests; optional demo-camera gesture restored. Emma's live gesture trial was
+finicky, so tune later and keep manual Dismiss. Phone connection is not built; it is the next focus
+after phone type/flow is confirmed. One OLED alert at a time is the current decision.
+
+### iPhone mirror — October 24
+
+Emma chose iPhone displaying the same live alerts (not camera streaming). Read-only viewer implemented;
+see docs/phone-mirror.md. Use Receiver mode on the laptop. Browser-only simulation is not cross-device.
+Temporary LAN viewer requires an access key, blocks writes, and exposes only /api/state plus build assets.
+Real Safari/network trial pending. Thumbs-up reliability tuning remains explicitly deferred.

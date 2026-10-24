@@ -30,3 +30,14 @@ test("Mana profile preserves Ignore through preset changes and removes reset exc
   );
   assert.deepEqual(setAwareRule(active, "dog_bark", 9), active);
 });
+
+
+test("custom requests retain explicit Ignore without becoming detector event tiers", async () => {
+  const { sanitizeCustomSounds } = await import("../../mana/AwareOnboarding.jsx");
+  const custom = sanitizeCustomSounds([{id:"a",label:"  My kettle whistle  ",tier:0},
+    {id:"b",label:"my kettle whistle",tier:4},{id:"c",label:" ",tier:2}]);
+  assert.deepEqual(custom, [{id:"a",label:"My kettle whistle",tier:0,status:"pending"}]);
+  const profile = buildAwareProfile({...AWARE_EMPTY_DRAFT, custom_rules:custom});
+  assert.deepEqual(profile.custom_sound_requests, custom);
+  assert.deepEqual(profile.notification_preferences.event_tiers, {});
+});

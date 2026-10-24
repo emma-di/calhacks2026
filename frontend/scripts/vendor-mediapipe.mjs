@@ -14,7 +14,7 @@ mkdirSync(target, { recursive: true });
 cpSync(join(root, "node_modules", "@mediapipe", "tasks-vision", "wasm"), join(target, "wasm"), { recursive: true });
 if (!existsSync(model)) {
   try {
-    const response = await fetch(MODEL_URL);
+    const response = await fetch(MODEL_URL, { signal: AbortSignal.timeout(20000) });
     if (!response.ok) throw new Error(`HTTP ${response.status}`);
     writeFileSync(model, Buffer.from(await response.arrayBuffer()));
     console.log("Gesture model saved to public/mediapipe/");

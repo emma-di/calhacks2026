@@ -48,7 +48,7 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] API-01 — Implemented backward-compatible /state, /display, /profile, /controls (docs/alert-engine.md);
   awaiting teammate review before calling the contract agreed.
 - [x] API-02 — Profile validation, server revision, atomic .cache/profile.json persistence (tests/test_alerts.py).
-- [x] API-03 — audio/alerts.py effective_tier: rule → preset → producer default; focus modes applied after.
+- [x] API-03 — audio/alerts.py effective_tier: per-sound → category → preset → producer default; focus modes applied after.
 - [x] API-04 — Dedup, 5-item queue with 10 s freshness, interruption/resume, repeat merging, urgent ongoing cap.
 - [x] API-05 — state_sequence, remaining_ms, session_id, event-specific dismiss; restart does not replay.
 - [ ] API-06 — /health reports per-source event recency and display clients; silence ≠ disconnect. Inference

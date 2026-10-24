@@ -16,7 +16,6 @@ const font: Record<string, string[]> = Object.fromEntries(
 );
 const bitmaps = assets.bitmaps as Record<string, string[]>;
 const ICON_SIZE = 32;
-const EDGE = 6;
 
 export class Bitmap {
   buffer = new Uint8Array((WIDTH * HEIGHT) / 8);
@@ -100,46 +99,45 @@ export function fitLabel(label: string, width: number) {
 }
 
 // Icon top-left per placement and its label row (always reserved, so the icon never moves).
-const PLACES: Record<string, [number, number, number]> = {
-  none: [(WIDTH - ICON_SIZE) / 2, 14, 52],
-  left: [EDGE, 14, 52],
-  right: [WIDTH - EDGE - ICON_SIZE, 14, 52],
-  front: [(WIDTH - ICON_SIZE) / 2, EDGE, 44],
-  behind: [(WIDTH - ICON_SIZE) / 2, HEIGHT - EDGE - ICON_SIZE, 13],
-};
-
-// Where the cue sits (see hardware/display.py layout()): the direction is the position.
 export function layout(
-  direction: string | null | undefined,
+  _direction: string | null | undefined,
   label: string | null,
 ) {
-  const [x, y, textY] = PLACES[direction ?? "none"] ?? PLACES.none;
+  const x = (WIDTH - ICON_SIZE) / 2,
+    y = 10,
+    textY = 55;
   const text = label ? fitLabel(label, 19) : null;
   const tw = text ? [...text].length * 6 - 1 : 0;
-  const textX =
-    direction === "left"
-      ? EDGE
-      : direction === "right"
-        ? WIDTH - EDGE - tw
-        : Math.floor((WIDTH - tw) / 2);
   return {
     box: [x, y, ICON_SIZE, ICON_SIZE] as const,
     icon: [x, y] as const,
     text,
-    origin: [textX, textY] as const,
+    origin: [Math.floor((WIDTH - tw) / 2), textY] as const,
     width: tw,
   };
 }
 
-// A one-pixel line along the edge the sound came from.
 function drawEdge(bitmap: Bitmap, direction?: string | null) {
-  if (direction === "left") bitmap.line(0, 8, 0, 55);
-  else if (direction === "right") bitmap.line(WIDTH - 1, 8, WIDTH - 1, 55);
-  else if (direction === "front") bitmap.line(16, 0, 111, 0);
-  else if (direction === "behind") bitmap.line(16, HEIGHT - 1, 111, HEIGHT - 1);
+  if (direction === "left") {
+    bitmap.line(27, 26, 37, 26);
+    bitmap.line(27, 26, 32, 21);
+    bitmap.line(27, 26, 32, 31);
+  } else if (direction === "right") {
+    bitmap.line(91, 26, 101, 26);
+    bitmap.line(101, 26, 96, 21);
+    bitmap.line(101, 26, 96, 31);
+  } else if (direction === "front") {
+    bitmap.line(64, 0, 64, 5);
+    bitmap.line(64, 0, 60, 4);
+    bitmap.line(64, 0, 68, 4);
+  } else if (direction === "behind") {
+    bitmap.line(64, 47, 64, 51);
+    bitmap.line(64, 51, 60, 47);
+    bitmap.line(64, 51, 68, 47);
+  }
 }
 
-// Tier changes only the box around the cue; position always comes from the direction.
+// Tier changes only the box around the cue; direction appears as a compass arrow around the centered icon.
 export function render(cue: Cue | null, showLabels = true): Bitmap {
   const bitmap = new Bitmap();
   if (

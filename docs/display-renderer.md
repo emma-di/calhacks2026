@@ -35,17 +35,10 @@ uses the same bitmaps for its sound buttons, and `frontend/src/lib/oled.ts` draw
 frames (checked against `hardware/render-fixtures.json`). Text is the original 5×7 font, uppercase,
 one line, truncated with an ellipsis.
 
-**The direction is the position.** The icon hugs the edge the sound came from, with a one-pixel
-line along that edge; its label sits on its own row aligned to the same edge (under the icon, or
-above it for behind). Unknown direction stays centred so the position never claims a side.
-
-| Direction | Icon (x, y) | Label row |
-| --- | --- | --- |
-| Unknown | centred (48, 14) | y 52, centred |
-| Left | (6, 14) | y 52, left-aligned |
-| Right | (90, 14) | y 52, right-aligned |
-| Front | (48, 6) | y 44, centred |
-| Behind | (48, 26) | y 13, centred |
+**Fixed right-side optical patch; centered icon with compass arrows.** The icon stays at
+(48, 10) for every direction. The label stays centered at y 55. Left/right arrows sit beside the
+icon; front/behind arrows sit above/below it. Unknown direction draws no arrow. The browser
+illustrates the panel on the right of the field of vision; its optical size still needs calibration.
 
 The label row is always reserved, so labels on/off and tier never move the icon (tested).
 Tier only changes the box around the icon:

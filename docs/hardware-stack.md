@@ -186,3 +186,9 @@ Yameen's screenshot identifies the final plate as an Azure Spy listing: BK-7 gla
 performance. The plate combines light paths; its aperture does not specify magnification, focal
 distance or angular field of view. Confirm the actual focusing lens and display/lens/plate/eye
 geometry before claiming a full-field directional overlay.
+
+## Confirmed display placement — October 24
+
+Emma confirms the optical display is on the right side of the wearer's field of vision. The renderer
+now centers the icon within 128×64 and uses surrounding compass arrows. Browser patch size is not
+calibrated to the optical FOV. No camera is installed on the glasses.

@@ -806,6 +806,38 @@
      }
     }
    ]
+  },
+  {
+   "name": "per-sound overrides inherit category before preset defaults",
+   "profile": {
+    "mode": "balanced",
+    "category_tiers": {
+     "home": 1
+    },
+    "event_tiers": {
+     "bell": 4
+    }
+   },
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "tier": 1,
+      "active": "k"
+     }
+    },
+    {
+     "at": 100,
+     "add": "bell",
+     "id": "b",
+     "expect": {
+      "tier": 4,
+      "active": "b"
+     }
+    }
+   ]
   }
  ]
 }

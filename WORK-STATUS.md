@@ -129,3 +129,15 @@ receiver-instance isolation, malformed-state handling, onboarding/live render mi
 controls/audience sizing. Actual UI→receiver settings, pause, connection-loss/restart and keyboard mode
 selection exercised on isolated ports without opening a mic/camera. Physical checks and multi-client
 profile ownership remain pending; existing backend processes need restart to load Python fixes.
+
+## Simulator freeze checkpoint — October 24
+
+See docs/simulator-freeze.md for D/E role coverage and docs/integration-revisit.md for blocked/deferred
+checks. Latest: centered icon + compass arrows inside fixed right-side patch; category inheritance;
+pending custom-sound requests; optional demo-camera gesture restored. Emma's live gesture trial was
+finicky, so tune later and keep manual Dismiss. Phone connection is not built; it is the next focus
+after phone type/flow is confirmed. One OLED alert at a time is the current decision.
+
+Phone mirror implemented and browser-checked at 390px with a real receiver mock event. It is read-only,
+access-key protected, and uses the shared OLED renderer. 43 Python / 18 frontend tests pass. Actual
+Safari-on-iPhone network trial pending; see docs/phone-mirror.md. No phone camera streaming implemented.

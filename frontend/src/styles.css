@@ -236,11 +236,7 @@ code {
   isolation: isolate;
   border-radius: 28px;
   background-color: #050505;
-  background-image: radial-gradient(
-    rgba(244, 242, 234, 0.06) 1px,
-    transparent 1px
-  ); /* taste-skill-ignore: display pixel-dot texture, not a colour fade */
-  background-size: 6px 6px;
+  background-image: none;
 }
 /* Lens vignette: the edge of the glass, over the room or the dark. */
 .stage::after {
@@ -940,4 +936,125 @@ code {
   width: min(92vw, 120dvh);
   height: auto;
   max-width: 92%;
+}
+
+.gesture-demo-status {
+  position: absolute;
+  z-index: 4;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  width: fit-content;
+  max-width: calc(100% - 32px);
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #141412;
+  color: var(--text);
+  font-size: 13px;
+}
+.gesture-demo-status.is-holding {
+  color: var(--signal);
+}
+
+/* Physical display is a fixed right-side optical patch, not a full-FOV projection. */
+.stage .lens-frame {
+  left: auto;
+  right: 5%;
+  top: 50%;
+  width: 42%;
+  height: auto;
+  max-width: 42%;
+  transform: translateY(-50%);
+}
+.audience .lens-frame {
+  right: 5%;
+  width: min(46vw, 100dvh);
+  max-width: 46%;
+  height: auto;
+}
+@media (max-width: 860px) {
+  .stage .lens-frame {
+    width: 60%;
+    max-width: 60%;
+    right: 4%;
+  }
+}
+
+/* Final demo shell: one calm stage, with synthetic inputs kept in a disclosure. */
+.stage {
+  background-image: none;
+  background-color: #080908;
+}
+.stage-caption {
+  font-family: inherit;
+  font-size: 13px;
+  letter-spacing: 0;
+  color: #b4b2aa;
+}
+.demo-tools summary {
+  cursor: pointer;
+  padding: 8px 4px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.demo-tools[open] .dock-row {
+  padding-top: 10px;
+}
+.sound-key {
+  background: #1a1b17;
+}
+.dock {
+  border-radius: 16px;
+}
+
+/* Phone mirror: the actual OLED frame is the main content, with no settings controls. */
+.phone-viewer {
+  max-width: 700px;
+  min-height: 100svh;
+  margin: auto;
+  padding: max(24px, env(safe-area-inset-top)) 24px
+    max(24px, env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: column;
+}
+.phone-viewer header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  font-size: 18px;
+}
+.phone-viewer header span:last-child,
+.phone-status,
+.phone-viewer figcaption,
+.phone-viewer section p,
+.phone-viewer footer {
+  color: var(--muted);
+}
+.phone-status {
+  margin-top: 28px;
+  font-size: 14px;
+}
+.phone-viewer figure {
+  margin: auto 0;
+  padding: 48px 0;
+}
+.phone-viewer .oled-bitmap {
+  display: block;
+  width: 100%;
+  height: auto;
+  image-rendering: pixelated;
+  background: #000;
+}
+.phone-viewer figcaption {
+  margin-top: 16px;
+  font-size: 13px;
+}
+.phone-viewer h1 {
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 8px;
+}
+.phone-viewer footer {
+  margin-top: 32px;
+  font-size: 13px;
 }

@@ -2,7 +2,7 @@
 // Mana source of truth: file-system/apps/Aware/app/code. A standalone copy is exported as AwareOnboarding.jsx.
 // Plain React with inline styles; no Mana APIs are required (theme support is used only when present).
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
-import Cue from "../src/components/Cue";
+import alertPolicy from "../../audio/alert-policy.json";
 import Oled from "../src/components/Oled";
 import { makeMock } from "../src/lib/events";
 
@@ -151,6 +151,34 @@ function parseAwareAliases(text, primary) {
   return out;
 }
 
+export function sanitizeCustomSounds(raw) {
+  const seen = new Set();
+  return (Array.isArray(raw) ? raw : [])
+    .filter((r) => {
+      if (
+        !r ||
+        typeof r.id !== "string" ||
+        !r.id ||
+        r.id.length > 120 ||
+        typeof r.label !== "string" ||
+        !isAwareTier(r.tier)
+      )
+        return false;
+      const label = r.label.trim().replace(/\s+/g, " ");
+      const key = label.toLocaleLowerCase();
+      if (!label || label.length > 80 || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 20)
+    .map((r) => ({
+      id: r.id,
+      label: r.label.trim().replace(/\s+/g, " "),
+      tier: r.tier,
+      status: "pending",
+    }));
+}
+
 export function sanitizeAwareDraft(raw) {
   const d = raw && typeof raw === "object" ? raw : {};
   const rules = [];
@@ -165,6 +193,16 @@ export function sanitizeAwareDraft(raw) {
     aliasesText: typeof d.aliasesText === "string" ? d.aliasesText : "",
     mode: AWARE_PRESETS.some((m) => m.key === d.mode) ? d.mode : "balanced",
     rules,
+    custom_rules: sanitizeCustomSounds(d.custom_rules),
+    category_rules: Object.fromEntries(
+      Object.entries(
+        d.category_rules && typeof d.category_rules === "object"
+          ? d.category_rules
+          : {},
+      ).filter(
+        ([key, tier]) => key in alertPolicy.categories && isAwareTier(tier),
+      ),
+    ),
   };
 }
 
@@ -173,6 +211,9 @@ export function resolveAwareTier(draft, key) {
   const d = sanitizeAwareDraft(draft);
   const rule = d.rules.find((r) => r.key === key);
   if (rule) return { tier: rule.tier, source: "rule" };
+  const category = alertPolicy.event_categories[key];
+  if (category in d.category_rules)
+    return { tier: d.category_rules[category], source: "category" };
   return { tier: AWARE_PRESET_DEFAULTS[d.mode][key], source: "preset" };
 }
 
@@ -217,6 +258,7 @@ export function buildAwareProfile(draft) {
     profile_id: "demo",
     revision: 1,
     display_name: primary,
+    custom_sound_requests: d.custom_rules,
     name_detection: {
       enabled: primary.length > 0,
       primary_name: primary,
@@ -225,6 +267,7 @@ export function buildAwareProfile(draft) {
     },
     notification_preferences: {
       mode: d.mode,
+      category_tiers: d.category_rules,
       event_tiers: eventTiers,
     },
   };
@@ -373,6 +416,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
   }));
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState(null); // { key, tier }
+  const [customNote, setCustomNote] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [previewKey, setPreviewKey] = useState("smoke_alarm");
   const [direction, setDirection] = useState("unknown");
@@ -724,6 +768,50 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
           </div>
         </section>
 
+        <section style={s.section}>
+          <details>
+            <summary style={s.summary}>Category defaults (optional)</summary>
+            <p style={s.help}>
+              Change a group together. Individual sound rules take priority;
+              otherwise the selected preset applies.
+            </p>
+            {Object.entries(alertPolicy.categories).map(([key, label]) => (
+              <label
+                key={key}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  alignItems: "center",
+                  marginTop: 12,
+                }}
+              >
+                {label}
+                <select
+                  aria-label={`Priority for category ${label}`}
+                  style={s.select}
+                  value={draft.category_rules?.[key] ?? ""}
+                  onChange={(e) =>
+                    setDraft((d) => {
+                      const categories = { ...d.category_rules };
+                      if (e.target.value === "") delete categories[key];
+                      else categories[key] = Number(e.target.value);
+                      return { ...d, category_rules: categories };
+                    })
+                  }
+                >
+                  <option value="">Use preset</option>
+                  {AWARE_TIERS.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            ))}
+          </details>
+        </section>
+
         {/* Rules */}
         <section style={s.section} aria-labelledby={uid + "-rules-h"}>
           <h2 id={uid + "-rules-h"} style={s.h2}>
@@ -759,6 +847,40 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                 Supported: {AWARE_EVENTS.map((e) => e.label).join(", ")}.
               </p>
               <div id={uid + "-results"} aria-live="polite">
+                {query.trim() && (
+                  <button
+                    type="button"
+                    style={{ ...s.textBtn, marginTop: 12 }}
+                    disabled={
+                      query.trim().length > 80 ||
+                      (draft.custom_rules ?? []).length >= 20
+                    }
+                    onClick={() => {
+                      const before = draft.custom_rules ?? [];
+                      const next = sanitizeCustomSounds([
+                        ...before,
+                        { id: crypto.randomUUID(), label: query, tier: 2 },
+                      ]);
+                      if (next.length === before.length) {
+                        setCustomNote("That custom sound is already listed.");
+                        return;
+                      }
+                      setDraft((d) => ({ ...d, custom_rules: next }));
+                      setQuery("");
+                      setCustomNote(
+                        "Custom sound saved. Recognition is pending; it is not being detected yet.",
+                      );
+                    }}
+                  >
+                    Request “{query.trim()}” as a custom sound
+                  </button>
+                )}
+                {customNote && (
+                  <p role="status" style={s.help}>
+                    {customNote}
+                  </p>
+                )}
+
                 {query.trim() !== "" && available.length > 0 && (
                   <ul
                     style={Object.assign({}, s.group, {
@@ -836,9 +958,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
                       Aware can only react to sounds its classifier has been
                       trained to recognize. Typing a new name here would not
-                      teach it that sound, so other sounds cannot be added yet.
-                      Support for more specific sounds would need classifier
-                      work first.
+                      teach it that sound. You can request it below and choose
+                      its priority; recognition will stay pending until support
+                      is connected.
                     </p>
                   </div>
                 )}
@@ -1020,6 +1142,73 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
             )}
           </div>
         </section>
+
+        {(draft.custom_rules ?? []).length > 0 && (
+          <section style={s.section} aria-label="Custom sounds">
+            <h2 style={s.h2}>Custom sounds</h2>
+            <p style={s.lead}>
+              Recognition pending. These preferences are saved, but these sounds
+              do not trigger alerts yet.
+            </p>
+            <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
+              {draft.custom_rules.map((rule) => (
+                <li
+                  key={rule.id}
+                  style={{
+                    display: "flex",
+                    flexWrap: "wrap",
+                    gap: 12,
+                    alignItems: "center",
+                    padding: "12px 0",
+                  }}
+                >
+                  <span style={{ flex: 1, minWidth: 140 }}>
+                    {rule.label}
+                    <small style={{ display: "block", color: p.muted }}>
+                      Recognition pending
+                    </small>
+                  </span>
+                  <select
+                    aria-label={`Priority for custom sound ${rule.label}`}
+                    value={rule.tier}
+                    style={s.select}
+                    onChange={(e) =>
+                      setDraft((d) => ({
+                        ...d,
+                        custom_rules: d.custom_rules.map((r) =>
+                          r.id === rule.id
+                            ? { ...r, tier: Number(e.target.value) }
+                            : r,
+                        ),
+                      }))
+                    }
+                  >
+                    {AWARE_TIERS.map((t) => (
+                      <option key={t.value} value={t.value}>
+                        {t.label}
+                      </option>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    style={s.textBtn}
+                    aria-label={`Remove custom sound ${rule.label}`}
+                    onClick={() =>
+                      setDraft((d) => ({
+                        ...d,
+                        custom_rules: d.custom_rules.filter(
+                          (r) => r.id !== rule.id,
+                        ),
+                      }))
+                    }
+                  >
+                    Remove
+                  </button>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
 
         {/* Name */}
         <section style={s.section}>

@@ -220,6 +220,18 @@ class ReceiverHttpTests(unittest.TestCase):
             self.call('/controls', {'focus_mode': 'dnd', 'paused': 'bad'})
         self.assertEqual(self.call('/state')['focus_mode'], 'everyday')
 
+    def test_custom_requests_persist_as_pending_without_enabling_recognition(self):
+        profile = self.call('/profile')
+        profile['custom_sound_requests'] = [dict(id='custom-1', label='My kettle whistle', tier=0, status='pending')]
+        saved = self.call('/profile', profile, 'PUT')
+        self.assertEqual(saved['custom_sound_requests'], profile['custom_sound_requests'])
+        restarted = self.module.AlertState(profile_path=self.profile_path)
+        self.assertEqual(restarted.profile()['custom_sound_requests'][0]['tier'], 0)
+        self.assertEqual(restarted.profile()['notification_preferences']['event_tiers'], {})
+        bad = dict(profile, custom_sound_requests=[dict(id='x',label='Something',tier=2,status='active')])
+        with self.assertRaises(HTTPError):
+            self.call('/profile', bad, 'PUT')
+
     def test_controls_dismiss_and_errors(self):
         alarm = make_event('smoke_alarm', .9, 'mock')
         self.call('/events', alarm)

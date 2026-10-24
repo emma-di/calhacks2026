@@ -127,3 +127,11 @@ Manual Dismiss and timed expiry work; Look is explicitly a simulated input. No n
 A phone can act as a camera when the OS/browser exposes it as a webcam. Direct phone-browser access
 would require a reachable secure site and an agreed event connection; localhost on the laptop is
 not accessible from the phone. That remote-phone setup has not been implemented or tested here.
+
+## Current display and demo decisions — October 24 (supersedes edge-placement history)
+
+The real panel is only on the right side of the field of vision. Center the icon within it and use
+compass arrows around that icon; unknown has no arrow. One alert at a time remains intentional.
+Optional thumbs-up is restored for the demo POV camera only, with a deliberate hold/release and exact
+event dismissal. User reports finicky live behavior; tuning is deferred. The glasses still have no
+camera. Phone POV/mirroring is not implemented yet. See simulator-freeze.md and integration-revisit.md.

@@ -34,6 +34,9 @@ def validate_profile(value, known_types):
             raise ValueError(f'Unknown sound in event_tiers: {kind}')
         if type(tier) is not int or not 0 <= tier <= 4:
             raise ValueError(f'Tier for {kind} must be 0..4')
+    categories = prefs.get('category_tiers', {})
+    if not isinstance(categories, dict) or any(k not in POLICY['categories'] or type(v) is not int or not 0 <= v <= 4 for k,v in categories.items()):
+        raise ValueError('Invalid category_tiers')
     names = value.get('name_detection', DEFAULT_PROFILE['name_detection'])
     if not isinstance(names, dict):
         raise ValueError('name_detection must be an object')
@@ -44,14 +47,35 @@ def validate_profile(value, known_types):
     if not isinstance(aliases, list) or len(aliases) > 8 or not all(
             isinstance(a, str) and 0 < len(a) <= 60 for a in aliases):
         raise ValueError('aliases must be up to 8 short strings')
+    requests = value.get('custom_sound_requests', [])
+    if not isinstance(requests, list) or len(requests) > 20:
+        raise ValueError('custom_sound_requests must contain at most 20 pending requests')
+    custom, seen = [], set()
+    for request in requests:
+        if not isinstance(request, dict):
+            raise ValueError('Invalid custom sound request')
+        label = request.get('label')
+        request_id = request.get('id')
+        tier = request.get('tier')
+        if not isinstance(label, str) or not label.strip() or len(label) > 80:
+            raise ValueError('Custom sound label must be 1..80 characters')
+        if not isinstance(request_id, str) or not 0 < len(request_id) <= 120:
+            raise ValueError('Invalid custom sound request id')
+        if type(tier) is not int or not 0 <= tier <= 4 or request.get('status') != 'pending':
+            raise ValueError('Custom sound must have a valid tier and pending status')
+        key = ' '.join(label.split()).casefold()
+        if key in seen:
+            raise ValueError('Duplicate custom sound label')
+        seen.add(key)
+        custom.append(dict(id=request_id, label=' '.join(label.split()), tier=tier, status='pending'))
     display = value.get('display', {})
     if not isinstance(display, dict) or not isinstance(display.get('labels', False), bool):
         raise ValueError('display.labels must be true or false')
     return dict(schema_version=1, profile_id=str(value.get('profile_id', 'local'))[:64],
-                revision=0, display_name=str(value.get('display_name', ''))[:60],
+                revision=0, custom_sound_requests=custom, display_name=str(value.get('display_name', ''))[:60],
                 name_detection=dict(enabled=bool(names.get('enabled', False)), primary_name=primary,
                                     aliases=list(aliases), language=str(names.get('language', 'en'))[:12]),
-                notification_preferences=dict(mode=prefs['mode'], event_tiers=dict(tiers)),
+                notification_preferences=dict(mode=prefs['mode'], event_tiers=dict(tiers), category_tiers=dict(categories)),
                 display=dict(labels=display.get('labels', False)))
 
 
@@ -81,6 +105,9 @@ def effective_tier(kind, producer_tier, profile):
     prefs = profile['notification_preferences']
     if kind in prefs['event_tiers']:
         return prefs['event_tiers'][kind]
+    category = POLICY['event_categories'].get(kind)
+    if category in prefs.get('category_tiers', {}):
+        return prefs['category_tiers'][category]
     return POLICY['presets'][prefs['mode']].get(kind, producer_tier)
 
 

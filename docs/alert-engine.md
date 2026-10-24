@@ -26,7 +26,7 @@ the Mana onboarding defaults.
 | Duplicate event ID | Counted once. |
 | Lifetimes | Ambient 2 s, Notify 3 s, Attention 5 s, Urgent 30 s (unchanged from before). |
 
-| Direction | Optional `direction_degrees` (0 front, +90 right, -90 left, 180 behind) with `direction_confidence`. At confidence ≥ 0.6 the cue moves to that edge of the display (each side covers 90°); otherwise it stays centred. A two-microphone worker cannot tell front from behind and should send null rather than guess. |
+| Direction | Optional `direction_degrees` (0 front, +90 right, -90 left, 180 behind) with `direction_confidence`. At confidence ≥ 0.6 a compass arrow appears around the centered icon (each side covers 90°); otherwise no arrow appears. A two-microphone worker cannot tell front from behind and should send null rather than guess. |
 | Gesture to dismiss | A `thumbs_up` event (hand held up for ⅓ s, seen by a camera) dismisses the showing cue; with nothing showing it is ignored. The companion runs MediaPipe's hand-gesture model in the browser on the lens camera (the glasses' camera when it appears as a webcam, or the laptop's) and posts the event with `source: "camera"`; any other camera worker can post the same event. Audio `finger_snap` is still accepted but its recognizer rule is disabled: quiet snappers and loud alarms make it unreliable. `gesture_to_dismiss.count: 2` would require two. |
 | Confirmation | Whenever the wearer resolves a cue (thumbs-up, Dismiss, Look) the glasses and lens show a check mark for 0.6 s where the cue was; a waiting cue resumes after it. Expiry shows nothing. |
 | Resolution | A cue ends by **expiring** (logged), **Dismiss**, a **thumbs-up**, or the wearer **looking toward it** (`POST /look`). Looking acknowledges it like Dismiss, so repeats stay quiet. Only a directed cue can be resolved by looking (front, right, behind or left). |
@@ -95,7 +95,7 @@ The hardware list does not include a camera, and nothing on the glasses depends 
 
 Send direction on the normal event: `direction_degrees` in −180..180 relative to the wearer's face
 (0 ahead, +90 right, −90 left) and `direction_confidence` in 0..1. Both or neither; distance stays
-rejected. Nothing else changes: the engine buckets it, the cue moves to that edge of the glasses,
+rejected. Nothing else changes: the engine buckets it, a compass arrow appears around the centered icon,
 the browser shows the same frame, and `/look` resolution starts working. Until measured, leave both
 null and every cue stays undirected, which is today's honest behavior.
 

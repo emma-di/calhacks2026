@@ -12,7 +12,7 @@ body{background:#101716;color:#e7f7ee;font:18px system-ui;max-width:900px;margin
 <script>
 const cue=document.querySelector('#cue'),meta=document.querySelector('#meta');
 let lastId=null;
-document.querySelector('#dismiss').onclick=()=>fetch('/dismiss',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});
+document.querySelector('#dismiss').onclick=()=>fetch('/dismiss',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({event_id:lastId})});
 async function poll(){
  try{
   const response=await fetch('/state');if(!response.ok)throw Error('Disconnected');
@@ -20,7 +20,7 @@ async function poll(){
   const event=state.active;
   if((event?.event_id??null)!==lastId){
    lastId=event?.event_id??null;cue.textContent=event?event.label:'Waiting for an event';
-   meta.textContent=event?`Tier ${event.priority_tier} · ${event.source} · model score ${event.confidence.toFixed(2)} · direction unknown`:'';
+   meta.textContent=event?`Tier ${event.priority_tier} · ${event.source} · model score ${Number.isFinite(event.confidence)?event.confidence.toFixed(2):'unavailable'} · direction ${state.direction??'unknown'}`:'';
   }
   const latest=state.events.at(-1);document.querySelector('#json').textContent=latest?JSON.stringify(latest,null,2):'No events received';
  }catch(e){document.querySelector('#status').textContent='Disconnected — receiver unavailable';cue.textContent='Disconnected';meta.textContent='';lastId=null;}

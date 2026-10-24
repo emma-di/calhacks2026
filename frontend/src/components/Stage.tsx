@@ -7,6 +7,7 @@ import {
 } from "react";
 import { Camera, CameraOff } from "lucide-react";
 import Oled from "./Oled";
+import { useThumbsUp } from "../lib/gesture";
 import type { SoundEvent } from "../lib/events";
 
 // The camera only ever starts from a click, stays in this tab and is never recorded or sent anywhere.
@@ -105,6 +106,7 @@ export default function Stage({
   large = false,
   motion = "none",
   accent,
+  onGesture,
   children,
 }: {
   event: SoundEvent | null;
@@ -114,13 +116,35 @@ export default function Stage({
   large?: boolean;
   motion?: "none" | "gentle";
   accent?: string;
+  onGesture?: (eventId: string) => void;
   children?: ReactNode;
 }) {
   const camera = useCamera();
+  const [gesturesEnabled, setGesturesEnabled] = useState(false);
   const video = useRef<HTMLVideoElement>(null);
   useEffect(() => {
     if (video.current) video.current.srcObject = camera.stream;
   }, [camera.stream]);
+  const cueId =
+    event && event.type !== ("resolved" as string) ? event.event_id : null;
+  const gesture = useThumbsUp(
+    video,
+    Boolean(camera.stream && gesturesEnabled && onGesture),
+    (eventId) => onGesture?.(eventId),
+    cueId,
+  );
+  const gestureText = {
+    off: "",
+    loading: "Loading gesture model…",
+    watching: cueId
+      ? "Hold thumbs-up for ½ second to dismiss"
+      : "Gestures ready · waiting for an alert",
+    hand: "Hand seen · hold thumbs-up",
+    holding: "Hold thumbs-up…",
+    release: "Lower your hand to re-arm gestures",
+    error: "Gestures unavailable · use Dismiss",
+  };
+
   return (
     <section
       className={`stage ${large ? "stage-large" : ""}`}
@@ -141,6 +165,15 @@ export default function Stage({
           {camera.stream ? `Demo POV camera · ${caption}` : caption}
         </span>
         <span className="stage-tools">
+          {camera.stream && onGesture && (
+            <button
+              className="stage-button"
+              aria-pressed={gesturesEnabled}
+              onClick={() => setGesturesEnabled((value) => !value)}
+            >
+              {gesturesEnabled ? "Gestures on" : "Enable thumbs-up"}
+            </button>
+          )}
           {camera.stream && camera.devices.length > 1 && (
             <select
               aria-label="Camera"
@@ -166,6 +199,11 @@ export default function Stage({
           </button>
         </span>
       </div>
+      {gesture !== "off" && (
+        <p className={`gesture-demo-status is-${gesture}`} role="status">
+          Demo camera · {gestureText[gesture]}
+        </p>
+      )}
       {camera.error && (
         <p className="stage-error" role="alert">
           {camera.error}

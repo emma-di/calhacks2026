@@ -137,6 +137,7 @@ export function useSession(
   const profileKey = profile
     ? JSON.stringify([
         profile.notification_preferences,
+        profile.custom_sound_requests,
         profile.name_detection,
         labels,
       ])
@@ -240,19 +241,22 @@ export function useSession(
     );
   }, [source, send, stopSequence]);
 
-  const dismiss = useCallback(async () => {
-    const id = view.active?.event_id;
-    if (!id) return;
-    if (source === "browser") {
-      engine.current.dismiss(performance.now(), id);
-      return;
-    }
-    try {
-      await request("/dismiss", { event_id: id });
-    } catch {
-      setError("Dismiss did not reach the receiver.");
-    }
-  }, [source, view.active]);
+  const dismiss = useCallback(
+    async (expectedEventId?: string) => {
+      const id = expectedEventId ?? view.active?.event_id;
+      if (!id) return;
+      if (source === "browser") {
+        engine.current.dismiss(performance.now(), id);
+        return;
+      }
+      try {
+        await request("/dismiss", { event_id: id });
+      } catch {
+        setError("Dismiss did not reach the receiver.");
+      }
+    },
+    [source, view.active],
+  );
 
   // A dismiss gesture from the camera, or the dock button standing in for it.
   const gesture = useCallback(

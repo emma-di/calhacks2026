@@ -142,44 +142,31 @@ def fit_label(label, width):
 
 # Icon top-left for each placement, and the row its label uses. The label row is always reserved,
 # so the icon never moves when labels are switched on or off.
-PLACES = {
-    None: ((WIDTH - ICON_SIZE) // 2, 14, 52),
-    "left": (EDGE, 14, 52),
-    "right": (WIDTH - EDGE - ICON_SIZE, 14, 52),
-    "front": ((WIDTH - ICON_SIZE) // 2, EDGE, 44),
-    "behind": ((WIDTH - ICON_SIZE) // 2, HEIGHT - EDGE - ICON_SIZE, 13),
-}
-
-
+# The entire panel sits on the right side of the wearer's field of view. The icon stays
+# centered within that patch; a compass arrow communicates sound direction around it.
 def layout(direction, label):
-    """Where the cue sits. The direction is the position; unknown stays centred.
-
-    The icon hugs the edge the sound came from; the label sits on its own row, aligned to that
-    edge (under the icon, or above it for behind). Returns the icon box and text origin.
-    """
-    x, y, text_y = PLACES[direction]
+    x, y, text_y = (WIDTH - ICON_SIZE) // 2, 10, 55
     text = fit_label(label, 19) if label else None
     tw = len(text) * 6 - 1 if text else 0
-    text_x = {"left": EDGE, "right": WIDTH - EDGE - tw}.get(direction, (WIDTH - tw) // 2)
     return dict(box=(x, y, ICON_SIZE, ICON_SIZE), icon=(x, y), text=text,
-                origin=(text_x, text_y) if text else None, width=tw)
+                origin=((WIDTH - tw) // 2, text_y) if text else None, width=tw)
 
 
 def draw_edge(bitmap, direction):
-    """A one-pixel line along the edge the sound came from."""
-    if direction == "left":
-        bitmap.line(0, 8, 0, 55)
-    elif direction == "right":
-        bitmap.line(WIDTH - 1, 8, WIDTH - 1, 55)
-    elif direction == "front":
-        bitmap.line(16, 0, 111, 0)
-    elif direction == "behind":
-        bitmap.line(16, HEIGHT - 1, 111, HEIGHT - 1)
+    """Compass arrow outside the stationary icon; no arrow for unknown direction."""
+    if direction == 'left':
+        bitmap.line(27, 26, 37, 26); bitmap.line(27, 26, 32, 21); bitmap.line(27, 26, 32, 31)
+    elif direction == 'right':
+        bitmap.line(91, 26, 101, 26); bitmap.line(101, 26, 96, 21); bitmap.line(101, 26, 96, 31)
+    elif direction == 'front':
+        bitmap.line(64, 0, 64, 5); bitmap.line(64, 0, 60, 4); bitmap.line(64, 0, 68, 4)
+    elif direction == 'behind':
+        bitmap.line(64, 47, 64, 51); bitmap.line(64, 51, 60, 47); bitmap.line(64, 51, 68, 47)
 
 
 def render(presentation=None, show_labels=True):
     """Tier changes only the box around the cue: 1 none, 2 thin, 3 double, 4 double plus an
-    inverted label (Urgent always shows its label). Position always comes from the direction.
+    inverted label (Urgent always shows its label). The icon is centered; direction is shown by the compass arrow.
     """
     bitmap = Bitmap()
     if presentation is None or presentation.effective_tier == 0 or presentation.remaining_ms == 0:

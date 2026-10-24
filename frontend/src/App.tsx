@@ -130,6 +130,9 @@ function syncText(source: Source, sync: SyncStatus, connected: boolean) {
 export default function App() {
   const [view, setView] = useState<View>("live");
   const [audience, setAudience] = useState(false);
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [view, audience]);
   const [source, setSource] = useState<Source>(() => {
     try {
       return localStorage.getItem("aware-source") === "receiver"
@@ -248,7 +251,9 @@ export default function App() {
     <figure className="oled-inset">
       <Oled event={lensEvent} labels={lensLabels} direction={lensDirection} />
       <figcaption>
-        {glasses ? "Display client online · preview" : "The panel · 128×64"}
+        {glasses
+          ? "Display client online · preview"
+          : "Right-side display · 128×64"}
       </figcaption>
     </figure>
   );
@@ -262,6 +267,7 @@ export default function App() {
           direction={lensDirection}
           caption={stageCaption}
           motion={appearance.motion}
+          onGesture={(eventId) => void session.dismiss(eventId)}
           accent={active ? appearance.colors[active.priority_tier] : undefined}
           large
         >
@@ -269,7 +275,11 @@ export default function App() {
         </Stage>
         <div className="audience-bar">
           <p className="narration">{narration}</p>
-          <button className="key" onClick={session.dismiss} disabled={!active}>
+          <button
+            className="key"
+            onClick={() => void session.dismiss()}
+            disabled={!active}
+          >
             Dismiss
           </button>
           <button className="key" onClick={() => setAudience(false)}>
@@ -381,6 +391,7 @@ export default function App() {
               direction={lensDirection}
               caption={stageCaption}
               motion={appearance.motion}
+              onGesture={(eventId) => void session.dismiss(eventId)}
               accent={
                 active ? appearance.colors[active.priority_tier] : undefined
               }
@@ -439,31 +450,6 @@ export default function App() {
                 className="switch"
                 role="radiogroup"
                 onKeyDown={radioKeys}
-                aria-label="Simulated direction of the next test sound"
-              >
-                {([null, "left", "front", "right", "behind"] as const).map(
-                  (d) => (
-                    <button
-                      key={d ?? "unknown"}
-                      role="radio"
-                      aria-checked={testDirection === d}
-                      tabIndex={testDirection === d ? 0 : -1}
-                      onClick={() => setTestDirection(d)}
-                      title={
-                        d
-                          ? `Next test sound comes from the ${d} (simulated)`
-                          : "No direction, as today's hardware reports"
-                      }
-                    >
-                      {d ? d[0].toUpperCase() + d.slice(1) : "No direction"}
-                    </button>
-                  ),
-                )}
-              </div>
-              <div
-                className="switch"
-                role="radiogroup"
-                onKeyDown={radioKeys}
                 aria-label="Mode"
               >
                 {focusOptions.map((option) => (
@@ -496,29 +482,60 @@ export default function App() {
               <span className="dock-spacer" />
               <button
                 className="key"
-                onClick={
-                  session.busy ? session.stopSequence : session.playSequence
-                }
-                disabled={offline}
-              >
-                {session.busy ? "Stop" : "Play a busy minute"}
-              </button>
-              {direction ? (
-                <button
-                  className="key key-signal"
-                  onClick={() => void session.look(direction)}
-                >
-                  Simulate look {direction}
-                </button>
-              ) : null}
-              <button
-                className="key"
-                onClick={session.dismiss}
+                onClick={() => void session.dismiss()}
                 disabled={!active}
               >
                 Dismiss
               </button>
             </div>
+            <details className="demo-tools">
+              <summary>Test a direction or sequence</summary>
+              <div className="dock-row">
+                {" "}
+                <div
+                  className="switch"
+                  role="radiogroup"
+                  onKeyDown={radioKeys}
+                  aria-label="Simulated direction of the next test sound"
+                >
+                  {([null, "left", "front", "right", "behind"] as const).map(
+                    (d) => (
+                      <button
+                        key={d ?? "unknown"}
+                        role="radio"
+                        aria-checked={testDirection === d}
+                        tabIndex={testDirection === d ? 0 : -1}
+                        onClick={() => setTestDirection(d)}
+                        title={
+                          d
+                            ? `Next test sound comes from the ${d} (simulated)`
+                            : "No direction, as today's hardware reports"
+                        }
+                      >
+                        {d ? d[0].toUpperCase() + d.slice(1) : "No direction"}
+                      </button>
+                    ),
+                  )}
+                </div>
+                <button
+                  className="key"
+                  onClick={
+                    session.busy ? session.stopSequence : session.playSequence
+                  }
+                  disabled={offline}
+                >
+                  {session.busy ? "Stop" : "Play a busy minute"}
+                </button>
+                {direction ? (
+                  <button
+                    className="key key-signal"
+                    onClick={() => void session.look(direction)}
+                  >
+                    Simulate look {direction}
+                  </button>
+                ) : null}
+              </div>
+            </details>
             <p className="dock-note">
               {focus.detail}
               {state.paused ? " Paused hides every cue, urgent ones too." : ""}
