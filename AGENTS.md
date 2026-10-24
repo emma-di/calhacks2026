@@ -4,6 +4,8 @@ This is the CalHacks situational-awareness glasses repo. Read this file before c
 
 ## Start here
 
+Audio/signals owner (John): start with [HANDOFF-JOHN.md](HANDOFF-JOHN.md).
+
 Latest continuity handoff: [HANDOFF-CLAUDE.md](HANDOFF-CLAUDE.md).
 
 Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and update it when work changes lanes.
