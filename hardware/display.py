@@ -1,4 +1,5 @@
 """Dependency-free 128x64 monochrome renderer and transport-independent display state."""
+from __future__ import annotations  # Pi OS Bullseye ships Python 3.9
 from dataclasses import dataclass
 import json
 import math
