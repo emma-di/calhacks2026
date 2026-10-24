@@ -218,6 +218,11 @@ voice cloning and continuous ASL translation are outside current weekend scope. 
   dismisses the showing cue; MediaPipe runs in the browser. Audio snap rule disabled, code kept.
 - Yameen: please confirm the camera model/interface and whether it can appear to the laptop as a webcam.
 
+## Design decisions recorded — October 24
+
+Full reasoning, rejected alternatives and open questions from the redesign sessions:
+[docs/design-decisions.md](docs/design-decisions.md).
+
 ## Add a note
 
 ```text

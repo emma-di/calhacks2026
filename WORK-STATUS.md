@@ -56,7 +56,7 @@ at 768/390; unfamiliar tester; second Mac; final mic/room accuracy and latency.
 spatial worker emitting direction; name worker; slow 1 Hz urgent pulse (proposed, not built);
 merge PR #2 after teammate review.
 
-**Decisions made in this session that need team re-review:**
+**Decisions made in this session that need team re-review** (reasoning in [design decisions](docs/design-decisions.md)):
 1. Receiver, not producers, decides tier; `/state.active.priority_tier` is now the effective tier.
 2. Queue/repeat/ack timings (5 items, 10 s fresh, 15 s acknowledge, urgent up to 2 min) and
    one-gesture dismiss; check mark delays a resumed cue by 0.6 s.

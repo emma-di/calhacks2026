@@ -7,6 +7,7 @@ This is the CalHacks situational-awareness glasses repo. Read this file before c
 Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and update it when work changes lanes.
 
 0. Read [TEAM-NOTES.md](TEAM-NOTES.md) for the latest chat decisions, caveats and branch context. Append relevant new decisions there.
+   Product/UI decisions with their reasoning and rejected options: [design decisions](docs/design-decisions.md).
 1. Read [README.md](README.md) for runnable setup and actual readiness.
 2. Read [TODO.md](TODO.md) for the whole-project checklist; update relevant IDs with evidence in your PR.
 3. Read [team workstreams](docs/team-workstreams.md) and [distilled build instructions](docs/team-build-instructions.md).
