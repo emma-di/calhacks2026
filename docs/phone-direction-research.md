@@ -32,3 +32,10 @@ speech work remains separate. No phone microphone recognition test has been star
 
 Sources and precise API links are in the native probe README. Physical probe status is updated in
 TEAM-NOTES.md / WORK-STATUS.md; compiled is not the same as confirmed live localization.
+
+
+Recorded replay follow-through: ran cached `samples/dog.wav` through John's observations CLI and
+an isolated ephemeral receiver using the real Zipformer model. Exit 0; **five observations and one
+dog_bark event** delivered with source=replay. Custom heads were explicitly disabled because the
+onnx/onnxruntime/kaldi-native-fbank dependencies are not installed in this environment. This verifies
+the built-in recognition + observations delivery path, not the custom-trained heads or speech worker.

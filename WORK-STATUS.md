@@ -156,3 +156,10 @@ checks. John’s phone is connected/trusted; signing/deployment in progress. No 
 claim yet. See native/PhoneSpatialProbe/README.md and docs/phone-direction-research.md. This probe is
 separate from the frozen simulator and does not emit alerts. John’s observations stream reviewed
 with six passing isolated tests; not merged into current receiver. Speech remains John’s ongoing work.
+
+
+Usage-limit handoff: HANDOFF-CLAUDE.md is the current resume point. Xcode is extracting OS library
+symbols from John's connected/unlocked iPhone after Developer Mode was enabled. Signed Run was
+requested; app launch and actual FOA capture are not yet confirmed. Native diagnostic preservation
+change compiled successfully. Real recorded John-observations replay delivered 5 observations +
+one dog_bark event (custom heads disabled). All follow-up gates and running services are in the handoff.

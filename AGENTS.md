@@ -4,6 +4,8 @@ This is the CalHacks situational-awareness glasses repo. Read this file before c
 
 ## Start here
 
+Latest continuity handoff: [HANDOFF-CLAUDE.md](HANDOFF-CLAUDE.md).
+
 Check [WORK-STATUS.md](WORK-STATUS.md) for the latest milestone snapshot and update it when work changes lanes.
 
 0. Read [TEAM-NOTES.md](TEAM-NOTES.md) for the latest chat decisions, caveats and branch context. Append relevant new decisions there.

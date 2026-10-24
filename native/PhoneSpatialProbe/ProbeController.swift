@@ -34,10 +34,12 @@ import Foundation
         }
     }
     func stop() {
+        guard running || engine != nil else { return }
+        let lastStatus = status
         generation += 1
         engine?.stop(); engine = nil; running = false
-        status = "Stopped. No audio saved or uploaded."
-        reading = "Direction unknown"
+        status = "Stopped. No audio saved or uploaded. Last input: \(lastStatus)"
+        reading = "Direction unknown · microphone off"
     }
 }
 
