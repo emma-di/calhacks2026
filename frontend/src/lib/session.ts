@@ -12,6 +12,7 @@ import {
   parseSnapshot,
   request,
   type EventType,
+  type SoundEvent,
   type ViewState,
 } from "./events";
 import { deliverEvent } from "./delivery";
@@ -225,6 +226,15 @@ export function useSession(
     [source],
   );
 
+  // A real detection from this browser's microphone (lib/useBrowserHearing.ts) in Browser mode.
+  const hear = useCallback(
+    (event: SoundEvent) => {
+      if (source !== "browser") return;
+      void deliverEvent(source, event, (input) => engine.current.add(input, performance.now()), request);
+    },
+    [source],
+  );
+
   const play = useCallback(
     async (type: EventType, direction: Direction | number | null = null) => {
       stopSequence();
@@ -329,6 +339,7 @@ export function useSession(
     busy,
     error,
     play,
+    hear,
     playSequence,
     stopSequence,
     dismiss,

@@ -785,9 +785,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const pendingEv = pending ? (pendingModel ? {...pendingModel,label:pending.custom_label || pendingModel.name,event_type:'custom',default_tier:2}
     : pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
   const hasName = /\p{L}/u.test(draft.name);
-  const readyToFinish = canFinish && !pending && hasName;
+  const readyToFinish = canFinish && !pending;   // a name is optional; name alerts simply stay off
   const finishBlockers = [
-    !hasName && "Add your name in step 1.",
     pending && "Add or cancel the sound you’re choosing in step 3.",
     !canFinish && "Waiting for your latest preferences to save…",
   ].filter(Boolean);
@@ -849,7 +848,6 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         >
           {firstUse ? "Set up Spidey Sense" : "Your settings"}
         </h1>
-        {firstUse && <p style={{ fontSize: 16, margin: "8px 0 0" }}>Only your name is required.</p>}
         <div
           role="status"
           aria-live="polite"
@@ -862,7 +860,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         {/* 1. Name */}
         <section style={s.section} aria-labelledby={uid + "-step-name"}>
           <h2 id={uid + "-step-name"} style={s.h2}>
-            <span style={stepNumber}>1.</span>Your name
+            <span style={stepNumber}>1.</span>Your name{" "}
+            <span style={{ fontWeight: 400, fontSize: 15, color: p.muted, marginLeft: 4 }}>Optional</span>
           </h2>
           <div className={`setup-name-grid ${!hasName && !draft.aliasesText ? "is-single" : ""}`} style={{ marginTop: 16 }}>
             <div>
@@ -873,15 +872,13 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 id={uid + "-name"}
                 type="text"
                 autoComplete="given-name"
-                required
-                aria-required="true"
                 value={draft.name}
                 onChange={(e) => update({ name: e.target.value, name_enabled: true })}
                 aria-describedby={uid + "-name-help"}
                 style={s.input}
               />
               <p id={uid + "-name-help"} style={s.help}>
-                {!hasName ? "Required to start." : draft.name_enabled === false ? "Name alerts are turned off." : ""}
+                {!hasName ? "Optional. Add it to get an alert when someone says it." : draft.name_enabled === false ? "Name alerts are turned off." : ""}
               </p>
             </div>
             <div hidden={!hasName && !draft.aliasesText}>
@@ -1029,7 +1026,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             <span style={{ fontWeight: 400, fontSize: 15, color: p.muted, marginLeft: 4 }}>Optional</span>
           </h2>
 
-          <details ref={aboutRef} open={connectClaude} style={{ marginTop: 16 }}>
+          {!HOSTED && <details ref={aboutRef} open={connectClaude} style={{ marginTop: 16 }}>
             <summary style={{ fontSize: 15, fontWeight: 500, padding: "6px 0" }}>
               Tell us about you{" "}
               <span style={{ fontWeight: 400, color: p.muted }}>· Claude suggests sounds</span>
@@ -1040,7 +1037,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 setCustomNote("Suggested sounds added. Your previous choices were kept.");
               }} />
             </div>
-          </details>
+          </details>}
 
           {!pending && (
             <div style={{ marginTop: 20 }}>

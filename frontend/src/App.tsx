@@ -31,6 +31,8 @@ import TeachPanel from "./components/TeachPanel";
 import PiMicrophoneLevels from "./components/PiMicrophoneLevels";
 import { initialView, SETUP_COMPLETE_KEY } from "./lib/setupEntry";
 import { HOSTED, REPO_URL } from "./lib/hosted";
+import { useBrowserHearing } from "./lib/useBrowserHearing";
+import type { PickedSound } from "./lib/browserHearing";
 
 type View = "live" | "preferences" | "log";
 
@@ -266,6 +268,17 @@ export default function App() {
   const helpDialog = useRef<HTMLDialogElement>(null);
   const session = useSession(source, profile, labels, editRevision);
   const { view: state, connection } = session;
+  // Browser mode can listen with this device's microphone, only after an explicit click.
+  const [micOn, setMicOn] = useState(false);
+  const listenNames = profile
+    ? [profile.name_detection.primary_name, ...profile.name_detection.aliases].filter(Boolean)
+    : [];
+  const mic = useBrowserHearing(
+    source === "browser" && micOn,
+    listenNames,
+    (profile?.custom_sound_requests ?? []) as PickedSound[],
+    session.hear,
+  );
   const connected = connection === "connected";
   const glasses = Boolean(
     source === "receiver" && connected && state.health?.display.connected,
@@ -552,6 +565,24 @@ export default function App() {
 
 
           <section className="dock" aria-label="Controls">
+            {source === "browser" && (
+              <div className="browser-mic">
+                <button className="key" aria-pressed={micOn} onClick={() => setMicOn((on) => !on)}>
+                  {micOn ? "Stop listening" : "Listen with this device's mic"}
+                </button>
+                <span className="aside" role="status">
+                  {mic.status === "starting" ? "Starting the microphone…"
+                    : mic.status === "error" ? `Microphone unavailable: ${mic.error}`
+                    : mic.status === "listening" ? `Listening${mic.heard.length ? ` · hearing ${mic.heard.join(", ")}` : ""}${mic.speech === "unavailable" ? " · name detection needs Chrome, Edge or Safari" : ""}`
+                    : "Or tap a test sound."}
+                </span>
+                <p className="aside browser-mic-note">
+                  Sounds are recognized on this device. Names and questions use your browser's speech
+                  service, which sends speech to its provider (Google in Chrome). Nothing is saved here.
+                  No arrows: one microphone can't tell direction.
+                </p>
+              </div>
+            )}
             {/* Test sounds are for Browser mode; Receiver mode shows only what the microphones hear. */}
             {source === "browser" && <div className="keys" role="group" aria-label="Play a sound">
               {sounds.map((sound) => {

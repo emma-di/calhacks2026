@@ -1603,3 +1603,6 @@ code {
 .diagnostics { margin-top: 40px; display: grid; gap: 20px; }
 .diagnostics > h2 { font-size: 17px; font-weight: 600; }
 .mobile-session[hidden] { display: none !important; }
+.browser-mic { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 14px; }
+.browser-mic .aside { margin: 0; }
+.browser-mic-note { flex-basis: 100%; max-width: 680px; }

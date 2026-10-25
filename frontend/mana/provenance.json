@@ -36,7 +36,8 @@
       "\"Tell us about you\" (Claude suggestions and key connection) moved from More settings to the start of step 3; the missing-key link now opens it",
       "Self-explanatory subtitles and help lines removed; save status shown only on failure; Spidey Sense product name",
       "Default urgent browser glow changed from amber to the brand comic red (#df443d)",
-      "Public demo build (HOSTED) hides Ask Claude, which needs the local receiver"
+      "Public demo build (HOSTED) hides Ask Claude, which needs the local receiver",
+      "Name made optional per Emma (Start no longer waits for it); \"Tell us about you\" hidden on the public demo, which has no Claude"
     ],
     "local_test_changes": [
       "frontend/src/lib/setupSuggestions.test.ts: three render tests updated from the old layout to the new step order, required name and aria-disabled Start"

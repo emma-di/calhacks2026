@@ -13,6 +13,7 @@
     "prebuild": "npm run setup:gestures"
   },
   "dependencies": {
+    "@mediapipe/tasks-audio": "1.1.1",
     "@mediapipe/tasks-vision": "1.1.1",
     "lucide-react": "^1.61.0",
     "react": "^19.3.1",
