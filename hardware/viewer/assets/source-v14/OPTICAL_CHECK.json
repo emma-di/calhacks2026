@@ -1,0 +1,28 @@
+{
+  "source_sha256": "f8c733a6f258e396da93c6c0478c8959fcf79164f7f499b3e3b88e18f5e1ea5b",
+  "nominal_folded_distance_mm": 36.0,
+  "focus_travel_distance_mm": [
+    33.0,
+    39.0
+  ],
+  "central_label_zone": {
+    "width_mm": 12,
+    "height_mm": 6,
+    "lens_sample_radius_mm": 2,
+    "sampled_rays": 135,
+    "minimum_mirror_edge_margin_mm": 5.77,
+    "rays_inside_1mm_mirror_border": 135,
+    "all_inside_border": true
+  },
+  "full_screen_zone": {
+    "width_mm": 21.7,
+    "height_mm": 10.8,
+    "lens_sample_radius_mm": 2,
+    "sampled_rays": 135,
+    "minimum_mirror_edge_margin_mm": -0.693,
+    "rays_inside_1mm_mirror_border": 117,
+    "all_inside_border": false
+  },
+  "scope": "Finite mirror fold geometry only. Lens principal planes/profile, aberration, full housing ray bundles, eye relief, brightness, prescription lenses and readable eye box are not certified.",
+  "bench_calibration_required": true
+}

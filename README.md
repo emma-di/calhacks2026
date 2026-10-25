@@ -80,6 +80,7 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/server.py` | Local event receiver and alert priority/state |
 | `audio/monitor.html` | Browser cue simulator |
 | `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |
+| [`hardware/`](hardware/README.md) | v0.14 printable STLs, editable CAD, browser assembly viewer and GPIO wiring guide |
 | `tests/` | Fast unit checks; no weights or microphone required |
 | `docs/` | Team handoffs, setup detail and planned contracts |
 | `reports/` | Measurements, source manifests and example decision logs |
@@ -93,6 +94,8 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 - Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
   from the saved onboarding profile; it does not require training a new model per user.
 - Hardware output and spatial audio await the confirmed hardware stack. Direction is currently unknown.
+- The current four-piece wearable CAD and interactive hardware viewer are available under
+  [`hardware/`](hardware/README.md); physical fit and optical focus still require dry-fit testing.
 
 Read [measured results](reports/summary.md) for counts, misses and false alerts. This prototype is
 an awareness aid, not a certified emergency alert system.

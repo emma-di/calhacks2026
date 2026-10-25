@@ -1,0 +1,127 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DETECT — Pi Zero W Wiring</title>
+  <link rel="stylesheet" href="wiring.css?v=18">
+</head>
+<body>
+  <header>
+    <a class="brand" href="index.html">DETECT</a>
+    <nav aria-label="Project views"><a href="index.html">CAD</a><a class="active" href="wiring.html" aria-current="page">WIRING</a></nav>
+    <span>PI ZERO W · 2× I²S MICROPHONES · I²C OLED</span>
+  </header>
+
+  <main>
+    <aside>
+      <p class="eyebrow">CONNECTION VIEWS</p>
+      <div class="steps" role="list" aria-label="Wiring views">
+        <button class="step active" data-group="all"><span>01</span><b>Complete system</b><small>Two I²S microphones + OLED</small></button>
+        <button class="step" data-group="left"><span>02</span><b>Left microphone</b><small>L/R select tied low</small></button>
+        <button class="step" data-group="right"><span>03</span><b>Right microphone</b><small>L/R select tied high</small></button>
+        <button class="step" data-group="oled"><span>04</span><b>OLED display</b><small>Four-wire I²C</small></button>
+        <button class="step" data-group="ports"><span>05</span><b>Power + ports</b><small>Correct Pi orientation</small></button>
+        <button class="step" data-group="clearance"><span>06</span><b>CAD clearance</b><small>Plug and wire keep-outs</small></button>
+        <button class="step" data-group="solder"><span>07</span><b>Underside soldering</b><small>OLED pads · mirrored view</small></button>
+      </div>
+
+      <section class="detail" aria-live="polite">
+        <p class="detail-kicker" id="detailKicker">COMPLETE SYSTEM</p>
+        <h1 id="detailTitle">Two-microphone wiring</h1>
+        <p id="detailText">Both microphones share the I²S clocks and data input. Their L/R pins select opposite stereo slots. The OLED uses the separate I²C pins.</p>
+        <div id="connectionList" class="connection-list"></div>
+      </section>
+
+      <div class="rules">
+        <p><b>3.3 V only:</b> never connect microphone or OLED logic to a 5 V GPIO pin.</p>
+        <p><b>Verified I²S:</b> SCK → pin 12, WS → pin 35, SD → pin 38, VDD → pin 1, GND → pin 6.</p>
+        <p><b>Shared bus:</b> matching SCK, WS and SD pins from both microphones join together.</p>
+        <p><b>Channel select:</b> left L/R → GND; right L/R → 3.3 V. Never leave L/R floating.</p>
+        <p><b>Data pull-down:</b> use one 100 kΩ resistor from the shared SD line to GND unless the breakout already includes it.</p>
+        <p class="source-links"><a href="https://www.raspberrypi.com/documentation/computers/raspberry-pi.html" target="_blank" rel="noreferrer">Raspberry Pi pin reference</a> · <a href="https://invensense.tdk.com/wp-content/uploads/2015/02/INMP441.pdf" target="_blank" rel="noreferrer">INMP441 datasheet</a></p>
+      </div>
+    </aside>
+
+    <section class="stage" aria-label="Interactive Raspberry Pi Zero W wiring diagram">
+      <div class="stage-bar"><div><b id="viewTitle">COMPLETE SYSTEM</b><span id="viewSubtitle">Click a connection to isolate it</span></div><button id="resetView" type="button">SHOW ALL</button></div>
+      <div class="diagram-wrap">
+        <svg id="wiringDiagram" viewBox="0 0 1400 930" role="img" aria-labelledby="diagramTitle diagramDesc">
+          <title id="diagramTitle">Raspberry Pi Zero W wiring for two I2S microphones and one I2C OLED</title>
+          <desc id="diagramDesc">Component-side view with microSD at top, CSI at bottom, GPIO on the right, ports on the left, two six-pin I2S microphones, and a four-pin OLED.</desc>
+          <defs>
+            <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="9" stdDeviation="10" flood-color="#000" flood-opacity=".34"/></filter>
+            <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="currentColor"/></marker>
+          </defs>
+
+          <g id="wireLayer"></g>
+
+          <g class="module mic-module" data-module="left" tabindex="0" role="button" aria-label="Left I2S microphone">
+            <circle class="module-shadow" cx="1168" cy="443" r="94"/><circle class="mic-board" cx="1168" cy="443" r="82"/>
+            <circle class="mic-port" cx="1168" cy="443" r="21"/><circle class="mic-ring" cx="1168" cy="443" r="9"/>
+            <text class="module-name" x="1168" y="334" text-anchor="middle">LEFT I²S MIC</text>
+            <text class="module-note" x="1168" y="352" text-anchor="middle">mounted on left side of glasses</text>
+            <g id="leftMicPins"></g>
+            <path class="local-link ground" d="M1235 396h45v31"/><text class="local-label" x="1283" y="440" text-anchor="middle">L/R → GND</text>
+          </g>
+
+          <g class="module mic-module" data-module="right" tabindex="0" role="button" aria-label="Right I2S microphone">
+            <circle class="module-shadow" cx="1168" cy="700" r="94"/><circle class="mic-board" cx="1168" cy="700" r="82"/>
+            <circle class="mic-port" cx="1168" cy="700" r="21"/><circle class="mic-ring" cx="1168" cy="700" r="9"/>
+            <text class="module-name" x="1168" y="591" text-anchor="middle">RIGHT I²S MIC</text>
+            <text class="module-note" x="1168" y="609" text-anchor="middle">mounted on right side of glasses</text>
+            <g id="rightMicPins"></g>
+            <path class="local-link power" d="M1235 653h45v31"/><text class="local-label" x="1283" y="697" text-anchor="middle">L/R → 3.3 V</text>
+          </g>
+
+          <g class="module power-module" data-module="ports" tabindex="0" role="button" aria-label="Pocket power bank connection">
+            <rect class="power-bank" x="107" y="684" width="253" height="112" rx="20"/>
+            <text class="module-name small" x="233" y="727" text-anchor="middle">POCKET POWER BANK</text>
+            <text class="module-note" x="233" y="751" text-anchor="middle">5 V output · Micro-USB power cable</text>
+            <rect class="bank-usb" x="346" y="722" width="22" height="34" rx="3"/>
+          </g>
+
+          <g class="pi-board" filter="url(#softShadow)">
+            <rect class="pcb" x="500" y="80" width="430" height="770" rx="36"/>
+            <circle class="mount" cx="545" cy="125" r="16"/><circle class="mount" cx="885" cy="125" r="16"/><circle class="mount" cx="545" cy="805" r="16"/><circle class="mount" cx="885" cy="805" r="16"/>
+            <rect class="sd-card" x="622" y="61" width="167" height="34" rx="5"/><path class="sd-teeth" d="M644 61v18m18-18v18m18-18v18m18-18v18m18-18v18m18-18v18m18-18v18"/>
+            <text class="edge-label" x="705" y="43" text-anchor="middle">microSD CARD · 15 mm REMOVAL CLEARANCE</text>
+            <rect class="edge-port hdmi-port" x="480" y="238" width="40" height="91" rx="5"/><text class="left-port-label" x="466" y="281" text-anchor="end">MINI HDMI</text>
+            <rect class="edge-port data-port" x="480" y="437" width="40" height="79" rx="5"/><text class="left-port-label data" x="466" y="473" text-anchor="end">USB DATA / OTG</text>
+            <rect class="edge-port pwr-port" x="480" y="603" width="40" height="79" rx="5"/><text class="left-port-label power" x="466" y="639" text-anchor="end">PWR IN</text>
+            <rect class="camera-port" x="642" y="833" width="146" height="28" rx="4"/><path class="camera-contacts" d="M655 839v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16m10-16v16"/>
+            <text class="edge-label" x="715" y="888" text-anchor="middle">CSI CAMERA · OPPOSITE END FROM microSD</text>
+            <rect class="soc" x="573" y="334" width="135" height="135" rx="9"/><text class="soc-label" x="640" y="391" text-anchor="middle">BCM2835</text><text class="soc-sub" x="640" y="414" text-anchor="middle">PI ZERO W</text>
+            <rect class="radio" x="587" y="522" width="100" height="70" rx="6"/><path class="antenna" d="M607 539h60v10h-49v10h49v10h-60"/>
+            <text class="board-title" x="661" y="722" text-anchor="middle">PI ZERO W</text><text class="orientation" x="661" y="745" text-anchor="middle">COMPONENT-SIDE VIEW</text><path class="orientation-arrow" d="M661 786V765m0 0l-8 9m8-9l8 9"/><text class="orientation" x="661" y="808" text-anchor="middle">CSI END</text>
+            <g id="gpioHeader"></g><text class="gpio-side-title" x="846" y="116" text-anchor="middle">40-PIN GPIO</text>
+          </g>
+
+          <g class="module oled-module" data-module="oled" tabindex="0" role="button" aria-label="0.96 inch I2C OLED display">
+            <rect class="oled-board" x="1050" y="88" width="260" height="208" rx="16"/><rect class="oled-screen" x="1073" y="143" width="214" height="122" rx="6"/>
+            <text class="screen-arrow" x="1180" y="207" text-anchor="middle">HELLO!</text><text class="module-name" x="1180" y="50" text-anchor="middle">0.96″ WHITE OLED</text><text class="module-note" x="1180" y="70" text-anchor="middle">SSD1306 · 128×64 · I²C</text><g id="oledPins"></g>
+          </g>
+
+          <g class="clearance-layer" aria-hidden="true">
+            <path class="keepout sd" d="M605 28h200"/><path class="keepout gpio" d="M956 135v590"/><path class="keepout usb" d="M458 414h-72v126h72"/><path class="keepout pwr" d="M458 580h-72v126h72"/><path class="keepout csi" d="M618 904h194"/>
+            <text x="970" y="560">12–15 mm ABOVE HEADER FOR WIRE BENDS</text><text x="375" y="405" text-anchor="end">USB PLUG KEEP-OUT</text><text x="375" y="720" text-anchor="end">POWER PLUG KEEP-OUT</text>
+          </g>
+
+          <g class="status-badge" transform="translate(95 110)">
+            <rect width="300" height="122" rx="15"/><circle cx="35" cy="37" r="14"/><path d="M28 37l5 5l10-12"/><text class="badge-title" x="62" y="35">BUS PLAN: VALID</text>
+            <text class="badge-copy" x="24" y="70">Two mics share I²S timing + data.</text><text class="badge-copy" x="24" y="91">OLED uses separate I²C signals.</text><text class="badge-copy" x="24" y="109">No GPIO function conflicts.</text>
+          </g>
+
+          <g class="legend" transform="translate(100 860)">
+            <g><circle class="c-power" r="6"/><text x="12" y="4">3.3 V</text></g><g transform="translate(76)"><circle class="c-ground" r="6"/><text x="12" y="4">GND</text></g><g transform="translate(143)"><circle class="c-sck" r="6"/><text x="12" y="4">SCK</text></g><g transform="translate(205)"><circle class="c-ws" r="6"/><text x="12" y="4">WS</text></g><g transform="translate(258)"><circle class="c-sd" r="6"/><text x="12" y="4">SD</text></g><g transform="translate(310)"><circle class="c-scl" r="6"/><text x="12" y="4">SCL</text></g><g transform="translate(368)"><circle class="c-sda" r="6"/><text x="12" y="4">SDA</text></g>
+          </g>
+
+          <g id="undersideLayer" aria-label="Raspberry Pi Zero W underside soldering guide"></g>
+        </svg>
+      </div>
+      <div class="mobile-tip">Rotate your phone for the clearest full-board view.</div>
+    </section>
+  </main>
+  <script src="wiring.js?v=18"></script>
+</body>
+</html>

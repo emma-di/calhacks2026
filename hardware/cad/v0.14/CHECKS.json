@@ -1,0 +1,183 @@
+{
+  "source_sha256": "f8c733a6f258e396da93c6c0478c8959fcf79164f7f499b3e3b88e18f5e1ea5b",
+  "clearance_probes": [
+    {
+      "name": "body vs frame",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "body vs Pi",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 4,
+      "passed": true
+    },
+    {
+      "name": "body vs GPIO plugs",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "cover vs Pi",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "cover vs GPIO plugs",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "body vs optics",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "cover vs optics",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "mic carriers vs frame",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "mic carriers vs PCBs",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "hook local side-loading path",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "wire routing envelopes",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "mic carriers vs solder/pin envelope",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "mic vertical insertion path",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "body and cover vs USB plug",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "body vs cover (0.02 mm seating lift)",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 1,
+      "passed": true
+    },
+    {
+      "name": "GPIO connectors 3 mm taller",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "central optical path vs printed housing",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "rear mic slot clear gauge",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "front OLED slot clear gauge",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "housing and cables vs coarse head keepout",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "top arm-screw access through printed body",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    },
+    {
+      "name": "enlarged OLED pocket gauge",
+      "solid_interference_mm3": 0,
+      "planar_contact_sheets": 0,
+      "passed": true
+    }
+  ],
+  "dimensions": {
+    "piece_count": 4,
+    "folded_object_distance_mm": 36.0,
+    "front_oled_exit_area_mm2": 100,
+    "front_reserved_bundle_area_mm2": 18.1,
+    "rear_mics_exit_area_mm2": 192,
+    "rear_reserved_two_mic_bundles_area_mm2": 60.38,
+    "front_area_ratio": 5.53,
+    "rear_area_ratio": 3.18,
+    "gpio_hood_cavity_height_above_lid_plane_mm": 18.0,
+    "actual_headroom_above_modeled_GPIO_plugs_mm": 10.7,
+    "mic_wire_bend_centerline_radius_mm": 5,
+    "oled_to_mirror_minimum_surface_gap_mm": 6.16,
+    "assumed_oled_board_mm": [
+      1.8,
+      27.3,
+      27.3
+    ],
+    "oled_pocket_envelope_mm": [
+      2.8,
+      28.3,
+      28.3
+    ],
+    "oled_extra_each_dimension_mm": [
+      1.0,
+      1.0,
+      1.0
+    ],
+    "measured_arm_mm": [
+      12.7,
+      7.112
+    ],
+    "hook_opening_height_mm": 13.4,
+    "hook_internal_engagement_depth_mm": 9.106,
+    "hook_screw_entry": "top",
+    "hook_underside_fasteners": false,
+    "hook_top_boss_height_mm": 5.2,
+    "mic_diameter_mm": 17.78,
+    "mic_total_depth_mm": 12.7,
+    "mic_pin_edge_margin_assumed_mm": 1.5,
+    "usb_plug_cross_section_mm": [
+      10.16,
+      5.08
+    ],
+    "status": "PARTIAL MEASUREMENTS RECEIVED; physical dry fit and optical focus pending"
+  }
+}

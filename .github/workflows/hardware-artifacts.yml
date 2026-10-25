@@ -1,0 +1,53 @@
+name: Hardware CAD artifacts
+
+on:
+  push:
+    paths:
+      - 'hardware/**'
+      - '.github/workflows/hardware-artifacts.yml'
+  pull_request:
+    paths:
+      - 'hardware/**'
+      - '.github/workflows/hardware-artifacts.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify required print files
+        run: |
+          test -s hardware/cad/v0.14/stl/body.stl
+          test -s hardware/cad/v0.14/stl/cover.stl
+          test -s hardware/cad/v0.14/stl/mic_left.stl
+          test -s hardware/cad/v0.14/stl/mic_right.stl
+          test -s hardware/viewer/index.html
+          test -s hardware/viewer/wiring.html
+
+      - name: Upload four print files
+        uses: actions/upload-artifact@v4
+        with:
+          name: DETECT-print-files-v0.14
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            hardware/cad/v0.14/stl/*.stl
+            hardware/cad/v0.14/stl/SHA256SUMS
+            hardware/cad/v0.14/DETECT_4_PRINT_PARTS_v0.14.zip
+            hardware/cad/v0.14/MEASURED_FIT.md
+            hardware/cad/v0.14/README.md
+
+      - name: Upload editable CAD and interactive viewer
+        uses: actions/upload-artifact@v4
+        with:
+          name: DETECT-CAD-viewer-v0.14
+          if-no-files-found: error
+          retention-days: 30
+          path: |
+            hardware/cad/v0.14
+            hardware/viewer
