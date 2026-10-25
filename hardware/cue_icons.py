@@ -55,15 +55,18 @@ def build_cue_icons(Canvas, originals):
     c=new('car_horn'); horn(c); rays(c)
     c=new('truck_horn'); horn(c,2,3); horn(c,9,12); c.rect(2,25,8,28)
     c=new('reverse_beep'); c.round_frame(10,8,29,23,3); c.rect(12,23,15,27); c.rect(24,23,27,27); c.polygon([(10,15),(4,10),(4,13),(1,13),(1,17),(4,17),(4,20)]); c.rect(15,12,18,15); c.rect(22,12,25,15)
-    c=new('breaking'); line(c,7,3,24,3); line(c,7,3,10,25); line(c,24,3,21,25); line(c,10,25,21,25)
-    # A cracked drinking glass, with an open zigzag split and two fallen shards.
-    line(c,18,3,14,11,value=0); line(c,14,11,19,15,value=0); line(c,19,15,14,25,value=0)
-    line(c,18,5,14,11); line(c,14,11,19,15); line(c,19,15,14,23)
+    c=new('breaking'); c.round_frame(2,2,29,29,3)
+    # A cracked window: lines radiate from the impact point to the frame, ringed by a broken halo.
+    for x, y in ((4,8),(11,4),(27,6),(27,20),(20,27),(5,24)): line(c,15,15,x,y)
+    for x, y in ((12,12),(18,11),(20,16),(17,20),(11,18)): c.ellipse(x,y,1.2,1.2)
     c.polygon([(3,18),(6,22),(2,25)]); c.polygon([(25,23),(29,28),(23,29)])
     c=new('scream'); face(c); mouth(c); line(c,1,8,3,5); line(c,28,5,30,8)
     c=new('explosion','bang'); c.rect(15,9,16,19); c.rect(15,22,16,24)
-    c=new('tire_squeal'); c.round_frame(6,8,26,17,2); c.polygon([(9,8),(12,2),(21,2),(24,8)]); c.rect(13,4,20,7,0); c.rect(8,16,11,20); c.rect(21,16,24,20)
-    line(c,9,21,6,24); line(c,6,24,10,27); line(c,10,27,6,30); line(c,23,21,20,24); line(c,20,24,24,27); line(c,24,27,20,30)
+    c=new('tire_squeal'); c.ring(20,14,10,10,3); c.ring(20,14,4,4,2)
+    # A tire with tread notches and black skid streaks left behind on the road.
+    for k in range(8):
+        a = k*math.pi/4; c.ellipse(20+8.5*math.cos(a), 14+8.5*math.sin(a), 1.1, 1.1, 0)
+    line(c,1,25,13,25); line(c,3,29,15,29); line(c,1,21,7,21)
 
     new('name_called','name')
     c=new('doorbell'); c.round_frame(8,2,24,30,4); c.ring(16,20,5,5,2); c.rect(13,6,19,8); line(c,2,11,4,9); line(c,28,9,30,11)
@@ -95,10 +98,11 @@ def build_cue_icons(Canvas, originals):
     c=new('bus'); c.round_frame(5,3,27,27,4); c.rect(8,7,24,16); c.rect(15,7,16,16,0); c.rect(9,20,12,22); c.rect(21,20,24,22); c.rect(8,27,11,30); c.rect(22,27,25,30)
     c=new('train'); c.round_frame(6,3,26,25,5); c.rect(10,7,22,14); c.rect(15,7,16,14,0); c.ring(16,20,3,3,1); line(c,10,25,5,30); line(c,22,25,27,30); c.rect(8,28,24,29)
     c=new('train_horn'); c.rect(4,14,23,21); c.rect(12,7,20,14); c.rect(2,22,27,24); c.ring(9,27,3,3,1); c.ring(22,27,3,3,1); line(c,3,4,7,7); line(c,14,1,14,4); line(c,23,4,27,2)
-    c=new('bicycle_bell'); c.ellipse(16,16,9,8); c.rect(5,16,27,20); c.rect(6,21,26,23)
-    # Side-view dome attached to a horizontal handlebar, with a thumb striker.
-    line(c,3,27,29,27); c.rect(12,23,15,28); line(c,25,15,28,10); c.rect(25,8,30,10)
-    c.rect(10,10,12,13,0); line(c,3,4,6,7); line(c,13,1,13,4)
+    c=new('bicycle_bell'); c.arc(15,21,9,180,360,2); line(c,6,20,24,20)
+    # Bell dome clamped on a handlebar (grips at both ends), thumb lever, and ring marks.
+    c.ellipse(15,10,1.6,1.6); line(c,2,25,29,25); c.rect(2,23,6,28); c.rect(25,23,29,28)
+    c.rect(14,21,15,24); line(c,22,17,27,13)
+    line(c,4,6,6,9); line(c,26,5,24,8); line(c,15,2,15,4)
     c=new('footsteps'); c.ellipse(11,12,4,8); c.ellipse(22,23,4,7); c.rect(8,22,13,26); c.rect(19,9,24,12)
     c=new('running'); c.ellipse(19,5,3,3); line(c,17,10,13,17,3); line(c,13,12,7,9); line(c,17,11,23,15); line(c,23,15,28,12); line(c,14,17,21,22,3); line(c,21,22,17,29,3); line(c,13,18,8,24,3); line(c,8,24,2,24,3)
     c=new('engine_start'); c.round_frame(4,11,27,26,3); c.rect(8,7,18,11); c.rect(1,15,4,23); c.rect(26,14,30,19); c.polygon([(18,12),(11,21),(16,21),(13,29),(23,18),(18,18)])
