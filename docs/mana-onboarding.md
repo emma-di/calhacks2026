@@ -55,3 +55,16 @@ Recorded Whistling → classifier → selected catalog rule → receiver/person 
 This is substantive Mana onboarding/backend integration; it is not a claim that Mana runs audio,
 controls I2C, or that the private workspace links are publicly judge-accessible. Public submission
 links and official eligibility remain to be confirmed; no sharing/publishing settings changed.
+
+## October 25: Mana revamped onboarding into a first-run flow (integrated)
+
+Prompt: [mana-onboarding-revamp-prompt.md](mana-onboarding-revamp-prompt.md), sent in the same Aware build
+conversation with the integrated file attached. Mana returned a four-step page a new person completes
+top to bottom: 1 required name (nicknames and question capture appear after it), 2 read-only everyday
+alerts with a quiet Adjust, 3 optional sounds (search, common choices, Ask Claude, Your sounds), 4 one
+Start button that says what is blocking it, then a collapsed More settings (Claude shortening and key,
+suggestions, category defaults, display, reset). Mana kept every line above the component byte for byte
+and found a real bug: the questions checkbox showed off for new drafts although the profile treats a
+missing value as on. The generated file is checked in unchanged (sha256 in provenance.json); only three
+local render tests were updated to the new order. For the Mana track the workspace app and chat must be
+made public by Emma; no sharing settings were changed here.

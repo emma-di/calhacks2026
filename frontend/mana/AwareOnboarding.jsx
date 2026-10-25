@@ -521,12 +521,12 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         body: JSON.stringify({ request }),
       });
       const body = await r.json().catch(() => ({}));
-      if (!r.ok) throw new Error(body.code === "missing_api_key"
-        ? "Connect Claude above with an Anthropic API key first."
-        : body.error || "Claude could not match this sound. Try again.");
+      if (!r.ok) throw Object.assign(new Error(body.code === "missing_api_key"
+        ? "Claude isn’t connected yet. Connect your Anthropic API key under More settings, then try again."
+        : body.error || "Claude could not match this sound. Try again."), { code: body.code });
       setClaudeMatch({ request, state: "done", matches: Array.isArray(body.matches) ? body.matches : [] });
     } catch (e) {
-      setClaudeMatch({ request, state: "error", matches: [], message: e.message });
+      setClaudeMatch({ request, state: "error", matches: [], message: e.message, code: e.code });
     }
   };
   const [confirmReset, setConfirmReset] = useState(false);
@@ -537,6 +537,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const [reducedMotion, setReducedMotion] = useState(false);
   const firstRun = useRef(true);
   const searchRef = useRef(null);
+  const moreRef = useRef(null);
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return undefined;
@@ -781,7 +782,34 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const pendingModel = pending?.model_label ? catalogLabels.get(pending.model_label) : null;
   const pendingEv = pending ? (pendingModel ? {...pendingModel,label:pending.custom_label || pendingModel.name,event_type:'custom',default_tier:2}
     : pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
-  const readyToFinish = canFinish && !pending;
+  const hasName = /\p{L}/u.test(draft.name);
+  const readyToFinish = canFinish && !pending && hasName;
+  const finishBlockers = [
+    !hasName && "Add your name in step 1.",
+    pending && "Add or cancel the sound you’re choosing in step 3.",
+    !canFinish && "Waiting for your latest preferences to save…",
+  ].filter(Boolean);
+  const finish = (e) => {
+    if (readyToFinish) onComplete?.(e);
+  };
+  const openMoreSettings = () => {
+    const el = moreRef.current;
+    if (!el) return;
+    el.open = true;
+    el.scrollIntoView?.({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
+  };
+  // What alerts out of the box, in order of importance. Tiers come from the preset, category and rules.
+  const readyAlerts = [
+    ["smoke_alarm", "Fire/smoke alarm"],
+    ["siren", "Siren"],
+    ["name_called", "Your name"],
+    ["knock", "Door knock"],
+    ["bell", "Bell/chime"],
+    ["dog_bark", "Dog barking"],
+  ];
+  const customRules = draft.custom_rules ?? [];
+  const stepNumber = { color: p.muted, fontWeight: 500, marginRight: 8 };
+  const subHeading = { fontSize: 16, fontWeight: 600, margin: 0 };
 
   return (
     <div
@@ -817,11 +845,12 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             margin: 0,
           }}
         >
-          {firstUse ? "Set up Aware" : "Choose your sounds"}
+          {firstUse ? "Set up Aware" : "Your Aware settings"}
         </h1>
         <p style={{ fontSize: 16, margin: "8px 0 0" }}>
-          Start with useful defaults. Add only what matters to you.
-          No sound recordings needed.
+          {firstUse
+            ? "About a minute. Only your name is needed; everything else already has a sensible default."
+            : "Change what you need. Everything else keeps its default."}
         </p>
         <div
           role="status"
@@ -831,26 +860,97 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           <div>{receiverProfile ? "Your choices save automatically." : statusText}</div>
         </div>
 
-        {/* Preset */}
-        <section style={s.section}>
-          <h2 style={s.h2}>Your everyday alerts</h2>
-          <p style={s.lead}>Already set up. Change any sound whenever you like.</p>
-          <ul className="setup-ready-sounds" aria-label="Current common alert priorities">
-            {['smoke_alarm','siren','knock','bell'].map((key)=>{
-              const sound=awareEvent(key), resolved=resolveAwareTier(draft,key);
-              return <li key={key}><SoundIcon type={key} size={22}/><span>{sound.label}</span>
-                <span className="aside">{awareTierLabel(resolved.tier)}</span></li>;
+        {/* 1. Name */}
+        <section style={s.section} aria-labelledby={uid + "-step-name"}>
+          <h2 id={uid + "-step-name"} style={s.h2}>
+            <span style={stepNumber}>1.</span>Your name
+          </h2>
+          <p style={s.lead}>Aware shows a cue when someone says it. No recording needed.</p>
+          <div className={`setup-name-grid ${!hasName && !draft.aliasesText ? "is-single" : ""}`} style={{ marginTop: 16 }}>
+            <div>
+              <label htmlFor={uid + "-name"} style={s.label}>
+                Your name
+              </label>
+              <input
+                id={uid + "-name"}
+                type="text"
+                autoComplete="given-name"
+                required
+                aria-required="true"
+                value={draft.name}
+                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
+                aria-describedby={uid + "-name-help"}
+                style={s.input}
+              />
+              <p id={uid + "-name-help"} style={s.help}>
+                {!hasName
+                  ? "Required to start."
+                  : draft.name_enabled !== false
+                    ? "Used for your name alert."
+                    : "Your name is saved; name alerts are turned off."}
+              </p>
+            </div>
+            <div hidden={!hasName && !draft.aliasesText}>
+              <label htmlFor={uid + "-aliases"} style={s.label}>
+                Nicknames <span style={{ fontWeight: 400, color: p.muted }}>(optional)</span>
+              </label>
+              <input
+                id={uid + "-aliases"}
+                type="text"
+                value={draft.aliasesText}
+                onChange={(e) => update({ aliasesText: e.target.value })}
+                aria-describedby={uid + "-aliases-help"}
+                style={s.input}
+              />
+              <p id={uid + "-aliases-help"} style={s.help}>
+                {!hasName && profile.name_detection.aliases.length
+                  ? "These are kept, but name alerts stay off until you add your name."
+                  : "Separate with commas, e.g. Sam, Sammy."}
+              </p>
+            </div>
+          </div>
+          <div hidden={!hasName}>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={draft.questions !== false}
+                onChange={(e) => update({ questions: e.target.checked })}
+                aria-describedby={uid + "-questions-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Also show what they ask right after your name
+            </label>
+            <p id={uid + "-questions-help"} style={Object.assign({}, s.help, { marginTop: 2 })}>
+              The next few seconds are transcribed on this laptop. Audio is never saved.
+            </p>
+          </div>
+        </section>
+
+        {/* 2. Everyday alerts */}
+        <section style={s.section} aria-labelledby={uid + "-step-ready"}>
+          <h2 id={uid + "-step-ready"} style={s.h2}>
+            <span style={stepNumber}>2.</span>Everyday alerts are ready
+          </h2>
+          <p style={s.lead}>These already alert you, at this strength.</p>
+          <ul className="setup-ready-sounds" aria-label="Sounds that already alert you, and how strongly">
+            {readyAlerts.map(([key, label]) => {
+              const resolved = resolveAwareTier(draft, key);
+              let aside = awareTierLabel(resolved.tier);
+              if (key === "name_called" && hasName && draft.name_enabled === false) aside = "Off";
+              else if (key === "name_called" && !hasName) aside += " · after you add your name";
+              else if (resolved.source !== "preset") aside += " · changed";
+              return (
+                <li key={key}>
+                  <SoundIcon type={key} size={22} />
+                  <span>{label}</span>
+                  <span className="aside">{aside}</span>
+                </li>
+              );
             })}
           </ul>
-          <div className="setup-start-actions">
-            <button type="button" onClick={onComplete} disabled={!readyToFinish} style={{...s.primaryBtn,opacity:readyToFinish?1:.55}}>
-              {firstUse ? 'Start Aware' : 'Go to live view'}
-            </button>
-            <span style={s.help}>{pending ? 'Add or cancel this sound before starting.' : canFinish ? 'You can personalize more below.' : 'Waiting for your latest preferences to save…'}</span>
-          </div>
-          <details>
-          <summary style={s.summary}>{preset.label} defaults · change or review</summary>
-          <p style={s.help}>Fire / smoke alarms, knocks, bells and your configured name already have priorities.</p>
+          <details style={{ marginTop: 12 }}>
+            <summary style={{ fontSize: 15, fontWeight: 500, color: p.muted, padding: "6px 0" }}>Adjust</summary>
+            <div style={{ marginTop: 12 }}>
           <fieldset
             style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}
           >
@@ -927,103 +1027,18 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </p>
             )}
           </div>
+            </div>
           </details>
         </section>
 
-        {/* Name */}
-        <section style={s.section}>
-          <details open={firstUse}>
-            <summary style={s.summary}>
-              Your name (optional){" "}
-              <span
-                style={{
-                  fontWeight: 400,
-                  fontSize: 15,
-                  color: p.muted,
-                  marginLeft: 6,
-                }}
-              >
-                {primary ? "Name configured" : "Off"}
-              </span>
-            </summary>
-            <div className={`setup-name-grid ${!primary && !draft.aliasesText ? 'is-single' : ''}`}>
-            <div>
-              <label htmlFor={uid + "-name"} style={s.label}>
-                Name
-              </label>
-              <input
-                id={uid + "-name"}
-                type="text"
-                autoComplete="given-name"
-                value={draft.name}
-                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
-                aria-describedby={uid + "-name-help"}
-                style={s.input}
-              />
-              <p id={uid + "-name-help"} style={s.help}>
-                {primary
-                  ? (draft.name_enabled ? "Used for your name alert. No recording needed." : "Your name is saved; name alerts are turned off.")
-                  : "Optional. Leave blank to keep name alerts off."}
-              </p>
-            </div>
-            <div hidden={!primary && !draft.aliasesText}>
-              <label htmlFor={uid + "-aliases"} style={s.label}>
-                Nicknames
-              </label>
-              <input
-                id={uid + "-aliases"}
-                type="text"
-                value={draft.aliasesText}
-                onChange={(e) => update({ aliasesText: e.target.value })}
-                aria-describedby={uid + "-aliases-help"}
-                style={s.input}
-              />
-              <p id={uid + "-aliases-help"} style={s.help}>
-                {!primary && profile.name_detection.aliases.length
-                  ? "These are kept, but name detection stays off until you add a name."
-                  : "Separate nicknames with commas, e.g. Sam, Sammy."}
-              </p>
-            </div>
-            </div>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={draft.questions}
-                onChange={(e) => update({ questions: e.target.checked })}
-                aria-describedby={uid + "-questions-help"}
-                style={{ width: 18, height: 18, accentColor: p.ink }}
-              />
-              Show what someone asks after your name
-            </label>
-            <p id={uid + "-questions-help"} style={s.help}>
-              After your name or “hey”, the next few seconds are transcribed on this laptop and a question
-              appears on the glasses. Audio is never saved.
-            </p>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions ? "pointer" : "default", opacity: draft.questions ? 1 : .55 }}>
-              <input
-                type="checkbox"
-                checked={draft.question_paraphrase}
-                disabled={!draft.questions}
-                onChange={(e) => update({ question_paraphrase: e.target.checked })}
-                aria-describedby={uid + "-paraphrase-help"}
-                style={{ width: 18, height: 18, accentColor: p.ink }}
-              />
-              Shorten questions with Claude
-            </label>
-            <p id={uid + "-paraphrase-help"} style={s.help}>
-              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
-              questions are shortened on this laptop.
-            </p>
-          </details>
-        </section>
-
-        {/* Rules */}
+        {/* 3. Sounds that matter */}
         <section style={s.section} aria-labelledby={uid + "-rules-h"}>
           <h2 id={uid + "-rules-h"} style={s.h2}>
-            Add sounds that matter
+            <span style={stepNumber}>3.</span>Sounds that matter to you{" "}
+            <span style={{ fontWeight: 400, fontSize: 15, color: p.muted, marginLeft: 4 }}>Optional</span>
           </h2>
           <p style={s.lead}>
-            Choose from built-in recognition. You only need to add sounds you want to personalize.
+            Add a sound only if you want an alert for it. Built-in recognition, no recordings needed.
           </p>
 
           {!pending && (
@@ -1230,7 +1245,17 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       recognizes; you choose before anything is added.
                     </p>
                     {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "error" && (
-                      <p role="status" style={s.help}>{claudeMatch.message}</p>
+                      <p role="status" style={s.help}>
+                        {claudeMatch.message}
+                        {claudeMatch.code === "missing_api_key" && (
+                          <>
+                            {" "}
+                            <button type="button" onClick={openMoreSettings} style={{ ...s.textBtn, height: "auto", padding: 0, fontSize: 14 }}>
+                              Open More settings
+                            </button>
+                          </>
+                        )}
+                      </p>
                     )}
                     {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "done" && (
                       claudeMatch.matches.length === 0
@@ -1357,97 +1382,55 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             </div>
           )}
 
-          <div style={{ marginTop: 24 }}>
-            <div style={{ fontWeight: 500 }}>Changes to common alerts</div>
-            {ruleCount === 0 ? (
-              <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                {(draft.custom_rules ?? []).length ? `Built-in sounds follow the ${preset.label} preset. Your added sounds are below.` : `Common alerts follow the ${preset.label} defaults. Nothing else to configure.`}
-              </p>
-            ) : (
-              <ul
-                style={Object.assign({}, s.group, {
-                  listStyle: "none",
-                  margin: "10px 0 0",
-                  padding: 0,
-                })}
-              >
-                {draft.rules.map((r, i) => {
+          {(draft.rules.length > 0 || customRules.length > 0) && (
+            <div style={{ marginTop: 24 }} aria-labelledby={uid + "-yours-h"} role="group">
+              <h3 id={uid + "-yours-h"} style={subHeading}>Your sounds</h3>
+              <ul style={{ listStyle: "none", padding: 0, margin: "8px 0 0" }}>
+                {draft.rules.map((r) => {
                   const ev = awareEvent(r.key);
                   return (
                     <li
-                      key={r.key}
-                      style={Object.assign(
-                        {
-                          display: "flex",
-                          flexWrap: "wrap",
-                          alignItems: "center",
-                          justifyContent: "space-between",
-                          gap: "8px 16px",
-                          padding: "10px 16px",
-                        },
-                        s.row(i),
-                      )}
+                      key={"rule-" + r.key}
+                      style={{
+                        display: "flex",
+                        flexWrap: "wrap",
+                        gap: 12,
+                        alignItems: "center",
+                        padding: "12px 0",
+                      }}
                     >
-                      <span style={{ flex: "1 1 160px" }}>
-                        <span style={{ display: "block", fontWeight: 500 }}>
+                      <span style={{ flex: 1, minWidth: 140 }}>
+                        <span style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                          <SoundIcon type={r.key} size={28} />
                           {ev.label}
                         </span>
-                        <span
-                          style={{
-                            display: "block",
-                            fontSize: 14,
-                            color: p.muted,
-                          }}
-                        >
-                          Preset would be {tierText(presetTiers[r.key])}
-                        </span>
+                        <small style={{ display: "block", color: p.muted }}>
+                          Built-in · {preset.label} default is {tierText(presetTiers[r.key])}
+                        </small>
                       </span>
-                      <span
-                        style={{
-                          display: "inline-flex",
-                          flexWrap: "wrap",
-                          alignItems: "center",
-                          gap: 8,
-                        }}
+                      <select
+                        aria-label={"Priority for " + ev.label}
+                        value={String(r.tier)}
+                        onChange={(e) => changeRule(r.key, Number(e.target.value))}
+                        style={s.select}
                       >
-                        <select
-                          aria-label={"Priority for " + ev.label}
-                          value={String(r.tier)}
-                          onChange={(e) =>
-                            changeRule(r.key, Number(e.target.value))
-                          }
-                          style={s.select}
-                        >
-                          {AWARE_TIERS.map((t) => (
-                            <option key={t.value} value={String(t.value)}>
-                              {t.label} ({t.value})
-                            </option>
-                          ))}
-                        </select>
-                        <button
-                          type="button"
-                          onClick={() => resetRule(r.key)}
-                          style={s.textBtn}
-                          aria-label={"Reset " + ev.label + " to preset"}
-                        >
-                          Reset to preset
-                        </button>
-                      </span>
+                        {AWARE_TIERS.map((t) => (
+                          <option key={t.value} value={String(t.value)}>
+                            {t.label}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        style={s.textBtn}
+                        aria-label={`Remove ${ev.label} (returns to the ${preset.label} default)`}
+                        onClick={() => resetRule(r.key)}
+                      >
+                        Remove
+                      </button>
                     </li>
                   );
                 })}
-              </ul>
-            )}
-          </div>
-        </section>
-
-        {(draft.custom_rules ?? []).length > 0 && (
-          <section style={s.section} aria-label="Your sound choices">
-            <h2 style={s.h2}>Your sound choices</h2>
-            <p style={s.lead}>
-              Selected catalog sounds use built-in recognition; no teaching is required. Sensitive matching favors catching sounds and may also alert on related sounds. Free-text requests remain pending.
-            </p>
-            <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
               {draft.custom_rules.map((rule) => (
                 <li
                   key={rule.id}
@@ -1506,19 +1489,71 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   </button>
                 </li>
               ))}
-            </ul>
-          </section>
-        )}
+              </ul>
+              {customRules.length > 0 && (
+                <p style={s.help}>
+                  Catalog sounds use built-in recognition. Matching is sensitive, so related sounds may also alert. Typed requests stay pending until Aware can recognize them.
+                </p>
+              )}
+            </div>
+          )}
+        </section>
 
-        <details style={s.section} className="setup-ai-disclosure" open={connectClaude}>
-          <summary style={s.summary}>Get sound suggestions from Claude (optional)</summary>
+        {/* 4. Start */}
+        <section style={s.section} aria-labelledby={uid + "-finish-h"}>
+          <h2 id={uid + "-finish-h"} style={s.h2}>
+            <span style={stepNumber}>4.</span>{firstUse ? "Start" : "Finish"}
+          </h2>
+          <div style={{ display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12, marginTop: 16 }}>
+            <button
+              type="button"
+              onClick={finish}
+              aria-disabled={!readyToFinish}
+              aria-describedby={uid + "-finish-help"}
+              style={{ ...s.primaryBtn, opacity: readyToFinish ? 1 : 0.55, cursor: readyToFinish ? "pointer" : "not-allowed" }}
+            >
+              {firstUse ? "Start Aware" : "Done"}
+            </button>
+          </div>
+          <p id={uid + "-finish-help"} role="status" aria-live="polite" style={s.help}>
+            {finishBlockers.length ? finishBlockers.join(" ") : "You can change any of this later."}
+          </p>
+        </section>
+
+        {/* More settings */}
+        <details ref={moreRef} style={s.section} open={connectClaude}>
+          <summary style={s.summary}>More settings</summary>
+          <p style={s.help}>Optional. The defaults work for most people.</p>
+
+          <div style={{ marginTop: 20 }}>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions !== false ? "pointer" : "default", opacity: draft.questions !== false ? 1 : .55 }}>
+              <input
+                type="checkbox"
+                checked={draft.question_paraphrase === true}
+                disabled={draft.questions === false}
+                onChange={(e) => update({ question_paraphrase: e.target.checked })}
+                aria-describedby={uid + "-paraphrase-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Shorten questions with Claude
+            </label>
+            <p id={uid + "-paraphrase-help"} style={s.help}>
+              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
+              questions are shortened on this laptop.
+            </p>
+          </div>
+
+          <div style={{ marginTop: 28 }}>
+            <h3 style={subHeading}>Sound suggestions from Claude</h3>
+            <div style={{ marginTop: 8 }}>
           <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
             setDraft((d) => applySuggestedCues(d, rows));
             setCustomNote("Suggested sounds added. Your previous choices were kept.");
           }} />
-        </details>
+            </div>
+          </div>
 
-        <section style={s.section}>
+          <div style={{ marginTop: 28 }}>
           <details>
             <summary style={s.summary}>Category defaults (optional)</summary>
             <p style={s.help}>
@@ -1560,10 +1595,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </label>
             ))}
           </details>
-        </section>
+          </div>
 
-        {/* Display preferences */}
-        <section style={s.section}>
+          <div style={{ marginTop: 20 }}>
           <details>
             <summary style={s.summary}>
               Display preferences{" "}
@@ -1831,23 +1865,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </p>
             </div>
           </details>
-        </section>
+          </div>
 
-        <section style={s.section} aria-label="Finish setup">
-          <p style={s.lead}>You can change these preferences anytime.</p>
-          <div
-            style={{
-              display: "flex",
-              flexWrap: "wrap",
-              alignItems: "center",
-              gap: 12,
-              marginTop: 20,
-            }}
-          >
-            <button type="button" onClick={onComplete} disabled={!readyToFinish} style={{...s.quietBtn,opacity:readyToFinish?1:.55}}>
-              Open live view
-            </button>
-            {!canFinish && <p style={s.help}>Your preferences haven’t finished syncing. Reconnect or wait for Saved before starting.</p>}
+          <div style={{ marginTop: 28, display: "flex", flexWrap: "wrap", alignItems: "center", gap: 12 }}>
             {!confirmReset ? (
               <button
                 type="button"
@@ -1881,7 +1901,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </span>
             )}
           </div>
-        </section>
+        </details>
       </div>
     </div>
   );

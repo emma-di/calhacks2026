@@ -24,5 +24,24 @@
       "TypeScript declaration only; generated JavaScript preserved"
     ],
     "live_backend_connected": true
+  },
+  "onboarding_revamp": {
+    "generator": "Mana workspace Aware, existing build conversation (October 25)",
+    "prompt": "docs/mana-onboarding-revamp-prompt.md",
+    "workspace_source": "/cloudspace/exports/aware/integrated/AwareOnboarding.jsx",
+    "sha256": "775e1baf63e7acd8f6e30a87f26c0c5a46f5c69a3e4a1abacde6b143d908c365",
+    "mana_reported_checks": "8/8 flow checks against stand-in modules (Mana-side; not rerun here)",
+    "local_runtime_changes": [
+      "None: the generated file is checked in byte for byte"
+    ],
+    "local_test_changes": [
+      "frontend/src/lib/setupSuggestions.test.ts: three render tests updated from the old layout to the new step order, required name and aria-disabled Start"
+    ],
+    "verified_locally": [
+      "frontend build and 64 frontend tests",
+      "Python suite",
+      "rendered first-run and returning views in the companion"
+    ],
+    "live_backend_connected": true
   }
 }

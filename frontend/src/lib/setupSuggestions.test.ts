@@ -72,28 +72,29 @@ test('a fresh browser can render setup with no saved custom sound array', async(
   const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark'}));
-  assert.ok(html.includes('Choose your sounds'));
-  assert.ok(html.includes('No sound recordings needed'));
+  assert.ok(html.includes('Your Aware settings'));
+  assert.ok(html.includes('No recording needed'));
   assert.ok(html.includes('Search sounds'));
 });
 
-test('first-use setup puts optional typed name before sound choices and has a clear finish action', async()=>{
+test('first-use setup starts with a required name and has a clear finish action', async()=>{
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true}));
   assert.ok(html.includes('Set up Aware'));
-  assert.ok(html.indexOf('Your name (optional)')<html.indexOf('Search sounds'));
+  assert.match(html,/<input[^>]*required=""[^>]*aria-required="true"/);
+  assert.ok(html.indexOf('Your name')<html.indexOf('Search sounds'));
   assert.ok(html.includes('Nicknames'));
   assert.ok(html.includes('Start Aware'));
 });
 
-test('setup offers defaults and finish before optional catalog and Claude work', async()=>{
+test('setup runs in order: name, ready defaults, optional sounds, one Start, then More settings', async()=>{
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true}));
-  assert.ok(html.indexOf('Your everyday alerts')<html.indexOf('Start Aware'));
-  assert.ok(html.indexOf('Start Aware')<html.indexOf('Search sounds'));
-  assert.ok(html.indexOf('Search sounds')<html.indexOf('Get sound suggestions from Claude'));
+  const order=['Your name','Everyday alerts are ready','Search sounds','Start Aware','More settings','Sound suggestions from Claude'];
+  order.slice(1).forEach((label,i)=>assert.ok(html.indexOf(order[i])<html.indexOf(label),`${order[i]} before ${label}`));
+  assert.equal(html.split('Start Aware').length-1,1);
 });
 
 test('custom sound preview keeps the actual cue icon and Ignore without publishing anything', async()=>{
@@ -108,6 +109,6 @@ test('setup cannot finish while the receiver has unconfirmed preferences', async
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true,canFinish:false}));
-  assert.match(html,/<button[^>]*disabled=""[^>]*>Start Aware<\/button>/);
+  assert.match(html,/<button[^>]*aria-disabled="true"[^>]*>Start Aware<\/button>/);
   assert.ok(html.includes('Waiting for your latest preferences to save'));
 });
