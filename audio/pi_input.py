@@ -7,6 +7,7 @@ import numpy as np
 from scipy.signal import firwin, lfilter
 
 from audio.pi_levels import CaptureBridge, LevelState, create_server
+from audio.pi_spatial import frame_evidence, window_evidence, unknown
 
 
 class StereoResampler:
@@ -38,11 +39,17 @@ class RecognitionState(LevelState):
         self.last_capture = None
         self.generation = 0
         self.inference_input = 'pi_stereo'
+        self.spatial = unknown('waiting_for_audio')
+        self.spatial_frames = []
+        self.recover_until = None
 
     def reset_audio(self):
         self.generation += 1
         self.last_capture = None
         self.resampler.reset()
+        self.spatial_frames = []
+        self.spatial = unknown('capture_reset')
+        self.recover_until = None
         while True:
             try:
                 self.pending.get_nowait()
@@ -55,21 +62,31 @@ class RecognitionState(LevelState):
 
     def update(self, pcm):
         captured = self.clock()
-        # SSH can deliver buffered bursts after a network pause. Discard bursts and reset;
-        # do not process them as fresh observations (especially alarm quiet evidence).
-        if self.last_capture is not None and captured - self.last_capture < .04:
+        # Normal SSH packet coalescing is NOT a capture gap: preserve all stereo frames.
+        # After a real interruption, drain for 300ms before accepting a new window.
+        if self.last_capture is not None and captured - self.last_capture > .5:
             self.reset_audio()
-            self.last_capture = captured
-            return
-        if self.last_capture is not None and captured - self.last_capture > .3:
-            self.reset_audio()
+            self.recover_until = captured + .3
         self.last_capture = captured
+        if self.recover_until is not None:
+            if captured < self.recover_until:
+                return
+            self.recover_until = None
         if self.pending.full():
             self.reset_audio()
             self.last_capture = captured
         block = self.resampler.convert(pcm)
-        self.pending.put_nowait((block, captured, int(time.time() * 1000), self.generation))
+        evidence = frame_evidence(pcm)
+        self.spatial_frames = (self.spatial_frames + [evidence])[-5:]
+        self.spatial = window_evidence(self.spatial_frames)
+        self.pending.put_nowait((block, captured, int(time.time() * 1000), self.generation, evidence))
         super().update(pcm)
+
+    def snapshot(self):
+        value = super().snapshot()
+        value['spatial'] = dict(self.spatial) if value['connected'] else unknown('offline')
+        value['spatial_frame'] = dict(self.spatial_frames[-1]) if value['connected'] and self.spatial_frames else None
+        return value
 
 
 class PiInput:

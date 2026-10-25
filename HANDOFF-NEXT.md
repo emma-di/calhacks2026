@@ -9,7 +9,10 @@ signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/produ
 Pi is now the primary recognition input; Mac mic is explicit fallback only. Current command:
 `audio.cli mic --pi pi@glasses-pi.local --endpoint http://127.0.0.1:8766/events`.
 One SSH capture feeds model + meters; former Mac mic and standalone meter workers are stopped.
-Actual inference windows and receiver observations verified; spatial detection is still pending.
+Actual inference windows and receiver observations verified. Spatial left/right is now implemented
+and running: [live spatial behavior and test status](docs/pi-spatial-live.md). Emma confirmed channel
+mapping and 11–13cm spacing. First alarm trial was mostly unknown; beep-pause handling was adjusted
+and needs a repeat physical trial. No front/back or fine-angle claim.
 New left/right-only scope replaces speculative front/back; unknown means no arrow.
 Meter UI/bridge implementation: [live levels](docs/pi-live-levels.md). 57 frontend tests/build pass;
 13 capture/resampling/bridge tests cover levels, stale clearing, antialiasing and process lifecycle.

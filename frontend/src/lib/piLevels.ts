@@ -16,6 +16,8 @@ export interface PiLevelsSnapshot {
   levels: PiChannelLevel[];
   error: string | null;
   inference_input?: "levels_only" | "pi_stereo";
+  spatial?: { side: "left" | "right" | null; direction_degrees: -90 | 90 | null;
+    direction_confidence: number | null; reason: string };
 }
 export interface PiLevelsState {
   snapshot: PiLevelsSnapshot | null;
@@ -33,6 +35,13 @@ const finite = (value: unknown, min: number, max = Number.MAX_SAFE_INTEGER) =>
 export function parsePiLevels(input: unknown): PiLevelsSnapshot {
   if (!input || typeof input !== "object") throw new Error("Invalid Pi audio levels");
   const value = input as Record<string, unknown>;
+  const spatial = value.spatial as PiLevelsSnapshot["spatial"];
+  if (spatial !== undefined && (!spatial || typeof spatial !== "object" ||
+      ![null,"left","right"].includes(spatial.side) || typeof spatial.reason !== "string" || spatial.reason.length > 100 ||
+      (spatial.side === null ? spatial.direction_degrees !== null || spatial.direction_confidence !== null :
+        spatial.direction_degrees !== (spatial.side === "left" ? -90 : 90) || !finite(spatial.direction_confidence, 0, 1)))) {
+    throw new Error("Invalid Pi spatial evidence");
+  }
   if (value.schema_version !== 1 || value.sample_rate !== 48000 || value.channels !== 2 ||
       !Number.isSafeInteger(value.sequence) || !finite(value.sequence, 0) ||
       typeof value.connected !== "boolean" ||
@@ -113,5 +122,6 @@ export function usePiMicrophoneLevels(enabled = true) {
     };
   }, [enabled]);
   return { ...displayPiLevels(state, now), inferenceInput: state.snapshot?.inference_input,
+    spatial: displayPiLevels(state, now).status === "live" ? state.snapshot?.spatial : undefined,
     error: state.error ?? state.snapshot?.error ?? null };
 }

@@ -2,6 +2,10 @@
 
 Updated October 25, 2026. **Plan, not a completed spatial implementation.**
 
+**Superseded implementation status:** left/right estimator and same-window event attachment are now
+running. Emma confirmed channel 0=left,1=right and 11–13cm spacing. See
+[current spatial implementation and acceptance](pi-spatial-live.md) before following older steps below.
+
 ## Product decision
 
 Emma wants the **two Pi microphones as primary input**, Mac microphone only as an explicitly

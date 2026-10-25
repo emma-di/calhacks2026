@@ -11,7 +11,9 @@ Live stereo level bridge and browser meters are implemented, with no raw audio s
 Mac only as explicit fallback, then conservative left/right/unknown from the same stereo windows.
 Pi recognition input is now implemented and running; Mac mic worker stopped. Verified actual
 inference windows and receiver observations, plus advancing Pi meter sequence through the site.
-13 capture/resampling/bridge tests pass. **Not yet implemented:** measured spatial alerts. Detailed restart plan,
+29 focused spatial/capture tests pass; 58 frontend tests/build pass. Left/right estimator and event
+association now run from Pi stereo. First physical alarm trial mostly unknown; pulse-aware refinement
+needs a repeat trial. Details: [live spatial implementation](docs/pi-spatial-live.md). Detailed restart plan,
 tests, stream ownership and calibration gates: [Pi spatial handoff](docs/pi-spatial-handoff.md).
 
 I²S capture driver installed with original bootconfig backed up on Pi at

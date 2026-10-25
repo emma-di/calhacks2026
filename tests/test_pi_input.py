@@ -47,7 +47,10 @@ class PiInputTests(unittest.TestCase):
         initial = pending.get_nowait()
         clock[0] += .1
         state.update(raw)
-        clock[0] += .5
+        clock[0] += .6
+        state.update(raw)
+        self.assertTrue(pending.empty())
+        clock[0] += .31
         state.update(raw)
         after_gap = pending.get_nowait()
         self.assertGreater(after_gap[3], initial[3])
@@ -61,7 +64,7 @@ class PiInputTests(unittest.TestCase):
         self.assertFalse(state.snapshot()['connected'])
         self.assertEqual(state.snapshot()['inference_input'], 'pi_stereo')
 
-    def test_network_burst_discarded_instead_of_fresh_quiet_evidence(self):
+    def test_normal_network_batching_does_not_destroy_valid_audio_windows(self):
         clock = [1.]
         pending = queue.Queue(maxsize=5)
         state = RecognitionState(pending, clock=lambda: clock[0])
@@ -70,8 +73,27 @@ class PiInputTests(unittest.TestCase):
         seq = state.sequence
         clock[0] += .001
         state.update(raw)
-        self.assertTrue(pending.empty())
-        self.assertEqual(state.sequence, seq)
+        self.assertEqual(pending.qsize(), 2)
+        self.assertEqual(state.sequence, seq+1)
+        self.assertEqual(pending.get_nowait()[3],pending.get_nowait()[3])
+
+    def test_coalesced_live_blocks_build_a_complete_recognition_window(self):
+        clock = [1.]
+        pending = queue.Queue(maxsize=40)
+        state = RecognitionState(pending,clock=lambda:clock[0])
+        raw = pcm(np.zeros((4800,2)))
+        generations=[]
+        samples=0
+        for i in range(20):
+            # Two blocks arrive together every 200ms, as observed over actual SSH.
+            if i % 2 == 0:
+                clock[0]+=.2
+            state.update(raw)
+            block, captured, wall, generation, evidence = pending.get_nowait()
+            samples+=len(block)
+            generations.append(generation)
+        self.assertEqual(samples,32000)
+        self.assertEqual(len(set(generations)),1)
 
 
 if __name__ == '__main__':

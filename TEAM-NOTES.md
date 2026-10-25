@@ -462,3 +462,14 @@ bridge stopped. Site says Pi is selected; actual model windows/receiver observat
 13 Python capture tests, 57 frontend tests and build pass. A confirmed old orphan arecord needed
 specific-PID SIGKILL after hotspot switch; failure/reconnect hardware acceptance is still pending.
 Spatial estimator/calibration remains TODO; resume at step 2 of docs/pi-spatial-handoff.md.
+
+## Pi spatial left/right implementation — October 25
+
+Emma confirmed physical channel labels (0 left,1 right) and spacing approximately 11–13cm.
+Mac spatial estimator uses constrained GCC-PHAT plus sensitive level difference, exact recognition
+window association, and pulse-aware alarm handling; emits only -90/+90 or null to existing16 arrows.
+Name direction stays unknown. Ordinary SSH batching now preserves model windows; real gaps drain/reset.
+Two physical alarm trials are NOT a direction acceptance pass: first mostly unknown; second some
+right windows but left unreliable. Latest -75dBFS spatial floor change needs a fresh physical trial.
+51 regression tests +58 frontend tests/build pass. Receiver8766 not restarted (session key preserved);
+phone spatial disconnected. See docs/pi-spatial-live.md for thresholds, evidence and limits.

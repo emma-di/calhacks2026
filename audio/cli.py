@@ -120,12 +120,17 @@ def main():
             if worker is not None:
                 worker.repeat_suppression = suppression
 
-    def hear_names(samples, source, clock=None, timestamp=None):
+    def hear_names(samples, source, clock=None, timestamp=None, spatial_frames=None):
         """Feed new audio to the name spotter as soon as it arrives (0.2 s blocks from the mic)."""
         if names is None:
             return
         refresh_controls()
         events = names.accept(samples, source, now=clock, timestamp_ms=timestamp)
+        if args.command == 'mic' and args.pi:
+            from audio.pi_spatial import annotate_events, unknown, window_evidence
+            # The spotter fires just after the phrase ends, so the last 1.5 s of frames covers it.
+            annotate_events(events, window_evidence(spatial_frames[-15:], require_current=False)
+                            if spatial_frames else unknown('speech_window_not_localized'))
         name_decisions.extend(names.decisions)
         deliveries = [{'event_id':e['event_id'],'status':publish(e,args.endpoint)} for e in events]
         name_events.extend(events)
@@ -133,7 +138,7 @@ def main():
             decision_log.write(dict(kind='name_detection',source=source,window_timestamp_ms=timestamp,
                 decisions=names.decisions,deliveries=deliveries))
 
-    def process(window, source, clock=None, timestamp=None):
+    def process(window, source, clock=None, timestamp=None, spatial=None):
         nonlocal snap_latched
         refresh_controls()
         scores, elapsed = model.predict(window)
@@ -163,6 +168,9 @@ def main():
             from audio.custom_sounds import rms
             events+=custom.detect(model.last_embedding, rms(window), source, now=clock, timestamp_ms=timestamp)
             custom_decisions += custom.decisions
+        if spatial is not None:
+            from audio.pi_spatial import annotate_events
+            annotate_events(events, spatial, competing=len(events) > 1)
         deliveries=[]
         for event in events:
             event['inference_ms'] = round(elapsed, 1)
@@ -184,6 +192,7 @@ def main():
                 window_seconds=model.window_samples/16000, hop_seconds=model.hop_samples/16000))
         name_decisions.clear()
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
+            spatial=spatial,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
             top5=sorted(scores.items(),key=lambda x:x[1],reverse=True)[:5],
             decisions=detector.decisions+custom_decisions,deliveries=deliveries))
@@ -212,7 +221,7 @@ def main():
     def callback(indata, frames, timing, status):
         if status:
             print(f'Audio capture: {status}', file=sys.stderr)
-        item = (indata[:, 0].copy(), time.monotonic(), int(time.time()*1000), 0)
+        item = (indata[:, 0].copy(), time.monotonic(), int(time.time()*1000), 0, None)
         try:
             pending.put_nowait(item)
         except queue.Full:
@@ -222,6 +231,7 @@ def main():
     buffer = np.empty(0, dtype=np.float32)
     last_capture = None
     last_generation = None
+    spatial_frames = []
     start = time.monotonic()
     if args.pi:
         from audio.pi_input import PiInput
@@ -235,18 +245,20 @@ def main():
               'Ctrl+C stops. Raw audio is not saved.', file=sys.stderr)
         while not args.seconds or time.monotonic()-start < args.seconds:
             try:
-                block, captured, wall, generation = pending.get(timeout=3)
+                block, captured, wall, generation, spatial_frame = pending.get(timeout=3)
             except queue.Empty:
                 # OS/device interruptions are not silence and must not terminate recognition.
                 if last_capture is not None:
                     print('Audio input paused; waiting for microphone frames to resume.', file=sys.stderr)
                     buffer = np.empty(0, dtype=np.float32)
+                    spatial_frames = []
                     if names is not None:
                         names.reset()
                     last_capture = None
                 continue
             if time.monotonic() - captured > .5:
                 buffer = np.empty(0, dtype=np.float32)
+                spatial_frames = []
                 if names is not None:
                     names.reset()
                 last_capture = None
@@ -254,15 +266,23 @@ def main():
             if generation != last_generation or (last_capture is not None and
                     captured-last_capture > 3*block_samples/16000):
                 buffer = np.empty(0, dtype=np.float32)
+                spatial_frames = []
                 if names is not None:
                     names.reset()
             last_generation = generation
             last_capture = captured
-            hear_names(block, 'microphone', captured, wall)
+            if args.pi:
+                spatial_frames.append(spatial_frame)
+            hear_names(block, 'microphone', captured, wall, spatial_frames)
             buffer = np.concatenate((buffer, block))
             if len(buffer) >= model.window_samples:
-                process(buffer[-model.window_samples:], 'microphone', captured, wall)
+                spatial = None
+                if args.pi:
+                    from audio.pi_spatial import window_evidence
+                    spatial = window_evidence(spatial_frames[-(model.window_samples // block_samples):], require_current=False)
+                process(buffer[-model.window_samples:], 'microphone', captured, wall, spatial=spatial)
                 buffer = buffer[-(model.window_samples-model.hop_samples):]
+                spatial_frames = spatial_frames[-((model.window_samples-model.hop_samples)//block_samples):]
 
 if __name__ == '__main__':
     try:

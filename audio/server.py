@@ -103,7 +103,8 @@ class AlertState:
         with self.lock:
             at = self._ms(now)
             self.last_event[event['source']] = at
-            if event.get('direction_degrees') is None and event['source'] in CAPTURE_SOURCES:
+            if (event.get('direction_degrees') is None and event['source'] in CAPTURE_SOURCES
+                    and event.get('direction_source') != 'pi_stereo'):
                 reading = self.spatial.match(at)
                 if reading:
                     # Same moment, separate device: direction comes from the phone's FOA microphones.

@@ -44,7 +44,10 @@ export default function PiMicrophoneLevels() {
       <p className="aside">{input.inferenceInput === "pi_stereo"
         ? "Recognition input: Pi stereo · processing on Mac · no automatic microphone fallback."
         : "Level monitor only · Pi is not selected as the recognition input."}</p>
-      <p className="aside">Left/right are stereo I²S slots; physical sides are not confirmed. This is not a spatial estimate.</p>
+      <p className="aside">{live && input.spatial?.side
+        ? `Spatial evidence: ${input.spatial.side === "left" ? "← Left" : "Right →"} · sustained stereo difference`
+        : "Spatial evidence: uncertain · no arrow"}</p>
+      <p className="aside">Physical left/right confirmed · 11–13 cm spacing · front/back unresolved.</p>
       {input.error && !live && <p className="pi-microphone-error">{input.error}</p>}
     </section>
   );
