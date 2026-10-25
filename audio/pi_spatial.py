@@ -26,7 +26,7 @@ def front_bearing(lag_samples, spacing_cm=12.):
     return math.degrees(math.asin(max(-1.,min(1.,ratio))))
 
 
-def delay_evidence(left, right, spacing_cm=13.):
+def delay_evidence(left, right, spacing_cm=13., diagnostics=None):
     """GCC-PHAT lateral delay, constrained by the confirmed 11–13cm array.
 
     Negative correlation lag means left heard it first. Require a distinct peak;
@@ -47,7 +47,13 @@ def delay_evidence(left, right, spacing_cm=13.):
     alternatives = peaks[np.abs(lags - lag) > 2]
     runner = float(alternatives.max()) if len(alternatives) else 0.
     quality = float(peaks[index]) / max(runner, 1e-12)
-    if abs(lag) < 2 or abs(lag) > spacing_cm / 100 / 343 * 48000 + .5 or quality < 1.6:
+    rejection = ('near_zero_delay' if abs(lag) < 2 else
+                 'outside_array_geometry' if abs(lag) > spacing_cm / 100 / 343 * 48000 + .5 else
+                 'ambiguous_peak' if quality < 1.6 else None)
+    if diagnostics is not None:
+        diagnostics.update(timing_peak_lag_samples=lag, timing_peak_ratio=round(quality, 2),
+                           timing_rejection=rejection)
+    if rejection is not None:
         return None
     return dict(side='left' if lag < 0 else 'right', lag_samples=lag,
                 peak_ratio=round(quality, 2))
@@ -79,13 +85,14 @@ def frame_evidence(pcm, gain_offset_db=0., min_dbfs=-75., margin_db=1.25):
     coherence = min(1., peak / max(float(np.linalg.norm(left)*np.linalg.norm(right)), 1e-12))
     if coherence < .2:
         return dict(unknown('inconsistent_channels'), coherence=round(coherence,3), difference_db=round(difference,2))
-    timing = delay_evidence(left, right) if coherence >= .55 else None
+    timing_diagnostics = {}
+    timing = delay_evidence(left, right, diagnostics=timing_diagnostics) if coherence >= .55 else None
     level_side = ('left' if difference > 0 else 'right') if abs(difference) >= margin_db else None
     if timing and level_side and timing['side'] != level_side and abs(difference)>=3.:
-        return unknown('timing_level_conflict')
+        return dict(unknown('timing_level_conflict'), **timing_diagnostics)
     side = timing['side'] if timing else level_side
     if side is None:
-        return dict(unknown('balanced_or_ambiguous_delay'), coherence=round(coherence,3), difference_db=round(difference,2))
+        return dict(unknown('balanced_or_ambiguous_delay'), coherence=round(coherence,3), difference_db=round(difference,2), **timing_diagnostics)
     # Timing supports a rough angle. Level-only evidence supports a side, represented
     # by a fixed diagonal rather than inventing an angle from uncalibrated volume.
     bearing = front_bearing(timing['lag_samples']) if timing else (-45. if side == 'left' else 45.)
@@ -95,7 +102,7 @@ def frame_evidence(pcm, gain_offset_db=0., min_dbfs=-75., margin_db=1.25):
                 reason='lateral_arrival_time' if timing else 'lateral_level_difference',
                 lag_samples=timing['lag_samples'] if timing else None,
                 difference_db=round(difference, 2),
-                coherence=round(coherence, 3))
+                coherence=round(coherence, 3), **timing_diagnostics)
 
 
 def window_evidence(frames, require_current=True):

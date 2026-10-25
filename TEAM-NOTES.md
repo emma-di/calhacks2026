@@ -539,3 +539,26 @@ liveness did not prove changed thresholds loaded. Spatial accuracy remains unval
   urgent sounds still interrupt. See docs/alert-engine.md. Receiver was restarted on8766 to activate the changes. Saved profile revision118 and controls
   were preserved; new session4c04cbec80b3461eaa44a3b8a7d3241b. Session-only provider key must
   be reconnected. 188 Python tests,68 frontend tests and production build passed.
+
+
+### Mounted direction remains inaccurate — October25 follow-up
+
+User reports direction still unreliable after mounted gain correction. Numeric recorder contained
+43 timing-based frames of1193;786 level-based and340 balanced/ambiguous (remainder conflicts,
+uncorrelated or no frame). These are evidence-type counts, not accuracy scores. Subsequent
+event directions skewed left after the gain correction; balancing alone has not solved localization.
+Do not claim spatial readiness. Existing front fallback is still explicitly assumed.
+A numeric-only left/right clap diagnostic is armed to separate tonal alarm ambiguity from a
+mount/channel problem. Check sound-port clearance; INMP441 is bottom-ported. Preserve one capture
+owner. No new sensitivity reduction or display orientation changes made in this follow-up.
+
+
+### Clap diagnosis and rejected-delay visibility
+
+Clap diagnostic captured loud frames but did not establish a reliable left/right split; most loud
+frames still used level evidence and selected left. No accuracy claim or further gain change.
+Added numeric timing_peak_lag_samples, timing_peak_ratio and timing_rejection to spatial_frame
+telemetry, so near-zero delay is distinguishable from an ambiguous peak. This instrumentation
+does not relax gates or change direction policy. Managed Pi worker restarted to load it; receiver
+and OLED preserved. 23 focused Pi/spatial tests pass. Next physical test must inspect those peak
+lags with explicitly labeled source-side changes and confirm exposed acoustic ports.

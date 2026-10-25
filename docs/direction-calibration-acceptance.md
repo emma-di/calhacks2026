@@ -4,6 +4,14 @@ The real Pi audio → recognition → browser/OLED path has worked. The 17-event
 trial demonstrated both lateral cues, not measured localization accuracy. More calibration and
 controlled acceptance are useful; making the threshold smaller is not a substitute.
 
+## Latest mounted result: not accepted
+
+User still reports inaccurate direction after the provisional mounted gain offset−3.85dB
+replaced−0.89dB. Most sampled frames were level-based rather than arrival-time-based. The
+correction changed the side bias; it is not a passed calibration. A left/right broadband-clap
+check and sound-port inspection are the current diagnostic. Existing numeric `.cache/` values
+are local only; verify actual loaded values before testing.
+
 ## Mount first
 
 1. Fix microphones in their final positions. Measure opening-to-opening separation accurately;
@@ -11,7 +19,7 @@ controlled acceptance are useful; making the threshold smaller is not a substitu
 2. Confirm channel0 is still physical left and1 right. Keep optics mirroring separate from
    acoustic left/right; an OLED `--flip-x` must not silently invert the acoustic coordinate frame.
 3. Keep the same speaker, volume and height during each comparison. Recheck a centered reference
-   at normal listening distance before changing the local gain offset (currently−0.89dB).
+   at normal listening distance before changing the local gain offset (latest provisional mounted value−3.85dB).
 4. A gain offset does not calibrate timing offset, mic frequency response or head-shadow effects.
    Those remain unmeasured. Do not tune against the same trials then report them as held-out accuracy.
 

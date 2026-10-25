@@ -30,6 +30,15 @@ class PiSpatialTests(unittest.TestCase):
             with self.subTest(lag=lag):
                 self.assertIsNone(frame_evidence(signal(lag))['side'])
 
+    def test_rejected_zero_delay_is_visible_without_inventing_a_side(self):
+        result = frame_evidence(signal())
+        self.assertIsNone(result['side'])
+        self.assertEqual(result['timing_peak_lag_samples'], 0)
+        self.assertEqual(result['timing_rejection'], 'near_zero_delay')
+        delayed = frame_evidence(signal(lag=8))
+        self.assertEqual(delayed['timing_peak_lag_samples'], -8)
+        self.assertIsNone(delayed['timing_rejection'])
+
     def test_level_difference_fallback_and_gain_compensation(self):
         self.assertEqual(frame_evidence(signal(right_gain=.7))['side'], 'left')
         self.assertEqual(frame_evidence(signal(left_gain=.7))['side'], 'right')
