@@ -81,6 +81,14 @@ class CatcherTests(unittest.TestCase):
         self.assertEqual(decisions[-1]['reason'], 'emitted')
         self.assertNotIn('transcript', decisions[-1])   # what people said stays out of the decision log
 
+    def test_finished_question_is_sent_without_waiting_for_quiet(self):
+        c, events, _ = catcher('Emma, are you coming to lunch?')
+        c.trigger(NAME, 'microphone')
+        self.feed(c, questions.MIN_SECONDS + 2 * questions.PROBE_SECONDS + .1)   # noisy room: never quiet
+        c.jobs.join()
+        self.assertEqual(len(events), 1)
+        self.assertLess(c.recognizer.heard, (questions.PRE_SECONDS + 2) * 16000)
+
     def test_capture_is_bounded(self):
         c, events, _ = catcher('Emma, are you coming?')
         c.trigger(NAME, 'microphone')

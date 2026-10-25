@@ -27,7 +27,9 @@ MODEL = ROOT / '.cache' / 'models' / 'sherpa-onnx-moonshine-tiny-en-int8'
 RATE = 16000
 PRE_SECONDS = 2.0        # the name itself and anything just before it
 CAPTURE_SECONDS = 6.0    # most questions finish within this after the name
-MIN_SECONDS = 1.5        # never stop before the speaker has had a moment to start
+MIN_SECONDS = 1.0        # never stop before the speaker has had a moment to start
+PROBE_SECONDS = 0.4      # re-transcribe this often; a finished question is sent without waiting for quiet
+QUIET_RATIO = 0.35       # "quiet" is relative to the speaker's own loudness (headsets and rooms are noisy)
 QUIET_SECONDS = 0.8      # stop early once the speaker has paused this long
 QUIET_RMS = 0.004
 MAX_LABEL = 84           # 4 lines of 21 characters on the OLED (hardware/display.py render_question)
@@ -79,6 +81,14 @@ def directed_question(transcript, names=()):
     """The question or request in the clip, without the name in front, or None."""
     for sentence in sentences(transcript):
         body = strip_call(sentence, names)
+        # A misheard name ("Shan, what are you...") can survive stripping: drop up to two words before a
+        # question or request word.
+        words = body.split()
+        for k in (1, 2):
+            if len(words) > k + 1 and re.sub(r'[^a-z]', '', words[k].lower()) in QUESTION_STARTS | {r.split()[0] for r in REQUEST_STARTS} \
+                    and re.sub(r'[^a-z]', '', words[0].lower()) not in QUESTION_STARTS:
+                body = ' '.join(words[k:])
+                break
         if len(body.split()) >= 2 and is_question(body):
             first = re.sub(r'[^a-z]', '', body.split()[0].lower())
             return body + '?' if first in QUESTION_STARTS and body[-1] not in '.?!' else body
@@ -131,6 +141,7 @@ class QuestionCatcher:
         self.recent = np.zeros(0, dtype=np.float32)
         self.capture = None
         self.jobs = queue.Queue(maxsize=4)
+        self.lock = threading.Lock()   # early checks (audio thread) and the worker share one recognizer
         threading.Thread(target=self._work, daemon=True).start()
 
     def trigger(self, name_event, source):
@@ -139,7 +150,8 @@ class QuestionCatcher:
             return
         if str(name_event.get('matched_alias_id', '')).startswith('warning'):
             return   # "watch out" is the whole message
-        self.capture = dict(samples=[self.recent.copy()], after=0, quiet=0, source=source, event=name_event)
+        self.capture = dict(samples=[self.recent.copy()], after=0, quiet=0, peak=0., probed=0,
+                            source=source, event=name_event)
 
     def feed(self, samples):
         samples = np.asarray(samples, dtype=np.float32)
@@ -149,10 +161,22 @@ class QuestionCatcher:
             return
         capture['samples'].append(samples)
         capture['after'] += len(samples)
-        loud = len(samples) and float(np.sqrt(np.mean(samples ** 2))) >= QUIET_RMS
+        rms = float(np.sqrt(np.mean(samples ** 2))) if len(samples) else 0.
+        capture['peak'] = max(capture['peak'], rms)
+        loud = rms >= max(QUIET_RMS, QUIET_RATIO * capture['peak'])
         capture['quiet'] = 0 if loud else capture['quiet'] + len(samples)
-        if capture['after'] >= CAPTURE_SECONDS * RATE or (
-                capture['after'] >= MIN_SECONDS * RATE and capture['quiet'] >= QUIET_SECONDS * RATE):
+        done = capture['after'] >= CAPTURE_SECONDS * RATE or (
+            capture['after'] >= MIN_SECONDS * RATE and capture['quiet'] >= QUIET_SECONDS * RATE)
+        if not done and capture['after'] >= MIN_SECONDS * RATE and capture['after'] - capture['probed'] >= PROBE_SECONDS * RATE:
+            # Transcribing is ~20 ms, so check early: a complete question goes out right away.
+            capture['probed'] = capture['after']
+            text = self.transcribe(np.concatenate(capture['samples']))
+            # The model punctuates unfinished audio too, so wait until the words stop changing.
+            if text == capture.get('last_text') and text.rstrip().endswith(('?', '.', '!')) \
+                    and directed_question(text, self.names()):
+                capture['transcript'], done = text, True
+            capture['last_text'] = text
+        if done:
             self.capture = None
             try:
                 self.jobs.put_nowait(capture)
@@ -166,17 +190,22 @@ class QuestionCatcher:
             self.jobs.put(capture)
         self.jobs.join()
 
+    def names(self):
+        detection = self.profile().get('name_detection', {})
+        return [detection.get('primary_name') or '', *detection.get('aliases', [])]
+
     def transcribe(self, samples):
-        stream = self.recognizer.create_stream()
-        stream.accept_waveform(RATE, samples)
-        self.recognizer.decode_stream(stream)
-        return stream.result.text.strip()
+        with self.lock:
+            stream = self.recognizer.create_stream()
+            stream.accept_waveform(RATE, samples)
+            self.recognizer.decode_stream(stream)
+            return stream.result.text.strip()
 
     def handle(self, capture):
         started = time.monotonic()
-        transcript = self.transcribe(np.concatenate(capture['samples']))
+        transcript = capture.get('transcript') or self.transcribe(np.concatenate(capture['samples']))
         detection = self.profile().get('name_detection', {})
-        names = [detection.get('primary_name') or '', *detection.get('aliases', [])]
+        names = self.names()
         question = directed_question(transcript, names) if transcript else None
         # What people said is not written to the decision log; only its length.
         decision = dict(type='question', after_event_id=capture['event'].get('event_id'),
