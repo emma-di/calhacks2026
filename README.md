@@ -82,6 +82,14 @@ API key. It stays in the receiver's memory only and clears when the receiver sto
 `audio.cli mic --pi pi@glasses-pi.local`. Step-by-step: [glasses checklist](docs/glasses-checklist.md),
 [Pi stereo direction](docs/pi-spatial-live.md).
 
+### Repeatable demo microphone controls
+
+Use `.venv/bin/python scripts/recognizer.py pi` to start Pi input in the background;
+`status`, `stop`, `devices` and `mac --device INDEX` handle the rest without duplicate workers.
+This controller defaults to the current demo receiver on8766. A fresh receiver defaults to8765;
+pass `--endpoint http://127.0.0.1:8765/events` in that case.
+See [recognizer controls and reflected OLED testing](docs/recognizer-controls.md).
+
 ## Where AI is used
 
 | What | Model | Runs | Why |

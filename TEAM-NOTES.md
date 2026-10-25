@@ -505,3 +505,17 @@ liveness did not prove changed thresholds loaded. Spatial accuracy remains unval
 - John owns SPACE-PHONE-01; see HANDOFF-JOHN.md and phone feasibility doc. Loose pocket orientation
   and independent clocks mean this is an experiment, not a ready third-mic triangulation feature.
 - Concurrent Claude question feature is checkpointed in3a593dc; live acceptance still pending.
+
+
+## October 25: recognizer automation and reflected optics session
+
+- Reviewed Claude commits through7b2466d: Mana first-run steps, typed-sound Claude matching,
+  Spidey Sense theme, Browser-only test controls and Live diagnostics moved to Log.
+- Added scripts/recognizer.py for explicit Pi/Mac background start, stop, status and logs.
+  Repeated starts are idempotent; source changes stop the managed old worker first. Older manually
+  started workers are detected and left untouched to avoid duplicate capture. Runtime state/logs
+  stay in ignored .cache/. No auto-start on login or silent Mac fallback.
+- Reflection checks: docs/recognizer-controls.md. Use existing SSD1306 --flip-x/--flip-y flags
+  only after wearer-view confirmation; do not swap microphone labels to fix mirrored text.
+- At initial check the existing Pi recognizer PID79402 was alive but Pi hostname unresolved.
+  Receiver8766 was responding; no inference/capture liveness claimed from process status alone.
