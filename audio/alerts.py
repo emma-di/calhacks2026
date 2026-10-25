@@ -145,6 +145,8 @@ def sound_key(event):
 
 def effective_tier(kind, producer_tier, profile, event=None):
     """Explicit override, then the selected preset, then the producer's legacy default."""
+    if kind == 'name_called' and event and str(event.get('matched_alias_id', '')).startswith('warning-'):
+        return 4   # "watch out" / "look out" is a warning, not a chat
     if kind == 'custom' and event:
         chosen = next((r for r in profile.get('custom_sound_requests', []) if r['id'] == event.get('custom_sound_id')), None)
         if chosen:

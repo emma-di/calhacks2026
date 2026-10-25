@@ -30,8 +30,15 @@ WARMUP_SECONDS = 2.5   # streaming models ignore roughly the first 2 s after a s
 
 # Attention calls: someone trying to get the wearer's attention without using their name. Common in
 # everyday talk, so they use a stricter threshold than names. profile.name_detection.attention_calls.
-ATTENTION_PHRASES = ('HEY', 'HEY YOU', 'EXCUSE ME', 'HELLO', 'OVER HERE')
+# Very short or constant words (yo, hi, sorry, wait) are left out: they would fire all day.
+ATTENTION_PHRASES = ('HEY', 'HEY YOU', 'EXCUSE ME', 'HELLO', 'OVER HERE', 'COME HERE', 'GET OVER HERE',
+                     'HEY THERE', 'PARDON ME', 'WAIT UP')
+# Warnings mean danger, not a chat: they show as an urgent cue (alerts.effective_tier, warning- ids).
+WARNING_PHRASES = ('WATCH OUT', 'LOOK OUT')
 ATTENTION_BOOST, ATTENTION_THRESHOLD = 1.0, 0.25
+# Multi-word phrases are distinctive enough for a looser match; danger warnings lean toward recall.
+PHRASE_BOOST, PHRASE_THRESHOLD = 1.5, 0.15
+WARNING_BOOST, WARNING_THRESHOLD = 2.0, 0.1
 
 # Detection settings chosen on a synthetic multi-voice test (docs/name-detection.md).
 DEFAULT_BOOST = 1.5
@@ -151,11 +158,15 @@ def keyword_lines(profile):
             seen.add(tokens)
             lines.append(f"{tokens} :{boost} #{threshold} @{alias_id}")
     if detection.get('attention_calls', True):
-        for i, phrase in enumerate(ATTENTION_PHRASES):
+        phrases = [(f'attention-{i}', p) for i, p in enumerate(ATTENTION_PHRASES)]
+        phrases += [(f'warning-{i}', p) for i, p in enumerate(WARNING_PHRASES)]
+        for alias_id, phrase in phrases:
             tokens = ' '.join(tokenize(phrase))
             if tokens not in seen:
                 seen.add(tokens)
-                lines.append(f"{tokens} :{ATTENTION_BOOST} #{ATTENTION_THRESHOLD} @attention-{i}")
+                boost, threshold = (WARNING_BOOST, WARNING_THRESHOLD) if alias_id.startswith('warning') else \
+                    (PHRASE_BOOST, PHRASE_THRESHOLD) if ' ' in phrase else (ATTENTION_BOOST, ATTENTION_THRESHOLD)
+                lines.append(f"{tokens} :{boost} #{threshold} @{alias_id}")
     if not names_on:
         return lines
     vocabulary = model_vocabulary()
@@ -298,11 +309,13 @@ def learn_spelling(waveform, profile):
 def make_name_event(profile, alias_id, source, timestamp_ms=None):
     """Schema-v2 name event (audio/events.py validate_name_event). Keyword spotting gives no calibrated
     score, so confidence is null with confidence_kind 'unavailable'."""
-    label = "Someone's calling" if alias_id.startswith('attention') else 'Your name'
+    label = ("Watch out!" if alias_id.startswith('warning') else
+             "Someone's calling" if alias_id.startswith('attention') else 'Your name')
     return dict(schema_version=2, event_id=str(uuid.uuid4()), type='name_called', label=label,
                 source=source, recognizer='sherpa-onnx-kws-zipformer-3.3M', confidence=None,
                 confidence_kind='unavailable', matched_alias_id=alias_id,
-                profile_revision=profile.get('revision', 0), priority_tier=3,
+                profile_revision=profile.get('revision', 0),
+                priority_tier=4 if alias_id.startswith('warning') else 3,
                 timestamp_ms=timestamp_ms if timestamp_ms is not None else int(time.time()*1000),
                 direction_degrees=None, direction_confidence=None, distance_meters=None, proximity='unknown')
 
@@ -318,7 +331,7 @@ class NameDetector:
         self.checked = -math.inf
         self.spotter = self.stream = None
         self.profile = default_profile()
-        self.last = -math.inf
+        self.last = {}   # per kind, so a "hey" cannot hold back a "watch out" right after it
         self.decisions = []
         self.maybe_reload(force=True)
 
@@ -355,7 +368,7 @@ class NameDetector:
             joiner=model('joiner'), keywords_file=str(keywords), num_threads=1)
         self.reset()
         heard = ([detection['primary_name']]+detection['aliases'] if names_on else []) + \
-            (['attention calls (hey, excuse me…)'] if detection.get('attention_calls', True) else [])
+            (['attention calls (hey, excuse me…, watch out)'] if detection.get('attention_calls', True) else [])
         print(f'Name detection: listening for {", ".join(heard)} (profile revision {profile["revision"]})', file=sys.stderr)
         return True
 
@@ -387,12 +400,13 @@ class NameDetector:
                 continue
             self.spotter.reset_stream(self.stream)
             decision = dict(type='name_called', matched_alias_id=alias_id, profile_revision=self.profile['revision'])
-            if getattr(self, 'repeat_suppression', True) and now-self.last < self.cooldown:
+            kind = alias_id.split('-')[0] if alias_id.startswith('warning') else 'call'
+            if getattr(self, 'repeat_suppression', True) and now-self.last.get(kind, -math.inf) < self.cooldown:
                 decision['reason'] = 'cooldown'
             else:
                 event = make_name_event(self.profile, alias_id, source, timestamp_ms)
                 events.append(event)
-                self.last = now
+                self.last[kind] = now
                 decision.update(reason='emitted', event_id=event['event_id'])
             self.decisions.append(decision)
         return events

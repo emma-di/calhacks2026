@@ -30,6 +30,8 @@ def run_step(engine, step):
             event.update(custom_sound_id=step['sound'], label=step['sound'])
         if 'target' in step:
             event['target_event_id'] = step['target']
+        if 'alias' in step:   # which name-spotter phrase matched
+            event['matched_alias_id'] = step['alias']
         result = engine.add(event, at)
     elif 'look' in step:
         result = dict(resolved=engine.look(at, step['look']))

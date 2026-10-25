@@ -34,7 +34,7 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       const label = `${scenario.name} / step ${index}`;
       let result: Record<string, unknown> = {};
       if (step.add)
-        result = { ...engine.add({...fixtureEvent(step.add, step.id, step.at, step.direction, step.sound), ...(step.target ? {target_event_id: step.target} : {})}, step.at) };
+        result = { ...engine.add({...fixtureEvent(step.add, step.id, step.at, step.direction, step.sound), ...(step.target ? {target_event_id: step.target} : {}), ...(step.alias ? {matched_alias_id: step.alias} : {})}, step.at) };
       else if (step.look) result = { resolved: engine.look(step.at, step.look) };
       else if (step.dismiss) {
         result = { dismissed: engine.dismiss(step.at, step.dismiss) };

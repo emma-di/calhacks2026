@@ -119,8 +119,10 @@ class SpellingTests(unittest.TestCase):
             with_name = names.keyword_lines(names.validate_profile(
                 {'name_detection': {'enabled': True, 'primary_name': 'Emma'}}))
             off = names.keyword_lines(names.validate_profile({'name_detection': {'attention_calls': False}}))
-        self.assertIn(f'▁HEY ▁YOU :{names.ATTENTION_BOOST} #{names.ATTENTION_THRESHOLD} @attention-1', no_name)
-        self.assertEqual(len(no_name), len(names.ATTENTION_PHRASES))
+        self.assertIn(f'▁HEY :{names.ATTENTION_BOOST} #{names.ATTENTION_THRESHOLD} @attention-0', no_name)
+        self.assertIn(f'▁HEY ▁YOU :{names.PHRASE_BOOST} #{names.PHRASE_THRESHOLD} @attention-1', no_name)
+        self.assertIn(f'▁WATCH ▁OUT :{names.WARNING_BOOST} #{names.WARNING_THRESHOLD} @warning-0', no_name)
+        self.assertEqual(len(no_name), len(names.ATTENTION_PHRASES) + len(names.WARNING_PHRASES))
         self.assertEqual(with_name[0], '▁EMMA :1.5 #0.15 @primary')
         self.assertGreater(names.ATTENTION_THRESHOLD, names.DEFAULT_THRESHOLD)   # stricter than names
         self.assertEqual(off, [])
@@ -130,6 +132,8 @@ class SpellingTests(unittest.TestCase):
         self.assertEqual((event['type'], event['label']), ('name_called', "Someone's calling"))
         self.assertEqual(validate_event(event)['matched_alias_id'], 'attention-0')
         self.assertEqual(names.make_name_event(dict(revision=1), 'primary', 'microphone')['label'], 'Your name')
+        warning = names.make_name_event(dict(revision=1), 'warning-0', 'microphone')
+        self.assertEqual((warning['label'], warning['priority_tier']), ('Watch out!', 4))
 
     def test_name_events_carry_pi_stereo_direction(self):
         from audio.pi_spatial import annotate_events

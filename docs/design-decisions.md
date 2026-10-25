@@ -135,3 +135,13 @@ compass arrows around that icon; unknown has no arrow. One alert at a time remai
 Optional thumbs-up is restored for the demo POV camera only, with a deliberate hold/release and exact
 event dismissal. User reports finicky live behavior; tuning is deferred. The glasses still have no
 camera. Phone POV/mirroring is not implemented yet. See simulator-freeze.md and integration-revisit.md.
+
+## Attention calls and spoken warnings
+
+Besides the wearer's name, the name spotter listens for attention calls ("hey", "hey you", "excuse
+me", "hello", "over here", "come here", "get over here", "hey there", "pardon me", "wait up") shown as
+"Someone's calling", and for "watch out" / "look out" shown as an urgent "Watch out!" (tier 4 in both
+engines, even when names are lowered). One-word calls use a strict threshold; multi-word phrases and
+warnings are looser because they are more distinctive. Very common short words (yo, hi, sorry, wait)
+are deliberately excluded. `name_detection.attention_calls: false` turns all of these off. Synthetic
+speech recall is patchy per phrase; real-voice tuning is still to do.

@@ -268,7 +268,9 @@ export class AlertEngine {
     this.seen = [...this.seen, event.event_id].slice(-256);
     if (GESTURES.has(event.type)) return this.gesture(event, now);
     const producer = event.priority_tier;
-    const tier = (event.type === "custom" ? this.prefs.custom_sound_tiers?.[event.custom_sound_id!] : undefined) ?? effectiveTier(event.type, producer, this.prefs);
+    // "watch out" / "look out" from the name spotter is a warning, not a chat (audio/alerts.py effective_tier).
+    const warning = event.type === "name_called" && String(event.matched_alias_id ?? "").startsWith("warning-");
+    const tier = warning ? 4 : (event.type === "custom" ? this.prefs.custom_sound_tiers?.[event.custom_sound_id!] : undefined) ?? effectiveTier(event.type, producer, this.prefs);
     const logged: LoggedEvent = {
       ...event,
       priority_tier: tier,

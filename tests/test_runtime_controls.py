@@ -39,7 +39,7 @@ class RepeatTestingTests(unittest.TestCase):
         detector.spotter = Mock()
         detector.spotter.get_result.return_value = 'primary'
         detector.cooldown = 5
-        detector.last = 0
+        detector.last = {'call': 0}
         detector.profile = {'revision': 1}
         for suppress, expected in [(True, 0), (False, 1), (True, 0)]:
             detector.repeat_suppression = suppress

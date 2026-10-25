@@ -1210,6 +1210,38 @@
      }
     }
    ]
-  }
+  },
+ {
+  "name": "a spoken warning is urgent even when names are lowered; an attention call follows the name setting",
+  "profile": {
+   "mode": "balanced",
+   "event_tiers": {
+    "name_called": 2
+   }
+  },
+  "steps": [
+   {
+    "at": 0,
+    "add": "name_called",
+    "id": "n1",
+    "alias": "attention-0",
+    "expect": {
+     "active": "n1",
+     "tier": 2
+    }
+   },
+   {
+    "at": 500,
+    "add": "name_called",
+    "id": "w1",
+    "alias": "warning-0",
+    "expect": {
+     "reason": "interrupted",
+     "active": "w1",
+     "tier": 4
+    }
+   }
+  ]
+ }
  ]
 }
