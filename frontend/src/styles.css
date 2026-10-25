@@ -1624,3 +1624,15 @@ code {
   font-weight: 700; cursor: pointer; box-shadow: 0 0 0 4px rgba(142, 208, 243, 0.25);
 }
 .listen-cta-button:hover { filter: brightness(1.06); }
+.listen-cta-main { display: flex; flex-direction: column; align-items: flex-start; gap: 12px; min-width: 260px; }
+.listen-name { display: grid; gap: 6px; font-size: 13px; color: var(--muted); }
+.listen-name input {
+  height: 40px; width: 240px; max-width: 100%; padding: 0 12px; border-radius: 10px; font: inherit; font-size: 15px;
+  color: var(--text); background: rgba(0, 0, 0, 0.25); border: 1px solid rgba(142, 208, 243, 0.4);
+}
+.listen-cta-button.is-on { background: var(--raise-2); color: var(--text); box-shadow: 0 0 0 2px var(--urgent); }
+.listen-status { color: var(--signal); font-size: 14px; }
+.listen-tries { flex: 1; min-width: 240px; max-width: 460px; }
+.listen-tries h3 { font-size: 14px; font-weight: 600; color: var(--text); }
+.listen-tries ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 14px; }
+.listen-tries q { color: var(--text); }

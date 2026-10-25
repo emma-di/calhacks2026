@@ -237,7 +237,7 @@ export default function App() {
     catch { return false; }
   });
   const [view, setView] = useState<View>(() => {
-    return initialView(window.location.search, setupComplete);
+    return initialView(window.location.search, setupComplete || HOSTED);   // the online demo opens on Live
   });
   const [audience, setAudience] = useState(false);
   useEffect(() => {
@@ -270,9 +270,13 @@ export default function App() {
   const { view: state, connection } = session;
   // Browser mode can listen with this device's microphone, only after an explicit click.
   const [micOn, setMicOn] = useState(false);
-  const listenNames = profile
+  // A name typed in the Live card counts when setup has none, so "Hey <name>" works straight away.
+  const [demoName, setDemoName] = useState("");
+  const setupNames = profile
     ? [profile.name_detection.primary_name, ...profile.name_detection.aliases].filter(Boolean)
     : [];
+  const listenNames = setupNames.length ? setupNames : demoName.trim() ? [demoName.trim()] : [];
+  const callName = listenNames[0] || "your name";
   const mic = useBrowserHearing(
     source === "browser" && micOn,
     listenNames,
@@ -536,16 +540,30 @@ export default function App() {
       {view === "live" && (
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
-          {source === "browser" && !micOn && (
+          {source === "browser" && (
             // The demo's main action: hear it with your own microphone.
             <section className="listen-cta" aria-label="Try it with your microphone">
-              <div>
+              <div className="listen-cta-main">
                 <h2>Hear it yourself</h2>
-                <p>Turn on your mic, then knock, play a siren or dog bark, or say “hey” and your name.</p>
+                {!setupNames.length && (
+                  <label className="listen-name">
+                    Your name
+                    <input value={demoName} onChange={(e) => setDemoName(e.target.value)} placeholder="e.g. Emma" autoComplete="given-name" />
+                  </label>
+                )}
+                <button className={`listen-cta-button ${micOn ? "is-on" : ""}`} onClick={() => setMicOn((on) => !on)}>
+                  <Mic size={20} /> {micOn ? "Stop listening" : "Listen with your mic"}
+                </button>
+                {micOn && <p className="listen-status" role="status">{mic.status === "listening" ? `Listening${mic.heard.length ? ` · hearing ${mic.heard.join(", ")}` : "…"}` : mic.status === "error" ? `Microphone unavailable: ${mic.error}` : "Starting the microphone…"}</p>}
               </div>
-              <button className="listen-cta-button" onClick={() => setMicOn(true)}>
-                <Mic size={20} /> Listen with your mic
-              </button>
+              <div className="listen-tries">
+                <h3>Things to try</h3>
+                <ul>
+                  <li>Say <q>Hey {callName}, are you coming to lunch?</q> Your name shows, then the question.</li>
+                  <li>Say <q>Excuse me</q> or <q>Watch out!</q></li>
+                  <li>Knock on your desk, or play a dog bark or siren from your phone.</li>
+                </ul>
+              </div>
             </section>
           )}
           <div className="lens-wrap">
