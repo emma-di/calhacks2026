@@ -26,11 +26,12 @@ INIT = [0xAE, 0xD5, 0x80, 0xA8, 0x3F, 0xD3, 0x00, 0x40, 0x8D, 0x14, 0x20, 0x00,
 class SSD1306:
     """Minimal I2C driver. `bus` is any object with smbus2's write_i2c_block_data."""
 
-    def __init__(self, bus, address=0x3C, flip_x=False, flip_y=False):
+    def __init__(self, bus, address=0x3C, flip_x=False, flip_y=False, contrast=None):
         self.bus, self.address = bus, address
         # Segment remap / COM scan direction; a beam-splitter combiner usually needs one axis mirrored.
         orientation = [0xA0 if flip_x else 0xA1, 0xC0 if flip_y else 0xC8]
-        self.command(*INIT, *orientation, 0xAF)
+        brightness = [] if contrast is None else [0x81, max(0, min(255, int(contrast)))]
+        self.command(*INIT, *orientation, *brightness, 0xAF)
 
     def command(self, *values):
         for start in range(0, len(values), 16):
@@ -66,7 +67,8 @@ def make_sink(name, args):
             from smbus2 import SMBus
         except ImportError:
             raise SystemExit('smbus2 is missing: pip install smbus2 (and enable I2C with raspi-config)')
-        driver = SSD1306(SMBus(args.bus), int(args.address, 16), args.flip_x, args.flip_y)
+        driver = SSD1306(SMBus(args.bus), int(args.address, 16), args.flip_x, args.flip_y,
+                         getattr(args, 'contrast', None))
         # On exit leave the panel on (the last frame drawn is blank): another program, such as the
         # DETECT bear demo service, may share this display and should not find it switched off.
         return lambda bitmap: driver.show(bitmap.ssd1306_pages()), (lambda: None)
@@ -135,6 +137,30 @@ def self_test(show, labels):
     print('self-test: cleared', flush=True)
 
 
+def gallery_frames(labels=True):
+    """Optics review: every cue icon (tier 2), the four tier treatments, then all 16 arrow positions.
+
+    Yields (description, bitmap). Uses only the deployed icon file, so it runs on the Pi as is.
+    """
+    from hardware.display import ICON_IDS, Presentation
+    def frame(icon, label, tier=2, bearing=None, show=labels):
+        value = dict(schema_version=1, session_id='gallery', state_sequence=1, event_id='gallery',
+                     label=label, icon_id=icon, effective_tier=tier, remaining_ms=2000)
+        if bearing is not None:
+            side = 'front' if -45 <= bearing <= 45 else 'right' if 45 < bearing <= 135 else \
+                'left' if -135 <= bearing < -45 else 'behind'
+            value.update(direction=side, bearing_degrees=bearing)
+        return render(Presentation.parse(value), show_labels=show)
+    for icon in sorted(i for i in ICON_IDS if i.startswith('cue_')):
+        name = icon[4:].replace('_', ' ')
+        yield f'icon {name}', frame(icon, name)
+    for tier, name in ((1, 'Ambient'), (2, 'Notify'), (3, 'Attention'), (4, 'Urgent')):
+        yield f'tier {tier} {name}', frame('cue_doorbell', name, tier)
+    for k in range(16):
+        bearing = k * 22.5 - 180
+        yield f'arrow {bearing:+.1f} deg', frame('cue_doorbell', 'doorbell', 2, bearing, False)
+
+
 def main():
     parser = argparse.ArgumentParser(description='Follow the receiver and drive the glasses display')
     parser.add_argument('--receiver', default='http://127.0.0.1:8765')
@@ -147,12 +173,27 @@ def main():
     parser.add_argument('--flip-y', action='store_true', help='Mirror vertically (display mounted upside down)')
     parser.add_argument('--output', default='.cache/oled-live.pbm', help='PBM sink path')
     parser.add_argument('--self-test', action='store_true')
+    parser.add_argument('--gallery', action='store_true',
+                        help='Optics review: all cue icons, tier treatments and 16 arrow positions')
+    parser.add_argument('--gallery-seconds', type=float, default=2.0, help='Seconds per gallery frame')
+    parser.add_argument('--contrast', type=int, help='SSD1306 brightness 0-255 (default: init value 0xCF)')
     parser.add_argument('--labels', action='store_true', help='Self-test only: show nonurgent labels')
     args = parser.parse_args()
     show, close = make_sink(args.sink, args)
     if args.self_test:
         try:
             self_test(show, args.labels)
+        finally:
+            close()
+        return
+    if args.gallery:
+        try:
+            frames = list(gallery_frames(labels=True))
+            for index, (description, bitmap) in enumerate(frames, 1):
+                print(f'gallery {index}/{len(frames)}: {description}', flush=True)
+                show(bitmap)
+                time.sleep(args.gallery_seconds)
+            show(render(None))
         finally:
             close()
         return

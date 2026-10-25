@@ -1,7 +1,7 @@
 import unittest
 from audio.alerts import AlertEngine
 from audio.events import make_event
-from hardware.oled_client import INIT, SSD1306, Follower
+from hardware.oled_client import INIT, SSD1306, Follower, gallery_frames
 
 
 class FakeBus:
@@ -57,6 +57,23 @@ class OledClientTests(unittest.TestCase):
         self.assertTrue(any(follower.frame().buffer))
         now[0] = 30.0
         self.assertFalse(any(follower.frame().buffer))
+
+
+class GalleryTests(unittest.TestCase):
+    def test_gallery_covers_every_cue_tier_and_arrow_with_distinct_frames(self):
+        frames = list(gallery_frames())
+        names = [d for d, _ in frames]
+        self.assertEqual(sum(d.startswith('icon ') for d in names), 50)
+        self.assertEqual(sum(d.startswith('tier ') for d in names), 4)
+        self.assertEqual(sum(d.startswith('arrow ') for d in names), 16)
+        self.assertEqual(len({bytes(b.buffer) for _, b in frames}), len(frames))
+
+    def test_contrast_is_sent_and_clamped(self):
+        bus = FakeBus()
+        SSD1306(bus, contrast=999)
+        commands = [b for _, control, data in bus.writes if control == 0x00 for b in data]
+        index = commands.index(0x81, len(INIT))
+        self.assertEqual(commands[index + 1], 255)
 
 
 if __name__ == '__main__':
