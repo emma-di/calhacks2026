@@ -28,6 +28,7 @@ import { useSession, type Source, type SyncStatus } from "./lib/session";
 import { useHearing } from "./lib/observations";
 import HearingPanel from "./components/Hearing";
 import TeachPanel from "./components/TeachPanel";
+import PiMicrophoneLevels from "./components/PiMicrophoneLevels";
 import { initialView, SETUP_COMPLETE_KEY } from "./lib/setupEntry";
 
 type View = "live" | "preferences" | "log";
@@ -520,6 +521,8 @@ export default function App() {
             </div>
             {oledInset}
           </div>
+
+          <PiMicrophoneLevels />
 
           <section className="dock" aria-label="Controls">
             <div className="keys" role="group" aria-label="Play a sound">

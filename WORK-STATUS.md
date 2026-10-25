@@ -6,6 +6,12 @@ for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
 ## Latest: two Pi microphones verified — October 25
 
+Live stereo level bridge and browser meters are implemented, with no raw audio served or saved.
+57 frontend tests and build pass. New priority: make Pi capture primary for recognition, retaining
+Mac only as explicit fallback, then conservative left/right/unknown from the same stereo windows.
+**Not yet implemented:** Pi recognition input and measured spatial alerts. Detailed restart plan,
+tests, stream ownership and calibration gates: [Pi spatial handoff](docs/pi-spatial-handoff.md).
+
 I²S capture driver installed with original bootconfig backed up on Pi at
 /home/pi/aware-mic-backup-20261025-000106/config.txt. Device AwareINMP441 now captures 48 kHz, S32_LE,
 stereo. Near-each-mic 20s test shows independent response: channel 0 +14.82 dB at first mic,

@@ -443,3 +443,12 @@ overlay. Config backed up before installation/reboot. User close-up trial confir
 responding channels at 48 kHz/S32_LE, with 14.82 dB and 21.65 dB channel advantages near the two mics.
 Physical left/right labeling and spatial calibration remain undone; do not infer direction from
 this capture test. No audio/credentials committed. See hardware/pi-capture/README.md.
+
+## Pi primary input and conservative spatial scope — October 25
+
+Emma clarified Pi stereo is the primary inference input; Mac microphone is explicit fallback.
+Current meters alone do not switch recognition. Requested direction is left/right/unknown only,
+with no front/back or distance claim. Physical channel mapping and real-room direction tests remain
+required. Detailed step-by-step handoff: docs/pi-spatial-handoff.md. On hotspot return SSH resolved
+again, but the existing level bridge remained disconnected; inspect capture lifecycle before claiming
+it recovered. Do not restart receiver 8766 unnecessarily (Claude key is memory-only).
