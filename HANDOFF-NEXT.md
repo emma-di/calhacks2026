@@ -6,7 +6,7 @@ signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/produ
 ## Latest software consolidation (read before older snapshots)
 
 Catalog picker + backend rules + per-ID priorities + icons are connected, including Rain/Saxophone.
-Free text remains pending. Recorded Whistling passes and Mana adapter→Python→Rain/drop/tier3 passes.
+Free text remains pending. Recorded Whistling passes and Mana adapter→Python→Rain/cue_rain/tier 3 passes.
 Mac optional custom-head dependencies installed; audio worker now runs embedding path + catalog.
 Profiles hydrate from receiver, only genuine edits save; cold reload verified without name loss.
 Mana-generated adapter is imported by the companion and preserves Ignore0, learned names and failures.
@@ -15,10 +15,17 @@ Site contrast/mobile/diagnostics polished without dither over meaningful data.
 
 TEMPORARY user-requested Domestic animals,pets → Dog barking is active in both policies; do not claim
 this is dog-specific. Guarded fallback evidence is separate (docs/dog-label-audit.md). Snap OFF.
-Current mic is explicitly user-authorized and running; receiver8766, site5174. No Pi until later.
+Current mic is explicitly user-authorized and running; receiver 8766, site 5174. No Pi until later.
 Remaining acceptance: real-room names/false positives/misses, selected-sound sensitivities, second
 Mac portability, phone-direction calibration and physical optics once hardware returns.
-Proposed50 cue set awaits Emma approval: docs/proposed-50-cues.md. Do not implement new50 symbols yet.
+Emma approved the 50 cues; implemented and pushed in 00eac84 (Claude committed the Codex work).
+50 distinct symbols and curated search are ready. See docs/cue-catalog-verification.md.
+Browser acceptance: isolated Preferences → Baby crying/Attention → save/reload → real recorded
+Zipformer positive → cue_baby_cry in both previews; Ignore suppresses, removal stops recognition.
+107 Python/44 frontend tests, 759 raster fixtures, 10,000 parity actions pass. 13/16 recorded spotchecks
+qualify; breaking/clapping/footsteps miss provisional thresholds. 34 cues lack mapped recordings.
+Do not describe this as 50-sound accuracy certification. Bicycle recognition stays disabled.
+Current live mic device 0 is MacBook Pro Microphone (device 1 is speakers); enumerate devices on restart.
 See docs/audio-software-readiness.md and docs/mana-onboarding.md for current evidence.
 
 ## Latest: 16 display positions, Pi scope, snap parked

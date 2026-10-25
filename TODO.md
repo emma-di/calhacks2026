@@ -3,7 +3,9 @@
 Latest October24 software supersedes older unchecked snapshots: catalog selection and name integration
 are wired, Mana receiver adapter is live, stale profile overwrite fixed, centered16-arrow renderer ready.
 See WORK-STATUS.md and docs/audio-software-readiness.md; remaining room/device acceptance is not
-completed by unit tests. Proposed50 symbols wait for explicit approval.
+completed by unit tests. Approved 50 symbols and curated picker are implemented; see docs/cue-catalog-verification.md for
+wiring evidence and remaining recognition gaps. Physical optics, independent per-class accuracy
+and final room testing remain acceptance gates.
 
 
 Single project checklist. Update IDs and evidence in every relevant PR. Checked means implemented

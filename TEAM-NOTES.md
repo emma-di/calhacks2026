@@ -372,7 +372,7 @@ phone-camera thumbs-up and automatic alarm clear after sustained quiet.
 
 Catalog selection now preserves recognized model labels, icon and per-ID tier; free text stays
 pending. CLI and scenes run CustomRules with hot reload. Rain/Saxophone are selectable; Whistling
-recorded integration emitted4 events with person/tier3. The ONNX embedding path now installed and
+recorded integration emitted4 events with person/tier 3. The ONNX embedding path now installed and
 matched original scores exactly on a checked recording. No model weights were fine-tuned.
 Receiver-authoritative hydration and genuine edit revisions prevent stale browser reloads from
 erasing names (live refresh held revision107 and retained the enabled name). Mana generated a
@@ -390,3 +390,16 @@ demo override. Catalog scores remain provisional; there is no zero-false-negativ
 
 Proposed50 named cues are in docs/proposed-50-cues.md, awaiting explicit approval before any new
 symbols/default bundle are implemented. Pi remains parked until available; only display code deploys.
+
+## Approved cue set and Claude review — October24
+
+Emma approved 50 cue proposals. They now have unique 32px OLED symbols, curated synonym search
+(including Baby crying), priority-before-add and up to 100 selections. Existing builtin alarm/name
+routes retain their identity; custom groups carry cue_id and canonical icon. All 527 raw classes remain
+available where not represented by curated groups; unsupported free text remains pending.
+Claude reviewed/pushed this work as 00eac84; root then redrew bicycle bell, cracked glass and skid symbols.
+Browser end-to-end acceptance used an isolated receiver: save/reload Baby crying/Attention → actual
+recorded Zipformer positive → matching previews; Ignore and removal verified. Live profile preserved.
+107 Python/44 frontend tests and 10,000 parity actions pass.13/16 recorded spotchecks qualify, with
+breaking/clapping/footsteps misses and 34 cues lacking mapped recordings. No 50-class accuracy claim.
+Live MacBook microphone is device 0 now; device 1 is speakers. Pi network remains disconnected.

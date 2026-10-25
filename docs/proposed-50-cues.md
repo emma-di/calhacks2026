@@ -1,6 +1,6 @@
-# Proposed 50 cue set — awaiting Emma approval
+# Approved 50 cue set — October 24
 
-Proposal only: no new symbols, defaults or 50-rule bundle have been implemented. Names use the separate speech worker. All other listed labels exist in the catalog, but require per-class validation. Bicycle bell remains disabled by default pending evidence. The temporary domestic-pets-to-dog override is a separate demo choice, not the final dog definition.
+Approved by Emma. All 50 symbols and curated selection are implemented; sounds remain opt-in rather than enabling a 50-rule bundle. See [verification](cue-catalog-verification.md) and [symbol sheet](images/cues-50.png). Names use the separate speech worker. All other listed labels exist in the catalog, but require per-class validation. Bicycle bell remains disabled by default pending evidence. The temporary domestic-pets-to-dog override is a separate demo choice, not the final dog definition.
 
 | # | Category | Cue | One-sentence pitch |
 | --- | --- | --- | --- |

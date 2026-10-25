@@ -7,10 +7,14 @@ for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 ## Latest software checkpoint
 
 527-label catalog choices now flow through settings, hot-reloaded rules, per-ID priority and OLED
-icons. Recorded Whistling + Mana adapter→Python→Rain/drop integration checks pass. Profile refresh
+icons. Recorded Whistling + Mana adapter→Python→Rain/cue_rain integration checks pass. Profile refresh
 preserves names; only explicit edits save. All previews centered; directional alignment retired.
 Site readability/mobile cleanup complete; Pi deployment parked. Domestic-pets→Dog barking is an
-explicit temporary demo override. Proposed50 custom symbols are awaiting approval, not implemented.
+explicit temporary demo override. Approved 50 cues now have dedicated symbols and curated defaults-first search (commit 00eac84).
+Browser Baby crying flow passes: save/reload, recorded positive, matching two previews, Ignore/removal.
+107 Python/44 frontend tests; 759 raster fixtures and 10,000 alert parity checks pass.13/16 recorded
+spotchecks qualify; breaking/clapping/footsteps miss; 34 cues untested by this recording set.
+Bicycle subtype stays disabled. Current MacBook mic is device 0; Pi not currently connected.
 Current evidence: docs/audio-software-readiness.md, docs/mana-onboarding.md, docs/proposed-50-cues.md.
 
 ## Latest: finer display directions and snap parked

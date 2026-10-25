@@ -6,7 +6,7 @@
     "name_preserved": true
   },
   "catalog_event": "Rain",
-  "icon": "drop",
+  "icon": "cue_rain",
   "tier": 3,
   "frame_bytes": 1024,
   "microphone_used": false,

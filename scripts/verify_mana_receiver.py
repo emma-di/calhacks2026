@@ -36,7 +36,7 @@ console.log(JSON.stringify({revision:saved.revision,ignore_preserved:true,name_p
         event=rules.detect({'Rain':.9},'simulation',now=0)[0]
         server.alert_state.add(event)
         display=server.alert_state.presentation()
-        assert display['icon_id']=='drop' and display['effective_tier']==3
+        assert display['icon_id']=='cue_rain' and display['effective_tier']==3
         result=dict(status='passed',mana_adapter=json.loads(checked.stdout),catalog_event=event['label'],icon=display['icon_id'],tier=display['effective_tier'],frame_bytes=len(render(Presentation.parse(display)).buffer),microphone_used=False,physical_hardware_used=False)
         print(json.dumps(result,indent=2))
     finally:

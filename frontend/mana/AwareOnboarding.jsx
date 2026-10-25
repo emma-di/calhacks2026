@@ -1185,7 +1185,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             <div style={{ fontWeight: 500 }}>Your rules</div>
             {ruleCount === 0 ? (
               <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                No rules yet. Every sound follows the {preset.label} preset.
+                {draft.custom_rules.length ? `Built-in sounds follow the ${preset.label} preset. Your added sounds are below.` : `No rules yet. Every sound follows the ${preset.label} preset.`}
               </p>
             ) : (
               <ul

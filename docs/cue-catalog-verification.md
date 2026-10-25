@@ -72,3 +72,14 @@ Independent positives and hard negatives for each intended demo sound; final mic
 trials; real-voice name checks; overlapping/repeated cues; full acoustic-onset-to-display latency;
 and physical OLED readability/orientation once the Pi returns. A 50-cue icon gallery and passing
 synthetic wiring do not establish 50-sound recognition accuracy.
+
+## Browser acceptance after Claude review
+
+An isolated receiver on 8769 with its own temporary profile and UI on 5179 was used to avoid changing
+the live demo profile. Browser search Baby crying → choose Attention → Add rule saved cue_id,
+model labels and cue_baby_cry. Refresh retained it. Real Zipformer inference on the public baby-cry
+fixture emitted score 0.7159 on its first qualifying window; HTTP receiver displayed tier 3.
+Both browser preview images showed Baby crying with the same pixel icon. A brief repeated replay
+of that recorded positive made screenshot capture possible; it was not live microphone capture.
+Changing priority to Ignore yielded ignored_tier_zero. Removing the rule left no active custom
+recognizer selection. Screenshots were kept locally in /tmp; no private audio was recorded.
