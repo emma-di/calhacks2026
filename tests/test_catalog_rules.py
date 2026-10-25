@@ -6,6 +6,7 @@ import unittest
 from audio.alerts import AlertEngine, DEFAULT_PROFILE, validate_profile
 from audio.events import EVENT_TYPES, validate_event
 from audio.custom_rules import CustomRules
+from audio.cue_catalog import CUES_BY_ID
 
 
 def profile(tier=2):
@@ -15,6 +16,26 @@ def profile(tier=2):
 
 
 class CatalogRulesTests(unittest.TestCase):
+    def test_curated_group_keeps_identity_and_canonical_icon(self):
+        cue=CUES_BY_ID['baby_cry']
+        p=profile();p['custom_sound_requests'][0].update(cue_id=cue['id'],
+            model_labels=cue['model_labels'],icon='smoke',icon_id='smoke')
+        selected=validate_profile(p,EVENT_TYPES)['custom_sound_requests'][0]
+        self.assertEqual(selected['cue_id'],'baby_cry')
+        self.assertEqual(selected['icon'],'cue_baby_cry')
+        self.assertEqual(selected['icon_id'],'cue_baby_cry')
+        for change in ({'cue_id':'not-real'},{'model_labels':['Rain']},{'cue_id':'fire_smoke'}):
+            bad=copy.deepcopy(p);bad['custom_sound_requests'][0].update(change)
+            with self.subTest(change=change),self.assertRaises(ValueError):
+                validate_profile(bad,EVENT_TYPES)
+
+    def test_capacity_accepts_one_hundred_and_rejects_more(self):
+        p=profile();p['custom_sound_requests']=[dict(id=f'sound-{i}',label=f'Sound {i}',
+            tier=0,status='pending') for i in range(100)]
+        self.assertEqual(len(validate_profile(p,EVENT_TYPES)['custom_sound_requests']),100)
+        p['custom_sound_requests'].append(dict(id='extra',label='Extra',tier=2,status='pending'))
+        with self.assertRaises(ValueError):validate_profile(p,EVENT_TYPES)
+
     def test_selected_rule_flows_into_receiver_and_profile_priority_wins(self):
         p=validate_profile(profile(0),EVENT_TYPES)
         with tempfile.TemporaryDirectory() as folder:

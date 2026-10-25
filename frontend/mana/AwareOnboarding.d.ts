@@ -16,10 +16,20 @@ export interface CustomSound {
   label: string;
   tier: Tier;
   status: "pending" | "recognized";
+  cue_id?: string;
+  icon_id?: string;
   model_labels?: string[];
   icon?: string;
   threshold?: number;
 }
+export interface CuratedCue {
+  id: string; label: string; aliases: string[]; model_labels: string[];
+  icon_id: string; default_tier: Tier; category: string;
+  event_type: string; experimental: boolean; threshold: number;
+}
+export function searchCuratedSounds(query: string): CuratedCue[];
+export function createCueRule(cueId: string, tier: Tier, id: string): CustomSound | null;
+export function applyCuratedRule(draft: unknown, cueId: string, tier: Tier, id: string): ManaDraft;
 export function sanitizeCustomSounds(raw: unknown): CustomSound[];
 export interface ManaProfile {
   display?: { labels: boolean };

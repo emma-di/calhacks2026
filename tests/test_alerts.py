@@ -189,7 +189,7 @@ class ReceiverHttpTests(unittest.TestCase):
         self.assertEqual(state['active']['producer_tier'], 2)
         self.assertTrue(state['health']['capture']['live'])
         display = self.call('/display?client=oled')
-        self.assertEqual((display['icon_id'], display['effective_tier'], display['show_labels']), ('knock', 4, True))
+        self.assertEqual((display['icon_id'], display['effective_tier'], display['show_labels']), ('cue_knock', 4, True))
         self.assertTrue(self.call('/health')['display']['connected'])
         # Restart: a new receiver loads the persisted profile.
         restarted = self.module.AlertState(profile_path=self.profile_path)

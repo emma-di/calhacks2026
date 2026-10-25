@@ -11,6 +11,7 @@ import math
 import time
 import uuid
 from pathlib import Path
+from audio.cue_catalog import selected_cue
 
 ROOT = Path(__file__).resolve().parent.parent
 PROFILE = ROOT / '.cache' / 'profile.json'
@@ -51,12 +52,20 @@ class CustomRules:
                     and type(r.get('threshold', DEFAULT_THRESHOLD)) in (int, float)
                     and math.isfinite(r.get('threshold', DEFAULT_THRESHOLD))
                     and 0 < r.get('threshold', DEFAULT_THRESHOLD) <= 1]
-        self.rules = [dict(id=r['id'], label=r['label'], tier=r['tier'],
-                           labels=[l for l in r.get('model_labels', []) if isinstance(l, str) and l in LABEL_ICONS],
-                           icon=r.get('icon') or LABEL_ICONS.get((r.get('model_labels') or [''])[0], 'wave'),
-                           threshold=float(r.get('threshold', DEFAULT_THRESHOLD)))
-                      for r in requests if isinstance(r, dict) and r.get('status') == 'recognized']
-        self.rules = [rule for rule in self.rules if rule['labels']]
+        self.rules = []
+        for r in requests:
+            if r.get('status') != 'recognized':
+                continue
+            try:
+                cue = selected_cue(r)
+            except ValueError:
+                continue  # A hand-edited/stale group cannot silently change what a cue means.
+            labels = [l for l in r.get('model_labels', []) if isinstance(l, str) and l in LABEL_ICONS]
+            if not labels:
+                continue
+            self.rules.append(dict(id=r['id'], label=r['label'], tier=r['tier'], labels=labels,
+                icon=cue['icon_id'] if cue else LABEL_ICONS[labels[0]],
+                threshold=float(r.get('threshold', DEFAULT_THRESHOLD))))
 
     def detect(self, scores, source, now=None, timestamp_ms=None):
         """Events for picked sounds in this window; decisions are kept for the signal panel."""

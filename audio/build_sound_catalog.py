@@ -10,6 +10,7 @@ category icon on the glasses.
 import csv
 import json
 from pathlib import Path
+from audio.cue_catalog import LABEL_CUE_ICONS
 
 ROOT = Path(__file__).resolve().parent.parent
 LABELS = ROOT / '.cache/models/sherpa-onnx-zipformer-small-audio-tagging-2024-04-15/class_labels_indices.csv'
@@ -40,6 +41,7 @@ def build(path=LABELS):
     for row in rows:
         index, label = int(row[0]), row[2]
         cat, icon = category(index)
+        icon = LABEL_CUE_ICONS.get(label, icon)
         name = label.split(',')[0].strip()
         sounds.append(dict(label=label, name=name, category=cat, icon=icon))
     return sounds

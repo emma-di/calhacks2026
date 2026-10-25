@@ -3,6 +3,7 @@
 // Plain React with inline styles; no Mana APIs are required (theme support is used only when present).
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
 import modelCatalog from "../../audio/sound-catalog.json";
+import cueCatalog from "../../audio/cue-catalog.json";
 import alertPolicy from "../../audio/alert-policy.json";
 import Oled from "../src/components/Oled";
 import { makeMock } from "../src/lib/events";
@@ -43,7 +44,7 @@ export const AWARE_EVENTS = [
     label: "Name called",
     cue: "Name called",
     terms: ["name", "my name", "called", "calling"],
-    hint: "Uses the name under Name (optional). Nothing listens for it yet.",
+    hint: "Uses the speech recognizer and the name under Name (optional).",
   },
   {
     key: "smoke_alarm",
@@ -155,35 +156,66 @@ function parseAwareAliases(text, primary) {
 
 const catalogLabels = new Map(modelCatalog.sounds.map((sound) => [sound.label, sound]));
 
+const cuesById = new Map(cueCatalog.cues.map((cue) => [cue.id, cue]));
+const curatedModelLabels = new Set(cueCatalog.cues.flatMap((cue) => cue.model_labels));
+const normalizeSearch = (text) => String(text).toLowerCase().replace(/[^a-z0-9]+/g, " ").trim();
+
+export function searchCuratedSounds(query) {
+  const q = normalizeSearch(query);
+  if (!q) return [];
+  const words = q.split(" ");
+  return cueCatalog.cues.filter((cue) => {
+    const text = normalizeSearch([cue.label, ...cue.aliases, ...cue.model_labels].join(" "));
+    return words.every((word) => text.includes(word));
+  }).sort((a, b) => Number(normalizeSearch(b.label) === q) - Number(normalizeSearch(a.label) === q));
+}
+
+export function createCueRule(cueId, tier, id) {
+  const cue = cuesById.get(cueId);
+  if (!cue || cue.experimental || cue.event_type !== "custom" || !isAwareTier(tier)) return null;
+  return {
+    id, cue_id: cue.id, label: cue.label, tier, status: "recognized",
+    model_labels: [...cue.model_labels], icon_id: cue.icon_id, icon: cue.icon_id, threshold: cue.threshold,
+  };
+}
+
+export function applyCuratedRule(draft, cueId, tier, id) {
+  const cue = cuesById.get(cueId);
+  if (!cue || cue.experimental || cue.event_type === "name_called" || !isAwareTier(tier)) return sanitizeAwareDraft(draft);
+  if (cue.event_type !== "custom") return setAwareRule(draft, cue.event_type, tier);
+  const rule = createCueRule(cueId, tier, id);
+  const d = sanitizeAwareDraft(draft);
+  if (d.custom_rules.some((r) => r.cue_id === cueId)) return d;
+  return {...d, custom_rules:sanitizeCustomSounds([...d.custom_rules, rule])};
+}
+
 export function sanitizeCustomSounds(raw) {
   const seen = new Set();
   return (Array.isArray(raw) ? raw : [])
     .filter((r) => {
-      if (
-        !r ||
-        typeof r.id !== "string" ||
-        !r.id ||
-        r.id.length > 120 ||
-        typeof r.label !== "string" ||
-        !isAwareTier(r.tier)
-      )
-        return false;
+      if (!r || typeof r.id !== "string" || !r.id || r.id.length > 120 ||
+          typeof r.label !== "string" || !isAwareTier(r.tier)) return false;
       const label = r.label.trim().replace(/\s+/g, " ");
       const key = label.toLocaleLowerCase();
       if (!label || label.length > 80 || seen.has(key)) return false;
       seen.add(key);
       return true;
     })
-    .slice(0, 20)
-    .map((r) => ({
-      id: r.id,
-      label: r.label.trim().replace(/\s+/g, " "),
-      tier: r.tier,
-      ...(r.status === "recognized" && Array.isArray(r.model_labels) && r.model_labels.length >= 1 && r.model_labels.length <= 4 && r.model_labels.every((label) => catalogLabels.has(label))
-        ? {status:"recognized", model_labels:[...new Set(r.model_labels)], icon:catalogLabels.get(r.model_labels[0]).icon,
-           threshold: typeof r.threshold === "number" && r.threshold > 0 && r.threshold <= 1 ? r.threshold : .25}
-        : {status:"pending"}),
-    }));
+    .slice(0, 100)
+    .map((r) => {
+      const base = { id:r.id, label:r.label.trim().replace(/\s+/g, " "), tier:r.tier };
+      if (r.status === "recognized" && r.cue_id) {
+        return createCueRule(r.cue_id, r.tier, r.id) ?? {...base, status:"pending"};
+      }
+      const recognized = r.status === "recognized" && Array.isArray(r.model_labels) &&
+        r.model_labels.length >= 1 && r.model_labels.length <= 4 &&
+        r.model_labels.every((label) => catalogLabels.has(label) && label !== "Bicycle bell");
+      return recognized
+        ? {...base, status:"recognized", model_labels:[...new Set(r.model_labels)],
+           icon:catalogLabels.get(r.model_labels[0]).icon,
+           threshold:typeof r.threshold === "number" && r.threshold > 0 && r.threshold <= 1 ? r.threshold : .25}
+        : {...base, status:"pending"};
+    });
 }
 
 export function sanitizeAwareDraft(raw) {
@@ -496,11 +528,18 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const presetTiers = AWARE_PRESET_DEFAULTS[draft.mode];
   const ruleKeys = new Set(draft.rules.map((r) => r.key));
   const matches = useMemo(() => searchAwareSounds(query), [query]);
+  const curatedMatches = useMemo(() => searchCuratedSounds(query), [query]);
+  const selectedCueIds = new Set([
+    ...(draft.custom_rules ?? []).map((rule) => rule.cue_id),
+    ...cueCatalog.cues.filter((cue) => cue.event_type !== "custom" && ruleKeys.has(cue.event_type)).map((cue) => cue.id),
+  ]);
   const catalogMatches = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const q = normalizeSearch(query);
     if (q.length < 2) return [];
     const selected = new Set((draft.custom_rules ?? []).flatMap((r) => r.model_labels ?? []));
-    return modelCatalog.sounds.filter((s) => !selected.has(s.label) && (`${s.name} ${s.label} ${s.category}`.toLowerCase().split(/[^a-z0-9]+/).some((word) => word.startsWith(q)) || s.name.toLowerCase().startsWith(q))).slice(0,8);
+    const words = q.split(" ");
+    return modelCatalog.sounds.filter((sound) => !selected.has(sound.label) && !curatedModelLabels.has(sound.label) && sound.label !== "Bicycle bell" &&
+      words.every((word) => normalizeSearch(`${sound.name} ${sound.label} ${sound.category}`).includes(word))).slice(0,8);
   }, [query, draft.custom_rules]);
   const available = matches.filter((e) => !ruleKeys.has(e.key));
   const alreadyAdded = matches.filter((e) => ruleKeys.has(e.key));
@@ -642,8 +681,16 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   };
   const confirmRule = () => {
     if (!pending || !isAwareTier(pending.tier)) return;
-    setDraft((d) => setAwareRule(d, pending.key, pending.tier));
-    setPreviewKey(pending.key);
+    if (pending.cue_id) {
+      const cue = cuesById.get(pending.cue_id);
+      if (!cue || cue.experimental || cue.event_type === "name_called") return;
+      setDraft((d) => applyCuratedRule(d, pending.cue_id, pending.tier, crypto.randomUUID()));
+      if (cue.event_type !== "custom") setPreviewKey(cue.event_type);
+      setCustomNote(`${cue.label} priority saved. Recognition sensitivity still needs real-room testing.`);
+    } else {
+      setDraft((d) => setAwareRule(d, pending.key, pending.tier));
+      setPreviewKey(pending.key);
+    }
     setPending(null);
   };
   const changeRule = (key, tier) => {
@@ -669,7 +716,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const previewResolved = resolveAwareTier(draft, previewEv.key);
   const motionOn =
     display.motion === "pulse" && !reducedMotion && render === "browser";
-  const pendingEv = pending ? awareEvent(pending.key) : null;
+  const pendingEv = pending ? (pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
 
   return (
     <div
@@ -866,9 +913,11 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 autoComplete="off"
                 onChange={(e) => setQuery(e.target.value)}
                 onKeyDown={(e) => {
-                  if (e.key === "Enter" && available.length) {
+                  if (e.key === "Enter" && (curatedMatches.length || available.length)) {
                     e.preventDefault();
-                    startRule(available[0].key);
+                    const cue = curatedMatches.find((c) => !c.experimental && c.event_type !== "name_called" && !selectedCueIds.has(c.id));
+                    if (cue) setPending({cue_id:cue.id, tier:cue.default_tier});
+                    else if (available.length && !curatedMatches.length) startRule(available[0].key);
                   }
                 }}
                 aria-describedby={uid + "-search-help"}
@@ -876,12 +925,36 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 style={s.input}
               />
               <p id={uid + "-search-help"} style={s.help}>
-                Search everyday defaults or the model’s 527 sound labels. Scores and sensitivity still need real-room testing.
+                Defaults are already set. Search for a sound you want to change; add only the exceptions that matter to you.
               </p>
               <div id={uid + "-results"} aria-live="polite">
+                {curatedMatches.length > 0 && <ul style={{...s.group, listStyle:"none", padding:0, marginTop:12}}>
+                  {curatedMatches.slice(0,8).map((cue, i) => <li key={cue.id} style={s.row(i)}>
+                    <button type="button" style={{...s.textBtn, width:"100%", textAlign:"left", textDecoration:"none", padding:"14px 16px"}}
+                      disabled={cue.experimental || selectedCueIds.has(cue.id) || ((draft.custom_rules ?? []).length >= 100 && cue.event_type === "custom")}
+                      onClick={() => {
+                        if (cue.event_type === "name_called") {
+                          const input = document.getElementById(uid + "-name");
+                          const section = input?.closest("details");
+                          if (section) section.open = true;
+                          input?.focus();
+                          return;
+                        }
+                        setPending({cue_id:cue.id, tier:cue.default_tier}); setQuery("");
+                      }}>
+                      <span style={{display:"block", fontWeight:500}}>{cue.label}</span>
+                      <span style={{display:"block", color:p.muted, fontSize:14, marginTop:4}}>
+                        {cue.experimental ? "Experimental · awaiting recognition tests" : selectedCueIds.has(cue.id) ? "Already added · change its priority below" : cue.event_type === "name_called" ? "Set your name · uses speech recognition" : `${cue.category} · suggested ${awareTierLabel(cue.default_tier)}`}
+                      </span>
+                    </button>
+                  </li>)}
+                </ul>}
+                {catalogMatches.length > 0 && <details style={{marginTop:12}}>
+                  <summary style={{...s.textBtn, cursor:"pointer"}}>More model labels</summary>
+                  <p style={s.help}>Advanced matches from the raw classifier. These use broader category icons.</p>
                 {catalogMatches.length > 0 && <ul style={{...s.group, listStyle:"none", padding:0, marginTop:12}}>
                   {catalogMatches.map((sound) => <li key={sound.label} style={{padding:12}}>
-                    <button type="button" style={s.textBtn} disabled={(draft.custom_rules ?? []).length >= 20}
+                    <button type="button" style={s.textBtn} disabled={(draft.custom_rules ?? []).length >= 100}
                       onClick={() => {
                         const next = sanitizeCustomSounds([...(draft.custom_rules ?? []), {
                           id:crypto.randomUUID(), label:sound.name, tier:2, status:"recognized",
@@ -895,13 +968,14 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                     </button>
                   </li>)}
                 </ul>}
-                {query.trim() && (
+                </details>}
+                {query.trim() && curatedMatches.length === 0 && (
                   <button
                     type="button"
                     style={{ ...s.textBtn, marginTop: 12 }}
                     disabled={
                       query.trim().length > 80 ||
-                      (draft.custom_rules ?? []).length >= 20
+                      (draft.custom_rules ?? []).length >= 100
                     }
                     onClick={() => {
                       const before = draft.custom_rules ?? [];
@@ -929,7 +1003,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   </p>
                 )}
 
-                {query.trim() !== "" && available.length > 0 && (
+                {query.trim() !== "" && available.length > 0 && curatedMatches.length === 0 && (
                   <ul
                     style={Object.assign({}, s.group, {
                       listStyle: "none",
@@ -991,7 +1065,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       below.
                     </p>
                   )}
-                {query.trim() !== "" && matches.length === 0 && catalogMatches.length === 0 && (
+                {query.trim() !== "" && matches.length === 0 && catalogMatches.length === 0 && curatedMatches.length === 0 && (
                   <div
                     style={{
                       marginTop: 12,
@@ -1032,7 +1106,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   Priority for {pendingEv.label}
                 </legend>
                 <p style={Object.assign({}, s.help, { marginTop: 2 })}>
-                  {preset.label} preset: {tierText(presetTiers[pendingEv.key])}.
+                  {pending.cue_id ? `Suggested: ${tierText(pendingEv.default_tier)}.` : `${preset.label} preset: ${tierText(presetTiers[pendingEv.key])}.`}
                   {pendingEv.hint ? " " + pendingEv.hint : ""}
                 </p>
                 <div style={Object.assign({}, s.group, { marginTop: 12 })}>
@@ -1045,7 +1119,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                           name={uid + "-pending"}
                           checked={on}
                           onChange={() =>
-                            setPending({ key: pending.key, tier: t.value })
+                            setPending({ ...pending, tier: t.value })
                           }
                           style={s.radio}
                         />
@@ -1192,8 +1266,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         </section>
 
         {(draft.custom_rules ?? []).length > 0 && (
-          <section style={s.section} aria-label="Custom sounds">
-            <h2 style={s.h2}>Custom sounds</h2>
+          <section style={s.section} aria-label="Added sounds">
+            <h2 style={s.h2}>Added sounds</h2>
             <p style={s.lead}>
               Catalog sounds can trigger alerts while the recognizer is running. Free-text requests stay pending until recognition is connected.
             </p>
@@ -1212,7 +1286,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   <span style={{ flex: 1, minWidth: 140 }}>
                     {rule.label}
                     <small style={{ display: "block", color: p.muted }}>
-                      {rule.status === "recognized" ? "Model catalog · sensitivity provisional" : "Recognition pending"}
+                      {rule.status === "recognized" ? (rule.cue_id ? "Sound cue · sensitivity provisional" : "Model label · sensitivity provisional") : "Recognition pending"}
                     </small>
                   </span>
                   <select
@@ -1288,7 +1362,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               />
               <p id={uid + "-name-help"} style={s.help}>
                 {primary
-                  ? "Your name is saved. Name recognition is not available yet."
+                  ? (draft.name_enabled ? "Your name is saved for the speech recognizer. Live recognition needs the speech worker running." : "Your name is saved. Name detection is currently disabled on the receiver.")
                   : "Leave blank to keep name detection off."}
               </p>
             </div>

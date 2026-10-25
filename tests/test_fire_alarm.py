@@ -14,7 +14,7 @@ class FireAlarmMappingTests(unittest.TestCase):
                     engine = AlertEngine()
                     decision = engine.add(events[0], 0)
                     self.assertEqual(decision['priority_tier'], 4)
-                    self.assertEqual(engine.presentation(0)['icon_id'], 'smoke')
+                    self.assertEqual(engine.presentation(0)['icon_id'], 'cue_fire_smoke')
 
     def test_generic_alarm_and_alarm_clock_are_not_fire_evidence(self):
         for model in ('zipformer', 'yamnet'):

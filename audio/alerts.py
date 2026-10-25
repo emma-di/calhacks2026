@@ -48,9 +48,10 @@ def validate_profile(value, known_types):
             isinstance(a, str) and 0 < len(a) <= 60 for a in aliases):
         raise ValueError('aliases must be up to 8 short strings')
     requests = value.get('custom_sound_requests', [])
-    if not isinstance(requests, list) or len(requests) > 20:
-        raise ValueError('custom_sound_requests must contain at most 20 pending requests')
+    if not isinstance(requests, list) or len(requests) > 100:
+        raise ValueError('custom_sound_requests must contain at most 100 requests')
     from audio.custom_rules import LABEL_ICONS
+    from audio.cue_catalog import selected_cue
     custom, seen, seen_ids = [], set(), set()
     for request in requests:
         if not isinstance(request, dict):
@@ -81,7 +82,11 @@ def validate_profile(value, known_types):
             threshold = request.get('threshold', .25)
             if type(threshold) not in (int, float) or not 0 < threshold <= 1:
                 raise ValueError('Custom threshold must be greater than 0 and at most 1')
-            entry.update(model_labels=list(dict.fromkeys(labels)), icon=LABEL_ICONS[labels[0]], threshold=threshold)
+            cue = selected_cue(request)
+            icon = cue['icon_id'] if cue else LABEL_ICONS[labels[0]]
+            entry.update(model_labels=list(dict.fromkeys(labels)), icon=icon, icon_id=icon, threshold=threshold)
+            if cue:
+                entry['cue_id'] = cue['id']
         custom.append(entry)
     display = value.get('display', {})
     if not isinstance(display, dict) or not isinstance(display.get('labels', False), bool):

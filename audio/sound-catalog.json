@@ -5,7 +5,7 @@
 "label": "Speech",
 "name": "Speech",
 "category": "Voices",
-"icon": "chat"
+"icon": "cue_speech"
 },
 {
 "label": "Male speech, man speaking",
@@ -83,13 +83,13 @@
 "label": "Children shouting",
 "name": "Children shouting",
 "category": "Voices",
-"icon": "chat"
+"icon": "cue_children_shout"
 },
 {
 "label": "Screaming",
 "name": "Screaming",
 "category": "Voices",
-"icon": "chat"
+"icon": "cue_scream"
 },
 {
 "label": "Whispering",
@@ -101,7 +101,7 @@
 "label": "Laughter",
 "name": "Laughter",
 "category": "People",
-"icon": "person"
+"icon": "cue_laughter"
 },
 {
 "label": "Baby laughter",
@@ -137,13 +137,13 @@
 "label": "Crying, sobbing",
 "name": "Crying",
 "category": "People",
-"icon": "person"
+"icon": "cue_crying"
 },
 {
 "label": "Baby cry, infant cry",
 "name": "Baby cry",
 "category": "People",
-"icon": "person"
+"icon": "cue_baby_cry"
 },
 {
 "label": "Whimper",
@@ -245,7 +245,7 @@
 "label": "Whistling",
 "name": "Whistling",
 "category": "People",
-"icon": "person"
+"icon": "cue_human_whistle"
 },
 {
 "label": "Breathing",
@@ -311,7 +311,7 @@
 "label": "Run",
 "name": "Run",
 "category": "People",
-"icon": "person"
+"icon": "cue_running"
 },
 {
 "label": "Shuffle",
@@ -323,7 +323,7 @@
 "label": "Walk, footsteps",
 "name": "Walk",
 "category": "People",
-"icon": "person"
+"icon": "cue_footsteps"
 },
 {
 "label": "Chewing, mastication",
@@ -383,7 +383,7 @@
 "label": "Clapping",
 "name": "Clapping",
 "category": "People",
-"icon": "person"
+"icon": "cue_clap"
 },
 {
 "label": "Heart sounds, heartbeat",
@@ -455,25 +455,25 @@
 "label": "Bark",
 "name": "Bark",
 "category": "Animals",
-"icon": "dog"
+"icon": "cue_dog_bark"
 },
 {
 "label": "Yip",
 "name": "Yip",
 "category": "Animals",
-"icon": "dog"
+"icon": "cue_dog_bark"
 },
 {
 "label": "Howl",
 "name": "Howl",
 "category": "Animals",
-"icon": "dog"
+"icon": "cue_dog_vocal"
 },
 {
 "label": "Bow-wow",
 "name": "Bow-wow",
 "category": "Animals",
-"icon": "dog"
+"icon": "cue_dog_bark"
 },
 {
 "label": "Growling",
@@ -485,7 +485,7 @@
 "label": "Whimper (dog)",
 "name": "Whimper (dog)",
 "category": "Animals",
-"icon": "dog"
+"icon": "cue_dog_vocal"
 },
 {
 "label": "Cat",
@@ -503,7 +503,7 @@
 "label": "Meow",
 "name": "Meow",
 "category": "Animals",
-"icon": "paw"
+"icon": "cue_cat_meow"
 },
 {
 "label": "Hiss",
@@ -677,7 +677,7 @@
 "label": "Bird vocalization, bird call, bird song",
 "name": "Bird vocalization",
 "category": "Animals",
-"icon": "paw"
+"icon": "cue_bird"
 },
 {
 "label": "Chirp, tweet",
@@ -827,7 +827,7 @@
 "label": "Music",
 "name": "Music",
 "category": "Music",
-"icon": "music"
+"icon": "cue_music"
 },
 {
 "label": "Musical instrument",
@@ -1187,7 +1187,7 @@
 "label": "Saxophone",
 "name": "Saxophone",
 "category": "Music",
-"icon": "music"
+"icon": "cue_saxophone"
 },
 {
 "label": "Clarinet",
@@ -1223,7 +1223,7 @@
 "label": "Bicycle bell",
 "name": "Bicycle bell",
 "category": "Bells",
-"icon": "bell"
+"icon": "cue_bicycle_bell"
 },
 {
 "label": "Tuning fork",
@@ -1703,7 +1703,7 @@
 "label": "Wind",
 "name": "Wind",
 "category": "Weather & nature",
-"icon": "cloud"
+"icon": "cue_wind"
 },
 {
 "label": "Rustling leaves",
@@ -1727,7 +1727,7 @@
 "label": "Thunder",
 "name": "Thunder",
 "category": "Weather & nature",
-"icon": "cloud"
+"icon": "cue_thunder"
 },
 {
 "label": "Water",
@@ -1739,7 +1739,7 @@
 "label": "Rain",
 "name": "Rain",
 "category": "Water",
-"icon": "drop"
+"icon": "cue_rain"
 },
 {
 "label": "Raindrop",
@@ -1751,7 +1751,7 @@
 "label": "Rain on surface",
 "name": "Rain on surface",
 "category": "Water",
-"icon": "drop"
+"icon": "cue_rain"
 },
 {
 "label": "Stream",
@@ -1853,7 +1853,7 @@
 "label": "Vehicle horn, car horn, honking",
 "name": "Vehicle horn",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_car_horn"
 },
 {
 "label": "Toot",
@@ -1877,19 +1877,19 @@
 "label": "Skidding",
 "name": "Skidding",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_tire_squeal"
 },
 {
 "label": "Tire squeal",
 "name": "Tire squeal",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_tire_squeal"
 },
 {
 "label": "Car passing by",
 "name": "Car passing by",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_passing_car"
 },
 {
 "label": "Race car, auto racing",
@@ -1913,13 +1913,13 @@
 "label": "Air horn, truck horn",
 "name": "Air horn",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_truck_horn"
 },
 {
 "label": "Reversing beeps",
 "name": "Reversing beeps",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_reverse_beep"
 },
 {
 "label": "Ice cream truck, ice cream van",
@@ -1931,7 +1931,7 @@
 "label": "Bus",
 "name": "Bus",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_bus"
 },
 {
 "label": "Emergency vehicle",
@@ -1943,31 +1943,31 @@
 "label": "Police car (siren)",
 "name": "Police car (siren)",
 "category": "Vehicles",
-"icon": "siren"
+"icon": "cue_emergency_siren"
 },
 {
 "label": "Ambulance (siren)",
 "name": "Ambulance (siren)",
 "category": "Vehicles",
-"icon": "siren"
+"icon": "cue_emergency_siren"
 },
 {
 "label": "Fire engine, fire truck (siren)",
 "name": "Fire engine",
 "category": "Vehicles",
-"icon": "siren"
+"icon": "cue_emergency_siren"
 },
 {
 "label": "Motorcycle",
 "name": "Motorcycle",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_motorcycle"
 },
 {
 "label": "Traffic noise, roadway noise",
 "name": "Traffic noise",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_traffic"
 },
 {
 "label": "Rail transport",
@@ -1979,19 +1979,19 @@
 "label": "Train",
 "name": "Train",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_train"
 },
 {
 "label": "Train whistle",
 "name": "Train whistle",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_train_horn"
 },
 {
 "label": "Train horn",
 "name": "Train horn",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_train_horn"
 },
 {
 "label": "Railroad car, train wagon",
@@ -2111,7 +2111,7 @@
 "label": "Engine starting",
 "name": "Engine starting",
 "category": "Vehicles",
-"icon": "car"
+"icon": "cue_engine_start"
 },
 {
 "label": "Idling",
@@ -2129,19 +2129,19 @@
 "label": "Door",
 "name": "Door",
 "category": "Home",
-"icon": "house"
+"icon": "cue_door"
 },
 {
 "label": "Doorbell",
 "name": "Doorbell",
 "category": "Home",
-"icon": "bell"
+"icon": "cue_doorbell"
 },
 {
 "label": "Ding-dong",
 "name": "Ding-dong",
 "category": "Home",
-"icon": "bell"
+"icon": "cue_doorbell"
 },
 {
 "label": "Sliding door",
@@ -2153,13 +2153,13 @@
 "label": "Slam",
 "name": "Slam",
 "category": "Home",
-"icon": "house"
+"icon": "cue_slam"
 },
 {
 "label": "Knock",
 "name": "Knock",
 "category": "Home",
-"icon": "knock"
+"icon": "cue_knock"
 },
 {
 "label": "Tap",
@@ -2189,7 +2189,7 @@
 "label": "Dishes, pots, and pans",
 "name": "Dishes",
 "category": "Home",
-"icon": "house"
+"icon": "cue_dishes"
 },
 {
 "label": "Cutlery, silverware",
@@ -2213,7 +2213,7 @@
 "label": "Microwave oven",
 "name": "Microwave oven",
 "category": "Home",
-"icon": "house"
+"icon": "cue_microwave"
 },
 {
 "label": "Blender",
@@ -2225,7 +2225,7 @@
 "label": "Water tap, faucet",
 "name": "Water tap",
 "category": "Home",
-"icon": "drop"
+"icon": "cue_faucet"
 },
 {
 "label": "Sink (filling or washing)",
@@ -2279,7 +2279,7 @@
 "label": "Keys jangling",
 "name": "Keys jangling",
 "category": "Home",
-"icon": "house"
+"icon": "cue_keys"
 },
 {
 "label": "Coin (dropping)",
@@ -2345,13 +2345,13 @@
 "label": "Telephone bell ringing",
 "name": "Telephone bell ringing",
 "category": "Alarms & signals",
-"icon": "bell"
+"icon": "cue_phone_ring"
 },
 {
 "label": "Ringtone",
 "name": "Ringtone",
 "category": "Alarms & signals",
-"icon": "bell"
+"icon": "cue_phone_ring"
 },
 {
 "label": "Telephone dialing, DTMF",
@@ -2375,37 +2375,37 @@
 "label": "Alarm clock",
 "name": "Alarm clock",
 "category": "Alarms & signals",
-"icon": "clock"
+"icon": "cue_alarm_clock"
 },
 {
 "label": "Siren",
 "name": "Siren",
 "category": "Alarms & signals",
-"icon": "siren"
+"icon": "cue_emergency_siren"
 },
 {
 "label": "Civil defense siren",
 "name": "Civil defense siren",
 "category": "Alarms & signals",
-"icon": "siren"
+"icon": "cue_civil_siren"
 },
 {
 "label": "Buzzer",
 "name": "Buzzer",
 "category": "Alarms & signals",
-"icon": "bell"
+"icon": "cue_device_beep"
 },
 {
 "label": "Smoke detector, smoke alarm",
 "name": "Smoke detector",
 "category": "Alarms & signals",
-"icon": "smoke"
+"icon": "cue_fire_smoke"
 },
 {
 "label": "Fire alarm",
 "name": "Fire alarm",
 "category": "Alarms & signals",
-"icon": "smoke"
+"icon": "cue_fire_smoke"
 },
 {
 "label": "Foghorn",
@@ -2561,7 +2561,7 @@
 "label": "Explosion",
 "name": "Explosion",
 "category": "Impacts",
-"icon": "bang"
+"icon": "cue_explosion"
 },
 {
 "label": "Gunshot, gunfire",
@@ -2621,7 +2621,7 @@
 "label": "Boom",
 "name": "Boom",
 "category": "Impacts",
-"icon": "bang"
+"icon": "cue_explosion"
 },
 {
 "label": "Wood",
@@ -2663,7 +2663,7 @@
 "label": "Shatter",
 "name": "Shatter",
 "category": "Impacts",
-"icon": "bang"
+"icon": "cue_breaking"
 },
 {
 "label": "Liquid",
@@ -2693,7 +2693,7 @@
 "label": "Drip",
 "name": "Drip",
 "category": "Water",
-"icon": "drop"
+"icon": "cue_drip"
 },
 {
 "label": "Pour",
@@ -2741,7 +2741,7 @@
 "label": "Boiling",
 "name": "Boiling",
 "category": "Water",
-"icon": "drop"
+"icon": "cue_boiling"
 },
 {
 "label": "Sonar",
@@ -2825,7 +2825,7 @@
 "label": "Breaking",
 "name": "Breaking",
 "category": "Other sounds",
-"icon": "wave"
+"icon": "cue_breaking"
 },
 {
 "label": "Bouncing",
@@ -2891,13 +2891,13 @@
 "label": "Beep, bleep",
 "name": "Beep",
 "category": "Alarms & signals",
-"icon": "bell"
+"icon": "cue_device_beep"
 },
 {
 "label": "Ping",
 "name": "Ping",
 "category": "Alarms & signals",
-"icon": "bell"
+"icon": "cue_device_beep"
 },
 {
 "label": "Ding",

@@ -13,6 +13,9 @@ LABELS = {'knock': 'Door knock', 'bell': 'Bell / chime', 'dog': 'Dog barking', '
           'car': 'Vehicle horn', 'house': 'Microwave oven', 'gear': 'Power tool', 'bang': 'Gunshot',
           'wave': 'Sound'}
 
+LABELS.update({cue['icon_id']: cue['label'] for cue in json.loads(
+    (Path(__file__).parent.parent / 'audio/cue-catalog.json').read_text())['cues']})
+
 
 def cases():
     for icon in sorted(ICON_IDS):

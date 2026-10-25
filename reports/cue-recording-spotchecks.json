@@ -1,0 +1,301 @@
+{
+  "method": "Real pretrained Zipformer inference on one existing held-out public recording per available mapped cue. No microphone, download, live receiver, profile changes or training. This is not a representative accuracy evaluation: examples are few, classes overlap, and results have been inspected. Catalog thresholds are provisional.",
+  "model": "zipformer-small-int8/2024-04-15",
+  "recorded_cases": 16,
+  "qualifying_cases": 13,
+  "results": [
+    {
+      "cue_id": "emergency_siren",
+      "source_id": "esc50-4-102871-A-42",
+      "source_category": "siren",
+      "split": "test",
+      "source_path": "esc50/4-102871-A-42.wav",
+      "source_sha256": "9dabae27ebcd55cc16ea57e813fc1984ec444159b62f246c0399cb4f920454ea",
+      "peak_label_scores": {
+        "Siren": 0.8334956169128418,
+        "Police car (siren)": 0.037956833839416504,
+        "Ambulance (siren)": 0.5714439749717712,
+        "Fire engine, fire truck (siren)": 0.5895186066627502
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "builtin_policy",
+      "qualifies": true,
+      "builtin_emitted": [
+        "siren"
+      ]
+    },
+    {
+      "cue_id": "car_horn",
+      "source_id": "esc50-4-175845-A-43",
+      "source_category": "car_horn",
+      "split": "test",
+      "source_path": "esc50/4-175845-A-43.wav",
+      "source_sha256": "aeaf26bd07b54964985f7c5726b2724f57b9912b6e70c0af2f8bf3758ca0f18c",
+      "peak_label_scores": {
+        "Vehicle horn, car horn, honking": 0.8802007436752319
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "breaking",
+      "source_id": "esc50-4-204115-A-39",
+      "source_category": "glass_breaking",
+      "split": "test",
+      "source_path": "esc50/4-204115-A-39.wav",
+      "source_sha256": "3d4a520122727b384d55738c254f33103e1eee73152f4c45893736089915eff9",
+      "peak_label_scores": {
+        "Breaking": 0.19759151339530945,
+        "Shatter": 0.05233728885650635
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": false,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "knock",
+      "source_id": "esc50-4-182034-A-30",
+      "source_category": "door_wood_knock",
+      "split": "test",
+      "source_path": "esc50/4-182034-A-30.wav",
+      "source_sha256": "8548390103bfa9097087ea552b42e6b493697f9fbe0b9d78a1aefdbf8b18219f",
+      "peak_label_scores": {
+        "Knock": 0.9998035430908203
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "builtin_policy",
+      "qualifies": true,
+      "builtin_emitted": [
+        "knock"
+      ]
+    },
+    {
+      "cue_id": "baby_cry",
+      "source_id": "esc50-4-167077-A-20",
+      "source_category": "crying_baby",
+      "split": "test",
+      "source_path": "esc50/4-167077-A-20.wav",
+      "source_sha256": "43a894a23a4a1bed053e2ca040f7029a5d9029269173d8bac1c650c52c03e937",
+      "peak_label_scores": {
+        "Baby cry, infant cry": 0.8762876987457275
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "clap",
+      "source_id": "esc50-4-189828-A-22",
+      "source_category": "clapping",
+      "split": "test",
+      "source_path": "esc50/4-189828-A-22.wav",
+      "source_sha256": "13a9c47cba0d2dab78358fa78a6ffe10d7fd209b94b4f062b260dd7ea1b67243",
+      "peak_label_scores": {
+        "Clapping": 0.04185926914215088
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": false,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "alarm_clock",
+      "source_id": "esc50-4-151242-A-37",
+      "source_category": "clock_alarm",
+      "split": "test",
+      "source_path": "esc50/4-151242-A-37.wav",
+      "source_sha256": "c83789199d3a2794323f9151cae42fa478b7ae408a624f483399316bd44cf899",
+      "peak_label_scores": {
+        "Alarm clock": 0.8626124858856201
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "builtin_policy",
+      "qualifies": true,
+      "builtin_emitted": [
+        "alarm_clock"
+      ]
+    },
+    {
+      "cue_id": "drip",
+      "source_id": "esc50-4-168155-A-15",
+      "source_category": "water_drops",
+      "split": "test",
+      "source_path": "esc50/4-168155-A-15.wav",
+      "source_sha256": "2cd2ad18953fa15ac00e34417479f1021d9f01afdfc193aeaa486c1a3473313e",
+      "peak_label_scores": {
+        "Drip": 0.6785870790481567
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "train",
+      "source_id": "esc50-4-165606-A-45",
+      "source_category": "train",
+      "split": "test",
+      "source_path": "esc50/4-165606-A-45.wav",
+      "source_sha256": "8db18f72cf0a09b40b78b62146a946235bcf4be656de7e5594615a90f51c969e",
+      "peak_label_scores": {
+        "Train": 0.9650148153305054
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "footsteps",
+      "source_id": "esc50-4-117627-A-25",
+      "source_category": "footsteps",
+      "split": "test",
+      "source_path": "esc50/4-117627-A-25.wav",
+      "source_sha256": "bee53dc6ab282257b4a70a852d6235104ec74bdb380f0a83b706f1ab88b356ca",
+      "peak_label_scores": {
+        "Walk, footsteps": 0.20422795414924622
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": false,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "dog_bark",
+      "source_id": "esc50-4-182395-A-0",
+      "source_category": "dog",
+      "split": "test",
+      "source_path": "esc50/4-182395-A-0.wav",
+      "source_sha256": "c249bcb8ef81d12516ad17c8a77f88c01952cdf70b9413732af5fb8b803f9c7d",
+      "peak_label_scores": {
+        "Bark": 0.9440768361091614,
+        "Bow-wow": 0.2909281849861145,
+        "Yip": 0.042693376541137695
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "builtin_policy",
+      "qualifies": true,
+      "builtin_emitted": [
+        "dog_bark"
+      ]
+    },
+    {
+      "cue_id": "cat_meow",
+      "source_id": "esc50-4-120160-A-5",
+      "source_category": "cat",
+      "split": "test",
+      "source_path": "esc50/4-120160-A-5.wav",
+      "source_sha256": "5828c0621dddd37ba88c08d99edb9c3860bf2e7f9c3b8adcc02f845bbf6e7211",
+      "peak_label_scores": {
+        "Meow": 0.6781201958656311
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": [
+        "dog_bark"
+      ]
+    },
+    {
+      "cue_id": "rain",
+      "source_id": "esc50-4-160999-A-10",
+      "source_category": "rain",
+      "split": "test",
+      "source_path": "esc50/4-160999-A-10.wav",
+      "source_sha256": "c85ef3d5cbd86ba80a7f089277d66f165e36b8dcf8070643ddc7ec73eb4f5dcb",
+      "peak_label_scores": {
+        "Rain": 0.5126864910125732,
+        "Rain on surface": 0.3007826805114746
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "thunder",
+      "source_id": "esc50-4-125070-A-19",
+      "source_category": "thunderstorm",
+      "split": "test",
+      "source_path": "esc50/4-125070-A-19.wav",
+      "source_sha256": "61b68a9eb06ee056826f8ce06e56558bc46301a2f4df43b92d7619cd6b2e8475",
+      "peak_label_scores": {
+        "Thunder": 0.84693443775177
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "wind",
+      "source_id": "esc50-4-144083-A-16",
+      "source_category": "wind",
+      "split": "test",
+      "source_path": "esc50/4-144083-A-16.wav",
+      "source_sha256": "a0b0bbb04a05542784cc031b2f806605d47f469c49576d8b903cebf9cc58f4b7",
+      "peak_label_scores": {
+        "Wind": 0.33887356519699097
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    },
+    {
+      "cue_id": "laughter",
+      "source_id": "esc50-4-132803-A-26",
+      "source_category": "laughing",
+      "split": "test",
+      "source_path": "esc50/4-132803-A-26.wav",
+      "source_sha256": "de5e596027c88e0e27334e4dfeb024238bc0b6028dba0f96c764017e534e8233",
+      "peak_label_scores": {
+        "Laughter": 0.9371959567070007
+      },
+      "catalog_threshold": 0.25,
+      "recognition_path": "catalog_rule",
+      "qualifies": true,
+      "builtin_emitted": []
+    }
+  ],
+  "no_mapped_fixture": [
+    "fire_smoke",
+    "civil_siren",
+    "truck_horn",
+    "reverse_beep",
+    "scream",
+    "explosion",
+    "tire_squeal",
+    "name_called",
+    "doorbell",
+    "phone_ring",
+    "children_shout",
+    "speech",
+    "human_whistle",
+    "crying",
+    "microwave",
+    "device_beep",
+    "boiling",
+    "faucet",
+    "door",
+    "slam",
+    "keys",
+    "dishes",
+    "traffic",
+    "passing_car",
+    "motorcycle",
+    "bus",
+    "train_horn",
+    "bicycle_bell",
+    "running",
+    "engine_start",
+    "dog_vocal",
+    "bird",
+    "music",
+    "saxophone"
+  ]
+}
