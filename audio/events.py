@@ -27,6 +27,9 @@ EVENT_TYPES['thumbs_up'] = ('Thumbs up', 0)
 # (audio/custom_rules.py). The label and tier come from the person; custom_sound_id says which sound,
 # so acknowledging one never silences another. icon_id optionally picks a glasses icon.
 EVENT_TYPES['custom'] = ('Custom sound', 2)
+# A question or request someone asked the wearer, transcribed on the laptop right after their name or an
+# attention call (audio/questions.py). label is the short version for the glasses; transcript is what was said.
+EVENT_TYPES['question'] = ('Question', 3)
 ICON_ID = re.compile(r'^[a-z][a-z0-9_]{0,39}$')
 
 def runtime_model():
@@ -125,6 +128,10 @@ def validate_event(event):
             raise ValueError('custom events need a custom_sound_id of 1..120 printable characters')
         if event.get('icon_id') is not None and not ICON_ID.match(str(event['icon_id'])):
             raise ValueError('icon_id must be a short lowercase icon name')
+    if event['type'] == 'question':
+        transcript = event.get('transcript')
+        if not isinstance(transcript, str) or not 0 < len(transcript) <= 600 or not transcript.isprintable():
+            raise ValueError('question events need a transcript of 1..600 printable characters')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
     for key in ('event_id', 'label', 'source'):

@@ -36,6 +36,10 @@ The optional `model` field identifies the classifier. Generic `bell` means Bell 
 the `bicycle_bell` subtype is disabled in the default recognition policy.
 User-taught sounds use `type: "custom"` with a `custom_sound_id`; see [custom sounds](custom-sounds.md).
 Name detection emits schema-v2 `name_called` events with `confidence: null`; see [name detection](name-detection.md).
+A question asked right after the name or an attention call is a schema-v1 `type: "question"` event: `label` is the
+short version for the glasses (OLED font A-Z 0-9 `! - . / ?`, at most 84 characters), `transcript` is what was said
+(required, at most 600 characters), `summary_source` is `local` or `claude`, `after_event_id` names the name event,
+and direction is copied from that name event. The OLED renders `icon_id: "question"` as wrapped text. See audio/questions.py.
 Every analysis window is also published as a raw observation (top labels, every rule's score and reason,
 custom-sound scores, level) at `GET /observations`; see the [live-site handoff](handoff-live-site.md).
 

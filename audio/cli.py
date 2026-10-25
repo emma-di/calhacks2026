@@ -35,6 +35,7 @@ def main():
         p.add_argument('--debug', action='store_true')
         p.add_argument('--no-custom', action='store_true', help='ignore taught custom sounds')
         p.add_argument('--no-names', action='store_true', help='turn off name detection')
+        p.add_argument('--no-questions', action='store_true', help='do not transcribe questions after your name')
         p.add_argument('--observations', help='URL for per-window observations (default: next to --endpoint)')
         p.add_argument('--no-observations', action='store_true', help='do not stream per-window observations')
         p.add_argument('--observe-top', type=int, default=10, help='labels per observation (1..25)')
@@ -107,6 +108,17 @@ def main():
         except (ImportError, RuntimeError) as exc:
             print(f'Name detection off: {exc}', file=sys.stderr)
     name_events = []   # emitted since the last window, so observations can report them
+    questions = None
+    if names is not None and not args.no_questions:
+        try:
+            from audio.questions import QuestionCatcher
+            questions = QuestionCatcher(
+                on_event=lambda event: publish(event, args.endpoint), profile=lambda: names.profile,
+                paraphrase_url=args.endpoint.rsplit('/', 1)[0] + '/questions/paraphrase' if args.endpoint else None,
+                on_decision=lambda decision: decision_log.write(dict(kind='question', **decision)))
+            print('Questions after your name: transcribed on this laptop, audio not saved', file=sys.stderr)
+        except (ImportError, RuntimeError) as exc:
+            print(f'Question capture off: {exc}', file=sys.stderr)
     from audio.custom_rules import CustomRules
     catalog = CustomRules()
     name_decisions = []
@@ -126,6 +138,8 @@ def main():
             return
         refresh_controls()
         events = names.accept(samples, source, now=clock, timestamp_ms=timestamp)
+        if questions is not None:
+            questions.feed(samples)
         if args.command == 'mic' and args.pi:
             from audio.pi_spatial import annotate_events, unknown, window_evidence
             # The spotter fires just after the phrase ends, so the last 1.5 s of frames covers it.
@@ -134,6 +148,8 @@ def main():
         name_decisions.extend(names.decisions)
         deliveries = [{'event_id':e['event_id'],'status':publish(e,args.endpoint)} for e in events]
         name_events.extend(events)
+        for event in events if questions is not None else ():
+            questions.trigger(event, source)   # after annotate_events, so the question keeps the direction
         if names.decisions:
             decision_log.write(dict(kind='name_detection',source=source,window_timestamp_ms=timestamp,
                 decisions=names.decisions,deliveries=deliveries))
@@ -214,6 +230,8 @@ def main():
                 hear_names(fresh, 'replay', end, base+int(end*1000))
             process(window, 'replay', position, base+int(end*1000))
         hear_names(np.zeros(8000, dtype=np.float32), 'replay', len(data)/16000+0.5, base+int(len(data)/16+500))
+        if questions is not None:
+            questions.flush()
         return
     # 0.2 s blocks so the name spotter hears speech quickly; sound windows still run every hop.
     block_samples = 1600 if args.pi else (3200 if model.hop_samples % 3200 == 0 else model.hop_samples)

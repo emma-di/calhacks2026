@@ -106,6 +106,7 @@ full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benc
 | `audio/monitor.html` | Basic debug monitor, with a live "Hearing now" meter |
 | `audio/custom_sounds.py`, `audio/embeddings.py`, `audio/teach.html` | User-taught custom sounds; `/teach` page |
 | `audio/names.py` | Name detection (streaming keyword spotter, learned spellings) |
+| `audio/questions.py` | Transcribes the few seconds after your name and shows any question on the glasses (`python -m audio.download_model --speech`) |
 | `audio/observations.py` | Per-window "what it heard" stream (`GET /observations`) |
 | `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |
 | `tests/` | Fast unit checks; no weights or microphone required |

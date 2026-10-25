@@ -11,7 +11,7 @@ LABELS = {'knock': 'Door knock', 'bell': 'Bell / chime', 'dog': 'Dog barking', '
           'smoke': 'Smoke alarm', 'siren': 'Siren', 'clock': 'Alarm clock', 'chat': 'Conversation', 'check': 'Done',
           'person': 'Baby cry', 'paw': 'Cat', 'music': 'Saxophone', 'cloud': 'Thunder', 'drop': 'Water tap',
           'car': 'Vehicle horn', 'house': 'Microwave oven', 'gear': 'Power tool', 'bang': 'Gunshot',
-          'wave': 'Sound'}
+          'wave': 'Sound', 'question': 'Are you coming?'}
 
 LABELS.update({cue['icon_id']: cue['label'] for cue in json.loads(
     (Path(__file__).parent.parent / 'audio/cue-catalog.json').read_text())['cues']})
@@ -42,6 +42,12 @@ def cases():
         for labels in (False, True):
             yield dict(icon_id='smoke', label='Fire / smoke alarm', effective_tier=4,
                        remaining_ms=3000, show_labels=labels, direction='front', bearing_degrees=bearing)
+
+    long_question = 'Emma are you coming to lunch with us later today or should we just go ahead without you'
+    for direction in (None, *DIRECTIONS):
+        for text in ('Coming to lunch?', long_question, 'Supercalifragilisticexpialidocious word?'):
+            yield dict(icon_id='question', label=text, effective_tier=3, remaining_ms=3000,
+                       show_labels=False, direction=direction)
 
 
 def frames():

@@ -2,6 +2,7 @@
 
     python -m audio.download_model            # sound classifier (Zipformer audio tagging)
     python -m audio.download_model --names    # also the name-detection keyword spotter
+    python -m audio.download_model --speech   # also speech-to-text for questions after your name
 """
 import argparse
 import hashlib
@@ -15,6 +16,7 @@ RELEASES = 'https://github.com/k2-fsa/sherpa-onnx/releases/download'
 MODELS = {
     'zipformer': ('sherpa-onnx-zipformer-small-audio-tagging-2024-04-15', 'audio-tagging-models', 'zipformer_archive_sha256'),
     'names': ('sherpa-onnx-kws-zipformer-gigaspeech-3.3M-2024-01-01', 'kws-models', 'kws_archive_sha256'),
+    'speech': ('sherpa-onnx-moonshine-tiny-en-int8', 'asr-models', 'speech_archive_sha256'),
 }
 NAME = MODELS['zipformer'][0]
 URL = f'{RELEASES}/audio-tagging-models/{NAME}.tar.bz2'
@@ -43,10 +45,13 @@ def fetch(kind):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument('--names', action='store_true', help='also download the name-detection model (~17 MB)')
+    parser.add_argument('--speech', action='store_true', help='also download speech-to-text for questions (Moonshine tiny)')
     args = parser.parse_args()
     fetch('zipformer')
     if args.names:
         fetch('names')
+    if args.speech:
+        fetch('speech')
 
 if __name__ == '__main__':
     main()

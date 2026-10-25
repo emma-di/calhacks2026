@@ -318,6 +318,17 @@ export default function App() {
       : null);
   const lensDirection = active ? direction : (state.confirm?.direction ?? null);
   const latest = state.decisions.at(-1);
+  // The full sentence stays readable here after the short version clears from the glasses.
+  const lastQuestion = [...state.events].reverse().find((e) => e.type === "question" && e.transcript);
+  const heard = lastQuestion && (
+    <p className="heard">
+      Heard: “{lastQuestion.transcript}”{" "}
+      <span className="muted">
+        · {clock(lastQuestion.timestamp_ms)}
+        {lastQuestion.summary_source === "claude" ? " · shortened by Claude" : ""}
+      </span>
+    </p>
+  );
   const focus = focusOptions.find((f) => f.key === state.focus_mode)!;
   const sourceSummary =
     source === "browser"
@@ -381,7 +392,10 @@ export default function App() {
           {oledInset}
         </Stage>
         <div className="audience-bar">
-          <p className="narration">{narration}</p>
+          <div>
+            <p className="narration">{narration}</p>
+            {heard}
+          </div>
           <button
             className="key"
             onClick={() => void session.dismiss()}
@@ -518,6 +532,7 @@ export default function App() {
                   ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · dismiss to resolve${waiting ? ` · next: ${waiting}` : ""}`
                   : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
               </p>
+              {heard}
             </div>
             {oledInset}
           </div>
@@ -790,7 +805,10 @@ export default function App() {
                         </span>
                       </td>
                       <td>{outcome(d.reason)}</td>
-                      <td className="muted">{explain(d)}</td>
+                      <td className="muted">
+                        {explain(d)}
+                        {event?.transcript ? ` “${event.transcript}”` : ""}
+                      </td>
                     </tr>
                   );
                 })}

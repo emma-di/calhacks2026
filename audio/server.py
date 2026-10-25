@@ -396,6 +396,17 @@ class Handler(BaseHTTPRequestHandler):
             self.reply(400, {'error': 'Enter a description of 1..1500 characters as JSON.',
                              'code': 'invalid_description'})
 
+    def question_paraphrase(self):
+        """Shorten a transcribed question with Claude for the recognizer on this laptop (opt-in, text only)."""
+        if not self.from_loopback() or self.headers.get('Origin'):
+            return self.reply(403, {'error': 'Only the recognizer on this laptop can request shortening'})
+        from audio import question_paraphrase
+        try:
+            text = self.read_json().get('text')
+            self.reply(200, {'short': question_paraphrase.shorten(text)})
+        except (ValueError, TypeError, AttributeError, json.JSONDecodeError):
+            self.reply(400, {'error': 'Expected {"text": "..."} of 1..600 characters'})
+
     def setup_key(self, method):
         """Accept a key only from the local browser; keep it in this process's memory."""
         origin = self.headers.get('Origin', '')
@@ -498,6 +509,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.setup_key('POST')
         if path == '/setup/suggestions':
             return self.setup_suggestions('POST')
+        if path == '/questions/paraphrase':
+            return self.question_paraphrase()
         if is_audio_route(self.parts()):
             return self.audio('POST')
         if path == '/observations':

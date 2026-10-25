@@ -127,8 +127,9 @@ def name_extras(names):
     extras = {}
     if names.get('sensitivity') in ('low', 'balanced', 'high'):
         extras['sensitivity'] = names['sensitivity']
-    if isinstance(names.get('attention_calls'), bool):
-        extras['attention_calls'] = names['attention_calls']
+    for key in ('attention_calls', 'questions', 'question_paraphrase'):
+        if isinstance(names.get(key), bool):
+            extras[key] = names[key]
     learned = names.get('learned_spellings')
     if isinstance(learned, list) and len(learned) <= 8 and all(isinstance(x, (str, dict)) for x in learned):
         extras['learned_spellings'] = learned

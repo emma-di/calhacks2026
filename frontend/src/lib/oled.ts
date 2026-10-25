@@ -131,6 +131,56 @@ function drawEdge(bitmap: Bitmap, direction?: string | null) {
   }
 }
 
+export const QUESTION_ICON = "question";
+
+// Greedy word wrap for the 5x7 font (hardware/display.py wrap_text); the last line ends in ... on overflow.
+export function wrapText(text: string, width = 21, lines = 4): string[] {
+  const words = text.toUpperCase().split(/\s+/).filter(Boolean);
+  const out: string[] = [];
+  let line = "";
+  for (let word of words) {
+    while ([...word].length > width) {
+      if (line) {
+        out.push(line);
+        line = "";
+      }
+      out.push([...word].slice(0, width).join(""));
+      word = [...word].slice(width).join("");
+    }
+    if (!line) line = word;
+    else if ([...line].length + 1 + [...word].length <= width) line += " " + word;
+    else {
+      out.push(line);
+      line = word;
+    }
+  }
+  if (line) out.push(line);
+  if (out.length > lines) {
+    out.length = lines;
+    out[lines - 1] = [...out[lines - 1]].slice(0, width - 3).join("").trimEnd() + "...";
+  }
+  return out;
+}
+
+// A question someone asked the wearer: header with a side triangle, then up to 4 lines (display.py render_question).
+function renderQuestion(bitmap: Bitmap, text: string, direction?: string | null) {
+  bitmap.centered("QUESTION", 2);
+  bitmap.line(0, 11, WIDTH - 1, 11);
+  wrapText(text).forEach((line, i) => bitmap.centered(line, 15 + 12 * i));
+  for (let row = 0; row < 7; row++) {
+    const half = 3 - Math.abs(row - 3);
+    for (let d = 0; d <= half; d++) {
+      if (direction === "left") bitmap.pixel(2 + 3 - half + d, 2 + row);
+      else if (direction === "right") bitmap.pixel(WIDTH - 3 - (3 - half + d), 2 + row);
+    }
+  }
+  if (direction === "front" || direction === "behind")
+    for (let row = 0; row < 4; row++) {
+      const y = direction === "front" ? 2 + row : 8 - row;
+      for (let x = 32 - row; x < 33 + row; x++) bitmap.pixel(x, y + 1);
+    }
+}
+
 // Tier changes only the box around the cue; direction appears as a compass arrow around the centered icon.
 export function render(cue: Cue | null, showLabels = true): Bitmap {
   const bitmap = new Bitmap();
@@ -141,6 +191,10 @@ export function render(cue: Cue | null, showLabels = true): Bitmap {
     !cue.icon_id
   )
     return bitmap;
+  if (cue.icon_id === QUESTION_ICON) {
+    renderQuestion(bitmap, cue.label, cue.direction);
+    return bitmap;
+  }
   const tier = cue.effective_tier;
   const place = layout(
     cue.direction,

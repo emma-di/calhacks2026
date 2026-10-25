@@ -145,3 +145,15 @@ engines, even when names are lowered). One-word calls use a strict threshold; mu
 warnings are looser because they are more distinctive. Very common short words (yo, hi, sorry, wait)
 are deliberately excluded. `name_detection.attention_calls: false` turns all of these off. Synthetic
 speech recall is patchy per phrase; "wait up" was dropped after it missed in a live test.
+
+## Questions after your name
+
+A hard-of-hearing wearer may catch their name but miss what followed. After a name or attention call, the
+recognizer keeps the 2 s before it and up to 6 s after (ending early on a 0.8 s pause), transcribes that
+one clip on the laptop (Moonshine tiny, ~120 MB, offline), and shows a "Question" cue when the clip holds
+a question or request. Nothing else is ever transcribed; audio is never saved, and transcripts stay out
+of the decision log. The OLED shows up to 4 lines of 21 characters with a side triangle; the site keeps
+the full sentence under the narration and in the Log after the cue clears. Shortening is local by
+default (drop the name/call words and fillers). "Shorten questions with Claude" is opt-in, sends only
+the text through the receiver's in-memory key, and falls back to local on any failure. Rejected:
+always-on captions (privacy, noise and OLED space) and sending audio to a cloud service.

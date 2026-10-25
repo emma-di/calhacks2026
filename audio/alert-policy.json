@@ -66,6 +66,7 @@
     "bicycle_bell": "cue_bicycle_bell",
     "dog_bark": "cue_dog_bark",
     "name_called": "cue_name_called",
+    "question": "question",
     "smoke_alarm": "cue_fire_smoke",
     "siren": "cue_emergency_siren",
     "alarm_clock": "cue_alarm_clock",
@@ -88,6 +89,7 @@
     "bicycle_bell": "home",
     "dog_bark": "animals",
     "name_called": "people",
+    "question": "people",
     "smoke_alarm": "safety",
     "siren": "safety"
   },

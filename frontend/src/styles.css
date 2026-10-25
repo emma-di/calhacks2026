@@ -444,6 +444,12 @@ code {
   font-size: 13px;
   color: var(--muted);
 }
+.heard {
+  margin-top: 10px;
+  font-size: 17px;
+  line-height: 1.35;
+  max-width: 760px;
+}
 
 /* Dock */
 .dock {

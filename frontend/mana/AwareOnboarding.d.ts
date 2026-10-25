@@ -1,5 +1,5 @@
 import type { ReactElement } from "react";
-import type { EventType, Tier } from "../src/lib/events";
+import type { EventType, Tier, SoundEvent } from "../src/lib/events";
 import type { Preset } from "../src/lib/alerts";
 import type { Appearance } from "../src/lib/appearance";
 export interface ManaDraft {
@@ -31,6 +31,7 @@ export function searchCuratedSounds(query: string): CuratedCue[];
 export function createCueRule(cueId: string, tier: Tier, id: string): CustomSound | null;
 export function applyCuratedRule(draft: unknown, cueId: string, tier: Tier, id: string): ManaDraft;
 export function applySuggestedCues(draft: unknown, suggestions: {cue_id: string; tier: Tier; reason: string}[]): ManaDraft;
+export function makeSetupPreviewEvent(sound: {event_type?:string; key?:string; label:string; id?:string; icon_id?:string; icon?:string}, tier:Tier): SoundEvent;
 export function sanitizeCustomSounds(raw: unknown): CustomSound[];
 export interface ManaProfile {
   display?: { labels: boolean };
@@ -44,6 +45,8 @@ export interface ManaProfile {
     primary_name: string;
     aliases: string[];
     language: string;
+    questions?: boolean;
+    question_paraphrase?: boolean;
   };
   notification_preferences: {
     mode: Preset;

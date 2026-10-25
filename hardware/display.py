@@ -178,6 +178,54 @@ def draw_edge(bitmap, direction):
                 bitmap.pixel(x, 53 - row)
 
 
+QUESTION_ICON = "question"
+
+
+def wrap_text(text, width=21, lines=4):
+    """Greedy word wrap for the 5x7 font; the last line ends in ... when the text does not fit."""
+    words, out, line = " ".join(text.upper().split()).split(" "), [], ""
+    for word in words:
+        while len(word) > width:                     # a word longer than a line is split hard
+            if line:
+                out.append(line)
+                line = ""
+            out.append(word[:width])
+            word = word[width:]
+        if not line:
+            line = word
+        elif len(line) + 1 + len(word) <= width:
+            line += " " + word
+        else:
+            out.append(line)
+            line = word
+    if line:
+        out.append(line)
+    if len(out) > lines:
+        out = out[:lines]
+        out[-1] = out[-1][:width - 3].rstrip() + "..."
+    return out
+
+
+def render_question(bitmap, text, direction):
+    """A question someone asked the wearer: a header with a side triangle, then up to 4 lines of text."""
+    bitmap.centered("QUESTION", 2)
+    bitmap.line(0, 11, WIDTH - 1, 11)
+    for i, line in enumerate(wrap_text(text)):
+        bitmap.centered(line, 15 + 12 * i)
+    for row in range(7):                             # 4 px deep, 7 px tall, apex toward the speaker
+        half = 3 - abs(row - 3)
+        for d in range(half + 1):
+            if direction == "left":
+                bitmap.pixel(2 + 3 - half + d, 2 + row)
+            elif direction == "right":
+                bitmap.pixel(WIDTH - 3 - (3 - half + d), 2 + row)
+    if direction in ("front", "behind"):
+        for row in range(4):                         # beside the header: apex up for front, down for behind
+            y = 2 + row if direction == "front" else 8 - row
+            for x in range(32 - row, 33 + row):
+                bitmap.pixel(x, y + 1)
+
+
 def render(presentation=None, show_labels=True):
     """Tier changes only the box around the cue: 1 none, 2 thin, 3 double, 4 double plus an
     inverted label (Urgent always shows its label). The icon is centered; direction is shown by a solid triangle.
@@ -186,6 +234,9 @@ def render(presentation=None, show_labels=True):
     if presentation is None or presentation.effective_tier == 0 or presentation.remaining_ms == 0:
         return bitmap
     tier, direction = presentation.effective_tier, presentation.direction
+    if presentation.icon_id == QUESTION_ICON:
+        render_question(bitmap, presentation.label, direction)
+        return bitmap
     place = layout(direction, presentation.label if show_labels or tier == 4 else None)
     x, y, cw, ch = place["box"]
     if tier >= 2:

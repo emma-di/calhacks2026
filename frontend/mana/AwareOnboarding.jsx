@@ -248,6 +248,8 @@ export function sanitizeAwareDraft(raw) {
   return {
     name: typeof d.name === "string" ? d.name : "",
     name_enabled: d.name_enabled !== false,
+    questions: d.questions !== false,
+    question_paraphrase: d.question_paraphrase === true,
     aliasesText: typeof d.aliasesText === "string" ? d.aliasesText : "",
     mode: AWARE_PRESETS.some((m) => m.key === d.mode) ? d.mode : "balanced",
     rules,
@@ -322,6 +324,8 @@ export function buildAwareProfile(draft) {
       primary_name: primary,
       aliases: parseAwareAliases(d.aliasesText, primary),
       language: "en",
+      questions: d.questions,
+      question_paraphrase: d.question_paraphrase,
     },
     notification_preferences: {
       mode: d.mode,
@@ -482,6 +486,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
     const prefs = receiverProfile.notification_preferences;
     setDraftState(sanitizeAwareDraft({
       name: names.primary_name, name_enabled: names.enabled,
+      questions: names.questions, question_paraphrase: names.question_paraphrase,
       aliasesText: names.aliases.join(", "), mode: prefs.mode,
       rules: Object.entries(prefs.event_tiers ?? {}).map(([key,tier]) => ({key,tier})),
       custom_rules: receiverProfile.custom_sound_requests ?? [], category_rules: prefs.category_tiers ?? {},
@@ -839,6 +844,35 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </p>
             </div>
             </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={draft.questions}
+                onChange={(e) => update({ questions: e.target.checked })}
+                aria-describedby={uid + "-questions-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Show what someone asks after your name
+            </label>
+            <p id={uid + "-questions-help"} style={s.help}>
+              After your name or “hey”, the next few seconds are transcribed on this laptop and a question
+              appears on the glasses. Audio is never saved.
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions ? "pointer" : "default", opacity: draft.questions ? 1 : .55 }}>
+              <input
+                type="checkbox"
+                checked={draft.question_paraphrase}
+                disabled={!draft.questions}
+                onChange={(e) => update({ question_paraphrase: e.target.checked })}
+                aria-describedby={uid + "-paraphrase-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Shorten questions with Claude
+            </label>
+            <p id={uid + "-paraphrase-help"} style={s.help}>
+              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
+              questions are shortened on this laptop.
+            </p>
           </details>
         </section>
 

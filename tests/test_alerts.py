@@ -126,7 +126,7 @@ class PolicyTests(unittest.TestCase):
         state.connect(engine.session_id)
         for index, kind in enumerate(k for k in EVENT_TYPES if k not in GESTURES):
             engine.set_controls(index * 100_000)
-            event = (make_event(kind, .9, 'mock') if kind not in ('name_called', 'custom') else
+            event = (make_event(kind, .9, 'mock') if kind not in ('name_called', 'custom', 'question') else
                      dict(fixture_event(kind, f'n{index}', 0), custom_sound_id='front-doorbell'))
             engine.add(event, index * 100_000)
             envelope = engine.presentation(index * 100_000)

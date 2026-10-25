@@ -332,6 +332,7 @@ def build():
     from hardware.cue_icons import build_cue_icons
     cues = build_cue_icons(Canvas, ICONS)
     assets["bitmaps"] = {key: make().rows() for key, make in ICONS.items()}
+    assets["bitmaps"]["question"] = conversation().rows()   # question cues render as text (display.render_question)
     assets["bitmaps"].update({key: canvas.rows() for key, canvas in cues.items()})
     ASSETS.write_text(json.dumps(assets, indent=1) + "\n")
 

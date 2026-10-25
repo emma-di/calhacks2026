@@ -11,7 +11,8 @@ export type EventType =
   | "bicycle_bell"
   | "finger_snap"
   | "thumbs_up"
-  | "custom";
+  | "custom"
+  | "question";
 export interface SoundEvent {
   target_event_id?: string;
   matched_alias_id?: string;
@@ -29,6 +30,9 @@ export interface SoundEvent {
   // Present only on type "custom": which user-taught sound (label is the user's own name for it).
   custom_sound_id?: string;
   icon_id?: string; // a custom sound may pick its glasses icon (falls back to the policy icon)
+  // Present only on type "question": what was said; label is the short version for the glasses.
+  transcript?: string;
+  summary_source?: "local" | "claude";
 }
 export interface Decision {
   event_id: string;
@@ -170,6 +174,13 @@ export const soundCatalog = [
     receiver: true,
   },
   {
+    type: "question" as EventType,
+    label: "Question",
+    detail: "Someone asked you something after your name",
+    tier: 3 as Tier,
+    receiver: true,
+  },
+  {
     type: "thumbs_up" as EventType,
     label: "Thumbs up",
     detail: "Dismisses the cue that is showing (camera)",
@@ -184,6 +195,23 @@ export function makeMock(
   directionDegrees: number | null = null,
 ): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
+  if (type === "question")
+    // Demo stand-in for audio/questions.py: the short version shows on the glasses, the transcript on the site.
+    return {
+      schema_version: 1,
+      event_id: crypto.randomUUID(),
+      type,
+      label: "Coming to lunch?",
+      transcript: "Hey Emma, are you coming to lunch with us later?",
+      summary_source: "local",
+      confidence: null,
+      source: "mock",
+      priority_tier: tier ?? sound.tier,
+      timestamp_ms: Date.now(),
+      direction_degrees: directionDegrees,
+      direction_confidence: directionDegrees === null ? null : 1,
+      distance_meters: null,
+    };
   if (type === "name_called")
     // John's name events are schema v2 (audio/names.py): no score, which alias matched. Direction
     // comes from the Pi stereo pair like every other cue.
@@ -229,6 +257,7 @@ const knownTypes = new Set([
   "finger_snap",
   "thumbs_up",
   "custom",
+  "question",
 ]);
 export function parseEvent(input: unknown): SoundEvent {
   if (!input || typeof input !== "object") throw new Error("Invalid event");
@@ -258,6 +287,8 @@ export function parseEvent(input: unknown): SoundEvent {
   }
   if (e.type === "custom" && !(typeof e.custom_sound_id === "string" && e.custom_sound_id.length > 0 && e.custom_sound_id.length <= 120))
     throw new Error("Receiver returned a custom sound without an id");
+  if (e.type === "question" && !(typeof e.transcript === "string" && e.transcript.length > 0 && e.transcript.length <= 600))
+    throw new Error("Receiver returned a question without a transcript");
   // Direction is kept only as a validated pair; the engine decides whether it is confident enough.
   const degrees = e.direction_degrees;
   const certainty = e.direction_confidence;

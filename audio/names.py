@@ -55,7 +55,8 @@ SENSITIVITY = {   # profile.name_detection.sensitivity -> (boost, threshold)
 def default_profile():
     return dict(schema_version=1, profile_id='local', revision=0, display_name='',
                 name_detection=dict(enabled=False, primary_name='', aliases=[], language='en',
-                                    sensitivity='balanced', learned_spellings=[], attention_calls=True))
+                                    sensitivity='balanced', learned_spellings=[], attention_calls=True,
+                                    questions=True, question_paraphrase=False))
 
 def clean_name(value, field):
     if not isinstance(value, str):
@@ -106,8 +107,13 @@ def validate_profile(profile):
     attention = detection.get('attention_calls', True)
     if type(attention) is not bool:
         raise ValueError('attention_calls must be true or false')
+    # Questions after your name are transcribed locally (audio/questions.py); Claude shortening is opt-in.
+    questions, paraphrase = detection.get('questions', True), detection.get('question_paraphrase', False)
+    if type(questions) is not bool or type(paraphrase) is not bool:
+        raise ValueError('questions and question_paraphrase must be true or false')
     result['name_detection'] = dict(enabled=enabled, primary_name=primary, aliases=aliases,
                                     language=language, sensitivity=sensitivity, attention_calls=attention,
+                                    questions=questions, question_paraphrase=paraphrase,
                                     learned_spellings=[dict(text=i['text'], tokens=i['tokens']) for i in learned])
     return result
 
