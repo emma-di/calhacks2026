@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>DETECT — CAD</title>
+  <link rel="stylesheet" href="viewer.css?v=10">
+  <style>.view-actions{flex-wrap:wrap;justify-content:flex-end}.viewer-bar{max-width:100%}</style>
+  <style>#opticalLabels{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:2}#opticalLabels path{fill:none;stroke:#c7bd9d;stroke-width:.7;opacity:.7}#opticalLabels circle{fill:#dfc26e}#opticalLabels text{fill:#f1e3be;font:9px monospace;letter-spacing:.05em;paint-order:stroke;stroke:#1e2224;stroke-width:3px;stroke-linejoin:round}</style>
+</head>
+<body>
+  <header>
+    <a href="#">DETECT</a>
+    <span class="header-nav"><a href="wiring.html">WIRING GUIDE</a> CAD · 0.14 <small>DRY FIT PENDING</small></span>
+  </header>
+  <main>
+    <aside>
+      <div class="aside-head">ASSEMBLY</div>
+      <button class="part-button active" id="assemblyButton">Complete assembly</button>
+      <nav id="partList" aria-label="CAD files"></nav>
+      <div class="file-info">
+        <div><span>TRIANGLES</span><b id="triangleCount">—</b></div>
+        <div><span>FILE SIZE</span><b id="fileSize">—</b></div>
+      </div>
+      <a class="download" id="downloadStl" href="#" download>DOWNLOAD STL</a>
+      <a class="source" href="downloads/DETECT_CAD_0.14.zip" download>EDITABLE CAD + STLs</a>
+      <a class="source" href="assets/source-v14/parameters.scad" download>FIT PARAMETERS</a>
+      <p class="fit-note">4 matte-black prints · OLED pocket 28.3 × 28.3 × 2.8 mm. Actual fit and optical focus still need testing.</p>
+    </aside>
+    <section class="viewer">
+      <div class="viewer-bar">
+        <div><b id="partName">ASSEMBLY</b></div>
+        <div class="view-actions"><button id="topView" class="on">Top</button><button id="sideView">Side</button><button id="threeView">3D</button><button id="openBody" class="on">Open body</button><button id="showFrame" class="on">Glasses</button><button id="showWiring" class="on">Wiring</button><button id="showPath">Light path</button><button id="showMechanisms">Fixes</button><button id="showHook">Hook</button><button id="resetCamera" type="button">Reset</button></div>
+      </div>
+      <canvas id="stlCanvas" aria-label="Interactive DETECT CAD model"></canvas>
+      <svg id="opticalLabels" aria-hidden="true"></svg>
+      <button id="showDimensions" class="dimension-toggle on" aria-pressed="true">Dimensions</button>
+      <div id="dimensionNote" class="dimension-note" role="status"></div>
+      <div class="path-key"><span>OLED</span><i>→</i><span>Mirror</span><i>→</i><span>Lens</span><i>→</i><span>Combiner</span><i>→</i><span>Eye</span></div>
+      <div class="hint">DRAG TO ROTATE · SCROLL TO ZOOM</div>
+      <div id="loading" class="loading"><span></span>LOADING CAD</div>
+    </section>
+  </main>
+  <script src="cad-data.js?v=14"></script>
+  <script src="viewer.js?v=14"></script>
+</body>
+</html>

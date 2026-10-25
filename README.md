@@ -171,4 +171,5 @@ All recognition runs locally, so no audio is ever sent to the cloud. Raw microph
 - [Demo and setup guide](docs/demo.md): what to look for, and how to run the live microphones on a laptop
 - [Contributing](CONTRIBUTING.md): branches, pull requests and checks
 - [Direction finding simulator](spatial/README.md): the two-microphone sound map
+- [Hardware](hardware/README.md): v0.14 printable STLs, editable CAD, a browser assembly viewer and the GPIO wiring guide; physical fit and optical focus still need dry-fit testing
 - [Team notes](TEAM-NOTES.md) and [work status](WORK-STATUS.md): handoffs and current readiness
