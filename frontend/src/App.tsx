@@ -545,7 +545,8 @@ export default function App() {
           <PiMicrophoneLevels />
 
           <section className="dock" aria-label="Controls">
-            <div className="keys" role="group" aria-label="Play a sound">
+            {/* Test sounds are for Browser mode; Receiver mode shows only what the microphones hear. */}
+            {source === "browser" && <div className="keys" role="group" aria-label="Play a sound">
               {sounds.map((sound) => {
                 const tier = effectiveTier(sound.type, sound.tier, prefs);
                 return (
@@ -555,15 +556,7 @@ export default function App() {
                     aria-current={
                       active?.type === sound.type ? "true" : undefined
                     }
-                    disabled={
-                      source === "receiver" && (!connected || !sound.receiver)
-                    }
                     onClick={() => void session.play(sound.type, testDirection)}
-                    title={
-                      source === "receiver" && !sound.receiver
-                        ? "The receiver has no detector for this sound"
-                        : undefined
-                    }
                   >
                     <SoundIcon type={sound.type} size={32} />
                     <span>{sound.label}</span>
@@ -573,7 +566,7 @@ export default function App() {
                   </button>
                 );
               })}
-            </div>
+            </div>}
             <div className="dock-row">
               <div
                 className="switch"
@@ -649,7 +642,7 @@ export default function App() {
                 Dismiss
               </button>
             </div>
-            <details className="demo-tools">
+            {source === "browser" && <details className="demo-tools">
               <summary>Test a direction or sequence</summary>
               <div className="dock-row">
                 {" "}
@@ -700,7 +693,7 @@ export default function App() {
                   {session.busy ? "Stop" : "Play a busy minute"}
                 </button>
               </div>
-            </details>
+            </details>}
             <p className="dock-note">
               {focus.detail}
               {state.paused ? " Paused hides every cue, urgent ones too." : ""}
