@@ -47,7 +47,7 @@ export default function MicMeter({
       const step = width / BARS;
       history.forEach((v, i) => {
         const h = Math.max(2, v * height);
-        g.fillStyle = v > 0.97 ? "#ffb547" : i === BARS - 1 ? "#f4f2ea" : "rgba(244,242,234,0.65)";
+        g.fillStyle = v > 0.97 ? "#df443d" : i === BARS - 1 ? "#f4f2ea" : "rgba(244,242,234,0.65)";
         g.fillRect(i * step + 1, (height - h) / 2, Math.max(1, step - 2), h);
       });
     };

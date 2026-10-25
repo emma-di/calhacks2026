@@ -339,7 +339,7 @@ export function buildAwareProfile(draft) {
 export const AWARE_DISPLAY_DEFAULTS = {
   labels: false,
   motion: "off",
-  colors: { 1: "#b4b2aa", 2: "#f4f2ea", 3: "#f4f2ea", 4: "#ffb547" },
+  colors: { 1: "#b4b2aa", 2: "#f4f2ea", 3: "#f4f2ea", 4: "#df443d" },
 };
 
 export function sanitizeAwareDisplay(raw) {

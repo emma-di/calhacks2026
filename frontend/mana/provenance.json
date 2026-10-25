@@ -34,7 +34,8 @@
     "local_runtime_changes": [
       "Step titles renamed per Emma: \"Alerts already set up\", \"Add or customize sounds\"",
       "\"Tell us about you\" (Claude suggestions and key connection) moved from More settings to the start of step 3; the missing-key link now opens it",
-      "Self-explanatory subtitles and help lines removed; save status shown only on failure; Spidey Sense product name"
+      "Self-explanatory subtitles and help lines removed; save status shown only on failure; Spidey Sense product name",
+      "Default urgent browser glow changed from amber to the brand comic red (#df443d)"
     ],
     "local_test_changes": [
       "frontend/src/lib/setupSuggestions.test.ts: three render tests updated from the old layout to the new step order, required name and aria-disabled Start"

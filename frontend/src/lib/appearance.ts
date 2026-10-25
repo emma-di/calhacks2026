@@ -13,7 +13,7 @@ export const defaultAppearance: Appearance = {
     1: "#b4b2aa",
     2: "#f4f2ea",
     3: "#f4f2ea",
-    4: "#ffb547",
+    4: "#df443d",
   },
   direction: "unknown",
 };

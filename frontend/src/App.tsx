@@ -542,7 +542,6 @@ export default function App() {
             {oledInset}
           </div>
 
-          <PiMicrophoneLevels />
 
           <section className="dock" aria-label="Controls">
             {/* Test sounds are for Browser mode; Receiver mode shows only what the microphones hear. */}
@@ -601,38 +600,6 @@ export default function App() {
                 {state.paused ? <Play size={14} /> : <Pause size={14} />}
                 {state.paused ? "Resume" : "Pause"}
               </button>
-              <button
-                className="key"
-                aria-pressed={state.repeat_suppression === false}
-                title="Testing only: bypass recognition cooldowns and redisplay repeated detections. Priority and pause still apply."
-                disabled={offline}
-                onClick={() =>
-                  void session.setControls({
-                    repeat_suppression: state.repeat_suppression === false,
-                  })
-                }
-              >
-                {state.repeat_suppression === false
-                  ? "Show every detection: on"
-                  : "Show every detection: off"}
-              </button>
-              {source === "receiver" && (
-                <button
-                  className="key"
-                  aria-pressed={state.snap_to_dismiss === true}
-                  disabled={offline}
-                  title="Experimental microphone control: one strongly recognized finger snap dismisses the current cue. No camera needed."
-                  onClick={() =>
-                    void session.setControls({
-                      snap_to_dismiss: !state.snap_to_dismiss,
-                    })
-                  }
-                >
-                  {state.snap_to_dismiss
-                    ? "Snap to dismiss: on"
-                    : "Snap to dismiss: off"}
-                </button>
-              )}
               <span className="dock-spacer" />
               <button
                 className="key"
@@ -694,18 +661,7 @@ export default function App() {
                 </button>
               </div>
             </details>}
-            <p className="dock-note">
-              {focus.detail}
-              {state.paused ? " Paused hides every cue, urgent ones too." : ""}
-              {session.error ? ` ${session.error}` : ""}
-            </p>
           </section>
-          {source === "receiver" && (
-            <HearingPanel
-              hearing={hearing}
-              onManageSounds={() => setView("preferences")}
-            />
-          )}
         </main>
       )}
 
@@ -755,10 +711,6 @@ export default function App() {
             {state.events.length === 1 ? "sound" : "sounds"} this session ·{" "}
             {sourceSummary}
           </p>
-          <SignalPanel
-            observations={state.observations}
-            health={state.health}
-          />
           {state.decisions.length === 0 ? (
             <p className="empty">
               Nothing yet. Sounds you play or the receiver hears appear here.
@@ -816,6 +768,55 @@ export default function App() {
               </tbody>
             </table>
           )}
+          {/* Diagnostics live here so the Live view shows only what the wearer sees. */}
+          <section className="diagnostics" aria-labelledby="diagnostics-title">
+            <h2 id="diagnostics-title">Diagnostics</h2>
+            {source === "receiver" && (
+              <HearingPanel
+                hearing={hearing}
+                onManageSounds={() => setView("preferences")}
+              />
+            )}
+            <SignalPanel
+              observations={state.observations}
+              health={state.health}
+            />
+            {source === "receiver" && <PiMicrophoneLevels />}
+            <div className="dock-row" aria-label="Testing controls">
+                <button
+                  className="key"
+                  aria-pressed={state.repeat_suppression === false}
+                  title="Testing only: bypass recognition cooldowns and redisplay repeated detections. Priority and pause still apply."
+                  disabled={offline}
+                  onClick={() =>
+                    void session.setControls({
+                      repeat_suppression: state.repeat_suppression === false,
+                    })
+                  }
+                >
+                  {state.repeat_suppression === false
+                    ? "Show every detection: on"
+                    : "Show every detection: off"}
+                </button>
+                {source === "receiver" && (
+                  <button
+                    className="key"
+                    aria-pressed={state.snap_to_dismiss === true}
+                    disabled={offline}
+                    title="Experimental microphone control: one strongly recognized finger snap dismisses the current cue. No camera needed."
+                    onClick={() =>
+                      void session.setControls({
+                        snap_to_dismiss: !state.snap_to_dismiss,
+                      })
+                    }
+                  >
+                    {state.snap_to_dismiss
+                      ? "Snap to dismiss: on"
+                      : "Snap to dismiss: off"}
+                  </button>
+                )}
+            </div>
+          </section>
           <details className="developer">
             <summary>Raw state for debugging</summary>
             <pre>{JSON.stringify(state, null, 2)}</pre>

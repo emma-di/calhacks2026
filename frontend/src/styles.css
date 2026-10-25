@@ -1,19 +1,21 @@
-@import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Silkscreen&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Bangers&family=Instrument+Sans:wght@400;500;600&family=Silkscreen&display=swap");
 /* Spidey Sense: the page is the view through the glasses. Near-black ground, the OLED's own white,
-   Silkscreen for anything the display would say, light blue for the brand and anything live, and
-   amber kept only for urgent so a smoke alarm never looks like decoration. A faint web sits in the corner. */
+   Silkscreen for anything the display would say, sky blue for the brand and anything live, and
+   comic red only for urgent so a smoke alarm never looks like decoration. A faint web sits in the corner.
+   Palette and Bangers wordmark follow the team's project page (yameensekandarii.com/spidey-sense). */
 :root {
-  --ground: #0b0b0a;
-  --raise: #141412;
-  --raise-2: #1c1c19;
+  --ground: #0a1219;
+  --raise: #101b24;
+  --raise-2: #16242f;
   --line: rgba(244, 242, 234, 0.09);
   --line-strong: rgba(244, 242, 234, 0.2);
   --text: #f4f2ea;
   --muted: #a3a198;
-  --signal: #8fd3ff;
+  --signal: #8ed0f3;
   --signal-ink: #04121c;
-  --urgent: #ffb547;
-  --urgent-ink: #1d1304;
+  --urgent: #df443d;
+  --urgent-ink: #fff4f2;
+  --navy: #20394d;
   --pixel:
     "Silkscreen", ui-monospace, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
   font-family: "Instrument Sans", Inter, system-ui, sans-serif;
@@ -32,7 +34,7 @@ body {
   margin: 0;
   background-color: var(--ground);
   /* Faint spider web anchored top-right: radial threads plus three rings. */
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520' fill='none' stroke='%238fd3ff' stroke-opacity='.07' stroke-width='1.2'%3E%3Cpath d='M520 0L0 0M520 0L40 220M520 0L140 400M520 0L300 520M520 0L520 520'/%3E%3Cpath d='M380 0Q390 60 392 66Q450 110 470 134Q500 140 520 140M240 0Q258 110 262 132Q380 220 420 268Q480 278 520 280M100 0Q126 160 132 198Q312 330 370 402Q456 414 520 420'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520' fill='none' stroke='%238ed0f3' stroke-opacity='.07' stroke-width='1.2'%3E%3Cpath d='M520 0L0 0M520 0L40 220M520 0L140 400M520 0L300 520M520 0L520 520'/%3E%3Cpath d='M380 0Q390 60 392 66Q450 110 470 134Q500 140 520 140M240 0Q258 110 262 132Q380 220 420 268Q480 278 520 280M100 0Q126 160 132 198Q312 330 370 402Q456 414 520 420'/%3E%3C/svg%3E");
   background-repeat: no-repeat;
   background-position: top right;
 }
@@ -109,11 +111,16 @@ code {
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  font-family: var(--pixel);
-  font-size: 17px;
-  letter-spacing: 0.02em;
+  font-family: "Bangers", Impact, sans-serif;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  color: var(--urgent);
+  text-shadow: 2px 2px 0 var(--navy);
   white-space: nowrap;
   flex-shrink: 0;
+}
+.wordmark svg {
+  color: var(--text);   /* the lens stays white; only the name is red */
 }
 .tabs {
   display: flex;
@@ -1591,3 +1598,7 @@ code {
   .setup-priority-preview .oled-bitmap { flex-basis:auto; }
   .setup-start-actions { align-items:stretch; flex-direction:column; }
 }
+
+/* Log page diagnostics: everything technical the Live view no longer shows. */
+.diagnostics { margin-top: 40px; display: grid; gap: 20px; }
+.diagnostics > h2 { font-size: 17px; font-weight: 600; }
