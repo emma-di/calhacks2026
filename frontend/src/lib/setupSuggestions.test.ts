@@ -72,8 +72,7 @@ test('a fresh browser can render setup with no saved custom sound array', async(
   const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark'}));
-  assert.ok(html.includes('Your Aware settings'));
-  assert.ok(html.includes('No recording needed'));
+  assert.ok(html.includes('Your settings'));
   assert.ok(html.includes('Search sounds'));
 });
 
@@ -81,20 +80,20 @@ test('first-use setup starts with a required name and has a clear finish action'
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true}));
-  assert.ok(html.includes('Set up Aware'));
+  assert.ok(html.includes('Set up Spidey Sense'));
   assert.match(html,/<input[^>]*required=""[^>]*aria-required="true"/);
   assert.ok(html.indexOf('Your name')<html.indexOf('Search sounds'));
   assert.ok(html.includes('Nicknames'));
-  assert.ok(html.includes('Start Aware'));
+  assert.ok(html.includes('Start Spidey Sense'));
 });
 
 test('setup runs in order: name, ready defaults, optional sounds, one Start, then More settings', async()=>{
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true}));
-  const order=['Your name','Everyday alerts are ready','Search sounds','Start Aware','More settings','Sound suggestions from Claude'];
+  const order=['Your name','Alerts already set up','Add or customize sounds','Tell us about you','Search sounds','Start Spidey Sense','More settings'];
   order.slice(1).forEach((label,i)=>assert.ok(html.indexOf(order[i])<html.indexOf(label),`${order[i]} before ${label}`));
-  assert.equal(html.split('Start Aware').length-1,1);
+  assert.equal(html.split('Start Spidey Sense').length-1,1);
 });
 
 test('custom sound preview keeps the actual cue icon and Ignore without publishing anything', async()=>{
@@ -109,6 +108,6 @@ test('setup cannot finish while the receiver has unconfirmed preferences', async
   const React=await import('react');const {renderToString}=await import('react-dom/server');
   const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
   const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true,canFinish:false}));
-  assert.match(html,/<button[^>]*aria-disabled="true"[^>]*>Start Aware<\/button>/);
+  assert.match(html,/<button[^>]*aria-disabled="true"[^>]*>Start Spidey Sense<\/button>/);
   assert.ok(html.includes('Waiting for your latest preferences to save'));
 });

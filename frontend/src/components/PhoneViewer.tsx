@@ -58,7 +58,7 @@ export default function PhoneViewer() {
   return (
     <main className="phone-viewer">
       <header>
-        <span>Aware</span>
+        <span>Spidey Sense</span>
         <span>Live mirror</span>
       </header>
       <p className="phone-status" role="status">

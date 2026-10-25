@@ -522,7 +522,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
       });
       const body = await r.json().catch(() => ({}));
       if (!r.ok) throw Object.assign(new Error(body.code === "missing_api_key"
-        ? "Claude isn’t connected yet. Connect your Anthropic API key under More settings, then try again."
+        ? "Claude isn’t connected yet. Connect your Anthropic API key under “Tell us about you”, then try again."
         : body.error || "Claude could not match this sound. Try again."), { code: body.code });
       setClaudeMatch({ request, state: "done", matches: Array.isArray(body.matches) ? body.matches : [] });
     } catch (e) {
@@ -538,6 +538,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const firstRun = useRef(true);
   const searchRef = useRef(null);
   const moreRef = useRef(null);
+  const aboutRef = useRef(null);   // "Tell us about you" holds the Claude key connection
 
   useEffect(() => {
     if (typeof window === "undefined" || !window.matchMedia) return undefined;
@@ -793,7 +794,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
     if (readyToFinish) onComplete?.(e);
   };
   const openMoreSettings = () => {
-    const el = moreRef.current;
+    const el = aboutRef.current;
     if (!el) return;
     el.open = true;
     el.scrollIntoView?.({ block: "start", behavior: reducedMotion ? "auto" : "smooth" });
@@ -845,19 +846,16 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             margin: 0,
           }}
         >
-          {firstUse ? "Set up Aware" : "Your Aware settings"}
+          {firstUse ? "Set up Spidey Sense" : "Your settings"}
         </h1>
-        <p style={{ fontSize: 16, margin: "8px 0 0" }}>
-          {firstUse
-            ? "About a minute. Only your name is needed; everything else already has a sensible default."
-            : "Change what you need. Everything else keeps its default."}
-        </p>
+        {firstUse && <p style={{ fontSize: 16, margin: "8px 0 0" }}>Only your name is required.</p>}
         <div
           role="status"
           aria-live="polite"
           style={{ marginTop: 14, fontSize: 14, color: p.muted }}
         >
-          <div>{receiverProfile ? "Your choices save automatically." : statusText}</div>
+          {/* Saving is automatic; only say something when it fails. */}
+          <div>{!receiverProfile && (!storageOk || saveState.kind === "failed") ? statusText : ""}</div>
         </div>
 
         {/* 1. Name */}
@@ -865,7 +863,6 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           <h2 id={uid + "-step-name"} style={s.h2}>
             <span style={stepNumber}>1.</span>Your name
           </h2>
-          <p style={s.lead}>Aware shows a cue when someone says it. No recording needed.</p>
           <div className={`setup-name-grid ${!hasName && !draft.aliasesText ? "is-single" : ""}`} style={{ marginTop: 16 }}>
             <div>
               <label htmlFor={uid + "-name"} style={s.label}>
@@ -883,11 +880,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 style={s.input}
               />
               <p id={uid + "-name-help"} style={s.help}>
-                {!hasName
-                  ? "Required to start."
-                  : draft.name_enabled !== false
-                    ? "Used for your name alert."
-                    : "Your name is saved; name alerts are turned off."}
+                {!hasName ? "Required to start." : draft.name_enabled === false ? "Name alerts are turned off." : ""}
               </p>
             </div>
             <div hidden={!hasName && !draft.aliasesText}>
@@ -899,13 +892,14 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 type="text"
                 value={draft.aliasesText}
                 onChange={(e) => update({ aliasesText: e.target.value })}
+                placeholder="e.g. Sam, Sammy"
                 aria-describedby={uid + "-aliases-help"}
                 style={s.input}
               />
               <p id={uid + "-aliases-help"} style={s.help}>
                 {!hasName && profile.name_detection.aliases.length
                   ? "These are kept, but name alerts stay off until you add your name."
-                  : "Separate with commas, e.g. Sam, Sammy."}
+                  : ""}
               </p>
             </div>
           </div>
@@ -921,7 +915,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               Also show what they ask right after your name
             </label>
             <p id={uid + "-questions-help"} style={Object.assign({}, s.help, { marginTop: 2 })}>
-              The next few seconds are transcribed on this laptop. Audio is never saved.
+              Transcribed on this laptop. Audio is never saved.
             </p>
           </div>
         </section>
@@ -929,9 +923,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         {/* 2. Everyday alerts */}
         <section style={s.section} aria-labelledby={uid + "-step-ready"}>
           <h2 id={uid + "-step-ready"} style={s.h2}>
-            <span style={stepNumber}>2.</span>Everyday alerts are ready
+            <span style={stepNumber}>2.</span>Alerts already set up
           </h2>
-          <p style={s.lead}>These already alert you, at this strength.</p>
           <ul className="setup-ready-sounds" aria-label="Sounds that already alert you, and how strongly">
             {readyAlerts.map(([key, label]) => {
               const resolved = resolveAwareTier(draft, key);
@@ -957,10 +950,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             <legend style={Object.assign({}, s.h2, { padding: 0 })}>
               Preset
             </legend>
-            <p style={s.lead}>
-              Sets the default priority for every supported sound. Changing it
-              keeps your rules.
-            </p>
+            <p style={s.lead}>Changing it keeps your own rules.</p>
             <div style={Object.assign({}, s.group, { marginTop: 20 })}>
               {AWARE_PRESETS.map((m, i) => {
                 const on = draft.mode === m.key;
@@ -1034,12 +1024,22 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         {/* 3. Sounds that matter */}
         <section style={s.section} aria-labelledby={uid + "-rules-h"}>
           <h2 id={uid + "-rules-h"} style={s.h2}>
-            <span style={stepNumber}>3.</span>Sounds that matter to you{" "}
+            <span style={stepNumber}>3.</span>Add or customize sounds{" "}
             <span style={{ fontWeight: 400, fontSize: 15, color: p.muted, marginLeft: 4 }}>Optional</span>
           </h2>
-          <p style={s.lead}>
-            Add a sound only if you want an alert for it. Built-in recognition, no recordings needed.
-          </p>
+
+          <details ref={aboutRef} open={connectClaude} style={{ marginTop: 16 }}>
+            <summary style={{ fontSize: 15, fontWeight: 500, padding: "6px 0" }}>
+              Tell us about you{" "}
+              <span style={{ fontWeight: 400, color: p.muted }}>· Claude suggests sounds</span>
+            </summary>
+            <div style={{ marginTop: 8 }}>
+              <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
+                setDraft((d) => applySuggestedCues(d, rows));
+                setCustomNote("Suggested sounds added. Your previous choices were kept.");
+              }} />
+            </div>
+          </details>
 
           {!pending && (
             <div style={{ marginTop: 20 }}>
@@ -1061,13 +1061,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                     else if (available.length && !curatedMatches.length) startRule(available[0].key);
                   }
                 }}
-                aria-describedby={uid + "-search-help"}
+                placeholder="Try baby crying, a doorbell, rain…"
                 aria-controls={uid + "-results"}
                 style={s.input}
               />
-              <p id={uid + "-search-help"} style={s.help}>
-                Try baby crying, a doorbell, rain or a train horn.
-              </p>
               <div id={uid + "-results"} aria-live="polite">
                 {!query.trim() && <div className="setup-common" aria-label="Common sound choices">
                   {['baby_cry','doorbell','train_horn','rain','phone_ring','cat_meow'].map((id) => {
@@ -1229,7 +1226,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       No supported sound matches “{query.trim()}”.
                     </div>
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                      Try a simpler sound name, or save it as a pending request. Personal recordings are an optional advanced feature; they are not needed for catalog sounds.
+                      Try a simpler name, ask Claude, or save it as pending.
                     </p>
                     <button
                       type="button"
@@ -1241,8 +1238,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                         ? "Asking Claude…" : `Ask Claude to find “${query.trim()}”`}
                     </button>
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                      Sends only what you typed to Anthropic. Claude picks from sounds Aware already
-                      recognizes; you choose before anything is added.
+                      Sends only what you typed. You choose before anything is added.
                     </p>
                     {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "error" && (
                       <p role="status" style={s.help}>
@@ -1251,7 +1247,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                           <>
                             {" "}
                             <button type="button" onClick={openMoreSettings} style={{ ...s.textBtn, height: "auto", padding: 0, fontSize: 14 }}>
-                              Open More settings
+                              Connect Claude
                             </button>
                           </>
                         )}
@@ -1490,11 +1486,6 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 </li>
               ))}
               </ul>
-              {customRules.length > 0 && (
-                <p style={s.help}>
-                  Catalog sounds use built-in recognition. Matching is sensitive, so related sounds may also alert. Typed requests stay pending until Aware can recognize them.
-                </p>
-              )}
             </div>
           )}
         </section>
@@ -1512,18 +1503,17 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               aria-describedby={uid + "-finish-help"}
               style={{ ...s.primaryBtn, opacity: readyToFinish ? 1 : 0.55, cursor: readyToFinish ? "pointer" : "not-allowed" }}
             >
-              {firstUse ? "Start Aware" : "Done"}
+              {firstUse ? "Start Spidey Sense" : "Done"}
             </button>
           </div>
           <p id={uid + "-finish-help"} role="status" aria-live="polite" style={s.help}>
-            {finishBlockers.length ? finishBlockers.join(" ") : "You can change any of this later."}
+            {finishBlockers.join(" ")}
           </p>
         </section>
 
         {/* More settings */}
         <details ref={moreRef} style={s.section} open={connectClaude}>
           <summary style={s.summary}>More settings</summary>
-          <p style={s.help}>Optional. The defaults work for most people.</p>
 
           <div style={{ marginTop: 20 }}>
             <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions !== false ? "pointer" : "default", opacity: draft.questions !== false ? 1 : .55 }}>
@@ -1538,19 +1528,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               Shorten questions with Claude
             </label>
             <p id={uid + "-paraphrase-help"} style={s.help}>
-              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
-              questions are shortened on this laptop.
+              Sends only the question's text, using the key from step 3.
             </p>
-          </div>
-
-          <div style={{ marginTop: 28 }}>
-            <h3 style={subHeading}>Sound suggestions from Claude</h3>
-            <div style={{ marginTop: 8 }}>
-          <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
-            setDraft((d) => applySuggestedCues(d, rows));
-            setCustomNote("Suggested sounds added. Your previous choices were kept.");
-          }} />
-            </div>
           </div>
 
           <div style={{ marginTop: 28 }}>

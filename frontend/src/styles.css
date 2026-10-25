@@ -1,6 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600&family=Silkscreen&display=swap");
-/* Night lens: the page is the view through the glasses. Near-black ground, the OLED's own white,
-   Silkscreen for anything the display would say, and one warm signal (amber) for urgent and alive. */
+/* Spidey Sense: the page is the view through the glasses. Near-black ground, the OLED's own white,
+   Silkscreen for anything the display would say, light blue for the brand and anything live, and
+   amber kept only for urgent so a smoke alarm never looks like decoration. A faint web sits in the corner. */
 :root {
   --ground: #0b0b0a;
   --raise: #141412;
@@ -9,8 +10,10 @@
   --line-strong: rgba(244, 242, 234, 0.2);
   --text: #f4f2ea;
   --muted: #a3a198;
-  --signal: #ffb547;
-  --signal-ink: #1d1304;
+  --signal: #8fd3ff;
+  --signal-ink: #04121c;
+  --urgent: #ffb547;
+  --urgent-ink: #1d1304;
   --pixel:
     "Silkscreen", ui-monospace, monospace; /* taste-skill-ignore: fallback for the Silkscreen pixel face */
   font-family: "Instrument Sans", Inter, system-ui, sans-serif;
@@ -27,7 +30,11 @@
 }
 body {
   margin: 0;
-  background: var(--ground);
+  background-color: var(--ground);
+  /* Faint spider web anchored top-right: radial threads plus three rings. */
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='520' height='520' viewBox='0 0 520 520' fill='none' stroke='%238fd3ff' stroke-opacity='.07' stroke-width='1.2'%3E%3Cpath d='M520 0L0 0M520 0L40 220M520 0L140 400M520 0L300 520M520 0L520 520'/%3E%3Cpath d='M380 0Q390 60 392 66Q450 110 470 134Q500 140 520 140M240 0Q258 110 262 132Q380 220 420 268Q480 278 520 280M100 0Q126 160 132 198Q312 330 370 402Q456 414 520 420'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: top right;
 }
 h1,
 h2,
@@ -103,8 +110,10 @@ code {
   align-items: center;
   gap: 10px;
   font-family: var(--pixel);
-  font-size: 19px;
+  font-size: 17px;
   letter-spacing: 0.02em;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 .tabs {
   display: flex;
@@ -423,7 +432,7 @@ code {
   transition: transform 260ms linear;
 }
 .lifeline-fill.is-urgent {
-  background: var(--signal);
+  background: var(--urgent);
 }
 .narration-row {
   display: flex;
@@ -522,7 +531,7 @@ code {
   color: var(--text);
 }
 .tier-4 {
-  color: var(--signal);
+  color: var(--urgent);
 }
 .dock-row {
   display: flex;
@@ -749,6 +758,16 @@ code {
 }
 
 /* Narrower screens */
+@media (max-width: 1200px) {
+  /* Status pills move to their own row before they can push the page sideways. */
+  .topbar {
+    flex-wrap: wrap;
+    height: auto;
+    padding-top: 12px;
+    padding-bottom: 8px;
+    row-gap: 8px;
+  }
+}
 @media (max-width: 1100px) {
   .keys {
     grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1117,7 +1136,7 @@ code {
 .hearing-alert {
   font-family: var(--pixel);
   font-size: 11px;
-  color: var(--signal);
+  color: var(--urgent);
 }
 .hearing-sub {
   margin: 4px 0 0;
@@ -1314,7 +1333,7 @@ code {
   color: #9fd8b0;
 }
 .teach-message.is-bad {
-  color: var(--signal);
+  color: var(--urgent);
 }
 .teach-dots {
   display: flex;

@@ -104,7 +104,7 @@ function radioKeys(event: ReactKeyboardEvent<HTMLDivElement>) {
 }
 
 function Mark() {
-  // A lens with one lit cue in its corner: the product itself.
+  // The lens of the glasses with a web in its corner.
   return (
     <svg width="26" height="18" viewBox="0 0 26 18" aria-hidden="true">
       <rect
@@ -117,7 +117,11 @@ function Mark() {
         stroke="currentColor"
         strokeWidth="1.5"
       />
-      <rect x="14" y="9" width="7" height="4" fill="var(--signal)" />
+      {/* A small web in the lens corner: the sense that something is happening. */}
+      <g stroke="var(--signal)" strokeWidth="1" fill="none" strokeLinecap="round">
+        <path d="M24 2 L13 2 M24 2 L15 9 M24 2 L24 13" />
+        <path d="M19 2 Q20 4 21 5.5 Q22.5 6 24 6.5 M15.5 2 Q17 6 18 8 Q21 9 24 10" />
+      </g>
     </svg>
   );
 }
@@ -351,7 +355,7 @@ export default function App() {
     ? "The receiver is not answering. Start it with python3 -m audio.server."
     : latest
       ? explain(latest)
-      : "Quiet. Tap a sound below and watch it reach the lens.";
+      : source === "browser" ? "Quiet. Tap a sound below and watch it reach the lens." : "Quiet.";
   const waiting = state.queue
     .map((q) => sounds.find((s) => s.type === q.type)?.label ?? q.type)
     .join(", ");
@@ -419,7 +423,7 @@ export default function App() {
           href="#"
           onClick={(e) => (e.preventDefault(), setView("live"))}
         >
-          <Mark /> aware
+          <Mark /> spidey sense
         </a>
         <nav className="tabs" aria-label="Main">
           {(
@@ -485,7 +489,7 @@ export default function App() {
           <button
             className="help-button"
             onClick={() => setHelp(true)}
-            aria-label="How Aware works"
+            aria-label="How Spidey Sense works"
           >
             ?
           </button>
@@ -529,8 +533,9 @@ export default function App() {
               <p className="narration">{narration}</p>
               <p className="aside">
                 {active
-                  ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · dismiss to resolve${waiting ? ` · next: ${waiting}` : ""}`
-                  : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
+                  ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left${waiting ? ` · next: ${waiting}` : ""}`
+                  : [state.paused && "Paused", state.focus_mode !== "everyday" && focus.label,
+                     prefs.mode !== "balanced" && `${presetName[prefs.mode]} preset`].filter(Boolean).join(" · ")}
               </p>
               {heard}
             </div>
@@ -712,11 +717,14 @@ export default function App() {
       )}
 
       <div className="page preferences-view" hidden={view !== "preferences"}>
+        {/* Saving is automatic; the line appears only when edits are not reaching the receiver. */}
         <p className="sync-line" role="status">
-          <span
-            className={`dot ${source === "receiver" && session.sync.kind === "error" ? "is-off" : ""}`}
-          />
-          {syncText(source, session.sync, connected)}
+          {source === "receiver" && (!connected || session.sync.kind === "error") && (
+            <>
+              <span className="dot is-off" />
+              {syncText(source, session.sync, connected)}
+            </>
+          )}
         </p>
         <Onboarding
           theme="dark"
@@ -829,7 +837,7 @@ export default function App() {
         aria-labelledby="about-title"
         className="about"
       >
-        <h2 id="about-title">How Aware works</h2>
+        <h2 id="about-title">How Spidey Sense works</h2>
         <ol className="about-flow">
           <li>
             <strong>Hear.</strong> A laptop model recognises a knock, a dog, a
@@ -859,7 +867,7 @@ export default function App() {
         </dl>
         <p className="aside">
           The glasses have no camera. Use POV camera adds an optional demo
-          backdrop from this device; nothing is recorded. Aware can miss sounds
+          backdrop from this device; nothing is recorded. Spidey Sense can miss sounds
           or raise false alerts, so it is not a safety device.
         </p>
         <button
