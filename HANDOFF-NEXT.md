@@ -1,5 +1,17 @@
 # Resume here — October 24 software checkpoint
 
+## CURRENT October25: disconnected hardware, prep work
+
+The physical sound→browser/OLED path worked; hardware is now disconnected for assembly.
+Do not start a fresh mic test or label offline readings live. Current direction calibration and
+remaining acceptance: [rough angles](docs/rough-front-angles.md) /
+[mounted test matrix](docs/direction-calibration-acceptance.md).
+
+**John's new owned TODO: SPACE-PHONE-01**, loose front-pocket phone for front/back evidence.
+[John's current handoff](HANDOFF-JOHN.md) / [feasibility and first tests](docs/third-microphone-feasibility.md).
+This is experimental; preserve the Pi-only demo. Website/onboarding streamlining is root-owned
+prep work; older snapshots below are historical and do not supersede these decisions.
+
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 

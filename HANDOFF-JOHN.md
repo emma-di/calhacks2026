@@ -1,5 +1,26 @@
 # John — handoff: live sound → signals, and phone spatial (October 24)
 
+## CURRENT October25: John owns the pocket-phone experiment
+
+**This section supersedes the older snapshot below.** Pi stereo recognition and the real OLED path
+have now worked. Pi is primary input; Mac mic is manual fallback. Hardware is disconnected for
+assembly, so current work is prep. Do not auto-start capture or claim an offline feed is live.
+
+Your assigned item is **SPACE-PHONE-01** in [TODO](TODO.md):
+**[Pocket-phone feasibility, existing probe and first deliverable](docs/third-microphone-feasibility.md)**.
+Emma proposes a phone in a front pocket without a fixed position. Establish whether the existing
+native FOA probe gives useful front/back evidence there; it is not a synchronized third raw mic.
+The document separates both approaches and gives known-position baseline, pocket motion, head-turn,
+multiple-source and failure tests. Return measured wrong-side/unknown counts and a go/no-go.
+Phone orientation is not wearer head orientation. Keep unverified bearings out of real Pi alerts.
+
+Current Pi implementation: [rough front angles](docs/rough-front-angles.md). The deliberate demo
+policy is eight buckets with a front-hemisphere assumption; rear direction remains unresolved.
+Centered balance is−0.89dB, margin0.75dB; calibration is Mac-local, not in a normal clone. Do not
+overwrite it or start a second arecord owner. Reuse native probe/USB transport already in repo;
+inspect generated local Xcode/signing state before repeating setup. Read [HANDOFF-NEXT](HANDOFF-NEXT.md)
+and [direction acceptance](docs/direction-calibration-acceptance.md) before older commands below.
+
 Emma and Claude are moving to the display. You own the audio side from here. Everything is pushed on
 `codex/browser-mirror` (not merged to main). Read [AGENTS.md](AGENTS.md) first; the receiver's rules and
 API are in [docs/alert-engine.md](docs/alert-engine.md).

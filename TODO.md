@@ -99,6 +99,13 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 
 ## Spatial audio — John and Leo (proposed); synchronized capture gate
 
+- [ ] SPACE-PHONE-01 — **John:** evaluate a phone in a loose front pocket for front/back evidence.
+  First deliverable: supported/unsupported report comparing the existing native FOA probe with
+  pocket movement and wearer head turns. Raw third-channel TDOA is a separate experiment requiring
+  clock/geometry calibration. Do not merge streams on arrival time or claim synchronized capture.
+  Baseline, pocket and failure test matrix: [phone feasibility](docs/third-microphone-feasibility.md).
+  Keep the working Pi-only demo intact; return wrong-side and unknown counts before real-alert use.
+
 - [ ] SPACE-01 — Prove synchronized multichannel capture and document microphone geometry.
 - [ ] SPACE-02 — Prototype GCC-PHAT with known-angle recordings and measure error/confidence.
 - [ ] SPACE-03 — Agree direction coordinate frame, freshness and unknown/low-confidence behavior.
