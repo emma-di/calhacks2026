@@ -1610,3 +1610,17 @@ code {
 .listen-pill .dot { background: var(--signal-ink); box-shadow: none; }
 .listen-pill.is-on { background: var(--raise-2); color: var(--text); }
 .listen-pill.is-on .dot { background: var(--urgent); }
+.listen-cta {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 14px 24px;
+  margin: 0 0 16px; padding: 18px 22px; border-radius: 18px;
+  background: linear-gradient(120deg, rgba(142, 208, 243, 0.18), rgba(142, 208, 243, 0.06));
+  border: 1px solid rgba(142, 208, 243, 0.45);
+}
+.listen-cta h2 { font-family: "Bangers", Impact, sans-serif; font-size: 28px; letter-spacing: 0.03em; color: var(--signal); }
+.listen-cta p { margin-top: 4px; color: var(--muted); max-width: 520px; }
+.listen-cta-button {
+  display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 26px; border: none;
+  border-radius: 999px; background: var(--signal); color: var(--signal-ink); font: inherit; font-size: 17px;
+  font-weight: 700; cursor: pointer; box-shadow: 0 0 0 4px rgba(142, 208, 243, 0.25);
+}
+.listen-cta-button:hover { filter: brightness(1.06); }

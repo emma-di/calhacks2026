@@ -5,7 +5,7 @@ import {
   useState,
   type KeyboardEvent as ReactKeyboardEvent,
 } from "react";
-import { Expand, Pause, Play, X } from "lucide-react";
+import { Expand, Mic, Pause, Play, X } from "lucide-react";
 import { SoundIcon } from "./components/Cue";
 import Oled from "./components/Oled";
 import Stage from "./components/Stage";
@@ -489,8 +489,9 @@ export default function App() {
               </button>
             ))}
           </div>}
-          {source === "browser" && view === "live" && (
-            <button className={`pill pill-button listen-pill ${micOn ? "is-on" : ""}`} aria-pressed={micOn} onClick={() => setMicOn((on) => !on)}>
+          {source === "browser" && (
+            <button className={`pill pill-button listen-pill ${micOn ? "is-on" : ""}`} aria-pressed={micOn}
+              onClick={() => { setView("live"); setMicOn((on) => !on); }}>
               <span className="dot" /> {micOn ? "Stop listening" : "Listen with your mic"}
             </button>
           )}
@@ -535,6 +536,18 @@ export default function App() {
       {view === "live" && (
         <main className="live">
           <h1 className="sr-only">What the wearer sees</h1>
+          {source === "browser" && !micOn && (
+            // The demo's main action: hear it with your own microphone.
+            <section className="listen-cta" aria-label="Try it with your microphone">
+              <div>
+                <h2>Hear it yourself</h2>
+                <p>Turn on your mic, then knock, play a siren or dog bark, or say “hey” and your name.</p>
+              </div>
+              <button className="listen-cta-button" onClick={() => setMicOn(true)}>
+                <Mic size={20} /> Listen with your mic
+              </button>
+            </section>
+          )}
           <div className="lens-wrap">
             <Stage
               event={lensEvent}
