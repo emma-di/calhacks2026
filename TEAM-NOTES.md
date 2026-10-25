@@ -316,3 +316,11 @@ native/PhoneSpatialProbe; preparation script uses Apple's licensed project shell
 Physical support/orientation/accuracy remain pending. Probe does not record, upload or control alerts.
 Emma authorized Personal Team signing for device testing; account/provisioning details stay local.
 John's observations stream at 8a440e1 passes six isolated tests; speech is in progress separately.
+
+### Resumed integration — October 24
+
+John’s `johnaou/integrate-audio-ui` (12dddc0) includes our latest branch and was fast-forwarded.
+79 Python / 21 frontend tests, build and 10,000 engine parity steps pass. Hearing now and opt-in
+teaching are integrated; all-model-label selection remains unfinished. Keep the responsive website
+for judges and configuration, reuse it on phones; no separate native frontend planned. No mic started.
+See HANDOFF-NEXT.md for the updated resume point.

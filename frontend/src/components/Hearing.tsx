@@ -3,7 +3,7 @@ import { levelFraction, type Hearing } from "../lib/observations";
 
 const STALE_MS = 4000;
 const QUIET_DBFS = -70;
-const MIC_COMMAND = ".venv/bin/python -m audio.cli mic --device 1 --endpoint http://127.0.0.1:8765/events";
+const MIC_COMMAND = ".venv/bin/python -m audio.cli mic --device 1 --endpoint http://127.0.0.1:8766/events";
 
 function Bar({ value, threshold, strong }: { value: number; threshold?: number; strong?: boolean }) {
   return (

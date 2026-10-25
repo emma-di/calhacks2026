@@ -3,6 +3,28 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Codex integration checkpoint — October 24, resumed session
+
+John's `johnaou/integrate-audio-ui` at `12dddc0` already merged our `2a443a6`; fast-forwarded
+it into `codex/browser-mirror`, preserving the latest receiver, spatial routes and solid OLED triangles.
+It integrates custom-sound teaching, per-custom-ID acknowledgement/queue identity, improved name
+spellings, Live → Hearing now, and an opt-in browser microphone meter/teaching controls.
+
+Fresh checks: 79 Python tests, 21 frontend tests, production build, and 10,000 cross-language engine
+steps passed. Initial sandbox socket errors disappeared when HTTP tests ran with localhost permission.
+No microphone was started. Physical connections/room accuracy remain separate acceptance checks.
+Corrected Hearing now's command to receiver port 8766 (old command pointed at 8765).
+
+Any-sound catalog plumbing below is STILL incomplete: taught custom sounds are now integrated, but
+selecting the pretrained catalog's 527 labels from Preferences is not. John's identity/parser/OLED
+changes satisfy parts of the older six-step list; inspect current code before reimplementing them.
+Live Hearing/Teach sections now exist; further live-view refinement should build on those.
+Do not apply a blanket two-window gate to short knocks/bells without recorded positive/negative tests.
+
+Product decision: keep the responsive web companion for judge visibility, setup and diagnostics;
+phone viewing can reuse the same web UI. A separate native UI is not needed for this purpose.
+Native phone audio capture remains a separate hardware capability experiment.
+
 ## Done today (verified)
 
 - **Real glasses work end to end.** `glasses-pi` (Pi Zero W, SSD1306 at 0x3C). `scripts/glasses_up.sh selftest`

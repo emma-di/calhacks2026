@@ -4,6 +4,14 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Latest integration checkpoint (supersedes older snapshots below)
+
+John's integration branch `12dddc0` is incorporated into `codex/browser-mirror`: live hearing panel,
+custom-sound teaching and improved name spelling are connected to the current receiver.
+Verified this session: 79 Python tests, 21 frontend tests, production build, 10,000 Python/browser
+alert-state comparisons. No microphone capture or new physical hardware trial performed.
+Pretrained sound-catalog selection is still unfinished. See [resume notes](HANDOFF-NEXT.md).
+
 | Worker / lane | Work | Checkpoint status | Evidence / handoff |
 | --- | --- | --- | --- |
 | Main Codex agent | Preview consistency and reliable individual sound tests | Fixed and locally verified; PR branch | Same semantic icons/text/placement for mirror/OLED; bell replaces previous urgent sample; dog test override removed |
