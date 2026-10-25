@@ -91,6 +91,9 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
               </ul>
             </>
           )}
+          {o.rules.name_called && <p className="hearing-note" aria-live="polite">
+            Name recognizer: {o.rules.name_called.reason === "cooldown" ? "recognized, suppressed by cooldown" : o.rules.name_called.reason === "emitted" ? "recognized and sent to alert engine (see Event log for display decision)" : o.rules.name_called.reason}.
+          </p>}
           {quiet && <p className="hearing-note">Quiet room: labels on near-silence aren't meaningful.</p>}
         </>
       )}

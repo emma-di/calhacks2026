@@ -171,7 +171,7 @@ class AlertState:
         latest = observations.since(0, 1)['observations']
         heard = latest[0] if latest and time.time() * 1000 - latest[0]['received_ms'] < 3000 else None
         return dict(
-            receiver='ok', session_id=self.engine.session_id,
+            receiver='ok', session_id=self.engine.session_id, repeat_suppression=self.engine.repeat_suppression,
             # Receiver health never implies a listening microphone: only recent capture events do.
             capture=dict(last_event_ms_ago=recent, live=any(
                 recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES),
@@ -466,7 +466,8 @@ class Handler(BaseHTTPRequestHandler):
                 self.receiver_state.spatial_reading(payload)
                 return self.reply(200, {'ok': True})
             if path == '/controls':
-                self.receiver_state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'))
+                self.receiver_state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'),
+                                             repeat_suppression=payload.get('repeat_suppression'))
                 return self.reply(200, {'ok': True})
             decision = self.receiver_state.add(validate_event(payload))
             self.reply(200, {'ok': True, 'reason': decision['reason'], 'priority_tier': decision['priority_tier']})

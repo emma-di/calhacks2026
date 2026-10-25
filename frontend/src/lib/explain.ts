@@ -10,6 +10,7 @@ export interface Explainable {
   active_label?: string | null;
   direction?: string;
   gesture?: string;
+  repeat_suppression?: boolean;
 }
 
 const gestureName = (gesture?: string) => (gesture === "finger_snap" ? "Snap" : "Thumbs up");
@@ -51,7 +52,9 @@ export function explain(d: Explainable): string {
     case "dismissed_gesture":
       return `${gestureName(d.gesture)}. ${sound} dismissed.`;
     case "dismissed":
-      return `${sound} dismissed. Repeats stay quiet for 15 seconds.`;
+      return d.repeat_suppression === false
+        ? `${sound} dismissed. Testing mode: a fresh detection can show it again immediately.`
+        : `${sound} dismissed. Repeats stay quiet for 15 seconds.`;
     case "duplicate":
       return `${sound} arrived twice with the same ID and was counted once.`;
     case "paused":

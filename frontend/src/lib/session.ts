@@ -287,7 +287,7 @@ export function useSession(
   );
 
   const setControls = useCallback(
-    async (changes: { focus_mode?: FocusMode; paused?: boolean }) => {
+    async (changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean }) => {
       if (source === "browser") {
         engine.current.setControls(performance.now(), changes);
         return;

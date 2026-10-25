@@ -73,6 +73,7 @@ export interface ViewState extends Snapshot {
   state_sequence: number;
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
+  repeat_suppression?: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
   health: Health | null;
   session_id: string | null;
@@ -129,7 +130,7 @@ export const sounds: {
   },
   {
     type: "smoke_alarm",
-    label: "Smoke alarm",
+    label: "Fire / smoke alarm",
     detail: "An important warning",
     tier: 4,
     receiver: true,
@@ -364,6 +365,7 @@ export function parseSnapshot(input: unknown): ViewState {
     confirm,
     focus_mode: focus,
     paused: s.paused === true,
+    repeat_suppression: s.repeat_suppression !== false,
     queue,
     health,
     session_id: typeof s.session_id === "string" ? s.session_id : null,

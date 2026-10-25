@@ -138,6 +138,7 @@ class AlertEngine:
         self.profile = profile or json.loads(json.dumps(DEFAULT_PROFILE))
         self.focus_mode = 'everyday'
         self.paused = False
+        self.repeat_suppression = True
         self.sequence = 0
         self.active = None  # dict(event, tier, started, expires, repeats)
         self.queue = []
@@ -153,6 +154,7 @@ class AlertEngine:
         decision = dict(kind='alert_state', event_id=event['event_id'], type=event['type'],
                         priority_tier=tier, reason=reason, at_ms=round(now),
                         active_type=self.active['event']['type'] if self.active else None,
+                        repeat_suppression=self.repeat_suppression,
                         label=event.get('label'),   # custom sounds are named by the user, not the type
                         active_label=self.active['event'].get('label') if self.active else None)
         decision.update(extra)
@@ -247,12 +249,12 @@ class AlertEngine:
             return self._decide(logged, tier, 'ignored_tier_zero', now)
         if self._blocked_by_focus(tier):
             return self._decide(logged, tier, f'held_{self.focus_mode}_mode', now)
-        if now < self.acks.get(kind, -1):
+        if self.repeat_suppression and now < self.acks.get(kind, -1):
             # An acknowledged sound that keeps going stays acknowledged while it continues.
             self.acks[kind] = now + POLICY['acknowledge_hold_ms']
             return self._decide(logged, tier, 'acknowledged_repeat', now)
         active = self.active
-        if active and sound_key(active['event']) == kind and tier <= active['tier']:
+        if self.repeat_suppression and active and sound_key(active['event']) == kind and tier <= active['tier']:
             # Same ongoing sound: keep the original cue, no new animation or lifetime restart.
             active['repeats'] += 1
             if active['tier'] == 4:
@@ -305,13 +307,19 @@ class AlertEngine:
         self._resolve(now, 'resolved_looked', direction=direction)
         return True
 
-    def set_controls(self, now, focus_mode=None, paused=None):
+    def set_controls(self, now, focus_mode=None, paused=None, repeat_suppression=None):
         # Validate the whole request before applying any part.
         if focus_mode is not None and focus_mode not in FOCUS_MODES:
             raise ValueError(f'focus_mode must be one of {", ".join(FOCUS_MODES)}')
         if paused is not None and not isinstance(paused, bool):
             raise ValueError('paused must be true or false')
+        if repeat_suppression is not None and not isinstance(repeat_suppression, bool):
+            raise ValueError('repeat_suppression must be true or false')
         self.tick(now)
+        if repeat_suppression is not None:
+            self.repeat_suppression = repeat_suppression
+            self.acks.clear()
+            self.confirm = None
         if focus_mode is not None:
             self.focus_mode = focus_mode
         if paused is not None:
@@ -367,7 +375,7 @@ class AlertEngine:
             remaining_ms=self.remaining_ms(now), direction=self.active['direction'] if self.active else None,
             confirm=dict(direction=self.confirm['direction'], remaining_ms=round(self.confirm['until'] - now))
             if self.confirm else None,
-            focus_mode=self.focus_mode, paused=self.paused,
+            focus_mode=self.focus_mode, paused=self.paused, repeat_suppression=self.repeat_suppression,
             queue=[dict(event_id=i['event']['event_id'], type=i['event']['type'], tier=i['tier'])
                    for i in self.queue],
             profile_revision=self.profile['revision'],

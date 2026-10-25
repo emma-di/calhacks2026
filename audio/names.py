@@ -366,7 +366,7 @@ class NameDetector:
                 continue
             self.spotter.reset_stream(self.stream)
             decision = dict(type='name_called', matched_alias_id=alias_id, profile_revision=self.profile['revision'])
-            if now-self.last < self.cooldown:
+            if getattr(self, 'repeat_suppression', True) and now-self.last < self.cooldown:
                 decision['reason'] = 'cooldown'
             else:
                 event = make_name_event(self.profile, alias_id, source, timestamp_ms)

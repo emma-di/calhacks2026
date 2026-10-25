@@ -25,6 +25,7 @@ export interface AlertDecision {
   active_type: EventType | null;
   label?: string; // custom sounds are named by the user, not the type
   active_label?: string | null;
+  repeat_suppression?: boolean;
   shown_event_id?: string;
   direction?: Direction;
   gesture?: string;
@@ -55,6 +56,7 @@ export interface EngineSnapshot {
   confirm: { direction: Direction | null; remaining_ms: number } | null;
   focus_mode: FocusMode;
   paused: boolean;
+  repeat_suppression?: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
 }
 
@@ -117,6 +119,7 @@ export class AlertEngine {
   prefs: Preferences = { mode: "balanced", event_tiers: {} };
   focusMode: FocusMode = "everyday";
   paused = false;
+  repeatSuppression = true;
   sequence = 0;
   active: Active | null = null;
   queue: Queued[] = [];
@@ -145,6 +148,7 @@ export class AlertEngine {
       reason,
       at_ms: Math.round(now),
       active_type: this.active?.event.type ?? null,
+      repeat_suppression: this.repeatSuppression,
       label: event.label,
       active_label: this.active?.event.label ?? null,
       ...extra,
@@ -269,12 +273,12 @@ export class AlertEngine {
     if (tier === 0) return this.decide(logged, tier, "ignored_tier_zero", now);
     if (this.blocked(tier))
       return this.decide(logged, tier, `held_${this.focusMode}_mode`, now);
-    if (now < (this.acks.get(kind) ?? -1)) {
+    if (this.repeatSuppression && now < (this.acks.get(kind) ?? -1)) {
       this.acks.set(kind, now + policy.acknowledge_hold_ms);
       return this.decide(logged, tier, "acknowledged_repeat", now);
     }
     const active = this.active;
-    if (active && soundKey(active.event) === kind && tier <= active.tier) {
+    if (this.repeatSuppression && active && soundKey(active.event) === kind && tier <= active.tier) {
       active.repeats += 1;
       if (active.tier === 4) {
         const cap = active.started + policy.urgent_ongoing_cap_ms;
@@ -338,9 +342,14 @@ export class AlertEngine {
 
   setControls(
     now: number,
-    changes: { focus_mode?: FocusMode; paused?: boolean },
+    changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean },
   ) {
     this.tick(now);
+    if (changes.repeat_suppression !== undefined) {
+      this.repeatSuppression = changes.repeat_suppression;
+      this.acks.clear();
+      this.confirm = null;
+    }
     if (changes.focus_mode !== undefined) this.focusMode = changes.focus_mode;
     if (changes.paused !== undefined) this.paused = changes.paused;
     if (this.paused) {
@@ -388,6 +397,7 @@ export class AlertEngine {
         : null,
       focus_mode: this.focusMode,
       paused: this.paused,
+      repeat_suppression: this.repeatSuppression,
       queue: this.queue.map((item) => ({
         event_id: item.event.event_id,
         type: item.event.type,

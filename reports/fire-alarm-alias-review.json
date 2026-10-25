@@ -1,0 +1,140 @@
+{
+  "method": "Re-evaluation of existing recorded-audio model scores; no new inference or microphone benchmark. Existing smoke labels retained, Fire alarm alias added at unchanged thresholds.",
+  "models": {
+    "zipformer": {
+      "tune": {
+        "recording_conditions": 1000,
+        "before": {
+          "tp": 16,
+          "fp": 0,
+          "fn": 0,
+          "tn": 984,
+          "precision": 1.0,
+          "recall": 1.0,
+          "false_positive_rate": 0.0,
+          "missed_ids": [],
+          "false_positive_ids": []
+        },
+        "after": {
+          "tp": 16,
+          "fp": 1,
+          "fn": 0,
+          "tn": 983,
+          "precision": 0.9411764705882353,
+          "recall": 1.0,
+          "false_positive_rate": 0.0010162601626016261,
+          "missed_ids": [],
+          "false_positive_ids": [
+            "esc50-1-34853-A-37"
+          ]
+        }
+      },
+      "test": {
+        "recording_conditions": 672,
+        "before": {
+          "tp": 27,
+          "fp": 0,
+          "fn": 1,
+          "tn": 644,
+          "precision": 1.0,
+          "recall": 0.9642857142857143,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-530094"
+          ],
+          "false_positive_ids": []
+        },
+        "after": {
+          "tp": 27,
+          "fp": 2,
+          "fn": 1,
+          "tn": 642,
+          "precision": 0.9310344827586207,
+          "recall": 0.9642857142857143,
+          "false_positive_rate": 0.003105590062111801,
+          "missed_ids": [
+            "freesound-530094"
+          ],
+          "false_positive_ids": [
+            "esc50-5-204352-A-13",
+            "esc50-5-210612-A-37"
+          ]
+        }
+      }
+    },
+    "yamnet": {
+      "tune": {
+        "recording_conditions": 948,
+        "before": {
+          "tp": 6,
+          "fp": 0,
+          "fn": 2,
+          "tn": 940,
+          "precision": 1.0,
+          "recall": 0.75,
+          "false_positive_rate": 0.0,
+          "missed_ids": [
+            "freesound-136482",
+            "freesound-369847"
+          ],
+          "false_positive_ids": []
+        },
+        "after": {
+          "tp": 6,
+          "fp": 2,
+          "fn": 2,
+          "tn": 938,
+          "precision": 0.75,
+          "recall": 0.75,
+          "false_positive_rate": 0.002127659574468085,
+          "missed_ids": [
+            "freesound-136482",
+            "freesound-369847"
+          ],
+          "false_positive_ids": [
+            "esc50-1-34853-A-37",
+            "esc50-3-117883-A-37"
+          ]
+        }
+      },
+      "test": {
+        "recording_conditions": 640,
+        "before": {
+          "tp": 6,
+          "fp": 1,
+          "fn": 2,
+          "tn": 631,
+          "precision": 0.8571428571428571,
+          "recall": 0.75,
+          "false_positive_rate": 0.0015822784810126582,
+          "missed_ids": [
+            "freesound-530094",
+            "freesound-530094"
+          ],
+          "false_positive_ids": [
+            "esc50-5-204352-A-13"
+          ]
+        },
+        "after": {
+          "tp": 6,
+          "fp": 4,
+          "fn": 2,
+          "tn": 628,
+          "precision": 0.6,
+          "recall": 0.75,
+          "false_positive_rate": 0.006329113924050633,
+          "missed_ids": [
+            "freesound-530094",
+            "freesound-530094"
+          ],
+          "false_positive_ids": [
+            "esc50-5-204352-A-13",
+            "esc50-5-204352-A-13",
+            "esc50-5-223176-A-37",
+            "esc50-5-223176-A-37"
+          ]
+        }
+      }
+    }
+  }
+}

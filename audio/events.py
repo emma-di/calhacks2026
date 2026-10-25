@@ -12,7 +12,7 @@ TARGETS = {
     'bicycle_bell': ('Bicycle bell', 'Bicycle bell', 2, 0.30),
     'dog_bark': ('Bark', 'Dog barking', 1, 0.30),
     'siren': ('Siren', 'Siren', 3, 0.40),
-    'smoke_alarm': ('Smoke detector, smoke alarm', 'Smoke alarm', 4, 0.40),
+    'smoke_alarm': ('Smoke detector, smoke alarm', 'Fire / smoke alarm', 4, 0.40),
     'alarm_clock': ('Alarm clock', 'Alarm clock', 2, 0.40),
     'bell': ('Bell', 'Bell / chime', 2, 0.30),
     # A gesture, not an alert: never displayed; the alert engine treats it as snap-to-dismiss.
@@ -162,7 +162,7 @@ class Detector:
                 continue
             if score<rule['threshold']:
                 decision['reason']='below_threshold'
-            elif now-self.last.get(kind,-math.inf)<rule.get('cooldown_seconds',self.cooldown):
+            elif getattr(self, 'repeat_suppression', True) and now-self.last.get(kind,-math.inf)<rule.get('cooldown_seconds',self.cooldown):
                 cooldown=rule.get('cooldown_seconds',self.cooldown)
                 decision.update(reason='cooldown',cooldown_remaining_seconds=round(cooldown-(now-self.last[kind]),3))
             else:

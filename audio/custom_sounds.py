@@ -473,7 +473,7 @@ class CustomSoundDetector:
             decision['raw_score'] = round(score, 4)
             if score < head['threshold']:
                 decision['reason'] = 'below_threshold'
-            elif now-self.last.get(meta['id'], -math.inf) < self.cooldown:
+            elif getattr(self, 'repeat_suppression', True) and now-self.last.get(meta['id'], -math.inf) < self.cooldown:
                 decision['reason'] = 'cooldown'
             else:
                 event = make_custom_event(meta, score, source, timestamp_ms)

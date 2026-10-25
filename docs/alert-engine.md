@@ -114,3 +114,23 @@ The physical glasses have no camera. The camera backdrop is demonstration-only. 
 runs gesture recognition or exposes the thumbs-up button. Earlier camera-gesture sections describe
 experimental code retained outside the current flow, not the physical build. Use manual Dismiss or
 expiry. A future physical input adapter can reuse the receiver contract if hardware is supplied.
+
+## Session-only recognition testing — October 24
+
+Live → **Show every detection** sends `POST /controls {"repeat_suppression": false}`.
+The receiver bypasses acknowledgement holds and same-sound merging; distinct detections restart
+the cue. The microphone/file CLI polls receiver health at most once per second and bypasses
+built-in, name and taught-sound cooldowns too. Thresholds, context suppression, tier 0, focus, pause,
+queue ordering and duplicate IDs remain active. This is a session control, not a saved preference:
+receiver restart restores normal suppression. Missing/unreachable control data restores recognition
+cooldowns. A standalone recognizer without a receiver keeps normal cooldowns.
+
+Hearing now shows name-recognizer emitted/cooldown decisions when present; Event log shows whether
+the receiver displayed, queued, merged or suppressed the emitted event. A missing name match is
+not evidence that the person did not say the name.
+
+The urgent `smoke_alarm` event now accepts both exact model labels `Fire alarm` and
+`Smoke detector, smoke alarm`, and is labeled Fire / smoke alarm. Both suppress a competing bell
+rule. Generic Alarm/Alarm clock are not directly mapped to fire. Broader alias matching remains
+provisional: cached recorded-score evaluation found additional false positives (including alarm
+clocks and crickets); see reports/fire-alarm-alias-review.json. Real room calibration is still needed.

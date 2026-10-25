@@ -101,12 +101,23 @@ def main():
         except (ImportError, RuntimeError) as exc:
             print(f'Name detection off: {exc}', file=sys.stderr)
     name_events = []   # emitted since the last window, so observations can report them
+    name_decisions = []
+    from audio.runtime_controls import RecognitionControls
+    controls = RecognitionControls(args.endpoint)
+
+    def refresh_controls():
+        suppression = controls.refresh()
+        for worker in (detector, names, custom):
+            if worker is not None:
+                worker.repeat_suppression = suppression
 
     def hear_names(samples, source, clock=None, timestamp=None):
         """Feed new audio to the name spotter as soon as it arrives (0.2 s blocks from the mic)."""
         if names is None:
             return
+        refresh_controls()
         events = names.accept(samples, source, now=clock, timestamp_ms=timestamp)
+        name_decisions.extend(names.decisions)
         deliveries = [{'event_id':e['event_id'],'status':publish(e,args.endpoint)} for e in events]
         name_events.extend(events)
         if names.decisions:
@@ -114,6 +125,7 @@ def main():
                 decisions=names.decisions,deliveries=deliveries))
 
     def process(window, source, clock=None, timestamp=None):
+        refresh_controls()
         scores, elapsed = model.predict(window)
         if args.debug:
             print(json.dumps({'inference_ms':round(elapsed, 1), 'top5':sorted(scores.items(), key=lambda x:x[1], reverse=True)[:5]}), file=sys.stderr)
@@ -135,10 +147,13 @@ def main():
             from audio.custom_sounds import rms as window_rms
             observer.publish(build_observation(scores, source=source, model=args.model,
                 timestamp_ms=timestamp, inference_ms=elapsed, window_rms=window_rms(window),
-                rule_decisions=detector.decisions, custom_decisions=custom_decisions,
+                rule_decisions=detector.decisions + name_decisions + (
+                    [dict(type="name_called", reason="disabled")] if names is not None and not names.active else []),
+                custom_decisions=custom_decisions,
                 custom_labels={m['id']:m['label'] for m,_ in custom.heads} if custom is not None else None,
                 events=events_for_observation, top_k=args.observe_top,
                 window_seconds=model.window_samples/16000, hop_seconds=model.hop_samples/16000))
+        name_decisions.clear()
         decision_log.write(dict(kind='recognition_window',source=source,model=args.model,
             window_timestamp_ms=timestamp,window_clock_seconds=clock,inference_ms=round(elapsed,1),
             top5=sorted(scores.items(),key=lambda x:x[1],reverse=True)[:5],

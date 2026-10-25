@@ -536,6 +536,15 @@ export default function App() {
                 {state.paused ? <Play size={14} /> : <Pause size={14} />}
                 {state.paused ? "Resume" : "Pause"}
               </button>
+              <button
+                className="key"
+                aria-pressed={state.repeat_suppression === false}
+                title="Testing only: bypass recognition cooldowns and redisplay repeated detections. Priority and pause still apply."
+                disabled={offline}
+                onClick={() => void session.setControls({ repeat_suppression: state.repeat_suppression === false })}
+              >
+                {state.repeat_suppression === false ? "Show every detection: on" : "Show every detection: off"}
+              </button>
               <span className="dock-spacer" />
               <button
                 className="key"

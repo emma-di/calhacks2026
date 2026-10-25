@@ -324,3 +324,20 @@ John’s `johnaou/integrate-audio-ui` (12dddc0) includes our latest branch and w
 teaching are integrated; all-model-label selection remains unfinished. Keep the responsive website
 for judges and configuration, reuse it on phones; no separate native frontend planned. No mic started.
 See HANDOFF-NEXT.md for the updated resume point.
+
+### Live testing controls and inclusive alarm mapping — October 24
+
+Emma requested repeat suppression be toggleable for name testing. Live → Show every detection
+bypasses recognizer cooldowns and receiver acknowledgement/merge suppression, while preserving
+priority, focus, pause and duplicate-event protection. Session-only; normal defaults return on restart.
+Name recognition emitted/cooldown decisions appear under Hearing now; display decisions stay in Log.
+The active MacBook mic recognizer is explicitly user-authorized.
+
+Fire alarm and Smoke detector, smoke alarm now share the existing urgent smoke_alarm type and
+Fire / smoke alarm label. Context suppresses a competing bell. Thresholds unchanged. Cached scores
+show added false positives; details in reports/fire-alarm-alias-review.json. No claim of room accuracy.
+
+Known settings caveat observed during this test: refreshing a companion with stale local onboarding
+settings can reapply them to the receiver, including disabling a name configured elsewhere. Restored
+Emma's previously active name/aliases after the refresh. Resolve receiver/browser initial ownership
+before claiming multi-client settings synchronization is complete; avoid multiple settings owners.

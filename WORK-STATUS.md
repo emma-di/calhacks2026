@@ -4,6 +4,14 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Live-testing checkpoint
+
+Session-only Show every detection bypasses recognizer cooldowns and alert repeat suppression.
+Fire alarm joins smoke alarm as an urgent alias; recorded-score tradeoffs are in
+reports/fire-alarm-alias-review.json. Verified: 85 Python / 21 frontend tests, production build,
+10,000 cross-language engine comparisons. User-authorized MacBook microphone remains active.
+Name-recognizer decisions are shown separately from display decisions. Physical glasses are offline.
+
 ## Latest integration checkpoint (supersedes older snapshots below)
 
 John's integration branch `12dddc0` is incorporated into `codex/browser-mirror`: live hearing panel,

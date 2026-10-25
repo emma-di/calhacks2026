@@ -920,6 +920,92 @@
      }
     }
    ]
+  },
+  {
+   "name": "testing repeats bypass dismissal and merging but preserve duplicates",
+   "steps": [
+    {
+     "at": 0,
+     "add": "name_called",
+     "id": "n1",
+     "expect": {
+      "active": "n1"
+     }
+    },
+    {
+     "at": 1,
+     "dismiss": "n1",
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 2,
+     "controls": {
+      "repeat_suppression": false
+     },
+     "expect": {}
+    },
+    {
+     "at": 3,
+     "add": "name_called",
+     "id": "n2",
+     "expect": {
+      "active": "n2",
+      "reason": "displayed"
+     }
+    },
+    {
+     "at": 4,
+     "add": "name_called",
+     "id": "n3",
+     "expect": {
+      "active": "n3",
+      "reason": "interrupted"
+     }
+    },
+    {
+     "at": 5,
+     "add": "name_called",
+     "id": "n3",
+     "expect": {
+      "active": "n3",
+      "reason": "duplicate"
+     }
+    },
+    {
+     "at": 6,
+     "controls": {
+      "repeat_suppression": true
+     },
+     "expect": {}
+    },
+    {
+     "at": 7,
+     "add": "name_called",
+     "id": "n4",
+     "expect": {
+      "active": "n3",
+      "reason": "merged_repeat"
+     }
+    },
+    {
+     "at": 8,
+     "dismiss": "n3",
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 9,
+     "add": "name_called",
+     "id": "n5",
+     "expect": {
+      "active": null,
+      "reason": "acknowledged_repeat"
+     }
+    }
+   ]
   }
  ]
 }

@@ -49,7 +49,7 @@ test("shared presentation keeps icons, urgent text and mock placement consistent
   assert.equal(bell?.direction, "left");
   assert.equal(
     cuePresentation(makeMock("smoke_alarm"), appearance, "unknown")?.label,
-    "Smoke alarm",
+    "Fire / smoke alarm",
   );
   assert.equal(
     cuePresentation(makeMock("dog_bark", 0), appearance, "left"),

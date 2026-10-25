@@ -3,6 +3,16 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest: name testing and fire alarm aliases
+
+Live has a session-only **Show every detection** toggle. It bypasses recognition cooldowns (including
+names) and receiver repeat merging/acknowledgement; all other priority/mode rules stay active.
+Current user-authorized MacBook microphone recognition is running; use receiver 8766 and site 5174.
+Hearing now includes name emitted/cooldown diagnostics. Controls reset on receiver restart.
+Both models now map Fire alarm + Smoke detector, smoke alarm to the existing urgent type;
+label is Fire / smoke alarm. Cached-score false-positive tradeoff is recorded in
+reports/fire-alarm-alias-review.json; user’s actual fire-alarm recording still needs a repeat trial.
+
 ## Codex integration checkpoint — October 24, resumed session
 
 John's `johnaou/integrate-audio-ui` at `12dddc0` already merged our `2a443a6`; fast-forwarded

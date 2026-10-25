@@ -45,8 +45,8 @@ export const AWARE_EVENTS = [
   },
   {
     key: "smoke_alarm",
-    label: "Smoke alarm",
-    cue: "Smoke alarm",
+    label: "Fire / smoke alarm",
+    cue: "Fire / smoke alarm",
     terms: ["smoke", "smoke alarm", "smoke detector", "fire alarm", "fire"],
   },
   {
