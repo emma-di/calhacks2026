@@ -71,6 +71,11 @@ class PiSpatialTests(unittest.TestCase):
         self.assertIsNone(window_evidence(frames)['side'])
         self.assertIsNone(window_evidence([quiet]*20,require_current=False)['side'])
 
+    def test_one_noisy_frame_does_not_veto_an_entire_classified_alarm(self):
+        left=frame_evidence(signal(8)); right=frame_evidence(signal(-8))
+        self.assertEqual(window_evidence([left]*9+[right]+[left]*10,require_current=False)['side'],'left')
+        self.assertIsNone(window_evidence([left]*10+[right]*10,require_current=False)['side'])
+
     def test_fire_alarm_drives_existing_left_right_triangles(self):
         for lag, side, degrees in ((8,'left',-90),(-8,'right',90)):
             event = make_event('smoke_alarm',.9,'microphone')

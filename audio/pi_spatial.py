@@ -4,6 +4,7 @@ Channel 0=physical left, 1=right (confirmed by Emma). This is a level-based demo
 heuristic, not calibrated localization accuracy. All thresholds need final-room trials.
 """
 import math
+from collections import Counter
 import numpy as np
 
 
@@ -89,12 +90,14 @@ def window_evidence(frames, require_current=True):
     """
     if len(frames) < 3:
         return unknown('insufficient_duration')
-    sides = {frame['side'] for frame in frames if frame['side'] is not None}
-    if len(sides) > 1:
-        return unknown('competing_sides')
-    if not sides:
+    counts = Counter(frame['side'] for frame in frames if frame['side'] is not None)
+    if not counts:
         return unknown('no_lateral_evidence')
-    side = next(iter(sides))
+    side, dominant = counts.most_common(1)[0]
+    # A single noisy 100ms frame must not veto a whole alarm window. Require >=80%
+    # directional agreement; a genuine left/right mixture still remains unknown.
+    if dominant / sum(counts.values()) < .8:
+        return unknown('competing_sides')
     votes = [frame for frame in frames if frame['side'] == side]
     recent = frames[-3:]
     # Quiet, clipping and a broken/mixed channel must clear immediately. A periodic tone

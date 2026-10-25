@@ -12,7 +12,8 @@ blocks used by recognition. Pi still runs capture/display only.
   supply direction at >=2.5dB; channel correlation must be >=.2, and >=.55 to use timing.
 - Both channels must be above -85dBFS, with louder channel >=-75dBFS. DC, clipping, invalid
   lengths and contradictory timing/level signs yield unknown. These are provisional thresholds.
-- Need >=3 supporting 100ms frames and no opposing-side frames in the recognition window.
+- Need >=3 supporting 100ms frames and >=80% agreement among directional frames. One noisy
+  opposing frame no longer vetoes the whole window; genuinely mixed left/right remains unknown.
   Stable timing can tolerate ambiguous tonal frames; level-only evidence needs >=60% agreement.
   Classification ignores quiet beep pauses when counting that agreement. Monitor mode still
   requires recent evidence and clears on quiet. All-quiet windows never provide direction.
@@ -51,6 +52,9 @@ network backlog and physical disconnect/reconnect need further acceptance testin
 - Second trial produced several right-resolved alarm windows but no reliable left result. Most
   sampled monitor frames were below the old -65dBFS floor; it is now -75dBFS, retaining timing/
   coherence/consistency gates. **This sensitivity change still needs a fresh physical test.**
+- Third trial after the lower floor still yielded 4 directionless alarm windows: 2 inconsistent,
+  2 competing-side windows. The strict any-opposite-frame veto was relaxed to >=80% directional
+  agreement, with tests for isolated outliers and balanced mixtures. **Not physically validated.**
 - Gain offset defaults to zero; channel gain calibration and final-room wrong-side/unknown rates
   remain unmeasured. Echoes or competing sources may still mislead this heuristic.
 
@@ -61,3 +65,6 @@ phone spatial experiment before then. The live Pi worker has the spatial changes
 
 Run: `.venv/bin/python -m audio.cli mic --pi pi@glasses-pi.local --endpoint http://127.0.0.1:8766/events`.
 This owns capture and meter port8768. Do not launch a second standalone meter/capture worker.
+
+Phone-third-mic proposal and required synchronization/geometry gates:
+[feasibility](third-microphone-feasibility.md). Not a connected third channel yet.
