@@ -101,6 +101,8 @@ def main():
         except (ImportError, RuntimeError) as exc:
             print(f'Name detection off: {exc}', file=sys.stderr)
     name_events = []   # emitted since the last window, so observations can report them
+    from audio.custom_rules import CustomRules
+    catalog = CustomRules()
     name_decisions = []
     snap_latched = False
     from audio.runtime_controls import RecognitionControls
@@ -108,7 +110,7 @@ def main():
 
     def refresh_controls():
         suppression = controls.refresh()
-        for worker in (detector, names, custom):
+        for worker in (detector, names, custom, catalog):
             if worker is not None:
                 worker.repeat_suppression = suppression
 
@@ -149,11 +151,12 @@ def main():
                 event['target_event_id'] = controls.active_event_id
             scoped.append(event)
         events = scoped
-        custom_decisions=[]
+        events += catalog.detect(scores, source, now=clock, timestamp_ms=timestamp)
+        custom_decisions=list(catalog.decisions)
         if custom is not None:
             from audio.custom_sounds import rms
             events+=custom.detect(model.last_embedding, rms(window), source, now=clock, timestamp_ms=timestamp)
-            custom_decisions=custom.decisions
+            custom_decisions += custom.decisions
         deliveries=[]
         for event in events:
             event['inference_ms'] = round(elapsed, 1)
@@ -169,7 +172,8 @@ def main():
                 rule_decisions=detector.decisions + name_decisions + (
                     [dict(type="name_called", reason="disabled")] if names is not None and not names.active else []),
                 custom_decisions=custom_decisions,
-                custom_labels={m['id']:m['label'] for m,_ in custom.heads} if custom is not None else None,
+                custom_labels={**{r['id']:r['label'] for r in catalog.rules},
+                               **({m['id']:m['label'] for m,_ in custom.heads} if custom is not None else {})},
                 events=events_for_observation, top_k=args.observe_top,
                 window_seconds=model.window_samples/16000, hop_seconds=model.hop_samples/16000))
         name_decisions.clear()

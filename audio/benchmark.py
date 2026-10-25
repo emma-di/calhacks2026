@@ -103,7 +103,9 @@ def extract(manifest, variants, model_name):
     return records
 
 def score(row, rule):
-    if rule.get('suppressors'):
+    if rule.get('suppressors') or rule.get('gated_labels'):
+        if 'windows' not in row:
+            raise ValueError('Temporal/context rules need per-window scores, not aggregated report maxima')
         from audio.events import event_score
         state={}
         return max(event_score(dict(zip(LABELS,window)),rule,now=index*row['hop_seconds'],state=state)

@@ -388,7 +388,7 @@ export async function request(
   path: string,
   body?: unknown,
   signal?: AbortSignal,
-  method?: "PUT",
+  method?: "GET" | "PUT",
 ): Promise<unknown> {
   const response = await fetch(`/api${path}`, {
     method: method ?? (body === undefined ? "GET" : "POST"),

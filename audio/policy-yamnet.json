@@ -22,10 +22,12 @@
       "labels": {
         "Bark": 1,
         "Bow-wow": 1,
-        "Yip": 1
+        "Yip": 1,
+        "Domestic animals, pets": 1
       },
       "threshold": 0.125,
-      "status": "tuned_on_source_split"
+      "status": "tuned_on_source_split",
+      "demo_override": "TEMPORARY Emma request: classify all Domestic animals, pets as Dog barking; not evidence of actual barking."
     },
     "siren": {
       "labels": {

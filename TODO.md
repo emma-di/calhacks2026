@@ -1,5 +1,11 @@
 # Project TODO
 
+Latest October24 software supersedes older unchecked snapshots: catalog selection and name integration
+are wired, Mana receiver adapter is live, stale profile overwrite fixed, centered16-arrow renderer ready.
+See WORK-STATUS.md and docs/audio-software-readiness.md; remaining room/device acceptance is not
+completed by unit tests. Proposed50 symbols wait for explicit approval.
+
+
 Single project checklist. Update IDs and evidence in every relevant PR. Checked means implemented
 or verified as stated; unchecked means pending. This list covers the whole product, not just the UI.
 See the [UI → backend plan](docs/ui-ux-backend-plan.md) for sequencing and proposed contracts.

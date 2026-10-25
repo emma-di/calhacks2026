@@ -4,6 +4,15 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Latest software checkpoint
+
+527-label catalog choices now flow through settings, hot-reloaded rules, per-ID priority and OLED
+icons. Recorded Whistling + Mana adapter→Python→Rain/drop integration checks pass. Profile refresh
+preserves names; only explicit edits save. All previews centered; directional alignment retired.
+Site readability/mobile cleanup complete; Pi deployment parked. Domestic-pets→Dog barking is an
+explicit temporary demo override. Proposed50 custom symbols are awaiting approval, not implemented.
+Current evidence: docs/audio-software-readiness.md, docs/mana-onboarding.md, docs/proposed-50-cues.md.
+
 ## Latest: finer display directions and snap parked
 
 16-position triangle renderer is ready in shared Pi/browser assets; original four directions are

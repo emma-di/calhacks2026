@@ -120,7 +120,7 @@ function Mark() {
 function syncText(source: Source, sync: SyncStatus, connected: boolean) {
   if (source === "browser") return "Saved in this browser.";
   if (!connected)
-    return "Saved in this browser. Applies when the receiver connects.";
+    return "Saved in this browser. New edits apply when the receiver connects.";
   if (sync.kind === "saving") return "Sending to the receiver…";
   if (sync.kind === "applied")
     return `Saved and applied to the receiver (version ${sync.revision}).`;
@@ -203,12 +203,13 @@ export default function App() {
     }
   }, [source]);
   const [profile, setProfile] = useState<ManaProfile | null>(null);
+  const [editRevision, setEditRevision] = useState(0);
   const [appearance, setAppearance] = useState<Appearance>(defaultAppearance);
   const [labels, setLabels] = useState(false);
   const [testDirection, setTestDirection] = useState<number | null>(null);
   const [help, setHelp] = useState(false);
   const helpDialog = useRef<HTMLDialogElement>(null);
-  const session = useSession(source, profile, labels);
+  const session = useSession(source, profile, labels, editRevision);
   const { view: state, connection } = session;
   const connected = connection === "connected";
   const glasses = Boolean(
@@ -218,8 +219,9 @@ export default function App() {
   const hearing = useHearing(source === "receiver" && connected);
 
   const applySetup = useCallback(
-    ({ profile, display, direction }: SetupChange) => {
+    ({ profile, display, direction, editRevision }: SetupChange) => {
       setProfile(profile);
+      setEditRevision(editRevision);
       setLabels(display.labels);
       setAppearance({
         text: display.labels ? "labels" : "icons",
@@ -464,7 +466,7 @@ export default function App() {
               <p className="narration">{narration}</p>
               <p className="aside">
                 {active
-                  ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · ${direction ? `simulate looking ${direction}, or dismiss to resolve` : "dismiss to resolve"}${waiting ? ` · next: ${waiting}` : ""}`
+                  ? `${tierNames[active.priority_tier]} · ${Math.ceil(state.remaining_ms / 1000)} s left · dismiss to resolve${waiting ? ` · next: ${waiting}` : ""}`
                   : `${presetName[prefs.mode]} preset · ${focus.label}${state.paused ? " · paused" : ""}`}
               </p>
             </div>
@@ -589,14 +591,7 @@ export default function App() {
                 >
                   {session.busy ? "Stop" : "Play a busy minute"}
                 </button>
-                {direction ? (
-                  <button
-                    className="key key-signal"
-                    onClick={() => void session.look(direction)}
-                  >
-                    Simulate look {direction}
-                  </button>
-                ) : null}
+
               </div>
             </details>
             <p className="dock-note">
@@ -619,6 +614,7 @@ export default function App() {
         </p>
         <Onboarding
           theme="dark"
+          receiverProfile={session.receiverProfile}
           onChange={applySetup}
           onComplete={() => setView("live")}
         />

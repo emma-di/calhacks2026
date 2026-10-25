@@ -83,6 +83,8 @@ def main():
     for p in placed:
         print(f'  {p["start"]:5.1f}s  {p["sound"]:<12} {p["direction"] or "no direction":<12} ({p["clip"]})', flush=True)
 
+    from audio.custom_rules import CustomRules
+    catalog = CustomRules()
     while True:
         detector = Detector(policy=load_policy(model_name=args.model))
         recognized = []
@@ -95,10 +97,12 @@ def main():
             time.sleep(max(0, start + done / args.speed - time.monotonic()))
             scores, elapsed = model.predict(window)
             events = detector.detect(scores, 'simulation', now=done, timestamp_ms=base + int(done * 1000))
+            events += catalog.detect(scores, 'simulation', now=done, timestamp_ms=base + int(done*1000))
             observer.publish(build_observation(
                 scores, source='simulation', model=args.model, timestamp_ms=base + int(done * 1000),
                 inference_ms=elapsed, window_rms=float(np.sqrt(np.mean(np.square(window)))),
-                rule_decisions=detector.decisions, events=events,
+                rule_decisions=detector.decisions, custom_decisions=catalog.decisions,
+                custom_labels={r['id']:r['label'] for r in catalog.rules}, events=events,
                 window_seconds=model.window_samples / RATE, hop_seconds=model.hop_samples / RATE))
             for event in events:
                 # The scene sound playing in this window, if any, supplies the simulated direction.

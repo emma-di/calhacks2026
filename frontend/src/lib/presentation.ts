@@ -1,6 +1,6 @@
 import type { Appearance } from "./appearance";
 import type { SoundEvent } from "./events";
-// Both browser and monochrome previews use this exact content/placement decision.
+// Semantic cue content. Direction describes the arrow, never icon placement.
 export function cuePresentation(
   event: SoundEvent | null,
   appearance: Appearance,

@@ -1,0 +1,569 @@
+# Model sound catalog
+
+527 pretrained labels in 13 presentation categories. These are model outputs, not 527 independently validated detectors. Selected catalog rules use provisional sensitivity; full sound names remain searchable in Preferences.
+
+## Voices (19)
+
+- Speech — `Speech` → `chat`
+- Male speech — `Male speech, man speaking` → `chat`
+- Female speech — `Female speech, woman speaking` → `chat`
+- Child speech — `Child speech, kid speaking` → `chat`
+- Conversation — `Conversation` → `chat`
+- Narration — `Narration, monologue` → `chat`
+- Babbling — `Babbling` → `chat`
+- Speech synthesizer — `Speech synthesizer` → `chat`
+- Shout — `Shout` → `chat`
+- Bellow — `Bellow` → `chat`
+- Whoop — `Whoop` → `chat`
+- Yell — `Yell` → `chat`
+- Battle cry — `Battle cry` → `chat`
+- Children shouting — `Children shouting` → `chat`
+- Screaming — `Screaming` → `chat`
+- Whispering — `Whispering` → `chat`
+- Chatter — `Chatter` → `chat`
+- Crowd — `Crowd` → `chat`
+- Hubbub — `Hubbub, speech noise, speech babble` → `chat`
+
+## People (42)
+
+- Laughter — `Laughter` → `person`
+- Baby laughter — `Baby laughter` → `person`
+- Giggle — `Giggle` → `person`
+- Snicker — `Snicker` → `person`
+- Belly laugh — `Belly laugh` → `person`
+- Chuckle — `Chuckle, chortle` → `person`
+- Crying — `Crying, sobbing` → `person`
+- Baby cry — `Baby cry, infant cry` → `person`
+- Whimper — `Whimper` → `person`
+- Wail — `Wail, moan` → `person`
+- Sigh — `Sigh` → `person`
+- Groan — `Groan` → `person`
+- Grunt — `Grunt` → `person`
+- Whistling — `Whistling` → `person`
+- Breathing — `Breathing` → `person`
+- Wheeze — `Wheeze` → `person`
+- Snoring — `Snoring` → `person`
+- Gasp — `Gasp` → `person`
+- Pant — `Pant` → `person`
+- Snort — `Snort` → `person`
+- Cough — `Cough` → `person`
+- Throat clearing — `Throat clearing` → `person`
+- Sneeze — `Sneeze` → `person`
+- Sniff — `Sniff` → `person`
+- Run — `Run` → `person`
+- Shuffle — `Shuffle` → `person`
+- Walk — `Walk, footsteps` → `person`
+- Chewing — `Chewing, mastication` → `person`
+- Biting — `Biting` → `person`
+- Gargling — `Gargling` → `person`
+- Stomach rumble — `Stomach rumble` → `person`
+- Burping — `Burping, eructation` → `person`
+- Hiccup — `Hiccup` → `person`
+- Fart — `Fart` → `person`
+- Hands — `Hands` → `person`
+- Finger snapping — `Finger snapping` → `person`
+- Clapping — `Clapping` → `person`
+- Heart sounds — `Heart sounds, heartbeat` → `person`
+- Heart murmur — `Heart murmur` → `person`
+- Cheering — `Cheering` → `person`
+- Applause — `Applause` → `person`
+- Children playing — `Children playing` → `person`
+
+## Music (149)
+
+- Singing — `Singing` → `music`
+- Choir — `Choir` → `music`
+- Yodeling — `Yodeling` → `music`
+- Chant — `Chant` → `music`
+- Mantra — `Mantra` → `music`
+- Male singing — `Male singing` → `music`
+- Female singing — `Female singing` → `music`
+- Child singing — `Child singing` → `music`
+- Synthetic singing — `Synthetic singing` → `music`
+- Rapping — `Rapping` → `music`
+- Humming — `Humming` → `music`
+- Music — `Music` → `music`
+- Musical instrument — `Musical instrument` → `music`
+- Plucked string instrument — `Plucked string instrument` → `music`
+- Guitar — `Guitar` → `music`
+- Electric guitar — `Electric guitar` → `music`
+- Bass guitar — `Bass guitar` → `music`
+- Acoustic guitar — `Acoustic guitar` → `music`
+- Steel guitar — `Steel guitar, slide guitar` → `music`
+- Tapping (guitar technique) — `Tapping (guitar technique)` → `music`
+- Strum — `Strum` → `music`
+- Banjo — `Banjo` → `music`
+- Sitar — `Sitar` → `music`
+- Mandolin — `Mandolin` → `music`
+- Zither — `Zither` → `music`
+- Ukulele — `Ukulele` → `music`
+- Keyboard (musical) — `Keyboard (musical)` → `music`
+- Piano — `Piano` → `music`
+- Electric piano — `Electric piano` → `music`
+- Organ — `Organ` → `music`
+- Electronic organ — `Electronic organ` → `music`
+- Hammond organ — `Hammond organ` → `music`
+- Synthesizer — `Synthesizer` → `music`
+- Sampler — `Sampler` → `music`
+- Harpsichord — `Harpsichord` → `music`
+- Percussion — `Percussion` → `music`
+- Drum kit — `Drum kit` → `music`
+- Drum machine — `Drum machine` → `music`
+- Drum — `Drum` → `music`
+- Snare drum — `Snare drum` → `music`
+- Rimshot — `Rimshot` → `music`
+- Drum roll — `Drum roll` → `music`
+- Bass drum — `Bass drum` → `music`
+- Timpani — `Timpani` → `music`
+- Tabla — `Tabla` → `music`
+- Cymbal — `Cymbal` → `music`
+- Hi-hat — `Hi-hat` → `music`
+- Wood block — `Wood block` → `music`
+- Tambourine — `Tambourine` → `music`
+- Rattle (instrument) — `Rattle (instrument)` → `music`
+- Maraca — `Maraca` → `music`
+- Gong — `Gong` → `music`
+- Tubular bells — `Tubular bells` → `music`
+- Mallet percussion — `Mallet percussion` → `music`
+- Marimba — `Marimba, xylophone` → `music`
+- Glockenspiel — `Glockenspiel` → `music`
+- Vibraphone — `Vibraphone` → `music`
+- Steelpan — `Steelpan` → `music`
+- Orchestra — `Orchestra` → `music`
+- Brass instrument — `Brass instrument` → `music`
+- French horn — `French horn` → `music`
+- Trumpet — `Trumpet` → `music`
+- Trombone — `Trombone` → `music`
+- Bowed string instrument — `Bowed string instrument` → `music`
+- String section — `String section` → `music`
+- Violin — `Violin, fiddle` → `music`
+- Pizzicato — `Pizzicato` → `music`
+- Cello — `Cello` → `music`
+- Double bass — `Double bass` → `music`
+- Wind instrument — `Wind instrument, woodwind instrument` → `music`
+- Flute — `Flute` → `music`
+- Saxophone — `Saxophone` → `music`
+- Clarinet — `Clarinet` → `music`
+- Harp — `Harp` → `music`
+- Harmonica — `Harmonica` → `music`
+- Accordion — `Accordion` → `music`
+- Bagpipes — `Bagpipes` → `music`
+- Didgeridoo — `Didgeridoo` → `music`
+- Shofar — `Shofar` → `music`
+- Theremin — `Theremin` → `music`
+- Singing bowl — `Singing bowl` → `music`
+- Scratching (performance technique) — `Scratching (performance technique)` → `music`
+- Pop music — `Pop music` → `music`
+- Hip hop music — `Hip hop music` → `music`
+- Beatboxing — `Beatboxing` → `music`
+- Rock music — `Rock music` → `music`
+- Heavy metal — `Heavy metal` → `music`
+- Punk rock — `Punk rock` → `music`
+- Grunge — `Grunge` → `music`
+- Progressive rock — `Progressive rock` → `music`
+- Rock and roll — `Rock and roll` → `music`
+- Psychedelic rock — `Psychedelic rock` → `music`
+- Rhythm and blues — `Rhythm and blues` → `music`
+- Soul music — `Soul music` → `music`
+- Reggae — `Reggae` → `music`
+- Country — `Country` → `music`
+- Swing music — `Swing music` → `music`
+- Bluegrass — `Bluegrass` → `music`
+- Funk — `Funk` → `music`
+- Folk music — `Folk music` → `music`
+- Middle Eastern music — `Middle Eastern music` → `music`
+- Jazz — `Jazz` → `music`
+- Disco — `Disco` → `music`
+- Classical music — `Classical music` → `music`
+- Opera — `Opera` → `music`
+- Electronic music — `Electronic music` → `music`
+- House music — `House music` → `music`
+- Techno — `Techno` → `music`
+- Dubstep — `Dubstep` → `music`
+- Drum and bass — `Drum and bass` → `music`
+- Electronica — `Electronica` → `music`
+- Electronic dance music — `Electronic dance music` → `music`
+- Ambient music — `Ambient music` → `music`
+- Trance music — `Trance music` → `music`
+- Music of Latin America — `Music of Latin America` → `music`
+- Salsa music — `Salsa music` → `music`
+- Flamenco — `Flamenco` → `music`
+- Blues — `Blues` → `music`
+- Music for children — `Music for children` → `music`
+- New-age music — `New-age music` → `music`
+- Vocal music — `Vocal music` → `music`
+- A capella — `A capella` → `music`
+- Music of Africa — `Music of Africa` → `music`
+- Afrobeat — `Afrobeat` → `music`
+- Christian music — `Christian music` → `music`
+- Gospel music — `Gospel music` → `music`
+- Music of Asia — `Music of Asia` → `music`
+- Carnatic music — `Carnatic music` → `music`
+- Music of Bollywood — `Music of Bollywood` → `music`
+- Ska — `Ska` → `music`
+- Traditional music — `Traditional music` → `music`
+- Independent music — `Independent music` → `music`
+- Song — `Song` → `music`
+- Background music — `Background music` → `music`
+- Theme music — `Theme music` → `music`
+- Jingle (music) — `Jingle (music)` → `music`
+- Soundtrack music — `Soundtrack music` → `music`
+- Lullaby — `Lullaby` → `music`
+- Video game music — `Video game music` → `music`
+- Christmas music — `Christmas music` → `music`
+- Dance music — `Dance music` → `music`
+- Wedding music — `Wedding music` → `music`
+- Happy music — `Happy music` → `music`
+- Funny music — `Funny music` → `music`
+- Sad music — `Sad music` → `music`
+- Tender music — `Tender music` → `music`
+- Exciting music — `Exciting music` → `music`
+- Angry music — `Angry music` → `music`
+- Scary music — `Scary music` → `music`
+
+## Animals (65)
+
+- Animal — `Animal` → `paw`
+- Domestic animals — `Domestic animals, pets` → `paw`
+- Dog — `Dog` → `dog`
+- Bark — `Bark` → `dog`
+- Yip — `Yip` → `dog`
+- Howl — `Howl` → `dog`
+- Bow-wow — `Bow-wow` → `dog`
+- Growling — `Growling` → `dog`
+- Whimper (dog) — `Whimper (dog)` → `dog`
+- Cat — `Cat` → `paw`
+- Purr — `Purr` → `paw`
+- Meow — `Meow` → `paw`
+- Hiss — `Hiss` → `paw`
+- Caterwaul — `Caterwaul` → `paw`
+- Livestock — `Livestock, farm animals, working animals` → `paw`
+- Horse — `Horse` → `paw`
+- Clip-clop — `Clip-clop` → `paw`
+- Neigh — `Neigh, whinny` → `paw`
+- Cattle — `Cattle, bovinae` → `paw`
+- Moo — `Moo` → `paw`
+- Cowbell — `Cowbell` → `paw`
+- Pig — `Pig` → `paw`
+- Oink — `Oink` → `paw`
+- Goat — `Goat` → `paw`
+- Bleat — `Bleat` → `paw`
+- Sheep — `Sheep` → `paw`
+- Fowl — `Fowl` → `paw`
+- Chicken — `Chicken, rooster` → `paw`
+- Cluck — `Cluck` → `paw`
+- Crowing — `Crowing, cock-a-doodle-doo` → `paw`
+- Turkey — `Turkey` → `paw`
+- Gobble — `Gobble` → `paw`
+- Duck — `Duck` → `paw`
+- Quack — `Quack` → `paw`
+- Goose — `Goose` → `paw`
+- Honk — `Honk` → `paw`
+- Wild animals — `Wild animals` → `paw`
+- Roaring cats (lions — `Roaring cats (lions, tigers)` → `paw`
+- Roar — `Roar` → `paw`
+- Bird — `Bird` → `paw`
+- Bird vocalization — `Bird vocalization, bird call, bird song` → `paw`
+- Chirp — `Chirp, tweet` → `paw`
+- Squawk — `Squawk` → `paw`
+- Pigeon — `Pigeon, dove` → `paw`
+- Coo — `Coo` → `paw`
+- Crow — `Crow` → `paw`
+- Caw — `Caw` → `paw`
+- Owl — `Owl` → `paw`
+- Hoot — `Hoot` → `paw`
+- Bird flight — `Bird flight, flapping wings` → `paw`
+- Canidae — `Canidae, dogs, wolves` → `paw`
+- Rodents — `Rodents, rats, mice` → `paw`
+- Mouse — `Mouse` → `paw`
+- Patter — `Patter` → `paw`
+- Insect — `Insect` → `paw`
+- Cricket — `Cricket` → `paw`
+- Mosquito — `Mosquito` → `paw`
+- Fly — `Fly, housefly` → `paw`
+- Buzz — `Buzz` → `paw`
+- Bee — `Bee, wasp, etc.` → `paw`
+- Frog — `Frog` → `paw`
+- Croak — `Croak` → `paw`
+- Snake — `Snake` → `paw`
+- Rattle — `Rattle` → `paw`
+- Whale vocalization — `Whale vocalization` → `paw`
+
+## Bells (8)
+
+- Bell — `Bell` → `bell`
+- Church bell — `Church bell` → `bell`
+- Jingle bell — `Jingle bell` → `bell`
+- Bicycle bell — `Bicycle bell` → `bell`
+- Tuning fork — `Tuning fork` → `bell`
+- Chime — `Chime` → `bell`
+- Wind chime — `Wind chime` → `bell`
+- Change ringing (campanology) — `Change ringing (campanology)` → `bell`
+
+## Weather & nature (7)
+
+- Wind — `Wind` → `cloud`
+- Rustling leaves — `Rustling leaves` → `cloud`
+- Wind noise (microphone) — `Wind noise (microphone)` → `cloud`
+- Thunderstorm — `Thunderstorm` → `cloud`
+- Thunder — `Thunder` → `cloud`
+- Fire — `Fire` → `smoke`
+- Crackle — `Crackle` → `smoke`
+
+## Water (23)
+
+- Water — `Water` → `drop`
+- Rain — `Rain` → `drop`
+- Raindrop — `Raindrop` → `drop`
+- Rain on surface — `Rain on surface` → `drop`
+- Stream — `Stream` → `drop`
+- Waterfall — `Waterfall` → `drop`
+- Ocean — `Ocean` → `drop`
+- Waves — `Waves, surf` → `drop`
+- Steam — `Steam` → `drop`
+- Gurgling — `Gurgling` → `drop`
+- Liquid — `Liquid` → `drop`
+- Splash — `Splash, splatter` → `drop`
+- Slosh — `Slosh` → `drop`
+- Squish — `Squish` → `drop`
+- Drip — `Drip` → `drop`
+- Pour — `Pour` → `drop`
+- Trickle — `Trickle, dribble` → `drop`
+- Gush — `Gush` → `drop`
+- Fill (with liquid) — `Fill (with liquid)` → `drop`
+- Spray — `Spray` → `drop`
+- Pump (liquid) — `Pump (liquid)` → `drop`
+- Stir — `Stir` → `drop`
+- Boiling — `Boiling` → `drop`
+
+## Vehicles (54)
+
+- Vehicle — `Vehicle` → `car`
+- Boat — `Boat, Water vehicle` → `car`
+- Sailboat — `Sailboat, sailing ship` → `car`
+- Rowboat — `Rowboat, canoe, kayak` → `car`
+- Motorboat — `Motorboat, speedboat` → `car`
+- Ship — `Ship` → `car`
+- Motor vehicle (road) — `Motor vehicle (road)` → `car`
+- Car — `Car` → `car`
+- Vehicle horn — `Vehicle horn, car horn, honking` → `car`
+- Toot — `Toot` → `car`
+- Car alarm — `Car alarm` → `siren`
+- Power windows — `Power windows, electric windows` → `car`
+- Skidding — `Skidding` → `car`
+- Tire squeal — `Tire squeal` → `car`
+- Car passing by — `Car passing by` → `car`
+- Race car — `Race car, auto racing` → `car`
+- Truck — `Truck` → `car`
+- Air brake — `Air brake` → `car`
+- Air horn — `Air horn, truck horn` → `car`
+- Reversing beeps — `Reversing beeps` → `car`
+- Ice cream truck — `Ice cream truck, ice cream van` → `car`
+- Bus — `Bus` → `car`
+- Emergency vehicle — `Emergency vehicle` → `siren`
+- Police car (siren) — `Police car (siren)` → `siren`
+- Ambulance (siren) — `Ambulance (siren)` → `siren`
+- Fire engine — `Fire engine, fire truck (siren)` → `siren`
+- Motorcycle — `Motorcycle` → `car`
+- Traffic noise — `Traffic noise, roadway noise` → `car`
+- Rail transport — `Rail transport` → `car`
+- Train — `Train` → `car`
+- Train whistle — `Train whistle` → `car`
+- Train horn — `Train horn` → `car`
+- Railroad car — `Railroad car, train wagon` → `car`
+- Train wheels squealing — `Train wheels squealing` → `car`
+- Subway — `Subway, metro, underground` → `car`
+- Aircraft — `Aircraft` → `car`
+- Aircraft engine — `Aircraft engine` → `car`
+- Jet engine — `Jet engine` → `car`
+- Propeller — `Propeller, airscrew` → `car`
+- Helicopter — `Helicopter` → `car`
+- Fixed-wing aircraft — `Fixed-wing aircraft, airplane` → `car`
+- Bicycle — `Bicycle` → `car`
+- Skateboard — `Skateboard` → `car`
+- Engine — `Engine` → `car`
+- Light engine (high frequency) — `Light engine (high frequency)` → `car`
+- Dental drill — `Dental drill, dentist's drill` → `car`
+- Lawn mower — `Lawn mower` → `car`
+- Chainsaw — `Chainsaw` → `car`
+- Medium engine (mid frequency) — `Medium engine (mid frequency)` → `car`
+- Heavy engine (low frequency) — `Heavy engine (low frequency)` → `car`
+- Engine knocking — `Engine knocking` → `car`
+- Engine starting — `Engine starting` → `car`
+- Idling — `Idling` → `car`
+- Accelerating — `Accelerating, revving, vroom` → `car`
+
+## Home (34)
+
+- Door — `Door` → `house`
+- Doorbell — `Doorbell` → `bell`
+- Ding-dong — `Ding-dong` → `bell`
+- Sliding door — `Sliding door` → `house`
+- Slam — `Slam` → `house`
+- Knock — `Knock` → `knock`
+- Tap — `Tap` → `house`
+- Squeak — `Squeak` → `house`
+- Cupboard open or close — `Cupboard open or close` → `house`
+- Drawer open or close — `Drawer open or close` → `house`
+- Dishes — `Dishes, pots, and pans` → `house`
+- Cutlery — `Cutlery, silverware` → `house`
+- Chopping (food) — `Chopping (food)` → `house`
+- Frying (food) — `Frying (food)` → `house`
+- Microwave oven — `Microwave oven` → `house`
+- Blender — `Blender` → `house`
+- Water tap — `Water tap, faucet` → `drop`
+- Sink (filling or washing) — `Sink (filling or washing)` → `drop`
+- Bathtub (filling or washing) — `Bathtub (filling or washing)` → `drop`
+- Hair dryer — `Hair dryer` → `house`
+- Toilet flush — `Toilet flush` → `house`
+- Toothbrush — `Toothbrush` → `house`
+- Electric toothbrush — `Electric toothbrush` → `house`
+- Vacuum cleaner — `Vacuum cleaner` → `house`
+- Zipper (clothing) — `Zipper (clothing)` → `house`
+- Keys jangling — `Keys jangling` → `house`
+- Coin (dropping) — `Coin (dropping)` → `house`
+- Scissors — `Scissors` → `house`
+- Electric shaver — `Electric shaver, electric razor` → `house`
+- Shuffling cards — `Shuffling cards` → `house`
+- Typing — `Typing` → `house`
+- Typewriter — `Typewriter` → `house`
+- Computer keyboard — `Computer keyboard` → `house`
+- Writing — `Writing` → `house`
+
+## Alarms & signals (19)
+
+- Alarm — `Alarm` → `bell`
+- Telephone — `Telephone` → `bell`
+- Telephone bell ringing — `Telephone bell ringing` → `bell`
+- Ringtone — `Ringtone` → `bell`
+- Telephone dialing — `Telephone dialing, DTMF` → `bell`
+- Dial tone — `Dial tone` → `bell`
+- Busy signal — `Busy signal` → `bell`
+- Alarm clock — `Alarm clock` → `clock`
+- Siren — `Siren` → `siren`
+- Civil defense siren — `Civil defense siren` → `siren`
+- Buzzer — `Buzzer` → `bell`
+- Smoke detector — `Smoke detector, smoke alarm` → `smoke`
+- Fire alarm — `Fire alarm` → `smoke`
+- Foghorn — `Foghorn` → `bell`
+- Whistle — `Whistle` → `bell`
+- Steam whistle — `Steam whistle` → `bell`
+- Beep — `Beep, bleep` → `bell`
+- Ping — `Ping` → `bell`
+- Ding — `Ding` → `bell`
+
+## Machines & tools (22)
+
+- Mechanisms — `Mechanisms` → `gear`
+- Ratchet — `Ratchet, pawl` → `gear`
+- Clock — `Clock` → `clock`
+- Tick — `Tick` → `clock`
+- Tick-tock — `Tick-tock` → `clock`
+- Gears — `Gears` → `gear`
+- Pulleys — `Pulleys` → `gear`
+- Sewing machine — `Sewing machine` → `gear`
+- Mechanical fan — `Mechanical fan` → `gear`
+- Air conditioning — `Air conditioning` → `gear`
+- Cash register — `Cash register` → `gear`
+- Printer — `Printer` → `gear`
+- Camera — `Camera` → `gear`
+- Single-lens reflex camera — `Single-lens reflex camera` → `gear`
+- Tools — `Tools` → `gear`
+- Hammer — `Hammer` → `gear`
+- Jackhammer — `Jackhammer` → `gear`
+- Sawing — `Sawing` → `gear`
+- Filing (rasp) — `Filing (rasp)` → `gear`
+- Sanding — `Sanding` → `gear`
+- Power tool — `Power tool` → `gear`
+- Drill — `Drill` → `gear`
+
+## Impacts (12)
+
+- Explosion — `Explosion` → `bang`
+- Gunshot — `Gunshot, gunfire` → `bang`
+- Machine gun — `Machine gun` → `bang`
+- Fusillade — `Fusillade` → `bang`
+- Artillery fire — `Artillery fire` → `bang`
+- Cap gun — `Cap gun` → `bang`
+- Fireworks — `Fireworks` → `bang`
+- Firecracker — `Firecracker` → `bang`
+- Burst — `Burst, pop` → `bang`
+- Eruption — `Eruption` → `bang`
+- Boom — `Boom` → `bang`
+- Shatter — `Shatter` → `bang`
+
+## Other sounds (73)
+
+- Wood — `Wood` → `wave`
+- Chop — `Chop` → `wave`
+- Splinter — `Splinter` → `wave`
+- Crack — `Crack` → `wave`
+- Glass — `Glass` → `wave`
+- Chink — `Chink, clink` → `wave`
+- Sonar — `Sonar` → `wave`
+- Arrow — `Arrow` → `wave`
+- Whoosh — `Whoosh, swoosh, swish` → `wave`
+- Thump — `Thump, thud` → `wave`
+- Thunk — `Thunk` → `wave`
+- Electronic tuner — `Electronic tuner` → `wave`
+- Effects unit — `Effects unit` → `wave`
+- Chorus effect — `Chorus effect` → `wave`
+- Basketball bounce — `Basketball bounce` → `wave`
+- Bang — `Bang` → `wave`
+- Slap — `Slap, smack` → `wave`
+- Whack — `Whack, thwack` → `wave`
+- Smash — `Smash, crash` → `wave`
+- Breaking — `Breaking` → `wave`
+- Bouncing — `Bouncing` → `wave`
+- Whip — `Whip` → `wave`
+- Flap — `Flap` → `wave`
+- Scratch — `Scratch` → `wave`
+- Scrape — `Scrape` → `wave`
+- Rub — `Rub` → `wave`
+- Roll — `Roll` → `wave`
+- Crushing — `Crushing` → `wave`
+- Crumpling — `Crumpling, crinkling` → `wave`
+- Tearing — `Tearing` → `wave`
+- Clang — `Clang` → `wave`
+- Squeal — `Squeal` → `wave`
+- Creak — `Creak` → `wave`
+- Rustle — `Rustle` → `wave`
+- Whir — `Whir` → `wave`
+- Clatter — `Clatter` → `wave`
+- Sizzle — `Sizzle` → `wave`
+- Clicking — `Clicking` → `wave`
+- Clickety-clack — `Clickety-clack` → `wave`
+- Rumble — `Rumble` → `wave`
+- Plop — `Plop` → `wave`
+- Jingle — `Jingle, tinkle` → `wave`
+- Hum — `Hum` → `wave`
+- Zing — `Zing` → `wave`
+- Boing — `Boing` → `wave`
+- Crunch — `Crunch` → `wave`
+- Silence — `Silence` → `wave`
+- Sine wave — `Sine wave` → `wave`
+- Harmonic — `Harmonic` → `wave`
+- Chirp tone — `Chirp tone` → `wave`
+- Sound effect — `Sound effect` → `wave`
+- Pulse — `Pulse` → `wave`
+- Inside — `Inside, small room` → `wave`
+- Inside — `Inside, large room or hall` → `wave`
+- Inside — `Inside, public space` → `wave`
+- Outside — `Outside, urban or manmade` → `wave`
+- Outside — `Outside, rural or natural` → `wave`
+- Reverberation — `Reverberation` → `wave`
+- Echo — `Echo` → `wave`
+- Noise — `Noise` → `wave`
+- Environmental noise — `Environmental noise` → `wave`
+- Static — `Static` → `wave`
+- Mains hum — `Mains hum` → `wave`
+- Distortion — `Distortion` → `wave`
+- Sidetone — `Sidetone` → `wave`
+- Cacophony — `Cacophony` → `wave`
+- White noise — `White noise` → `wave`
+- Pink noise — `Pink noise` → `wave`
+- Throbbing — `Throbbing` → `wave`
+- Vibration — `Vibration` → `wave`
+- Television — `Television` → `wave`
+- Radio — `Radio` → `wave`
+- Field recording — `Field recording` → `wave`

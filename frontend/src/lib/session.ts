@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { createAwareReceiverAdapter } from "../../mana/awareReceiverAdapter.js";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   AlertEngine,
   directionDegrees,
@@ -14,6 +15,7 @@ import {
   type ViewState,
 } from "./events";
 import { deliverEvent } from "./delivery";
+import { ProfileEdits } from "./profileSync";
 import type { ManaProfile } from "../../mana/AwareOnboarding.jsx";
 
 export type Source = "browser" | "receiver";
@@ -55,16 +57,22 @@ export function useSession(
   source: Source,
   profile: ManaProfile | null,
   labels: boolean,
+  editRevision = 0,
 ) {
   const engine = useRef(new AlertEngine());
   const [view, setView] = useState<ViewState>(emptyView);
   const [connection, setConnection] = useState<Connection>("idle");
   const [sync, setSync] = useState<SyncStatus>({ kind: "local" });
+  const [receiverProfile, setReceiverProfile] = useState<ManaProfile | null>(null);
+  const edits = useRef(new ProfileEdits());
+  const profileAdapter = useMemo(() => createAwareReceiverAdapter(request), []);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
   const prefs: Preferences | null = profile
-    ? (profile.notification_preferences as Preferences)
+    ? ({ ...profile.notification_preferences,
+        custom_sound_tiers: Object.fromEntries((profile.custom_sound_requests ?? []).map((sound) => [sound.id, sound.tier])),
+      } as Preferences)
     : null;
 
   const stopSequence = useCallback(() => {
@@ -132,56 +140,56 @@ export function useSession(
     };
   }, [parseSnapshot, source]);
 
-  // Saved preferences follow the receiver, including after it restarts with a new session.
-  const synced = useRef<string | null>(null);
+  // Hydrate from the receiver first. A stale localStorage draft must never PUT
+  // automatically on connection or receiver restart. Only genuine user edits do.
+  useEffect(() => {
+    if (profile) edits.current.observe({ ...profile, display: { labels } }, editRevision);
+  }, [profile, labels, editRevision]);
+
   const saves = useRef<Promise<unknown>>(Promise.resolve());
-  const profileKey = profile
-    ? JSON.stringify([
-        profile.notification_preferences,
-        profile.custom_sound_requests,
-        profile.name_detection,
-        labels,
-      ])
-    : null;
   useEffect(() => {
     if (source !== "receiver") {
-      synced.current = null;
+      setReceiverProfile(null);
       setSync({ kind: "local" });
       return;
     }
-    if (connection !== "connected" || !profile || !profileKey) return;
-    const key = `${view.session_id}:${profileKey}`;
-    if (synced.current === key) return;
-    synced.current = key;
-    setSync({ kind: "saving" });
+    if (connection !== "connected") return;
     let cancelled = false;
-    // Preserve edit order: an older, slower request must not overwrite the latest settings.
-    saves.current = saves.current
-      .catch(() => undefined)
-      .then(async () => {
+    let timer: ReturnType<typeof setTimeout>;
+    const reconcile = () => {
+      saves.current = saves.current.catch(() => undefined).then(async () => {
         if (cancelled) return;
         try {
-          const saved = await request(
-            "/profile",
-            { ...profile, display: { labels } },
-            undefined,
-            "PUT",
-          );
-          if (!cancelled)
-            setSync({
-              kind: "applied",
-              revision: Number((saved as { revision: number }).revision),
-            });
+          // Read before each write: preserve fields changed by the audio/name
+          // tools or another browser since this tab last hydrated.
+          const remote = await profileAdapter.readProfile();
+          if (cancelled) return;
+          const pending = edits.current.prepare(remote as unknown as Record<string, unknown>);
+          let applied = remote;
+          if (edits.current.dirty) {
+            setSync({ kind: "saving" });
+            applied = await profileAdapter.saveEdits(pending.patch);
+            edits.current.acknowledge(pending.version);
+          }
+          if (!cancelled) {
+            // Never replace an edit that happened during the network request.
+            if (!edits.current.dirty) setReceiverProfile((previous) =>
+              JSON.stringify(previous) === JSON.stringify(applied) ? previous : applied);
+            setSync({ kind: "applied", revision: applied.revision });
+          }
         } catch (e) {
-          if (synced.current === key) synced.current = null;
-          if (!cancelled)
-            setSync({ kind: "error", message: (e as Error).message });
+          if (!cancelled) setSync({ kind: "error", message: (e as Error).message });
+        } finally {
+          if (!cancelled) timer = setTimeout(reconcile, 2000);
         }
       });
+    };
+    reconcile();
     return () => {
       cancelled = true;
+      clearTimeout(timer);
     };
-  }, [source, connection, profile, profileKey, labels, view.session_id]);
+  }, [source, connection, view.session_id, editRevision, profileAdapter]);
 
   const send = useCallback(
     async (
@@ -306,6 +314,7 @@ export function useSession(
   return {
     view,
     connection,
+    receiverProfile,
     sync,
     busy,
     error,

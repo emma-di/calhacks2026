@@ -2,9 +2,11 @@
 // Mana source of truth: file-system/apps/Aware/app/code. A standalone copy is exported as AwareOnboarding.jsx.
 // Plain React with inline styles; no Mana APIs are required (theme support is used only when present).
 import React, { useEffect, useId, useMemo, useRef, useState } from "react";
+import modelCatalog from "../../audio/sound-catalog.json";
 import alertPolicy from "../../audio/alert-policy.json";
 import Oled from "../src/components/Oled";
 import { makeMock } from "../src/lib/events";
+import { directionBucket } from "../src/lib/alerts";
 
 // --- profile logic ---
 export const AWARE_TIERS = [
@@ -27,8 +29,8 @@ export const AWARE_EVENTS = [
     key: "bell",
     label: "Bell or chime",
     cue: "Bell or chime",
-    terms: ["bell", "chime", "ding", "doorbell", "door bell"],
-    hint: "Any bell or chime. Doorbells are included but not told apart from other bells.",
+    terms: ["bell", "chime", "ding"],
+    hint: "Generic bell/chime. Select Doorbell from the model catalog for a doorbell-specific rule.",
   },
   {
     key: "dog_bark",
@@ -151,6 +153,8 @@ function parseAwareAliases(text, primary) {
   return out;
 }
 
+const catalogLabels = new Map(modelCatalog.sounds.map((sound) => [sound.label, sound]));
+
 export function sanitizeCustomSounds(raw) {
   const seen = new Set();
   return (Array.isArray(raw) ? raw : [])
@@ -175,7 +179,10 @@ export function sanitizeCustomSounds(raw) {
       id: r.id,
       label: r.label.trim().replace(/\s+/g, " "),
       tier: r.tier,
-      status: "pending",
+      ...(r.status === "recognized" && Array.isArray(r.model_labels) && r.model_labels.length >= 1 && r.model_labels.length <= 4 && r.model_labels.every((label) => catalogLabels.has(label))
+        ? {status:"recognized", model_labels:[...new Set(r.model_labels)], icon:catalogLabels.get(r.model_labels[0]).icon,
+           threshold: typeof r.threshold === "number" && r.threshold > 0 && r.threshold <= 1 ? r.threshold : .25}
+        : {status:"pending"}),
     }));
 }
 
@@ -190,6 +197,7 @@ export function sanitizeAwareDraft(raw) {
   });
   return {
     name: typeof d.name === "string" ? d.name : "",
+    name_enabled: d.name_enabled !== false,
     aliasesText: typeof d.aliasesText === "string" ? d.aliasesText : "",
     mode: AWARE_PRESETS.some((m) => m.key === d.mode) ? d.mode : "balanced",
     rules,
@@ -260,7 +268,7 @@ export function buildAwareProfile(draft) {
     display_name: primary,
     custom_sound_requests: d.custom_rules,
     name_detection: {
-      enabled: primary.length > 0,
+      enabled: primary.length > 0 && d.name_enabled !== false,
       primary_name: primary,
       aliases: parseAwareAliases(d.aliasesText, primary),
       language: "en",
@@ -358,8 +366,11 @@ export function AwareCuePreview({
   motionOn,
   playKey,
 }) {
+  const bearing = direction === "unknown" ? null : Number(direction);
+  const coarse = directionBucket(bearing, bearing === null ? null : 1);
   const event = {
     ...makeMock(ev.key, tier),
+    direction_degrees: bearing, direction_confidence: bearing === null ? null : 1,
     event_id: "onboarding-" + playKey,
     label: ev.cue,
   };
@@ -377,7 +388,7 @@ export function AwareCuePreview({
         <Oled
           event={event}
           labels={appearance.text === "labels"}
-          direction={direction === "unknown" ? null : direction}
+          direction={coarse}
         />
       ) : (
         <div
@@ -389,7 +400,7 @@ export function AwareCuePreview({
           <Oled
             event={event}
             labels={appearance.text === "labels"}
-            direction={direction === "unknown" ? null : direction}
+            direction={coarse}
             lens
           />
         </div>
@@ -398,19 +409,34 @@ export function AwareCuePreview({
   );
 }
 
-export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
+export default function AwareOnboarding({ onChange, onComplete, theme, receiverProfile } = {}) {
   const isDark = theme === "dark";
   const uid = useId();
   const [storageOk] = useState(() => awareStorageAvailable());
   const [restored] = useState(() =>
     awareStorageAvailable() ? readAwareDraft() : null,
   );
-  const [draft, setDraft] = useState(() => restored || AWARE_EMPTY_DRAFT);
-  const [display, setDisplay] = useState(() =>
+  const [draft, setDraftState] = useState(() => restored || AWARE_EMPTY_DRAFT);
+  const [display, setDisplayState] = useState(() =>
     sanitizeAwareDisplay(
       awareStorageAvailable() ? readAwareStored(AWARE_DISPLAY_KEY) : null,
     ),
   );
+  const [editRevision, setEditRevision] = useState(0);
+  const setDraft = React.useCallback((value) => { setEditRevision((n) => n+1); setDraftState(value); }, []);
+  const setDisplay = React.useCallback((value) => { setEditRevision((n) => n+1); setDisplayState(value); }, []);
+  useEffect(() => {
+    if (!receiverProfile) return;
+    const names = receiverProfile.name_detection;
+    const prefs = receiverProfile.notification_preferences;
+    setDraftState(sanitizeAwareDraft({
+      name: names.primary_name, name_enabled: names.enabled,
+      aliasesText: names.aliases.join(", "), mode: prefs.mode,
+      rules: Object.entries(prefs.event_tiers ?? {}).map(([key,tier]) => ({key,tier})),
+      custom_rules: receiverProfile.custom_sound_requests ?? [], category_rules: prefs.category_tiers ?? {},
+    }));
+    if (receiverProfile.display) setDisplayState((old) => ({...old, labels: receiverProfile.display.labels === true}));
+  }, [receiverProfile]);
   const [saveState, setSaveState] = useState(() => ({
     kind: restored ? "restored" : "new",
   }));
@@ -462,14 +488,20 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
 
   const profile = useMemo(() => buildAwareProfile(draft), [draft]);
   useEffect(() => {
-    onChange?.({ profile, display, direction });
-  }, [profile, display, direction, onChange]);
+    onChange?.({ profile, display, direction: directionBucket(direction === "unknown" ? null : Number(direction), direction === "unknown" ? null : 1) ?? "unknown", editRevision });
+  }, [profile, display, direction, editRevision, onChange]);
   const ruleCount = draft.rules.length;
   const primary = profile.name_detection.primary_name;
   const preset = AWARE_PRESETS.find((m) => m.key === draft.mode);
   const presetTiers = AWARE_PRESET_DEFAULTS[draft.mode];
   const ruleKeys = new Set(draft.rules.map((r) => r.key));
   const matches = useMemo(() => searchAwareSounds(query), [query]);
+  const catalogMatches = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (q.length < 2) return [];
+    const selected = new Set((draft.custom_rules ?? []).flatMap((r) => r.model_labels ?? []));
+    return modelCatalog.sounds.filter((s) => !selected.has(s.label) && (`${s.name} ${s.label} ${s.category}`.toLowerCase().split(/[^a-z0-9]+/).some((word) => word.startsWith(q)) || s.name.toLowerCase().startsWith(q))).slice(0,8);
+  }, [query, draft.custom_rules]);
   const available = matches.filter((e) => !ruleKeys.has(e.key));
   const alreadyAdded = matches.filter((e) => ruleKeys.has(e.key));
 
@@ -844,9 +876,25 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                 style={s.input}
               />
               <p id={uid + "-search-help"} style={s.help}>
-                Supported: {AWARE_EVENTS.map((e) => e.label).join(", ")}.
+                Search everyday defaults or the model’s 527 sound labels. Scores and sensitivity still need real-room testing.
               </p>
               <div id={uid + "-results"} aria-live="polite">
+                {catalogMatches.length > 0 && <ul style={{...s.group, listStyle:"none", padding:0, marginTop:12}}>
+                  {catalogMatches.map((sound) => <li key={sound.label} style={{padding:12}}>
+                    <button type="button" style={s.textBtn} disabled={(draft.custom_rules ?? []).length >= 20}
+                      onClick={() => {
+                        const next = sanitizeCustomSounds([...(draft.custom_rules ?? []), {
+                          id:crypto.randomUUID(), label:sound.name, tier:2, status:"recognized",
+                          model_labels:[sound.label], icon:sound.icon,
+                        }]);
+                        setDraft((d) => ({...d, custom_rules:next}));
+                        setCustomNote(`${sound.name} added from the model catalog. Choose its priority below; recognition sensitivity is provisional.`);
+                        setQuery("");
+                      }}>
+                      Add {sound.name} · {sound.category}
+                    </button>
+                  </li>)}
+                </ul>}
                 {query.trim() && (
                   <button
                     type="button"
@@ -943,7 +991,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                       below.
                     </p>
                   )}
-                {query.trim() !== "" && matches.length === 0 && (
+                {query.trim() !== "" && matches.length === 0 && catalogMatches.length === 0 && (
                   <div
                     style={{
                       marginTop: 12,
@@ -1147,8 +1195,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
           <section style={s.section} aria-label="Custom sounds">
             <h2 style={s.h2}>Custom sounds</h2>
             <p style={s.lead}>
-              Recognition pending. These preferences are saved, but these sounds
-              do not trigger alerts yet.
+              Catalog sounds can trigger alerts while the recognizer is running. Free-text requests stay pending until recognition is connected.
             </p>
             <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
               {draft.custom_rules.map((rule) => (
@@ -1165,7 +1212,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                   <span style={{ flex: 1, minWidth: 140 }}>
                     {rule.label}
                     <small style={{ display: "block", color: p.muted }}>
-                      Recognition pending
+                      {rule.status === "recognized" ? "Model catalog · sensitivity provisional" : "Recognition pending"}
                     </small>
                   </span>
                   <select
@@ -1223,7 +1270,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                   marginLeft: 6,
                 }}
               >
-                {primary ? "Saved for later" : "Off"}
+                {primary ? "Name configured" : "Off"}
               </span>
             </summary>
             <div style={{ marginTop: 16 }}>
@@ -1235,7 +1282,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                 type="text"
                 autoComplete="given-name"
                 value={draft.name}
-                onChange={(e) => update({ name: e.target.value })}
+                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
                 aria-describedby={uid + "-name-help"}
                 style={s.input}
               />
@@ -1459,8 +1506,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                     color: p.muted,
                   }}
                 >
-                  Simulated direction
+                  Arrow bearing (simulated)
                   <select
+                    aria-label="Preview arrow bearing"
                     value={direction}
                     onChange={(e) => {
                       setDirection(e.target.value);
@@ -1468,11 +1516,11 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                     }}
                     style={s.select}
                   >
-                    <option value="unknown">Unknown</option>
-                    <option value="front">Front</option>
-                    <option value="left">Left</option>
-                    <option value="right">Right</option>
-                    <option value="behind">Behind</option>
+                    <option value="unknown">No direction arrow</option>
+                    {Array.from({length:16},(_,i) => {
+                      const angle=i*22.5, signed=angle>180?angle-360:angle;
+                      return <option key={i} value={String(signed)}>{signed}° · simulated</option>;
+                    })}
                   </select>
                 </label>
                 <label
@@ -1529,11 +1577,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme } = {}) {
                 .
               </p>
               <p style={s.help}>
-                Direction is simulated for this browser preview only; Aware does
-                not track where sounds come from. When the location is unknown
-                the cue stays in a neutral position without a direction marker.
-                How much of the edge is visible on the glasses depends on their
-                optics.
+                The icon and priority box stay centered inside the fixed right-side display patch.
+                Only the surrounding arrow changes with direction. These preview bearings are simulated;
+                live arrows require a supported bearing. Unknown direction has no arrow.
               </p>
             </div>
           </details>

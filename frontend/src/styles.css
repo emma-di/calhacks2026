@@ -8,7 +8,7 @@
   --line: rgba(244, 242, 234, 0.09);
   --line-strong: rgba(244, 242, 234, 0.2);
   --text: #f4f2ea;
-  --muted: #8f8d85;
+  --muted: #a3a198;
   --signal: #ffb547;
   --signal-ink: #1d1304;
   --pixel:
@@ -705,34 +705,7 @@ code {
   width: 256px;
   height: 128px;
 }
-.cue-region {
-  position: absolute;
-  left: 50%;
-  bottom: 22%;
-  transform: translateX(-50%);
-  max-width: 80%;
-  width: max-content;
-}
-.cue-region.edge-left {
-  left: 24px;
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-.cue-region.edge-right {
-  left: auto;
-  right: 24px;
-  top: 50%;
-  bottom: auto;
-  transform: translateY(-50%);
-}
-.cue-region.edge-front {
-  top: 18px;
-  bottom: auto;
-}
-.cue-region.edge-behind {
-  bottom: 18px;
-}
+/* All cue views use the fixed lens-frame and shared centered OLED renderer. */
 .cue {
   display: flex;
   align-items: center;
@@ -1112,8 +1085,7 @@ code {
   color: var(--muted);
 }
 .hearing-meta {
-  font-family: var(--pixel);
-  font-size: 10px;
+  font-variant-numeric: tabular-nums;
 }
 .hearing-head a.key {
   text-decoration: none;
@@ -1161,6 +1133,9 @@ code {
   font-size: 13px;
 }
 .hearing-list.is-quiet {
+  color: var(--muted);
+}
+.hearing-list.is-quiet .hearing-fill {
   opacity: 0.45;
 }
 .hearing-label {
@@ -1202,9 +1177,60 @@ code {
   width: 2px;
   background: var(--signal);
 }
+.hearing-decisions {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 13px;
+}
+.hearing-decisions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 12px;
+}
+.hearing-decisions dt {
+  min-width: 92px;
+  color: var(--text);
+}
+.hearing-decisions dd {
+  margin: 0;
+  color: var(--muted);
+}
+/* Native selects keep their keyboard behavior and share the surrounding control rhythm. */
+.dock-row select {
+  height: 40px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--raise-2);
+  font-size: 14px;
+}
 @media (max-width: 520px) {
   .hearing-list li {
     grid-template-columns: minmax(0, 1fr) 80px 40px;
+  }
+  .hearing-head .dock-spacer {
+    display: none;
+  }
+  .hearing-head a.key {
+    min-height: 44px;
+    margin-left: auto;
+  }
+  .dock-row .key,
+  .dock-row select,
+  .teach-card .key,
+  .teach-row input,
+  .teach-row select {
+    min-height: 44px;
+  }
+  .dock-row .key {
+    max-width: 100%;
+    height: auto;
+    padding-block: 10px;
+    white-space: normal;
+    text-align: left;
   }
 }
 @media (prefers-reduced-motion: reduce) {

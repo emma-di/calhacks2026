@@ -41,3 +41,14 @@ test("custom requests retain explicit Ignore without becoming detector event tie
   assert.deepEqual(profile.custom_sound_requests, custom);
   assert.deepEqual(profile.notification_preferences.event_tiers, {});
 });
+
+test("model catalog selections preserve labels/icons and explicit Ignore", () => {
+  const profile = buildAwareProfile({custom_rules:[{id:"whistle",label:"Whistling",tier:0,status:"recognized",model_labels:["Whistling"]}]});
+  assert.equal(profile.custom_sound_requests?.[0].status,"recognized");
+  assert.deepEqual(profile.custom_sound_requests?.[0].model_labels,["Whistling"]);
+  assert.equal(profile.custom_sound_requests?.[0].tier,0);
+});
+
+test("hydrated named-disabled profile does not silently enable name recognition", () => {
+  assert.equal(buildAwareProfile({name:"Emma",name_enabled:false}).name_detection.enabled,false);
+});

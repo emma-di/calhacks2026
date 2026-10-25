@@ -4,6 +4,7 @@ import type { Preset } from "../src/lib/alerts";
 import type { Appearance } from "../src/lib/appearance";
 export interface ManaDraft {
   name: string;
+  name_enabled?: boolean;
   aliasesText: string;
   mode: Preset;
   rules: { key: string; tier: Tier }[];
@@ -14,10 +15,14 @@ export interface CustomSound {
   id: string;
   label: string;
   tier: Tier;
-  status: "pending";
+  status: "pending" | "recognized";
+  model_labels?: string[];
+  icon?: string;
+  threshold?: number;
 }
 export function sanitizeCustomSounds(raw: unknown): CustomSound[];
 export interface ManaProfile {
+  display?: { labels: boolean };
   custom_sound_requests?: CustomSound[];
   schema_version: 1;
   profile_id: string;
@@ -38,6 +43,7 @@ export interface ManaProfile {
   };
 }
 export interface SetupChange {
+  editRevision: number;
   profile: ManaProfile;
   display: {
     labels: boolean;
@@ -66,4 +72,5 @@ export default function AwareOnboarding(props: {
   onChange?: (change: SetupChange) => void;
   onComplete?: () => void;
   theme?: "light" | "dark";
+  receiverProfile?: ManaProfile | null;
 }): ReactElement;

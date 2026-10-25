@@ -1,8 +1,8 @@
 import assets from "../../../hardware/oled-assets.json";
 import policy from "../../../audio/alert-policy.json";
-import { tierNames, type EventType, type SoundEvent } from "../lib/events";
+import { type EventType, type SoundEvent } from "../lib/events";
 import type { Appearance } from "../lib/appearance";
-import { cuePresentation } from "../lib/presentation";
+import Oled from "./Oled";
 
 const bitmaps = assets.bitmaps as Record<string, string[]>;
 const iconIds = policy.icons as Record<string, string>;
@@ -16,7 +16,7 @@ const paths: Record<string, string> = Object.fromEntries(
   ]),
 );
 
-export function SoundIcon({ type, size = 24 }: { type: EventType; size?: number }) {
+export function SoundIcon({ type, iconId, size = 24 }: { type: EventType; iconId?: string; size?: number }) {
   return (
     <svg
       className="pixel-icon"
@@ -26,7 +26,7 @@ export function SoundIcon({ type, size = 24 }: { type: EventType; size?: number 
       shapeRendering="crispEdges"
       aria-hidden="true"
     >
-      <path d={paths[iconIds[type] ?? "bell"]} fill="currentColor" />
+      <path d={paths[iconId ?? iconIds[type] ?? "wave"]} fill="currentColor" />
     </svg>
   );
 }
@@ -39,38 +39,10 @@ export default function Cue({
   appearance: Appearance;
   direction: Appearance["direction"];
 }) {
-  const presentation = cuePresentation(event, appearance, direction);
-  const visible = presentation && event;
-  const text = presentation?.label;
   return (
-    <div
-      className={`cue-region edge-${visible ? direction : "unknown"}`}
-      role="status"
-      aria-live="polite"
-      aria-atomic="true"
-    >
-      {visible ? (
-        <div
-          key={event.event_id}
-          className={`cue tier-${event.priority_tier} ${text ? "" : "icon-only"} ${appearance.motion === "gentle" ? "gentle-cue" : ""}`}
-          role="group"
-          aria-label={`${tierNames[event.priority_tier]}: ${event.label}`}
-          style={{
-            color: appearance.colors[event.priority_tier],
-            borderColor: appearance.colors[event.priority_tier],
-          }}
-        >
-          <span className="cue-symbol">
-            <SoundIcon type={event.type} size={32} />
-          </span>
-          {text && <strong>{event.label}</strong>}
-        </div>
-      ) : (
-        <div className="cue-idle">
-          <span className="idle-orbit" />
-          <span>Quiet. Play a sound to see its cue here.</span>
-        </div>
-      )}
+    <div className={`lens-frame ${event ? "is-lit" : ""} ${appearance.motion === "gentle" ? "gentle-cue" : ""}`}>
+      <Oled event={event} labels={appearance.text === "labels"}
+        direction={direction === "unknown" ? null : direction} lens />
     </div>
   );
 }

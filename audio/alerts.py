@@ -50,7 +50,8 @@ def validate_profile(value, known_types):
     requests = value.get('custom_sound_requests', [])
     if not isinstance(requests, list) or len(requests) > 20:
         raise ValueError('custom_sound_requests must contain at most 20 pending requests')
-    custom, seen = [], set()
+    from audio.custom_rules import LABEL_ICONS
+    custom, seen, seen_ids = [], set(), set()
     for request in requests:
         if not isinstance(request, dict):
             raise ValueError('Invalid custom sound request')
@@ -61,13 +62,27 @@ def validate_profile(value, known_types):
             raise ValueError('Custom sound label must be 1..80 characters')
         if not isinstance(request_id, str) or not 0 < len(request_id) <= 120:
             raise ValueError('Invalid custom sound request id')
-        if type(tier) is not int or not 0 <= tier <= 4 or request.get('status') != 'pending':
-            raise ValueError('Custom sound must have a valid tier and pending status')
+        status = request.get('status')
+        if type(tier) is not int or not 0 <= tier <= 4 or status not in ('pending', 'recognized'):
+            raise ValueError('Custom sound must have a valid tier and status')
+        if request_id in seen_ids:
+            raise ValueError('Duplicate custom sound id')
+        seen_ids.add(request_id)
         key = ' '.join(label.split()).casefold()
         if key in seen:
             raise ValueError('Duplicate custom sound label')
         seen.add(key)
-        custom.append(dict(id=request_id, label=' '.join(label.split()), tier=tier, status='pending'))
+        entry = dict(id=request_id, label=' '.join(label.split()), tier=tier, status=status)
+        if status == 'recognized':
+            labels = request.get('model_labels')
+            if not isinstance(labels, list) or not 1 <= len(labels) <= 4 or not all(
+                    isinstance(label, str) and label in LABEL_ICONS for label in labels):
+                raise ValueError('Recognized sounds need 1..4 exact catalog labels')
+            threshold = request.get('threshold', .25)
+            if type(threshold) not in (int, float) or not 0 < threshold <= 1:
+                raise ValueError('Custom threshold must be greater than 0 and at most 1')
+            entry.update(model_labels=list(dict.fromkeys(labels)), icon=LABEL_ICONS[labels[0]], threshold=threshold)
+        custom.append(entry)
     display = value.get('display', {})
     if not isinstance(display, dict) or not isinstance(display.get('labels', False), bool):
         raise ValueError('display.labels must be true or false')
@@ -120,8 +135,12 @@ def sound_key(event):
     return event['type']
 
 
-def effective_tier(kind, producer_tier, profile):
+def effective_tier(kind, producer_tier, profile, event=None):
     """Explicit override, then the selected preset, then the producer's legacy default."""
+    if kind == 'custom' and event:
+        chosen = next((r for r in profile.get('custom_sound_requests', []) if r['id'] == event.get('custom_sound_id')), None)
+        if chosen:
+            return chosen['tier']
     prefs = profile['notification_preferences']
     if kind in prefs['event_tiers']:
         return prefs['event_tiers'][kind]
@@ -240,7 +259,7 @@ class AlertEngine:
         if event['type'] in GESTURES:
             return self._gesture(event, now)
         producer = event['priority_tier']
-        tier = effective_tier(event['type'], producer, self.profile)
+        tier = effective_tier(event['type'], producer, self.profile, event)
         logged = dict(event, priority_tier=tier, producer_tier=producer)
         self.events.append(logged)
         kind = sound_key(event)

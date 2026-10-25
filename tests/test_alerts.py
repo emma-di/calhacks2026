@@ -54,6 +54,7 @@ class SharedScenarioTests(unittest.TestCase):
             if 'profile' in scenario:
                 profile = json.loads(json.dumps(DEFAULT_PROFILE))
                 profile['notification_preferences'] = scenario['profile']
+                profile['custom_sound_requests'] = scenario.get('custom_sound_requests', [])
                 engine.set_profile(validate_profile(profile, EVENT_TYPES))
             for index, step in enumerate(scenario['steps']):
                 with self.subTest(scenario=scenario['name'], step=index):

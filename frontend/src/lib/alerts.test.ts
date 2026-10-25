@@ -29,7 +29,7 @@ const fixtureEvent = (type: EventType, id: string, at: number, direction?: [numb
 test("browser simulator passes the same scenarios as the Python receiver", () => {
   for (const scenario of scenarios.scenarios) {
     const engine = new AlertEngine();
-    if ("profile" in scenario) engine.prefs = scenario.profile as never;
+    if ("profile" in scenario) engine.prefs = {...scenario.profile, custom_sound_tiers:Object.fromEntries(((scenario as any).custom_sound_requests ?? []).map((sound:any) => [sound.id,sound.tier]))} as never;
     scenario.steps.forEach((step: Record<string, any>, index) => {
       const label = `${scenario.name} / step ${index}`;
       let result: Record<string, unknown> = {};

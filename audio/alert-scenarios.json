@@ -1160,6 +1160,56 @@
      }
     }
    ]
+  },
+  {
+   "name": "catalog per-id priorities override producer including Ignore0",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "whistle",
+     "label": "Whistling",
+     "tier": 0,
+     "status": "recognized",
+     "model_labels": [
+      "Whistling"
+     ]
+    },
+    {
+     "id": "sax",
+     "label": "Saxophone",
+     "tier": 3,
+     "status": "recognized",
+     "model_labels": [
+      "Saxophone"
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "whistle",
+     "id": "c1",
+     "expect": {
+      "reason": "ignored_tier_zero",
+      "active": null,
+      "tier": 0
+     }
+    },
+    {
+     "at": 1,
+     "add": "custom",
+     "sound": "sax",
+     "id": "c2",
+     "expect": {
+      "active": "c2",
+      "tier": 3
+     }
+    }
+   ]
   }
  ]
 }

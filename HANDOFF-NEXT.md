@@ -3,6 +3,24 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest software consolidation (read before older snapshots)
+
+Catalog picker + backend rules + per-ID priorities + icons are connected, including Rain/Saxophone.
+Free text remains pending. Recorded Whistling passes and Mana adapter→Python→Rain/drop/tier3 passes.
+Mac optional custom-head dependencies installed; audio worker now runs embedding path + catalog.
+Profiles hydrate from receiver, only genuine edits save; cold reload verified without name loss.
+Mana-generated adapter is imported by the companion and preserves Ignore0, learned names and failures.
+Legacy directional alignment is retired: centered icon/box +16-position triangle in all previews.
+Site contrast/mobile/diagnostics polished without dither over meaningful data.
+
+TEMPORARY user-requested Domestic animals,pets → Dog barking is active in both policies; do not claim
+this is dog-specific. Guarded fallback evidence is separate (docs/dog-label-audit.md). Snap OFF.
+Current mic is explicitly user-authorized and running; receiver8766, site5174. No Pi until later.
+Remaining acceptance: real-room names/false positives/misses, selected-sound sensitivities, second
+Mac portability, phone-direction calibration and physical optics once hardware returns.
+Proposed50 cue set awaits Emma approval: docs/proposed-50-cues.md. Do not implement new50 symbols yet.
+See docs/audio-software-readiness.md and docs/mana-onboarding.md for current evidence.
+
 ## Latest: 16 display positions, Pi scope, snap parked
 
 Snap is OFF by Emma's decision; keep manual Dismiss, optional phone-camera thumbs-up and alarm

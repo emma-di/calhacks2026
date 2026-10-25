@@ -3,14 +3,39 @@ import { levelFraction, type Hearing } from "../lib/observations";
 
 const STALE_MS = 4000;
 const QUIET_DBFS = -70;
-const MIC_COMMAND = ".venv/bin/python -m audio.cli mic --device 1 --endpoint http://127.0.0.1:8766/events";
+const MIC_COMMAND =
+  ".venv/bin/python -m audio.cli mic --device 1 --endpoint http://127.0.0.1:8766/events";
 
-function Bar({ value, threshold, strong }: { value: number; threshold?: number; strong?: boolean }) {
+const RULE_REASONS: Record<string, string> = {
+  disabled: "Off",
+  below_threshold: "Below detection threshold",
+  cooldown: "Recognized · waiting for repeat cooldown",
+  emitted: "Recognized · sent to alert engine",
+  suppressed_current_context: "Filtered by current sound context",
+  suppressed_recent_context: "Filtered by recent sound context",
+};
+
+function Bar({
+  value,
+  threshold,
+  strong,
+}: {
+  value: number;
+  threshold?: number;
+  strong?: boolean;
+}) {
   return (
     <span className="hearing-track">
-      <span className={`hearing-fill ${strong ? "is-strong" : ""}`} style={{ transform: `scaleX(${value})` }} />
+      <span
+        className={`hearing-fill ${strong ? "is-strong" : ""}`}
+        style={{ transform: `scaleX(${value})` }}
+      />
       {threshold !== undefined && (
-        <span className="hearing-threshold" style={{ left: `${threshold * 100}%` }} title={`Alert at ${threshold.toFixed(2)}`} />
+        <span
+          className="hearing-threshold"
+          style={{ left: `${threshold * 100}%` }}
+          title={`Alert at ${threshold.toFixed(2)}`}
+        />
       )}
     </span>
   );
@@ -42,9 +67,16 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
     <section className="hearing" aria-label="What the microphone hears">
       <header className="hearing-head">
         <h2>Hearing now</h2>
-        <span className={`dot ${!o || stale ? "is-off" : ""}`} aria-hidden="true" />
+        <span
+          className={`dot ${!o || stale ? "is-off" : ""}`}
+          aria-hidden="true"
+        />
         <span className="hearing-status">{status}</span>
-        {o && !stale && <span className="hearing-meta">{o.level_dbfs > -100 ? `${o.level_dbfs} dBFS` : "silence"}</span>}
+        {o && !stale && (
+          <span className="hearing-meta">
+            {o.level_dbfs > -100 ? `${o.level_dbfs} dBFS` : "silence"}
+          </span>
+        )}
         <span className="dock-spacer" />
         <a className="key" href="#teach">
           Teach sounds &amp; your name
@@ -54,13 +86,16 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
       {!o || stale ? (
         <p className="hearing-empty">
           {o ? "Is the microphone still running? " : "Nothing heard yet. "}
-          Start it in a Terminal tab from the project folder (use your mic's number from{" "}
-          <code>audio.cli devices</code>):
+          Start it in a Terminal tab from the project folder (use your mic's
+          number from <code>audio.cli devices</code>):
           <code className="hearing-cmd">{MIC_COMMAND}</code>
         </p>
       ) : (
         <>
-          <div className="hearing-level" aria-label={`Level ${o.level_dbfs} dBFS`}>
+          <div
+            className="hearing-level"
+            aria-label={`Level ${o.level_dbfs} dBFS`}
+          >
             <Bar value={levelFraction(o.level_dbfs)} />
           </div>
           {alerts.length > 0 && (
@@ -71,7 +106,9 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
           <ul className={`hearing-list ${quiet ? "is-quiet" : ""}`}>
             {o.top.slice(0, 6).map((t) => (
               <li key={t.label}>
-                <span className="hearing-label">{t.label}</span>
+                <span className="hearing-label" title={t.label}>
+                  {t.label}
+                </span>
                 <Bar value={t.score} />
                 <span className="hearing-num">{t.score.toFixed(2)}</span>
               </li>
@@ -83,21 +120,56 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
               <ul className="hearing-list">
                 {o.custom.map((c) => (
                   <li key={c.id}>
-                    <span className="hearing-label">{c.label}</span>
-                    <Bar value={c.score} threshold={c.threshold} strong={c.score >= c.threshold} />
+                    <span className="hearing-label" title={c.label}>
+                      {c.label}
+                    </span>
+                    <Bar
+                      value={c.score}
+                      threshold={c.threshold}
+                      strong={c.score >= c.threshold}
+                    />
                     <span className="hearing-num">{c.score.toFixed(2)}</span>
                   </li>
                 ))}
               </ul>
             </>
           )}
-          {o.rules.name_called && <p className="hearing-note" aria-live="polite">
-            Name recognizer: {o.rules.name_called.reason === "cooldown" ? "recognized, suppressed by cooldown" : o.rules.name_called.reason === "emitted" ? "recognized and sent to alert engine (see Event log for display decision)" : o.rules.name_called.reason}.
-          </p>}
-          {quiet && <p className="hearing-note">Quiet room: labels on near-silence aren't meaningful.</p>}
+          {(o.rules.name_called || o.rules.finger_snap) && (
+            <dl
+              className="hearing-decisions"
+              aria-label="Recognition decisions"
+            >
+              {(
+                [
+                  ["name_called", "Your name"],
+                  ["finger_snap", "Snap control"],
+                ] as const
+              ).map(([key, label]) => {
+                const rule = o.rules[key];
+                return rule ? (
+                  <div key={key}>
+                    <dt>{label}</dt>
+                    <dd>
+                      {RULE_REASONS[rule.reason] ??
+                        rule.reason.replaceAll("_", " ")}
+                    </dd>
+                  </div>
+                ) : null;
+              })}
+            </dl>
+          )}
+          {quiet && (
+            <p className="hearing-note">
+              Quiet room: labels on near-silence aren't meaningful.
+            </p>
+          )}
         </>
       )}
-      {hearing.error && <p className="hearing-note">Observation stream unavailable: {hearing.error}</p>}
+      {hearing.error && (
+        <p className="hearing-note">
+          Observation stream unavailable: {hearing.error}
+        </p>
+      )}
     </section>
   );
 }

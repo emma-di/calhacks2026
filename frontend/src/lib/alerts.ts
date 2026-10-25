@@ -13,6 +13,7 @@ export function soundKey(event: SoundEvent): string {
 export type Preset = keyof typeof policy.presets;
 export interface Preferences {
   mode: Preset;
+  custom_sound_tiers?: Record<string, Tier>;
   event_tiers: Partial<Record<EventType, Tier>>;
   category_tiers?: Partial<Record<keyof typeof policy.categories, Tier>>;
 }
@@ -267,7 +268,7 @@ export class AlertEngine {
     this.seen = [...this.seen, event.event_id].slice(-256);
     if (GESTURES.has(event.type)) return this.gesture(event, now);
     const producer = event.priority_tier;
-    const tier = effectiveTier(event.type, producer, this.prefs);
+    const tier = (event.type === "custom" ? this.prefs.custom_sound_tiers?.[event.custom_sound_id!] : undefined) ?? effectiveTier(event.type, producer, this.prefs);
     const logged: LoggedEvent = {
       ...event,
       priority_tier: tier,

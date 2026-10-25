@@ -44,8 +44,19 @@ def load_policy(path=None, model_name=None):
 
 def evaluate_rule(scores, rule, now=None, state=None):
     values = [float(scores.get(label, 0))*weight for label,weight in rule['labels'].items()]
+    # A parent class alone is insufficient; specific vocal evidence must coincide in this window.
+    supports = {}
+    for label, gate in rule.get('gated_labels', {}).items():
+        supporting = {name: float(scores.get(name, 0)) for name, threshold in gate.get('requires_any', {}).items()
+                      if math.isfinite(float(scores.get(name, 0))) and float(scores.get(name, 0)) >= threshold}
+        parent = float(scores.get(label, 0))
+        if supporting and math.isfinite(parent) and 0 <= parent <= 1:
+            values.append(parent * gate['weight'])
+            supports.update({label: parent, **supporting})
     raw=max((value for value in values if math.isfinite(value) and 0<=value<=1), default=0)
     decision={'raw_score':raw,'threshold':rule['threshold'],'reason':'eligible'}
+    if supports:
+        decision['support_labels'] = supports
     active={label:float(scores.get(label,0)) for label,threshold in rule.get('suppressors',{}).items()
             if float(scores.get(label,0))>=threshold}
     if active:

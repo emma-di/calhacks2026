@@ -367,3 +367,26 @@ not improved by rendering more bins. Tests: 93 Python / 21 frontend / build; liv
 Pi hostname did not resolve, so not deployed to hardware. See docs/display-16-directions.md.
 Emma chose to park snap recognition: switched snap_to_dismiss off. Keep manual Dismiss, optional
 phone-camera thumbs-up and automatic alarm clear after sustained quiet.
+
+### Catalog, Mana backend and centered simulator consolidation — October 24
+
+Catalog selection now preserves recognized model labels, icon and per-ID tier; free text stays
+pending. CLI and scenes run CustomRules with hot reload. Rain/Saxophone are selectable; Whistling
+recorded integration emitted4 events with person/tier3. The ONNX embedding path now installed and
+matched original scores exactly on a checked recording. No model weights were fine-tuned.
+Receiver-authoritative hydration and genuine edit revisions prevent stale browser reloads from
+erasing names (live refresh held revision107 and retained the enabled name). Mana generated a
+serialized read-before-write adapter, now used by the companion, with10 contract tests and a real
+Python receiver/Rain→drop test. Private workspace source/provenance is recorded; no public sharing.
+
+Retired movable edge-left/right/front/behind cue CSS and old cue renderer. All previews now use
+centered OLED pixels and direction triangles; onboarding has16 explicit arrow bearings. Added
+readability/mobile polish; skipped distracting dither over cues/data.
+
+Emma explicitly requested TEMPORARY Domestic animals,pets → Dog barking, active in both policies.
+This overrides dog-specific semantics and can show cats/pets as barking. Guarded Dog+bark-family
+fallback is separately supported by cached-window evidence; zero-FP results do NOT cover the broad
+demo override. Catalog scores remain provisional; there is no zero-false-negative guarantee.
+
+Proposed50 named cues are in docs/proposed-50-cues.md, awaiting explicit approval before any new
+symbols/default bundle are implemented. Pi remains parked until available; only display code deploys.

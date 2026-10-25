@@ -44,8 +44,15 @@ class CustomRules:
             requests = json.loads(self.path.read_text()).get('custom_sound_requests', [])
         except (OSError, ValueError):
             requests = []
+        requests = requests if isinstance(requests, list) else []
+        requests = [r for r in requests if isinstance(r, dict) and isinstance(r.get('id'), str)
+                    and isinstance(r.get('label'), str) and type(r.get('tier')) is int
+                    and 0 <= r['tier'] <= 4 and isinstance(r.get('model_labels', []), list)
+                    and type(r.get('threshold', DEFAULT_THRESHOLD)) in (int, float)
+                    and math.isfinite(r.get('threshold', DEFAULT_THRESHOLD))
+                    and 0 < r.get('threshold', DEFAULT_THRESHOLD) <= 1]
         self.rules = [dict(id=r['id'], label=r['label'], tier=r['tier'],
-                           labels=[l for l in r.get('model_labels', []) if l in LABEL_ICONS],
+                           labels=[l for l in r.get('model_labels', []) if isinstance(l, str) and l in LABEL_ICONS],
                            icon=r.get('icon') or LABEL_ICONS.get((r.get('model_labels') or [''])[0], 'wave'),
                            threshold=float(r.get('threshold', DEFAULT_THRESHOLD)))
                       for r in requests if isinstance(r, dict) and r.get('status') == 'recognized']
@@ -58,10 +65,10 @@ class CustomRules:
         events, self.decisions = [], []
         for rule in self.rules:
             score = max(float(scores.get(label, 0)) for label in rule['labels'])
-            decision = dict(type=f"custom:{rule['label']}"[:40], raw_score=score,
+            decision = dict(type='custom', custom_sound_id=rule['id'], raw_score=score,
                             threshold=rule['threshold'], reason='below_threshold')
             if score >= rule['threshold']:
-                if now - self.last.get(rule['id'], -math.inf) < COOLDOWN_SECONDS:
+                if getattr(self, 'repeat_suppression', True) and now - self.last.get(rule['id'], -math.inf) < COOLDOWN_SECONDS:
                     decision['reason'] = 'cooldown'
                 else:
                     self.last[rule['id']] = now
