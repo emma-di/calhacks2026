@@ -23,8 +23,7 @@
       "labels": {
         "Bark": 1,
         "Bow-wow": 1,
-        "Yip": 1,
-        "Domestic animals, pets": 1
+        "Yip": 1
       },
       "threshold": 0.175,
       "status": "guarded_parent_fallback_exploratory_cached_and_live_reported_miss",
@@ -37,8 +36,7 @@
             "Yip": 0.08
           }
         }
-      },
-      "demo_override": "TEMPORARY Emma request: classify all Domestic animals, pets as Dog barking; not evidence of actual barking."
+      }
     },
     "siren": {
       "labels": {

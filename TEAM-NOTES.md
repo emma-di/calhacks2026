@@ -487,3 +487,9 @@ Centered reference measured−0.89dB left-minus-right; local numeric config sets
 and margin_db0.75. Active worker telemetry confirms those values. Old SIGINT-ignored worker was
 actually replaced; explicit SIGINT/SIGTERM handlers now make future reloads graceful. Earlier feed
 liveness did not prove changed thresholds loaded. Spatial accuracy remains unvalidated.
+
+## Oct 25: dog override removed, attention calls added
+- The TEMPORARY Domestic animals, pets → Dog barking override is gone from both policies: it raised
+  "Dog barking" live for cats, pigs, horses and chewing. The guarded bark rule remains (docs/dog-label-audit.md).
+- The name spotter also listens for attention calls ("Someone's calling") and "watch out" / "look out"
+  (urgent "Watch out!"). See docs/design-decisions.md. Name cues now carry Pi stereo direction.

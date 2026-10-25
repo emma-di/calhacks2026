@@ -68,3 +68,10 @@ same-window Bark/Bow-wow/Yip >=0.08. Emma then explicitly requested mapping all 
 pets to Dog barking for now. That broader alias is active in both model policies, marked TEMPORARY.
 It can report cats/pets as barking, and is NOT covered by the guarded candidate's zero-FP result.
 Remove that alias after the demo/testing phase before claiming dog-specific accuracy.
+
+## Override removed — October 25
+
+The temporary Domestic animals, pets → Dog barking alias fired repeatedly in live Pi use with no dog
+present: the logged windows were a cat, a pig, a horse, chewing and room noise. Emma asked for it to be
+fixed, so the alias is removed from both policies. The guarded rule above stays: bark-family labels
+≥ 0.175, or Dog ≥ 0.7 with bark evidence ≥ 0.08 in the same window. samples/dog.wav still alerts.
