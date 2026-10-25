@@ -108,9 +108,7 @@ def validate_name_event(event):
         raise ValueError('priority_tier must be 0..4')
     if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
         raise ValueError('timestamp_ms must be a nonnegative integer')
-    if any(event.get(k) is not None for k in ('direction_degrees', 'direction_confidence', 'distance_meters')):
-        raise ValueError('Spatial estimates are not supported for names yet')
-    return event
+    return validate_direction(event)
 
 
 def validate_event(event):
@@ -140,6 +138,10 @@ def validate_event(event):
         raise ValueError('priority_tier must be 0..4')
     if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
         raise ValueError('timestamp_ms must be a nonnegative integer')
+    return validate_direction(event)
+
+
+def validate_direction(event):
     # Direction from a localization worker: degrees relative to the face (0 front, +90 right), with a
     # confidence. The alert engine ignores low-confidence directions. Distance stays unsupported.
     degrees, certainty = event.get('direction_degrees'), event.get('direction_confidence')

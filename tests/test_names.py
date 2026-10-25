@@ -131,6 +131,14 @@ class SpellingTests(unittest.TestCase):
         self.assertEqual(validate_event(event)['matched_alias_id'], 'attention-0')
         self.assertEqual(names.make_name_event(dict(revision=1), 'primary', 'microphone')['label'], 'Your name')
 
+    def test_name_events_carry_pi_stereo_direction(self):
+        from audio.pi_spatial import annotate_events
+        event = names.make_name_event(dict(revision=1), 'primary', 'microphone')
+        annotate_events([event], dict(direction_degrees=90, direction_confidence=.7, reason='sustained_lateral_evidence'))
+        self.assertEqual(validate_event(event)['direction_degrees'], 90)
+        with self.assertRaises(ValueError):
+            validate_event(dict(event, direction_confidence=None))
+
 class EventTests(unittest.TestCase):
     profile = dict(revision=3)
 

@@ -184,7 +184,8 @@ export function makeMock(
 ): SoundEvent {
   const sound = soundCatalog.find((s) => s.type === type)!;
   if (type === "name_called")
-    // John's name events are schema v2 (audio/names.py): no score, no direction, which alias matched.
+    // John's name events are schema v2 (audio/names.py): no score, which alias matched. Direction
+    // comes from the Pi stereo pair like every other cue.
     return {
       schema_version: 2,
       event_id: crypto.randomUUID(),
@@ -194,8 +195,8 @@ export function makeMock(
       source: "mock",
       priority_tier: tier ?? sound.tier,
       timestamp_ms: Date.now(),
-      direction_degrees: null,
-      direction_confidence: null,
+      direction_degrees: directionDegrees,
+      direction_confidence: directionDegrees === null ? null : 1,
       distance_meters: null,
       matched_alias_id: "primary",
       profile_revision: 0,
