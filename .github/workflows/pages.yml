@@ -1,8 +1,11 @@
 name: Public demo site
 # Builds the companion in Browser mode (VITE_HOSTED=1: test sounds only, no receiver, no Claude) and
-# deploys it to GitHub Pages at /calhacks2026/. Runs only when started by hand from the Actions tab,
-# and only publishes once Pages is enabled for this repository (Settings → Pages → GitHub Actions).
+# deploys it to GitHub Pages at https://emma-di.github.io/calhacks2026/ whenever the frontend changes
+# on main or the demo branch (both are allowed in the github-pages environment), or by hand.
 on:
+  push:
+    branches: [main, codex/browser-mirror]
+    paths: ['frontend/**', 'audio/*.json', 'hardware/oled-assets.json', '.github/workflows/pages.yml']
   workflow_dispatch:
 permissions:
   contents: read
