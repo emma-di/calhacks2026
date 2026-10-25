@@ -1,7 +1,8 @@
 # Two INMP441 microphones on the original Pi Zero W
 
-Status: prepared and dry-run validated on the actual Pi (Raspbian 13.6, kernel 6.18.50 ARMv6).
-**Physical capture has not yet been tested.** Administrator authentication and a reboot are pending.
+Status: installed and physically captured on October 25 on the actual Pi
+(Raspbian 13.6, kernel 6.18.50 ARMv6). `AwareINMP441` appears as card 1, capture device 0.
+A five-second stereo recording completed successfully; physical left/right slot mapping remains pending.
 The display and inference processes are not changed by this setup script.
 
 ## Interface
@@ -65,3 +66,22 @@ teammate changes: compare the files first.
 - Resulting device tree reports I2S status `okay`, `AwareINMP441`, two 32-bit slots, CPU clock master.
 - Required ICS43432, BCM2835 I2S and simple-card modules exist for the running kernel.
 - Existing boot configuration and OLED were left unchanged during preparation.
+- After administrator installation and coordinated reboot, a real capture completed with 240,000
+  stereo frames at 48 kHz, signed 32-bit little endian, exactly five seconds.
+- Channel 0: RMS −41.88 dBFS, peak −15.85 dBFS. Channel 1: RMS −42.66 dBFS, peak −18.21 dBFS.
+- Both channels contain positive and negative samples and are not byte-identical; correlation 0.881.
+- No clipping, no all-zero 10 ms blocks, and no ALSA overrun messages in this short trial. These
+  checks do not establish long-run reliability or useful localization accuracy.
+- Private capture and diagnostic values are under ignored `.cache/pi-audio-tests/`; never commit audio.
+- Actual pre-install boot backup: `/home/pi/aware-mic-backup-20261025-000106/config.txt`.
+- Still needed: sound near each microphone to identify which physical side occupies each slot, then
+  a separate synchronized spatial test with measured microphone spacing.
+
+## Physical microphone check — October 25
+
+A 20-second authorized stereo recording captured 960,000 frames at 48 kHz/S32_LE. During speech close
+to the first microphone, channel 0 was up to 14.82 dB louder; near the other, channel 1 was up to 21.65 dB
+louder. Both microphones therefore respond independently; these are not duplicated mono channels.
+Physical left/right identity was not specified during the trial. Direction/calibration is a separate
+step. No overruns were reported. Raw recordings remain private/ignored; sanitized result:
+[pi-stereo-mic-check.json](../../reports/pi-stereo-mic-check.json).

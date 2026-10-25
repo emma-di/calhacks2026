@@ -4,6 +4,15 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Latest: two Pi microphones verified — October 25
+
+I²S capture driver installed with original bootconfig backed up on Pi at
+/home/pi/aware-mic-backup-20261025-000106/config.txt. Device AwareINMP441 now captures 48 kHz, S32_LE,
+stereo. Near-each-mic 20s test shows independent response: channel 0 +14.82 dB at first mic,
+channel 1 +21.65 dB at other. No reported overruns. Physical left/right identity not yet mapped;
+spatial testing/calibration remains separate. See reports/pi-stereo-mic-check.json and
+hardware/pi-capture/README.md. No raw audio/transcripts/credentials committed; inference stays on Mac.
+
 ## Latest: first-use setup and real Claude suggestions
 
 First use now opens Preferences with optional typed name/nicknames up front, defaults already set,

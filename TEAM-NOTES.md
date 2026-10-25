@@ -435,3 +435,11 @@ in these docs. This docs review did not change live settings or start microphone
 User's latest priority is both Pi microphones first, then spatial work. Root owns the physical
 capture checks. UI/provider verification is not evidence that physical Pi mics are connected or
 synchronized. Only display/capture endpoint code belongs on Pi; inference remains on Mac.
+
+## Pi microphone checkpoint — October 25
+
+Both INMP441 microphones now capture using the stock compatible I²S MEMS driver and a small local
+overlay. Config backed up before installation/reboot. User close-up trial confirmed two independently
+responding channels at 48 kHz/S32_LE, with 14.82 dB and 21.65 dB channel advantages near the two mics.
+Physical left/right labeling and spatial calibration remain undone; do not infer direction from
+this capture test. No audio/credentials committed. See hardware/pi-capture/README.md.

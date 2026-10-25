@@ -3,6 +3,15 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest: two Pi microphones verified — October 25
+
+I²S capture driver installed with original bootconfig backed up on Pi at
+/home/pi/aware-mic-backup-20261025-000106/config.txt. Device AwareINMP441 now captures 48 kHz, S32_LE,
+stereo. Near-each-mic 20s test shows independent response: channel 0 +14.82 dB at first mic,
+channel 1 +21.65 dB at other. No reported overruns. Physical left/right identity not yet mapped;
+spatial testing/calibration remains separate. See reports/pi-stereo-mic-check.json and
+hardware/pi-capture/README.md. No raw audio/transcripts/credentials committed; inference stays on Mac.
+
 ## Latest: first-use setup and real Claude suggestions
 
 First use now opens Preferences with optional typed name/nicknames up front, defaults already set,
