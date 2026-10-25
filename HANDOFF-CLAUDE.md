@@ -71,8 +71,10 @@ not speculative bearings attached to real alerts. Keep this outside the Pi demo 
 
 First-use setup opens Preferences; defaults already active, optional typed name, curated sound
 search with dedicated icons, optional reviewed Claude suggestions. Catalog choices need no training.
-Unsupported free text is pending; optional recordings are advanced. Root is streamlining this flow
-and testing it offline. Check the latest UI commit/status before modifying the same files.
+Unsupported free text is pending; optional recordings are advanced. The defaults-first flow is now streamlined and tested offline: priority preview before adding,
+Start above optional customization, and latest-save gating. See docs/onboarding-review.md.
+64 frontend tests and production build pass. Question-after-name work is in commit3a593dc;
+its live physical acceptance remains open. Check Git status before shared-file edits.
 
 Preserve receiver-authoritative profile hydration, existing Ignore choices, learned name spellings,
 category inheritance, and explicit-edit synchronization. Do not turn a cold reload into a save.

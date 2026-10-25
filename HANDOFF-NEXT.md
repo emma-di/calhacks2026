@@ -9,8 +9,10 @@ remaining acceptance: [rough angles](docs/rough-front-angles.md) /
 
 **John's new owned TODO: SPACE-PHONE-01**, loose front-pocket phone for front/back evidence.
 [John's current handoff](HANDOFF-JOHN.md) / [feasibility and first tests](docs/third-microphone-feasibility.md).
-This is experimental; preserve the Pi-only demo. Website/onboarding streamlining is root-owned
-prep work; older snapshots below are historical and do not supersede these decisions.
+This is experimental; preserve the Pi-only demo. Website/onboarding streamlining is complete: defaults and Start first, explicit sound-priority
+previews, and latest-save confirmation gating. See [UI verification](docs/onboarding-review.md).
+64 frontend tests and production build pass. Claude question-after-name work is in commit3a593dc;
+physical speech/display acceptance remains open. Older snapshots below are historical.
 
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.

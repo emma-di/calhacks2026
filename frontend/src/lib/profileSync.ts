@@ -63,3 +63,31 @@ export class ProfileEdits {
     if (version === this.version) this.pending = {};
   }
 }
+
+
+export type ProfileSyncStatus =
+  | { kind: "local" }
+  | { kind: "saving" }
+  | { kind: "applied"; revision: number }
+  | { kind: "error"; message: string };
+
+export interface ProfileSyncCheckpoint {
+  status: ProfileSyncStatus;
+  editRevision: number;
+  sessionId: string | null;
+}
+
+/** Render-time gate: a previous save never confirms a newer edit or receiver session.
+ * This is deliberately independent of passive effects and network request timing.
+ */
+export function currentProfileSync(
+  checkpoint: ProfileSyncCheckpoint,
+  editRevision: number,
+  sessionId: string | null,
+  connected: boolean,
+): ProfileSyncStatus {
+  if (!connected) return { kind: "local" };
+  if (checkpoint.editRevision !== editRevision || checkpoint.sessionId !== sessionId)
+    return { kind: "saving" };
+  return checkpoint.status;
+}

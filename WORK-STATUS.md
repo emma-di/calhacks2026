@@ -4,6 +4,21 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Current: October 25 prep checkpoint
+
+Hardware is disconnected for assembly. The real Pi sound→browser/OLED path worked; mounted
+localization accuracy, optics and reconnect acceptance remain open. Current measured calibration
+and limits: [rough angles](docs/rough-front-angles.md). Historical sections below are snapshots.
+
+Onboarding now starts with useful defaults and a reachable Start action, explicit priority previews
+for all catalog choices, and revision-aware save confirmation. Isolated browser save/reload flows
+passed; 176 Python tests, 64 frontend tests and production build pass. [UI review](docs/onboarding-review.md).
+Claude's question-after-name feature is committed as3a593dc; live acceptance remains separate.
+
+**John owns SPACE-PHONE-01**: [handoff](HANDOFF-JOHN.md),
+[phone experiment](docs/third-microphone-feasibility.md). Loose-pocket front/back is experimental,
+not a synchronized third Pi channel. Keep the working Pi-only route intact.
+
 ## Latest: two Pi microphones verified — October 25
 
 Live stereo level bridge and browser meters are implemented, with no raw audio served or saved.

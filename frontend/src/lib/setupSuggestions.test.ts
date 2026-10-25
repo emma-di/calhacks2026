@@ -86,3 +86,28 @@ test('first-use setup puts optional typed name before sound choices and has a cl
   assert.ok(html.includes('Nicknames'));
   assert.ok(html.includes('Start Aware'));
 });
+
+test('setup offers defaults and finish before optional catalog and Claude work', async()=>{
+  const React=await import('react');const {renderToString}=await import('react-dom/server');
+  const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
+  const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true}));
+  assert.ok(html.indexOf('Your everyday alerts')<html.indexOf('Start Aware'));
+  assert.ok(html.indexOf('Start Aware')<html.indexOf('Search sounds'));
+  assert.ok(html.indexOf('Search sounds')<html.indexOf('Get sound suggestions from Claude'));
+});
+
+test('custom sound preview keeps the actual cue icon and Ignore without publishing anything', async()=>{
+  const {makeSetupPreviewEvent}=await import('../../mana/AwareOnboarding.jsx');
+  const event=makeSetupPreviewEvent({id:'baby_cry',event_type:'custom',label:'Baby crying',icon_id:'cue_baby_cry'},0);
+  assert.equal(event.type,'custom');assert.equal(event.icon_id,'cue_baby_cry');
+  assert.equal(event.label,'Baby crying');assert.equal(event.priority_tier,0);
+  assert.equal(event.source,'mock');assert.equal(event.direction_degrees,null);
+});
+
+test('setup cannot finish while the receiver has unconfirmed preferences', async()=>{
+  const React=await import('react');const {renderToString}=await import('react-dom/server');
+  const {default:Onboarding}=await import('../../mana/AwareOnboarding.jsx');
+  const html=renderToString(React.createElement(Onboarding,{theme:'dark',firstUse:true,canFinish:false}));
+  assert.match(html,/<button[^>]*disabled=""[^>]*>Start Aware<\/button>/);
+  assert.ok(html.includes('Waiting for your latest preferences to save'));
+});

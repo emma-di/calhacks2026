@@ -146,3 +146,13 @@ See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluat
 Browser companion, mock scenarios and recorded-audio receiver integration are implemented; see [frontend evidence](frontend/README.md). Physical rendering depends
 on the remaining HW-01 confirmations; spatial localization depends on HW-02 and SPACE-01. Name setup can be designed now,
 but recognition depends on NAME-01–05. No live microphone session is required for the first UI pass.
+
+## October 25 prep completion
+
+- [x] SET-STREAMLINE-01 — Defaults-first onboarding, explicit catalog-priority preview, blank Ignore
+  preview and latest-save finish gating. 64 frontend tests/build and isolated browser persistence
+  checks pass. [Verification](docs/onboarding-review.md).
+- [ ] SET-LIVE-ACCEPT-01 — After hardware reconnect: chosen sound/Ignore → recognition → canonical
+  alert → browser and mounted OLED, including save/reload and receiver restart.
+- [ ] SPEECH-QUESTION-ACCEPT-01 — Validate commit3a593dc question-after-name output live; do not
+  infer physical speech accuracy from unit tests.

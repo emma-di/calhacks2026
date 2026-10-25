@@ -15,16 +15,12 @@ import {
   type ViewState,
 } from "./events";
 import { deliverEvent } from "./delivery";
-import { ProfileEdits } from "./profileSync";
+import { ProfileEdits, currentProfileSync, type ProfileSyncCheckpoint } from "./profileSync";
+export type { ProfileSyncStatus as SyncStatus } from "./profileSync";
 import type { ManaProfile } from "../../mana/AwareOnboarding.jsx";
 
 export type Source = "browser" | "receiver";
 export type Connection = "idle" | "connecting" | "connected" | "disconnected";
-export type SyncStatus =
-  | { kind: "local" }
-  | { kind: "saving" }
-  | { kind: "applied"; revision: number }
-  | { kind: "error"; message: string };
 
 const emptyView = (): ViewState => ({
   display_labels: null,
@@ -62,7 +58,11 @@ export function useSession(
   const engine = useRef(new AlertEngine());
   const [view, setView] = useState<ViewState>(emptyView);
   const [connection, setConnection] = useState<Connection>("idle");
-  const [sync, setSync] = useState<SyncStatus>({ kind: "local" });
+  const [syncCheckpoint, setSyncCheckpoint] = useState<ProfileSyncCheckpoint>({
+    status: { kind: "local" }, editRevision: 0, sessionId: null,
+  });
+  const sync = currentProfileSync(syncCheckpoint, editRevision, view.session_id,
+    source === "receiver" && connection === "connected");
   const [receiverProfile, setReceiverProfile] = useState<ManaProfile | null>(null);
   const edits = useRef(new ProfileEdits());
   const profileAdapter = useMemo(() => createAwareReceiverAdapter(request), []);
@@ -144,13 +144,18 @@ export function useSession(
   // automatically on connection or receiver restart. Only genuine user edits do.
   useEffect(() => {
     if (profile) edits.current.observe({ ...profile, display: { labels } }, editRevision);
-  }, [profile, labels, editRevision]);
+    // Invalidate the prior save before the queued read starts. The render-time
+    // revision gate above also closes the gap before this passive effect runs.
+    if (source === "receiver" && edits.current.dirty) setSyncCheckpoint({
+      status: { kind: "saving" }, editRevision, sessionId: view.session_id,
+    });
+  }, [profile, labels, editRevision, source, view.session_id]);
 
   const saves = useRef<Promise<unknown>>(Promise.resolve());
   useEffect(() => {
     if (source !== "receiver") {
       setReceiverProfile(null);
-      setSync({ kind: "local" });
+      setSyncCheckpoint({ status: { kind: "local" }, editRevision, sessionId: view.session_id });
       return;
     }
     if (connection !== "connected") return;
@@ -167,7 +172,7 @@ export function useSession(
           const pending = edits.current.prepare(remote as unknown as Record<string, unknown>);
           let applied = remote;
           if (edits.current.dirty) {
-            setSync({ kind: "saving" });
+            setSyncCheckpoint({ status: { kind: "saving" }, editRevision, sessionId: view.session_id });
             applied = await profileAdapter.saveEdits(pending.patch);
             edits.current.acknowledge(pending.version);
           }
@@ -175,10 +180,15 @@ export function useSession(
             // Never replace an edit that happened during the network request.
             if (!edits.current.dirty) setReceiverProfile((previous) =>
               JSON.stringify(previous) === JSON.stringify(applied) ? previous : applied);
-            setSync({ kind: "applied", revision: applied.revision });
+            setSyncCheckpoint({
+              status: edits.current.dirty ? { kind: "saving" } : { kind: "applied", revision: applied.revision },
+              editRevision, sessionId: view.session_id,
+            });
           }
         } catch (e) {
-          if (!cancelled) setSync({ kind: "error", message: (e as Error).message });
+          if (!cancelled) setSyncCheckpoint({
+            status: { kind: "error", message: (e as Error).message }, editRevision, sessionId: view.session_id,
+          });
         } finally {
           if (!cancelled) timer = setTimeout(reconcile, 2000);
         }

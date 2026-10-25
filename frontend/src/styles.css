@@ -1555,3 +1555,20 @@ code {
 .pi-microphones > .aside { margin:8px 0 0; }
 .pi-microphone-error { margin:12px 0 0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
 @media(max-width:560px) { .pi-microphone-channels { grid-template-columns:1fr; gap:20px; } }
+
+/* Setup starts with the useful defaults and one reachable primary action. */
+.setup-name-grid.is-single { grid-template-columns:1fr; }
+.setup-ready-sounds { list-style:none; padding:0; margin:16px 0; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:0 20px; }
+.setup-ready-sounds li { min-width:0; display:grid; grid-template-columns:22px minmax(0,1fr) auto; align-items:center; gap:10px; padding:12px 0; border-bottom:1px solid var(--line); font-size:14px; }
+.setup-ready-sounds .aside { margin:0; font-size:12px; }
+.setup-start-actions { display:flex; align-items:center; flex-wrap:wrap; gap:12px 18px; margin:20px 0; }
+.setup-start-actions .aside { margin:0; }
+.setup-priority-preview { display:flex; gap:20px; align-items:center; margin:0 0 20px; padding:16px; background:var(--raise); border-radius:8px; }
+.setup-priority-preview .oled-bitmap { flex:0 0 160px; width:160px; height:80px; max-width:100%; aspect-ratio:2/1; }
+.setup-priority-preview figcaption { font-size:14px; color:var(--muted); line-height:1.5; }
+@media (max-width:540px) {
+  .setup-ready-sounds { grid-template-columns:1fr; }
+  .setup-priority-preview { align-items:flex-start; flex-direction:column; gap:12px; }
+  .setup-priority-preview .oled-bitmap { flex-basis:auto; }
+  .setup-start-actions { align-items:stretch; flex-direction:column; }
+}

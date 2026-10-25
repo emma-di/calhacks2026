@@ -463,6 +463,17 @@ export function AwareCuePreview({
   );
 }
 
+// Local visual preview only: selecting a priority never sends a fake recognition event.
+export function makeSetupPreviewEvent(sound, tier) {
+  const type = sound.event_type || sound.key || 'custom';
+  return {
+    ...makeMock(type === 'custom' ? 'knock' : type, tier),
+    type, label:sound.label, icon_id:sound.icon_id || sound.icon,
+    ...(type === 'custom' ? {custom_sound_id:sound.id || 'setup-preview'} : {}),
+    event_id:'setup-priority-preview',
+  };
+}
+
 export default function AwareOnboarding({ onChange, onComplete, theme, receiverProfile, firstUse = false, canFinish = true } = {}) {
   const isDark = theme === "dark";
   const connectClaude = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("connect") === "claude";
@@ -696,20 +707,28 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const update = (patch) => setDraft((d) => Object.assign({}, d, patch));
   const updateDisplay = (patch) =>
     setDisplay((d) => sanitizeAwareDisplay(Object.assign({}, d, patch)));
-  const tierText = (v) => awareTierLabel(v) + " (" + v + ")";
+  const tierText = (v) => awareTierLabel(v);
 
   const startRule = (key) => {
-    setPending({ key, tier: null });
+    setPending({ key, tier: resolveAwareTier(draft,key).tier });
     setQuery("");
   };
   const confirmRule = () => {
     if (!pending || !isAwareTier(pending.tier)) return;
-    if (pending.cue_id) {
+    if (pending.model_label) {
+      const sound=catalogLabels.get(pending.model_label);
+      if (!sound) return;
+      setDraft((d)=>({...d,custom_rules:sanitizeCustomSounds([...(d.custom_rules ?? []),{
+        id:crypto.randomUUID(),label:sound.name,tier:pending.tier,status:'recognized',
+        model_labels:[sound.label],icon:sound.icon,
+      }])}));
+      setCustomNote(`${sound.name} added. You can change its priority below.`);
+    } else if (pending.cue_id) {
       const cue = cuesById.get(pending.cue_id);
       if (!cue || cue.experimental || cue.event_type === "name_called") return;
       setDraft((d) => applyCuratedRule(d, pending.cue_id, pending.tier, crypto.randomUUID()));
       if (cue.event_type !== "custom") setPreviewKey(cue.event_type);
-      setCustomNote(`${cue.label} priority saved. Recognition sensitivity still needs real-room testing.`);
+      setCustomNote(`${cue.label} saved. You can change its priority below.`);
     } else {
       setDraft((d) => setAwareRule(d, pending.key, pending.tier));
       setPreviewKey(pending.key);
@@ -739,7 +758,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const previewResolved = resolveAwareTier(draft, previewEv.key);
   const motionOn =
     display.motion === "pulse" && !reducedMotion && render === "browser";
-  const pendingEv = pending ? (pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
+  const pendingModel = pending?.model_label ? catalogLabels.get(pending.model_label) : null;
+  const pendingEv = pending ? (pendingModel ? {...pendingModel,label:pendingModel.name,event_type:'custom',default_tier:2}
+    : pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
+  const readyToFinish = canFinish && !pending;
 
   return (
     <div
@@ -778,7 +800,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           {firstUse ? "Set up Aware" : "Choose your sounds"}
         </h1>
         <p style={{ fontSize: 16, margin: "8px 0 0" }}>
-          Common alerts are ready. Add your name and choose sounds that matter.
+          Start with useful defaults. Add only what matters to you.
           No sound recordings needed.
         </p>
         <div
@@ -789,95 +811,23 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           <div>{receiverProfile ? "Your choices save automatically." : statusText}</div>
         </div>
 
-        {/* Name */}
-        <section style={s.section}>
-          <details open={firstUse}>
-            <summary style={s.summary}>
-              Your name (optional){" "}
-              <span
-                style={{
-                  fontWeight: 400,
-                  fontSize: 15,
-                  color: p.muted,
-                  marginLeft: 6,
-                }}
-              >
-                {primary ? "Name configured" : "Off"}
-              </span>
-            </summary>
-            <div className="setup-name-grid">
-            <div>
-              <label htmlFor={uid + "-name"} style={s.label}>
-                Name
-              </label>
-              <input
-                id={uid + "-name"}
-                type="text"
-                autoComplete="given-name"
-                value={draft.name}
-                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
-                aria-describedby={uid + "-name-help"}
-                style={s.input}
-              />
-              <p id={uid + "-name-help"} style={s.help}>
-                {primary
-                  ? (draft.name_enabled ? "Used for your name alert. No recording needed." : "Your name is saved; name alerts are turned off.")
-                  : "Optional. Leave blank to keep name alerts off."}
-              </p>
-            </div>
-            <div>
-              <label htmlFor={uid + "-aliases"} style={s.label}>
-                Nicknames
-              </label>
-              <input
-                id={uid + "-aliases"}
-                type="text"
-                value={draft.aliasesText}
-                onChange={(e) => update({ aliasesText: e.target.value })}
-                aria-describedby={uid + "-aliases-help"}
-                style={s.input}
-              />
-              <p id={uid + "-aliases-help"} style={s.help}>
-                {!primary && profile.name_detection.aliases.length
-                  ? "These are kept, but name detection stays off until you add a name."
-                  : "Separate nicknames with commas, e.g. Sam, Sammy."}
-              </p>
-            </div>
-            </div>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={draft.questions}
-                onChange={(e) => update({ questions: e.target.checked })}
-                aria-describedby={uid + "-questions-help"}
-                style={{ width: 18, height: 18, accentColor: p.ink }}
-              />
-              Show what someone asks after your name
-            </label>
-            <p id={uid + "-questions-help"} style={s.help}>
-              After your name or “hey”, the next few seconds are transcribed on this laptop and a question
-              appears on the glasses. Audio is never saved.
-            </p>
-            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions ? "pointer" : "default", opacity: draft.questions ? 1 : .55 }}>
-              <input
-                type="checkbox"
-                checked={draft.question_paraphrase}
-                disabled={!draft.questions}
-                onChange={(e) => update({ question_paraphrase: e.target.checked })}
-                aria-describedby={uid + "-paraphrase-help"}
-                style={{ width: 18, height: 18, accentColor: p.ink }}
-              />
-              Shorten questions with Claude
-            </label>
-            <p id={uid + "-paraphrase-help"} style={s.help}>
-              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
-              questions are shortened on this laptop.
-            </p>
-          </details>
-        </section>
-
         {/* Preset */}
         <section style={s.section}>
+          <h2 style={s.h2}>Your everyday alerts</h2>
+          <p style={s.lead}>Already set up. Change any sound whenever you like.</p>
+          <ul className="setup-ready-sounds" aria-label="Current common alert priorities">
+            {['smoke_alarm','siren','knock','bell'].map((key)=>{
+              const sound=awareEvent(key), resolved=resolveAwareTier(draft,key);
+              return <li key={key}><SoundIcon type={key} size={22}/><span>{sound.label}</span>
+                <span className="aside">{awareTierLabel(resolved.tier)}</span></li>;
+            })}
+          </ul>
+          <div className="setup-start-actions">
+            <button type="button" onClick={onComplete} disabled={!readyToFinish} style={{...s.primaryBtn,opacity:readyToFinish?1:.55}}>
+              {firstUse ? 'Start Aware' : 'Go to live view'}
+            </button>
+            <span style={s.help}>{pending ? 'Add or cancel this sound before starting.' : canFinish ? 'You can personalize more below.' : 'Waiting for your latest preferences to save…'}</span>
+          </div>
           <details>
           <summary style={s.summary}>{preset.label} defaults · change or review</summary>
           <p style={s.help}>Fire / smoke alarms, knocks, bells and your configured name already have priorities.</p>
@@ -960,18 +910,97 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           </details>
         </section>
 
-        <details style={s.section} className="setup-ai-disclosure" open={connectClaude}>
-          <summary style={s.summary}>Get sound suggestions from Claude (optional)</summary>
-          <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
-            setDraft((d) => applySuggestedCues(d, rows));
-            setCustomNote("Suggested sounds added. Your previous choices were kept.");
-          }} />
-        </details>
+        {/* Name */}
+        <section style={s.section}>
+          <details open={firstUse}>
+            <summary style={s.summary}>
+              Your name (optional){" "}
+              <span
+                style={{
+                  fontWeight: 400,
+                  fontSize: 15,
+                  color: p.muted,
+                  marginLeft: 6,
+                }}
+              >
+                {primary ? "Name configured" : "Off"}
+              </span>
+            </summary>
+            <div className={`setup-name-grid ${!primary && !draft.aliasesText ? 'is-single' : ''}`}>
+            <div>
+              <label htmlFor={uid + "-name"} style={s.label}>
+                Name
+              </label>
+              <input
+                id={uid + "-name"}
+                type="text"
+                autoComplete="given-name"
+                value={draft.name}
+                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
+                aria-describedby={uid + "-name-help"}
+                style={s.input}
+              />
+              <p id={uid + "-name-help"} style={s.help}>
+                {primary
+                  ? (draft.name_enabled ? "Used for your name alert. No recording needed." : "Your name is saved; name alerts are turned off.")
+                  : "Optional. Leave blank to keep name alerts off."}
+              </p>
+            </div>
+            <div hidden={!primary && !draft.aliasesText}>
+              <label htmlFor={uid + "-aliases"} style={s.label}>
+                Nicknames
+              </label>
+              <input
+                id={uid + "-aliases"}
+                type="text"
+                value={draft.aliasesText}
+                onChange={(e) => update({ aliasesText: e.target.value })}
+                aria-describedby={uid + "-aliases-help"}
+                style={s.input}
+              />
+              <p id={uid + "-aliases-help"} style={s.help}>
+                {!primary && profile.name_detection.aliases.length
+                  ? "These are kept, but name detection stays off until you add a name."
+                  : "Separate nicknames with commas, e.g. Sam, Sammy."}
+              </p>
+            </div>
+            </div>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={draft.questions}
+                onChange={(e) => update({ questions: e.target.checked })}
+                aria-describedby={uid + "-questions-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Show what someone asks after your name
+            </label>
+            <p id={uid + "-questions-help"} style={s.help}>
+              After your name or “hey”, the next few seconds are transcribed on this laptop and a question
+              appears on the glasses. Audio is never saved.
+            </p>
+            <label style={{ display: "flex", alignItems: "center", gap: 10, minHeight: 40, marginTop: 6, cursor: draft.questions ? "pointer" : "default", opacity: draft.questions ? 1 : .55 }}>
+              <input
+                type="checkbox"
+                checked={draft.question_paraphrase}
+                disabled={!draft.questions}
+                onChange={(e) => update({ question_paraphrase: e.target.checked })}
+                aria-describedby={uid + "-paraphrase-help"}
+                style={{ width: 18, height: 18, accentColor: p.ink }}
+              />
+              Shorten questions with Claude
+            </label>
+            <p id={uid + "-paraphrase-help"} style={s.help}>
+              Optional. Sends only the question's text to Anthropic, using the key connected below. Without it,
+              questions are shortened on this laptop.
+            </p>
+          </details>
+        </section>
 
         {/* Rules */}
         <section style={s.section} aria-labelledby={uid + "-rules-h"}>
           <h2 id={uid + "-rules-h"} style={s.h2}>
-            Find a sound
+            Add sounds that matter
           </h2>
           <p style={s.lead}>
             Choose from built-in recognition. You only need to add sounds you want to personalize.
@@ -1044,15 +1073,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   {catalogMatches.map((sound) => <li key={sound.label} style={{padding:12}}>
                     <button type="button" style={s.textBtn} disabled={(draft.custom_rules ?? []).length >= 100}
                       onClick={() => {
-                        const next = sanitizeCustomSounds([...(draft.custom_rules ?? []), {
-                          id:crypto.randomUUID(), label:sound.name, tier:2, status:"recognized",
-                          model_labels:[sound.label], icon:sound.icon,
-                        }]);
-                        setDraft((d) => ({...d, custom_rules:next}));
-                        setCustomNote(`${sound.name} added from the model catalog. Choose its priority below; recognition sensitivity is provisional.`);
+                        setPending({model_label:sound.label,tier:2});
                         setQuery("");
                       }}>
-                      Add {sound.name} · {sound.category}
+                      Choose {sound.name} · {sound.category}
                     </button>
                   </li>)}
                 </ul>}
@@ -1187,6 +1211,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 borderRadius: 12,
               }}
             >
+              <figure className="setup-priority-preview">
+                <Oled event={makeSetupPreviewEvent(pendingEv,pending.tier)} labels={display.labels}/>
+                <figcaption>{awareTierLabel(pending.tier)} · {AWARE_TIERS.find((t)=>t.value===pending.tier)?.hint}</figcaption>
+              </figure>
               <fieldset
                 style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}
               >
@@ -1194,7 +1222,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   Priority for {pendingEv.label}
                 </legend>
                 <p style={Object.assign({}, s.help, { marginTop: 2 })}>
-                  {pending.cue_id ? `Suggested: ${tierText(pendingEv.default_tier)}.` : `${preset.label} preset: ${tierText(presetTiers[pendingEv.key])}.`}
+                  {pending.cue_id || pending.model_label ? `Suggested: ${tierText(pendingEv.default_tier)}.` : `${preset.label} preset: ${tierText(presetTiers[pendingEv.key])}.`}
                   {pendingEv.hint ? " " + pendingEv.hint : ""}
                 </p>
                 <div style={Object.assign({}, s.group, { marginTop: 12 })}>
@@ -1218,7 +1246,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                               fontWeight: on ? 600 : 500,
                             }}
                           >
-                            {t.label} ({t.value})
+                            {t.label}
                           </span>
                           <span
                             style={{
@@ -1256,7 +1284,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       : { opacity: 0.4, cursor: "not-allowed" },
                   )}
                 >
-                  Add rule
+                  {pendingEv.event_type === 'custom' ? 'Add sound' : 'Save priority'}
                 </button>
                 <button
                   type="button"
@@ -1421,6 +1449,14 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             </ul>
           </section>
         )}
+
+        <details style={s.section} className="setup-ai-disclosure" open={connectClaude}>
+          <summary style={s.summary}>Get sound suggestions from Claude (optional)</summary>
+          <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
+            setDraft((d) => applySuggestedCues(d, rows));
+            setCustomNote("Suggested sounds added. Your previous choices were kept.");
+          }} />
+        </details>
 
         <section style={s.section}>
           <details>
@@ -1748,8 +1784,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               marginTop: 20,
             }}
           >
-            <button type="button" onClick={onComplete} disabled={!canFinish} style={{...s.primaryBtn,opacity:canFinish?1:.55}}>
-              {firstUse ? "Start Aware" : "Go to live view"}
+            <button type="button" onClick={onComplete} disabled={!readyToFinish} style={{...s.quietBtn,opacity:readyToFinish?1:.55}}>
+              Open live view
             </button>
             {!canFinish && <p style={s.help}>Your preferences haven’t finished syncing. Reconnect or wait for Saved before starting.</p>}
             {!confirmReset ? (

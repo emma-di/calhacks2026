@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { ProfileEdits } from "./profileSync.ts";
+import { ProfileEdits, currentProfileSync, type ProfileSyncCheckpoint } from "./profileSync.ts";
 
 const cached = () => ({
   name_detection: { enabled: false, primary_name: "", aliases: [] },
@@ -67,4 +67,67 @@ test("an edit during an in-flight save remains pending after the older save comp
   assert.deepEqual(second.profile.display, { labels: false });
   edits.acknowledge(second.version);
   assert.equal(edits.dirty, false);
+});
+
+
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((done) => { resolve = done; });
+  return { promise, resolve };
+}
+
+test("finish stays blocked from the edit render through pending GET and PUT, until that edit saves", async () => {
+  const edits = new ProfileEdits();
+  edits.observe(cached(), 0);
+  let editRevision = 0;
+  let checkpoint: ProfileSyncCheckpoint = {
+    status: {kind:"applied", revision:8}, editRevision:0, sessionId:"receiver-a",
+  };
+  const canFinish = () => currentProfileSync(checkpoint, editRevision, "receiver-a", true).kind === "applied";
+  assert.equal(canFinish(), true);
+
+  // This is the render before passive effects or the initial read execute.
+  editRevision = 1;
+  assert.equal(canFinish(), false);
+  edits.observe({...cached(), display:{labels:true}}, editRevision);
+  checkpoint = {status:{kind:"saving"}, editRevision, sessionId:"receiver-a"};
+  const read = deferred<ReturnType<typeof receiver>>();
+  const write = deferred<ReturnType<typeof receiver>>();
+  let writeStarted = false;
+  const save = (async () => {
+    const remote = await read.promise;
+    const pending = edits.prepare(remote);
+    writeStarted = true;
+    const applied = await write.promise;
+    edits.acknowledge(pending.version);
+    checkpoint = {status:{kind:"applied",revision:applied.revision}, editRevision:1, sessionId:"receiver-a"};
+  })();
+  assert.equal(writeStarted, false);
+  assert.equal(canFinish(), false);
+  read.resolve(receiver());
+  await Promise.resolve();
+  assert.equal(writeStarted, true);
+  assert.equal(canFinish(), false);
+  write.resolve({...receiver(),revision:9});
+  await save;
+  assert.equal(edits.dirty,false);
+  assert.equal(canFinish(),true);
+});
+
+test("stale successful saves or errors cannot confirm a newer edit, even before its effect runs", () => {
+  const olderSuccess: ProfileSyncCheckpoint = {
+    status:{kind:"applied",revision:9}, editRevision:1, sessionId:"receiver-a",
+  };
+  assert.deepEqual(currentProfileSync(olderSuccess,2,"receiver-a",true),{kind:"saving"});
+  const olderError: ProfileSyncCheckpoint = {...olderSuccess,status:{kind:"error",message:"Old request failed"}};
+  assert.deepEqual(currentProfileSync(olderError,2,"receiver-a",true),{kind:"saving"});
+  const latestError: ProfileSyncCheckpoint = {...olderError,editRevision:2};
+  assert.deepEqual(currentProfileSync(latestError,2,"receiver-a",true),latestError.status);
+});
+
+test("receiver restart and disconnection invalidate the previous finish confirmation", () => {
+  const saved: ProfileSyncCheckpoint = {status:{kind:"applied",revision:8},editRevision:0,sessionId:"receiver-a"};
+  assert.deepEqual(currentProfileSync(saved,0,"receiver-b",true),{kind:"saving"});
+  assert.deepEqual(currentProfileSync(saved,0,"receiver-a",false),{kind:"local"});
+  assert.equal(currentProfileSync({...saved,sessionId:"receiver-b"},0,"receiver-b",true).kind,"applied");
 });

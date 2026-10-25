@@ -120,3 +120,30 @@ verified. They do not prove a physical two-microphone path. The current next lan
 validating the **two Pi microphones first**; spatial estimation comes afterward. The root agent owns
 that hardware work. Verify device enumeration, actual captured channels and synchronization before
 claiming direction support. Do not deploy inference models or website code onto the Pi.
+
+
+## October 25: defaults-first setup and save confirmation
+
+Supersedes the earlier layout/next-lane snapshot above. Hardware is disconnected for assembly;
+this review used an isolated receiver and temporary profile, without microphone capture.
+
+- Everyday defaults and Start Aware now appear before optional name, search and Claude suggestions.
+- Both curated and raw model-catalog choices open an explicit priority chooser before saving.
+- The chooser previews the actual cue at the OLED aspect ratio; Ignore renders blank. This local
+  preview never publishes a fake recognition event.
+- Start is disabled while a sound choice is unfinished or the latest receiver save is unconfirmed.
+  Revision/session-aware sync prevents an older successful save from confirming a newer edit.
+- Browser verification: name saved; Baby crying set to Ignore; Accordion set to Notify; both
+  persisted after the Saved confirmation and reload; Start opened Live. Reloading before a pending
+  save finishes can still abandon that save. Wait for confirmation.
+
+Final combined checks: 176 Python tests, 64 frontend tests and the production build pass.
+Python HTTP tests required local socket access outside the restricted sandbox. Visual inspection at desktop1440, tablet768 and
+phone390 pixels showed no horizontal overflow or console errors. The inspector reported zero
+failures and one below-fold warning: optional customization intentionally continues below the
+first viewport while defaults and the primary action remain visible. Existing brand cream text
+and hairline borders were allowed. Local artifacts:
+/tmp/aware-onboarding-streamlined-review-final/ (report.json and viewport screenshots).
+
+The concurrent question-after-name feature is checkpointed separately in commit3a593dc. Its
+physical speech-to-OLED acceptance remains a live hardware test, not a result of this UI review.

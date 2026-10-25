@@ -493,3 +493,15 @@ liveness did not prove changed thresholds loaded. Spatial accuracy remains unval
   "Dog barking" live for cats, pigs, horses and chewing. The guarded bark rule remains (docs/dog-label-audit.md).
 - The name spotter also listens for attention calls ("Someone's calling") and "watch out" / "look out"
   (urgent "Watch out!"). See docs/design-decisions.md. Name cues now carry Pi stereo direction.
+
+
+## October 25: offline setup cleanup and John handoff
+
+- Hardware disconnected for assembly; no fresh capture started for UI verification.
+- Defaults and Start precede optional configuration. Catalog sounds require a priority choice,
+  with a local OLED preview. Ignore is blank; choices save only after confirmation.
+- Finish waits for the latest edit's receiver confirmation, including reconnect/session changes.
+- Isolated browser verified Baby crying Ignore + Accordion Notify persistence after Saved/reload.
+- John owns SPACE-PHONE-01; see HANDOFF-JOHN.md and phone feasibility doc. Loose pocket orientation
+  and independent clocks mean this is an experiment, not a ready third-mic triangulation feature.
+- Concurrent Claude question feature is checkpointed in3a593dc; live acceptance still pending.
