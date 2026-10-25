@@ -473,3 +473,17 @@ Two physical alarm trials are NOT a direction acceptance pass: first mostly unkn
 right windows but left unreliable. Latest -75dBFS spatial floor change needs a fresh physical trial.
 51 regression tests +58 frontend tests/build pass. Receiver8766 not restarted (session key preserved);
 phone spatial disconnected. See docs/pi-spatial-live.md for thresholds, evidence and limits.
+
+## Live OLED, eight rough bearings and centered balance — October25
+
+User confirmed actual live sound alerts on the real OLED. Numeric trial matched149/149 sampled
+state/display event IDs; Fire/smoke showed0 and+45 degrees, but direction remained too often front.
+User approved eight buckets and assuming front when unresolved. Implementation now uses front-branch
+TDOA angle, median/45-degree buckets, explicit assumed-front metadata and level-only±45 fallback.
+No rear-angle/distance claim. See docs/rough-front-angles.md for current policy and limits.
+Dancing Bear PID1076 was SIGSTOP-paused at user's request; OLED client follows8766 over SSH.
+No optics flips yet; --flip-x/--flip-y are ready for the mounted reflection review.
+Centered reference measured−0.89dB left-minus-right; local numeric config sets gain_offset_db−0.89
+and margin_db0.75. Active worker telemetry confirms those values. Old SIGINT-ignored worker was
+actually replaced; explicit SIGINT/SIGTERM handlers now make future reloads graceful. Earlier feed
+liveness did not prove changed thresholds loaded. Spatial accuracy remains unvalidated.

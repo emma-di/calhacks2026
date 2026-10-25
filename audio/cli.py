@@ -285,6 +285,11 @@ def main():
                 spatial_frames = spatial_frames[-((model.window_samples-model.hop_samples)//block_samples):]
 
 if __name__ == '__main__':
+    import signal
+    # Noninteractive launchers may inherit SIGINT ignored. Always allow deliberate,
+    # graceful worker reloads so PiInput releases its SSH stream and meter port.
+    signal.signal(signal.SIGINT, signal.default_int_handler)
+    signal.signal(signal.SIGTERM, signal.default_int_handler)
     try:
         main()
     except KeyboardInterrupt:

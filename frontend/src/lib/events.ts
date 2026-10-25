@@ -14,6 +14,7 @@ export type EventType =
   | "custom";
 export interface SoundEvent {
   target_event_id?: string;
+  matched_alias_id?: string;
   schema_version: number;
   event_id: string;
   type: EventType;

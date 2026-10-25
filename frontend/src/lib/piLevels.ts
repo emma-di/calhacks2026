@@ -16,7 +16,7 @@ export interface PiLevelsSnapshot {
   levels: PiChannelLevel[];
   error: string | null;
   inference_input?: "levels_only" | "pi_stereo";
-  spatial?: { side: "left" | "right" | null; direction_degrees: -90 | 90 | null;
+  spatial?: { side: "left" | "right" | "front" | null; direction_degrees: number | null;
     direction_confidence: number | null; reason: string };
 }
 export interface PiLevelsState {
@@ -37,9 +37,13 @@ export function parsePiLevels(input: unknown): PiLevelsSnapshot {
   const value = input as Record<string, unknown>;
   const spatial = value.spatial as PiLevelsSnapshot["spatial"];
   if (spatial !== undefined && (!spatial || typeof spatial !== "object" ||
-      ![null,"left","right"].includes(spatial.side) || typeof spatial.reason !== "string" || spatial.reason.length > 100 ||
+      ![null,"left","right","front"].includes(spatial.side) || typeof spatial.reason !== "string" || spatial.reason.length > 100 ||
       (spatial.side === null ? spatial.direction_degrees !== null || spatial.direction_confidence !== null :
-        spatial.direction_degrees !== (spatial.side === "left" ? -90 : 90) || !finite(spatial.direction_confidence, 0, 1)))) {
+        !finite(spatial.direction_degrees,-90,90) ||
+        (spatial.side === "left" && (spatial.direction_degrees ?? 0)>=0) ||
+        (spatial.side === "right" && (spatial.direction_degrees ?? 0)<=0) ||
+        (spatial.side === "front" && spatial.direction_degrees !== 0) ||
+        !finite(spatial.direction_confidence, 0, 1)))) {
     throw new Error("Invalid Pi spatial evidence");
   }
   if (value.schema_version !== 1 || value.sample_rate !== 48000 || value.channels !== 2 ||

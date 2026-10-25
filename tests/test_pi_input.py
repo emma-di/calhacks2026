@@ -1,8 +1,11 @@
 import queue
 import unittest
+import tempfile
+import json
+from pathlib import Path
 import numpy as np
 
-from audio.pi_input import RecognitionState, StereoResampler
+from audio.pi_input import RecognitionState, StereoResampler, load_calibration
 
 
 def pcm(data):
@@ -10,6 +13,16 @@ def pcm(data):
 
 
 class PiInputTests(unittest.TestCase):
+    def test_numeric_calibration_is_bounded_and_invalid_values_fall_back(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path=Path(folder)/'calibration.json'
+            self.assertEqual(load_calibration(path),(0.,1.25))
+            path.write_text(json.dumps(dict(schema_version=1,gain_offset_db=-.89,margin_db=.75)))
+            self.assertEqual(load_calibration(path),(-.89,.75))
+            for value in [[],None,dict(schema_version=1,gain_offset_db=100,margin_db=.75),
+                          dict(schema_version=1,gain_offset_db=0,margin_db=0)]:
+                path.write_text(json.dumps(value))
+                self.assertEqual(load_calibration(path),(0.,1.25))
     def test_chunked_resampling_matches_continuous_and_correct_rate(self):
         rng = np.random.default_rng(12)
         stereo = rng.normal(0, .1, (9600, 2))

@@ -6,11 +6,11 @@ const sample = () => ({ schema_version:1, sample_rate:48000, channels:2, sequenc
   levels:[{channel:0,rms_dbfs:-30,peak_dbfs:-10,clip_fraction:0},{channel:1,rms_dbfs:-120,peak_dbfs:-110,clip_fraction:0}], error:null });
 
 test("Pi spatial evidence validates side/angle pairs and uncertainty", () => {
-  for (const [side,degrees] of [["left",-90],["right",90],[null,null]]) {
+  for (const [side,degrees] of [["left",-90],["left",-22.5],["right",67.5],["right",90],["front",0],[null,null]]) {
     const spatial={side,direction_degrees:degrees,direction_confidence:side ? .7 : null,reason:"test"};
     assert.deepEqual(parsePiLevels({...sample(),spatial}).spatial,spatial);
   }
-  for (const spatial of [null,{side:"front",direction_degrees:0,direction_confidence:.9,reason:"bad"},
+  for (const spatial of [null,{side:"front",direction_degrees:45,direction_confidence:.9,reason:"bad"},
     {side:"left",direction_degrees:90,direction_confidence:.9,reason:"bad"},
     {side:null,direction_degrees:null,direction_confidence:.9,reason:"bad"}]) {
     assert.throws(()=>parsePiLevels({...sample(),spatial}));

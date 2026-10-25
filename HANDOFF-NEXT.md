@@ -5,6 +5,11 @@ signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/produ
 
 ## Latest: two Pi microphones verified — October 25
 
+**Current live spatial settings:** [eight rough buckets / assumed front](docs/rough-front-angles.md).
+Real Pi microphone→model→browser→OLED path exercised; user confirmed display works.149/149 sampled
+state/display event IDs matched. Spatial accuracy is NOT validated; latest1.25dB sensitivity needs
+room acceptance. Dancing Bear paused, OLED client following8766, repeat suppression OFF for testing.
+
 **Next: [Pi recognition + left/right implementation handoff](docs/pi-spatial-handoff.md).**
 Pi is now the primary recognition input; Mac mic is explicit fallback only. Current command:
 `audio.cli mic --pi pi@glasses-pi.local --endpoint http://127.0.0.1:8766/events`.

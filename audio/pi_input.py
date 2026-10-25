@@ -2,12 +2,28 @@
 import queue
 import threading
 import time
+import json
+import math
+from pathlib import Path
 
 import numpy as np
 from scipy.signal import firwin, lfilter
 
 from audio.pi_levels import CaptureBridge, LevelState, create_server
-from audio.pi_spatial import frame_evidence, window_evidence, unknown
+from audio.pi_spatial import frame_evidence, window_evidence, unknown, assumed_front
+
+
+def load_calibration(path=None):
+    path = Path(path) if path else Path(__file__).resolve().parent.parent/'.cache'/'pi-spatial-calibration.json'
+    try:
+        value=json.loads(path.read_text())
+        gain,margin=value['gain_offset_db'],value['margin_db']
+        if (value.get('schema_version')==1 and type(gain) in (int,float) and math.isfinite(gain)
+                and abs(gain)<=12 and type(margin) in (int,float) and math.isfinite(margin) and .25<=margin<=6):
+            return float(gain),float(margin)
+    except (OSError,ValueError,KeyError,TypeError):
+        pass
+    return 0.,1.25
 
 
 class StereoResampler:
@@ -42,6 +58,7 @@ class RecognitionState(LevelState):
         self.spatial = unknown('waiting_for_audio')
         self.spatial_frames = []
         self.recover_until = None
+        self.gain_offset_db,self.margin_db=load_calibration()
 
     def reset_audio(self):
         self.generation += 1
@@ -76,9 +93,13 @@ class RecognitionState(LevelState):
             self.reset_audio()
             self.last_capture = captured
         block = self.resampler.convert(pcm)
-        evidence = frame_evidence(pcm)
+        evidence = frame_evidence(pcm,gain_offset_db=self.gain_offset_db,margin_db=self.margin_db)
         self.spatial_frames = (self.spatial_frames + [evidence])[-5:]
         self.spatial = window_evidence(self.spatial_frames)
+        if any(frame['side'] is not None or frame['reason'] in
+               ('balanced_or_ambiguous_delay','inconsistent_channels','timing_level_conflict')
+               for frame in self.spatial_frames):
+            self.spatial = assumed_front(self.spatial)
         self.pending.put_nowait((block, captured, int(time.time() * 1000), self.generation, evidence))
         super().update(pcm)
 
@@ -86,6 +107,7 @@ class RecognitionState(LevelState):
         value = super().snapshot()
         value['spatial'] = dict(self.spatial) if value['connected'] else unknown('offline')
         value['spatial_frame'] = dict(self.spatial_frames[-1]) if value['connected'] and self.spatial_frames else None
+        value['spatial_calibration'] = dict(gain_offset_db=self.gain_offset_db,margin_db=self.margin_db)
         return value
 
 
