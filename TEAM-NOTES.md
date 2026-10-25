@@ -411,3 +411,27 @@ choices require no teaching. Custom primary defaults are 0.15 and related-label 
 train horn accepts strong truck/generic horn evidence with uncertain wording, not a definite train.
 Exact selected categories win over subtype fallbacks. Existing five selections updated; MacBook
 mic currently device 1 (phone device 0). See docs/recall-first-matching.md for tests and limitations.
+
+## First-use setup, Claude review and handoff to Pi microphones — October 24
+
+Setup now starts with optional typed name/nicknames, already-active defaults and sound search; no
+training recordings are required. Start Aware marks completion locally and opens Live. Optional
+personal recordings are separated into Preferences. Ambient is a quiet unframed 2-second icon;
+16-position direction triangles and Mac inference/Pi display split remain unchanged.
+
+Optional Claude suggestions now call the real Haiku 4.5 API through the receiver. Session keys are
+kept in receiver memory only and configured from a localhost Origin; no key belongs in Git.
+GET/POST /setup/suggestions provides availability/reviewable suggestions; POST/DELETE
+/setup/suggestions/key manages the memory override. Complete JSON fences are safely unwrapped;
+malformed output, unsupported IDs/tiers and provider failures retain strict typed error codes.
+
+Root verified an actual external sound-only response (Doorbell (2), Rain (1), Baby crying (3)), profile
+unchanged, and an actual browser Review suggested sounds result without Apply. Checkpoint rerun:
+132 Python/51 frontend tests + build pass; isolated Taste desktop/tablet/phone inspection gives
+0 failures / 0 warnings and no overflow. Screenshots reviewed; minor mobile density notes are in
+docs/onboarding-review.md. No live API key, user description or provider response body was recorded
+in these docs. This docs review did not change live settings or start microphone capture.
+
+User's latest priority is both Pi microphones first, then spatial work. Root owns the physical
+capture checks. UI/provider verification is not evidence that physical Pi mics are connected or
+synchronized. Only display/capture endpoint code belongs on Pi; inference remains on Mac.

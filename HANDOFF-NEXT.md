@@ -1,7 +1,27 @@
-# Resume here — October 24 (end of Claude session)
+# Resume here — October 24 software checkpoint
 
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
+
+## Latest: first-use setup and real Claude suggestions
+
+First use now opens Preferences with optional typed name/nicknames up front, defaults already set,
+and supported-sound search for exceptions. Start Aware saves a local completion flag and opens Live;
+later visits open Live, with explicit view links preserved. No training or personal recordings are
+required. Optional recordings are in Preferences, outside Live. Ambient remains a frame-free icon
+for two seconds; centered icons and existing 16-position triangles remain unchanged.
+
+Claude suggestions are implemented through the local receiver with review before Apply. User-entered
+API keys stay in receiver memory only; localhost-origin key routes are required. Haiku 4.5 was verified
+with an actual external sound-only request (Doorbell (2), Rain (1), Baby crying (3)), plus a browser review result;
+neither test applied suggestions to the live profile. Strict bounded parsing accepts a complete JSON
+fence but rejects malformed/unsupported output with specific error codes. Never commit credentials.
+
+Fresh verification: 132 Python tests, 51 frontend tests, production build pass. Taste inspector at
+1440/768/390 passes with 0 failures / 0 warnings with no horizontal overflow; screenshots reviewed. Details and minor
+phone polish: [onboarding review](docs/onboarding-review.md). UI source is built; physical two-mic
+capture is not certified by these checks. Current user priority: connect/test both Pi mics first;
+root agent owns hardware, spatial work follows verified capture. Inference stays on Mac.
 
 ## Latest: recall-first selected sounds
 

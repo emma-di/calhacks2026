@@ -4,6 +4,26 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Latest: first-use setup and real Claude suggestions
+
+First use now opens Preferences with optional typed name/nicknames up front, defaults already set,
+and supported-sound search for exceptions. Start Aware saves a local completion flag and opens Live;
+later visits open Live, with explicit view links preserved. No training or personal recordings are
+required. Optional recordings are in Preferences, outside Live. Ambient remains a frame-free icon
+for two seconds; centered icons and existing 16-position triangles remain unchanged.
+
+Claude suggestions are implemented through the local receiver with review before Apply. User-entered
+API keys stay in receiver memory only; localhost-origin key routes are required. Haiku 4.5 was verified
+with an actual external sound-only request (Doorbell (2), Rain (1), Baby crying (3)), plus a browser review result;
+neither test applied suggestions to the live profile. Strict bounded parsing accepts a complete JSON
+fence but rejects malformed/unsupported output with specific error codes. Never commit credentials.
+
+Fresh verification: 132 Python tests, 51 frontend tests, production build pass. Taste inspector at
+1440/768/390 passes with 0 failures / 0 warnings with no horizontal overflow; screenshots reviewed. Details and minor
+phone polish: [onboarding review](docs/onboarding-review.md). UI source is built; physical two-mic
+capture is not certified by these checks. Current user priority: connect/test both Pi mics first;
+root agent owns hardware, spatial work follows verified capture. Inference stays on Mac.
+
 ## Latest: recall-first selected sounds
 
 Emma requests fewer misses even at the cost of related-sound false alerts. Custom catalog threshold
@@ -75,8 +95,9 @@ Pretrained sound-catalog selection is still unfinished. See [resume notes](HANDO
 
 ## Deliberately parked
 
-Further Mana generation, Claude API integration, new cloud infrastructure and extra hardware features
-are parked while the stable preview and notification policy are resolved. Mana Bridge is not installed.
+Further Mana generation, new cloud infrastructure and extra hardware features are parked. Optional
+Claude onboarding suggestions are implemented and provider-tested; they are not in the live audio path.
+Mana Bridge is not installed.
 The original Pi Zero W remains the planned capture/display endpoint; another Mac will run inference.
 
 ## How to follow along

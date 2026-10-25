@@ -14,17 +14,21 @@ import Onboarding, {
   type ManaProfile,
   type SetupChange,
 } from "../mana/AwareOnboarding.jsx";
+import { effectiveTier, type FocusMode, type Preferences } from "./lib/alerts";
 import {
-  effectiveTier,
-  type FocusMode,
-  type Preferences,
-} from "./lib/alerts";
-import { soundCatalog, sounds, tierNames, type Health, type Observation, type SoundEvent } from "./lib/events";
+  soundCatalog,
+  sounds,
+  tierNames,
+  type Health,
+  type Observation,
+  type SoundEvent,
+} from "./lib/events";
 import { explain, outcome } from "./lib/explain";
 import { useSession, type Source, type SyncStatus } from "./lib/session";
 import { useHearing } from "./lib/observations";
 import HearingPanel from "./components/Hearing";
 import TeachPanel from "./components/TeachPanel";
+import { initialView, SETUP_COMPLETE_KEY } from "./lib/setupEntry";
 
 type View = "live" | "preferences" | "log";
 
@@ -129,21 +133,33 @@ function syncText(source: Source, sync: SyncStatus, connected: boolean) {
   return "Saved in this browser.";
 }
 
-const ruleLabel = (type: string) => soundCatalog.find((c) => c.type === type)?.label ?? type.replaceAll("_", " ");
+const ruleLabel = (type: string) =>
+  soundCatalog.find((c) => c.type === type)?.label ?? type.replaceAll("_", " ");
 
 // Why a rule did or didn't fire, for the rules close enough to matter.
-function ruleNote(type: string, rule: { score: number; threshold: number; reason: string }) {
+function ruleNote(
+  type: string,
+  rule: { score: number; threshold: number; reason: string },
+) {
   const name = ruleLabel(type);
   const value = `${rule.score.toFixed(2)} / ${rule.threshold.toFixed(2)}`;
   if (rule.reason === "emitted") return `${name} sent (${value})`;
   if (rule.reason === "cooldown") return `${name} heard again, cooling down`;
-  if (rule.reason.startsWith("suppressed")) return `${name} held back by alarm context`;
-  if (rule.reason === "below_threshold") return `${name} close, below threshold (${value})`;
+  if (rule.reason.startsWith("suppressed"))
+    return `${name} held back by alarm context`;
+  if (rule.reason === "below_threshold")
+    return `${name} close, below threshold (${value})`;
   return `${name}: ${rule.reason.replaceAll("_", " ")}`;
 }
 
 // Live recognizer view: every analysis window, before the receiver decides anything.
-function SignalPanel({ observations, health }: { observations: Observation[]; health: Health | null }) {
+function SignalPanel({
+  observations,
+  health,
+}: {
+  observations: Observation[];
+  health: Health | null;
+}) {
   const listening = health?.capture.listening;
   return (
     <section className="signal-panel" aria-labelledby="signal-title">
@@ -155,25 +171,52 @@ function SignalPanel({ observations, health }: { observations: Observation[]; he
       </p>
       {observations.length > 0 && (
         <ol className="signal-list">
-          {[...observations].reverse().slice(0, 8).map((o) => {
-            const notes = Object.entries(o.rules)
-              .filter(([, r]) => r.reason === "emitted" || r.reason === "cooldown" || r.reason.startsWith("suppressed")
-                || (r.reason === "below_threshold" && r.score >= 0.5 * r.threshold))
-              .map(([type, r]) => ruleNote(type, r));
-            return (
-              <li key={o.seq}>
-                <span className="signal-level" aria-label={`level ${o.level_dbfs} dBFS`}>
-                  <span style={{ width: `${Math.max(2, Math.min(100, (o.level_dbfs + 70) * (100 / 70)))}%` }} />
-                </span>
-                <span className="signal-top">
-                  {o.top.slice(0, 3).map((t) => `${t.label} ${t.score.toFixed(2)}`).join(" · ")}
-                </span>
-                <span className={notes.some((n) => n.includes(" sent")) ? "signal-note is-sent" : "signal-note"}>
-                  {notes.length ? notes.join("; ") : "No alert sound near its threshold"}
-                </span>
-              </li>
-            );
-          })}
+          {[...observations]
+            .reverse()
+            .slice(0, 8)
+            .map((o) => {
+              const notes = Object.entries(o.rules)
+                .filter(
+                  ([, r]) =>
+                    r.reason === "emitted" ||
+                    r.reason === "cooldown" ||
+                    r.reason.startsWith("suppressed") ||
+                    (r.reason === "below_threshold" &&
+                      r.score >= 0.5 * r.threshold),
+                )
+                .map(([type, r]) => ruleNote(type, r));
+              return (
+                <li key={o.seq}>
+                  <span
+                    className="signal-level"
+                    aria-label={`level ${o.level_dbfs} dBFS`}
+                  >
+                    <span
+                      style={{
+                        width: `${Math.max(2, Math.min(100, (o.level_dbfs + 70) * (100 / 70)))}%`,
+                      }}
+                    />
+                  </span>
+                  <span className="signal-top">
+                    {o.top
+                      .slice(0, 3)
+                      .map((t) => `${t.label} ${t.score.toFixed(2)}`)
+                      .join(" · ")}
+                  </span>
+                  <span
+                    className={
+                      notes.some((n) => n.includes(" sent"))
+                        ? "signal-note is-sent"
+                        : "signal-note"
+                    }
+                  >
+                    {notes.length
+                      ? notes.join("; ")
+                      : "No alert sound near its threshold"}
+                  </span>
+                </li>
+              );
+            })}
         </ol>
       )}
     </section>
@@ -181,18 +224,22 @@ function SignalPanel({ observations, health }: { observations: Observation[]; he
 }
 
 export default function App() {
-  const [view, setView] = useState<View>("live");
+  const [setupComplete, setSetupComplete] = useState(() => {
+    try { return localStorage.getItem(SETUP_COMPLETE_KEY) === "true"; }
+    catch { return false; }
+  });
+  const [view, setView] = useState<View>(() => {
+    return initialView(window.location.search, setupComplete);
+  });
   const [audience, setAudience] = useState(false);
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [view, audience]);
   const [source, setSource] = useState<Source>(() => {
     try {
-      return localStorage.getItem("aware-source") === "receiver"
-        ? "receiver"
-        : "browser";
+      return localStorage.getItem("aware-source") === "browser" ? "browser" : "receiver";
     } catch {
-      return "browser";
+      return "receiver";
     }
   });
   useEffect(() => {
@@ -208,6 +255,7 @@ export default function App() {
   const [labels, setLabels] = useState(false);
   const [testDirection, setTestDirection] = useState<number | null>(null);
   const [help, setHelp] = useState(false);
+  const [recordingsOpened, setRecordingsOpened] = useState(false);
   const helpDialog = useRef<HTMLDialogElement>(null);
   const session = useSession(source, profile, labels, editRevision);
   const { view: state, connection } = session;
@@ -542,19 +590,33 @@ export default function App() {
                 aria-pressed={state.repeat_suppression === false}
                 title="Testing only: bypass recognition cooldowns and redisplay repeated detections. Priority and pause still apply."
                 disabled={offline}
-                onClick={() => void session.setControls({ repeat_suppression: state.repeat_suppression === false })}
+                onClick={() =>
+                  void session.setControls({
+                    repeat_suppression: state.repeat_suppression === false,
+                  })
+                }
               >
-                {state.repeat_suppression === false ? "Show every detection: on" : "Show every detection: off"}
+                {state.repeat_suppression === false
+                  ? "Show every detection: on"
+                  : "Show every detection: off"}
               </button>
-              {source === "receiver" && <button
-                className="key"
-                aria-pressed={state.snap_to_dismiss === true}
-                disabled={offline}
-                title="Experimental microphone control: one strongly recognized finger snap dismisses the current cue. No camera needed."
-                onClick={() => void session.setControls({ snap_to_dismiss: !state.snap_to_dismiss })}
-              >
-                {state.snap_to_dismiss ? "Snap to dismiss: on" : "Snap to dismiss: off"}
-              </button>}
+              {source === "receiver" && (
+                <button
+                  className="key"
+                  aria-pressed={state.snap_to_dismiss === true}
+                  disabled={offline}
+                  title="Experimental microphone control: one strongly recognized finger snap dismisses the current cue. No camera needed."
+                  onClick={() =>
+                    void session.setControls({
+                      snap_to_dismiss: !state.snap_to_dismiss,
+                    })
+                  }
+                >
+                  {state.snap_to_dismiss
+                    ? "Snap to dismiss: on"
+                    : "Snap to dismiss: off"}
+                </button>
+              )}
               <span className="dock-spacer" />
               <button
                 className="key"
@@ -570,15 +632,38 @@ export default function App() {
                 {" "}
                 <label>
                   Simulated bearing{" "}
-                  <select aria-label="Simulated direction of the next test sound"
-                    value={testDirection === null ? "unknown" : String(testDirection)}
-                    onChange={(e) => setTestDirection(e.target.value === "unknown" ? null : Number(e.target.value))}>
+                  <select
+                    aria-label="Simulated direction of the next test sound"
+                    value={
+                      testDirection === null ? "unknown" : String(testDirection)
+                    }
+                    onChange={(e) =>
+                      setTestDirection(
+                        e.target.value === "unknown"
+                          ? null
+                          : Number(e.target.value),
+                      )
+                    }
+                  >
                     <option value="unknown">No direction</option>
-                    {Array.from({length:16}, (_, i) => {
+                    {Array.from({ length: 16 }, (_, i) => {
                       const angle = i * 22.5;
                       const signed = angle > 180 ? angle - 360 : angle;
-                      const side = angle === 0 ? "Front" : angle === 90 ? "Right" : angle === 180 ? "Behind" : angle === 270 ? "Left" : `${signed}°`;
-                      return <option key={i} value={signed}>{side} · simulated</option>;
+                      const side =
+                        angle === 0
+                          ? "Front"
+                          : angle === 90
+                            ? "Right"
+                            : angle === 180
+                              ? "Behind"
+                              : angle === 270
+                                ? "Left"
+                                : `${signed}°`;
+                      return (
+                        <option key={i} value={signed}>
+                          {side} · simulated
+                        </option>
+                      );
                     })}
                   </select>
                 </label>
@@ -591,7 +676,6 @@ export default function App() {
                 >
                   {session.busy ? "Stop" : "Play a busy minute"}
                 </button>
-
               </div>
             </details>
             <p className="dock-note">
@@ -600,8 +684,12 @@ export default function App() {
               {session.error ? ` ${session.error}` : ""}
             </p>
           </section>
-          {source === "receiver" && <HearingPanel hearing={hearing} />}
-          {source === "receiver" && connected && <TeachPanel />}
+          {source === "receiver" && (
+            <HearingPanel
+              hearing={hearing}
+              onManageSounds={() => setView("preferences")}
+            />
+          )}
         </main>
       )}
 
@@ -614,10 +702,30 @@ export default function App() {
         </p>
         <Onboarding
           theme="dark"
+          firstUse={!setupComplete}
+          canFinish={source === "browser" || session.sync.kind === "applied"}
           receiverProfile={session.receiverProfile}
           onChange={applySetup}
-          onComplete={() => setView("live")}
+          onComplete={() => {
+            try { localStorage.setItem(SETUP_COMPLETE_KEY, "true"); } catch { /* This visit still proceeds. */ }
+            setSetupComplete(true);
+            setView("live");
+          }}
         />
+        <details
+          className="personal-recordings"
+          onToggle={(event) => {
+            if (event.currentTarget.open) setRecordingsOpened(true);
+          }}
+        >
+          <summary>Personal recordings (optional)</summary>
+          <p className="aside">
+            For a particular sound or a name that needs help. The built-in sound
+            library works without recordings.
+          </p>
+          {/* Keep the mounted recorder alive when the disclosure closes or views change. */}
+          {recordingsOpened && <TeachPanel />}
+        </details>
       </div>
 
       {view === "log" && (
@@ -628,7 +736,10 @@ export default function App() {
             {state.events.length === 1 ? "sound" : "sounds"} this session ·{" "}
             {sourceSummary}
           </p>
-          <SignalPanel observations={state.observations} health={state.health} />
+          <SignalPanel
+            observations={state.observations}
+            health={state.health}
+          />
           {state.decisions.length === 0 ? (
             <p className="empty">
               Nothing yet. Sounds you play or the receiver hears appear here.

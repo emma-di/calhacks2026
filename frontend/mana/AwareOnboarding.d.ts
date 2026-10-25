@@ -30,6 +30,7 @@ export interface CuratedCue {
 export function searchCuratedSounds(query: string): CuratedCue[];
 export function createCueRule(cueId: string, tier: Tier, id: string): CustomSound | null;
 export function applyCuratedRule(draft: unknown, cueId: string, tier: Tier, id: string): ManaDraft;
+export function applySuggestedCues(draft: unknown, suggestions: {cue_id: string; tier: Tier; reason: string}[]): ManaDraft;
 export function sanitizeCustomSounds(raw: unknown): CustomSound[];
 export interface ManaProfile {
   display?: { labels: boolean };
@@ -82,5 +83,7 @@ export default function AwareOnboarding(props: {
   onChange?: (change: SetupChange) => void;
   onComplete?: () => void;
   theme?: "light" | "dark";
+  firstUse?: boolean;
+  canFinish?: boolean;
   receiverProfile?: ManaProfile | null;
 }): ReactElement;

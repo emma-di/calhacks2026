@@ -370,6 +370,56 @@ class Handler(BaseHTTPRequestHandler):
         except OSError:
             self.reply(503, {'error': 'Could not save; previous settings remain active'})
 
+    def setup_suggestions(self, method):
+        """Private, optional setup helper. It never touches profiles or the alert engine."""
+        if not self.from_loopback():
+            return self.reply(403, {'error': 'Setup suggestions are only available on the receiver laptop',
+                                    'code': 'local_only'})
+        origin = self.headers.get('Origin')
+        if origin:
+            try:
+                parsed = urlsplit(origin)
+                valid_origin = parsed.scheme in ('http', 'https') and parsed.hostname in ('localhost', '127.0.0.1', '::1')
+            except ValueError:
+                valid_origin = False
+            if not valid_origin:
+                return self.reply(403, {'error': 'Setup suggestions require a local companion origin',
+                                        'code': 'local_only'})
+        from audio import setup_suggestions
+        try:
+            payload = setup_suggestions.status() if method == 'GET' else setup_suggestions.suggest(self.read_json())
+            self.reply(200, payload)
+        except setup_suggestions.SuggestionError as exc:
+            self.reply(exc.status, {'error': str(exc), 'code': exc.code})
+        except (ValueError, TypeError, json.JSONDecodeError):
+            self.reply(400, {'error': 'Enter a description of 1..1500 characters as JSON.',
+                             'code': 'invalid_description'})
+
+    def setup_key(self, method):
+        """Accept a key only from the local browser; keep it in this process's memory."""
+        origin = self.headers.get('Origin', '')
+        try:
+            parsed = urlsplit(origin)
+            valid_origin = parsed.scheme in ('http', 'https') and parsed.hostname in ('localhost', '127.0.0.1', '::1')
+        except ValueError:
+            valid_origin = False
+        if not self.from_loopback() or not valid_origin:
+            return self.reply(403, {'error': 'Configure Claude from the local companion on the receiver Mac.',
+                                    'code': 'local_only'})
+        from audio import setup_suggestions
+        try:
+            value = self.read_json()
+            if method == 'DELETE':
+                if value != {}:
+                    raise ValueError('Expected empty JSON object')
+                payload = setup_suggestions.clear_key()
+            else:
+                payload = setup_suggestions.configure_key(value)
+            self.reply(200, payload)
+        except (ValueError, TypeError, json.JSONDecodeError):
+            self.reply(400, {'error': 'Enter an API key of 1..512 characters without spaces or newlines as JSON.',
+                             'code': 'invalid_key'})
+
     def reply(self, status, payload, content_type='application/json'):
         body = payload if isinstance(payload, bytes) else json.dumps(payload).encode()
         self.send_response(status)
@@ -381,6 +431,8 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_GET(self):
         url = urlsplit(self.path)
+        if url.path == '/setup/suggestions':
+            return self.setup_suggestions('GET')
         if is_audio_route(self.parts()):
             return self.audio('GET')
         if url.path == '/teach':
@@ -423,6 +475,8 @@ class Handler(BaseHTTPRequestHandler):
         self.reply(404, {'error': 'Not found'})
 
     def do_DELETE(self):
+        if urlsplit(self.path).path == '/setup/suggestions/key':
+            return self.setup_key('DELETE')
         if is_audio_route(self.parts()):
             return self.audio('DELETE')
         self.reply(404, {'error': 'Not found'})
@@ -439,6 +493,10 @@ class Handler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         path = urlsplit(self.path).path
+        if path == '/setup/suggestions/key':
+            return self.setup_key('POST')
+        if path == '/setup/suggestions':
+            return self.setup_suggestions('POST')
         if is_audio_route(self.parts()):
             return self.audio('POST')
         if path == '/observations':

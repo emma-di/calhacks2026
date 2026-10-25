@@ -42,7 +42,13 @@ function Bar({
 }
 
 /** What the microphone hears right now, from the receiver's observation stream (Receiver mode). */
-export default function HearingPanel({ hearing }: { hearing: Hearing }) {
+export default function HearingPanel({
+  hearing,
+  onManageSounds,
+}: {
+  hearing: Hearing;
+  onManageSounds: () => void;
+}) {
   const [now, setNow] = useState(() => Date.now());
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
@@ -78,18 +84,28 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
           </span>
         )}
         <span className="dock-spacer" />
-        <a className="key" href="#teach">
-          Teach sounds &amp; your name
-        </a>
+        <button className="key" onClick={onManageSounds}>
+          Choose sounds
+        </button>
       </header>
 
       {!o || stale ? (
-        <p className="hearing-empty">
-          {o ? "Is the microphone still running? " : "Nothing heard yet. "}
-          Start it in a Terminal tab from the project folder (use your mic's
-          number from <code>audio.cli devices</code>):
-          <code className="hearing-cmd">{MIC_COMMAND}</code>
-        </p>
+        <div className="hearing-empty">
+          <p>
+            {o
+              ? "The audio feed has stopped. Check the processing computer’s microphone connection."
+              : "Waiting for the microphone on the processing computer."}
+          </p>
+          <details className="hearing-diagnostics">
+            <summary>Connection diagnostics</summary>
+            <p>
+              From the project folder, find your input with{" "}
+              <code>audio.cli devices</code>, then replace the device number
+              below:
+            </p>
+            <code className="hearing-cmd">{MIC_COMMAND}</code>
+          </details>
+        </div>
       ) : (
         <>
           <div
@@ -120,9 +136,18 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
               <ul className="hearing-list">
                 {o.custom.map((c) => (
                   <li key={c.id}>
-                    <span className="hearing-label" title={c.matched_label ? `${c.label}: ${c.match_kind === "related_label" ? "related match" : "model label"} ${c.matched_label}` : c.label}>
+                    <span
+                      className="hearing-label"
+                      title={
+                        c.matched_label
+                          ? `${c.label}: ${c.match_kind === "related_label" ? "related match" : "model label"} ${c.matched_label}`
+                          : c.label
+                      }
+                    >
                       {c.label}
-                      {c.match_kind === "related_label" && <small> · related: {c.matched_label}</small>}
+                      {c.match_kind === "related_label" && (
+                        <small> · related: {c.matched_label}</small>
+                      )}
                     </span>
                     <Bar
                       value={c.score}

@@ -6,16 +6,18 @@ import modelCatalog from "../../audio/sound-catalog.json";
 import cueCatalog from "../../audio/cue-catalog.json";
 import alertPolicy from "../../audio/alert-policy.json";
 import Oled from "../src/components/Oled";
+import SetupSuggestions from "../src/components/SetupSuggestions";
+import { SoundIcon } from "../src/components/Cue";
 import { makeMock } from "../src/lib/events";
 import { directionBucket } from "../src/lib/alerts";
 
 // --- profile logic ---
 export const AWARE_TIERS = [
   { value: 0, label: "Ignore", hint: "No cue." },
-  { value: 1, label: "Ambient", hint: "Faint, glanceable cue." },
-  { value: 2, label: "Notify", hint: "Standard cue." },
-  { value: 3, label: "Attention", hint: "Prominent cue." },
-  { value: 4, label: "Urgent", hint: "Strongest cue, with short text." },
+  { value: 1, label: "Ambient", hint: "Quiet icon, no frame. Clears after 2 seconds." },
+  { value: 2, label: "Notify", hint: "Icon with a thin frame. Clears after 3 seconds." },
+  { value: 3, label: "Attention", hint: "Double frame. Clears after 5 seconds." },
+  { value: 4, label: "Urgent", hint: "Strong frame and short text. Up to 30 seconds, with ongoing-alarm handling." },
 ];
 
 // Sounds the classifier supports. Search terms only point at these; they never create new labels.
@@ -187,6 +189,22 @@ export function applyCuratedRule(draft, cueId, tier, id) {
   const d = sanitizeAwareDraft(draft);
   if (d.custom_rules.some((r) => r.cue_id === cueId)) return d;
   return {...d, custom_rules:sanitizeCustomSounds([...d.custom_rules, rule])};
+}
+
+// Suggestions are proposals only. Existing choices, including explicit Ignore, win.
+export function applySuggestedCues(draft, suggestions) {
+  let next = sanitizeAwareDraft(draft);
+  const existing = new Set([
+    ...next.custom_rules.map((r) => r.cue_id),
+    ...cueCatalog.cues.filter((c) => next.rules.some((r) => r.key === c.event_type)).map((c) => c.id),
+  ]);
+  for (const row of suggestions) {
+    if (!existing.has(row.cue_id)) {
+      next = applyCuratedRule(next, row.cue_id, row.tier, crypto.randomUUID());
+      existing.add(row.cue_id);
+    }
+  }
+  return next;
 }
 
 export function sanitizeCustomSounds(raw) {
@@ -441,8 +459,9 @@ export function AwareCuePreview({
   );
 }
 
-export default function AwareOnboarding({ onChange, onComplete, theme, receiverProfile } = {}) {
+export default function AwareOnboarding({ onChange, onComplete, theme, receiverProfile, firstUse = false, canFinish = true } = {}) {
   const isDark = theme === "dark";
+  const connectClaude = typeof window !== "undefined" && new URLSearchParams(window.location.search).get("connect") === "claude";
   const uid = useId();
   const [storageOk] = useState(() => awareStorageAvailable());
   const [restored] = useState(() =>
@@ -566,12 +585,11 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         btnFg: "#fafaf8",
       };
   const font = '"Instrument Sans", Inter, ui-sans-serif, system-ui, sans-serif';
-  const mono = "ui-monospace, SFMono-Regular, Menlo, Consolas, monospace";
 
   const s = {
     section: {
-      marginTop: 36,
-      paddingTop: 32,
+      marginTop: 24,
+      paddingTop: 24,
       borderTop: "1px solid " + p.line,
     },
     h2: { fontSize: 17, fontWeight: 600, margin: 0, letterSpacing: "-0.005em" },
@@ -752,23 +770,83 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
             margin: 0,
           }}
         >
-          Your preferences
+          {firstUse ? "Set up Aware" : "Choose your sounds"}
         </h1>
         <p style={{ fontSize: 16, margin: "8px 0 0" }}>
-          Stay aware of the sounds that matter to you, without watching a
-          screen. Start from a preset, then add exceptions. Changes apply to the
-          preview right away and to the receiver whenever it is connected.
+          Common alerts are ready. Add your name and choose sounds that matter.
+          No sound recordings needed.
         </p>
         <div
           role="status"
           aria-live="polite"
           style={{ marginTop: 14, fontSize: 14, color: p.muted }}
         >
-          <div>{statusText}</div>
+          <div>{receiverProfile ? "Your choices save automatically." : statusText}</div>
         </div>
+
+        {/* Name */}
+        <section style={s.section}>
+          <details open={firstUse}>
+            <summary style={s.summary}>
+              Your name (optional){" "}
+              <span
+                style={{
+                  fontWeight: 400,
+                  fontSize: 15,
+                  color: p.muted,
+                  marginLeft: 6,
+                }}
+              >
+                {primary ? "Name configured" : "Off"}
+              </span>
+            </summary>
+            <div className="setup-name-grid">
+            <div>
+              <label htmlFor={uid + "-name"} style={s.label}>
+                Name
+              </label>
+              <input
+                id={uid + "-name"}
+                type="text"
+                autoComplete="given-name"
+                value={draft.name}
+                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
+                aria-describedby={uid + "-name-help"}
+                style={s.input}
+              />
+              <p id={uid + "-name-help"} style={s.help}>
+                {primary
+                  ? (draft.name_enabled ? "Used for your name alert. No recording needed." : "Your name is saved; name alerts are turned off.")
+                  : "Optional. Leave blank to keep name alerts off."}
+              </p>
+            </div>
+            <div>
+              <label htmlFor={uid + "-aliases"} style={s.label}>
+                Nicknames
+              </label>
+              <input
+                id={uid + "-aliases"}
+                type="text"
+                value={draft.aliasesText}
+                onChange={(e) => update({ aliasesText: e.target.value })}
+                aria-describedby={uid + "-aliases-help"}
+                style={s.input}
+              />
+              <p id={uid + "-aliases-help"} style={s.help}>
+                {!primary && profile.name_detection.aliases.length
+                  ? "These are kept, but name detection stays off until you add a name."
+                  : "Separate nicknames with commas, e.g. Sam, Sammy."}
+              </p>
+            </div>
+            </div>
+          </details>
+        </section>
 
         {/* Preset */}
         <section style={s.section}>
+          <details>
+          <summary style={s.summary}>{preset.label} defaults · change or review</summary>
+          <p style={s.help}>Fire / smoke alarms, knocks, bells and your configured name already have priorities.</p>
           <fieldset
             style={{ border: "none", margin: 0, padding: 0, minWidth: 0 }}
           >
@@ -845,65 +923,30 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               </p>
             )}
           </div>
-        </section>
-
-        <section style={s.section}>
-          <details>
-            <summary style={s.summary}>Category defaults (optional)</summary>
-            <p style={s.help}>
-              Change a group together. Individual sound rules take priority;
-              otherwise the selected preset applies.
-            </p>
-            {Object.entries(alertPolicy.categories).map(([key, label]) => (
-              <label
-                key={key}
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 16,
-                  alignItems: "center",
-                  marginTop: 12,
-                }}
-              >
-                {label}
-                <select
-                  aria-label={`Priority for category ${label}`}
-                  style={s.select}
-                  value={draft.category_rules?.[key] ?? ""}
-                  onChange={(e) =>
-                    setDraft((d) => {
-                      const categories = { ...d.category_rules };
-                      if (e.target.value === "") delete categories[key];
-                      else categories[key] = Number(e.target.value);
-                      return { ...d, category_rules: categories };
-                    })
-                  }
-                >
-                  <option value="">Use preset</option>
-                  {AWARE_TIERS.map((t) => (
-                    <option key={t.value} value={t.value}>
-                      {t.label}
-                    </option>
-                  ))}
-                </select>
-              </label>
-            ))}
           </details>
         </section>
+
+        <details style={s.section} className="setup-ai-disclosure" open={connectClaude}>
+          <summary style={s.summary}>Get sound suggestions from Claude (optional)</summary>
+          <SetupSuggestions connectOpen={connectClaude} selectedIds={[...selectedCueIds].filter(Boolean)} onApply={(rows) => {
+            setDraft((d) => applySuggestedCues(d, rows));
+            setCustomNote("Suggested sounds added. Your previous choices were kept.");
+          }} />
+        </details>
 
         {/* Rules */}
         <section style={s.section} aria-labelledby={uid + "-rules-h"}>
           <h2 id={uid + "-rules-h"} style={s.h2}>
-            Sound rules
+            Find a sound
           </h2>
           <p style={s.lead}>
-            Search for a sound to change how it gets your attention.
+            Choose from built-in recognition. You only need to add sounds you want to personalize.
           </p>
 
           {!pending && (
             <div style={{ marginTop: 20 }}>
               <label htmlFor={uid + "-search"} style={s.label}>
-                Find a sound
+                Search sounds
               </label>
               <input
                 id={uid + "-search"}
@@ -925,9 +968,20 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                 style={s.input}
               />
               <p id={uid + "-search-help"} style={s.help}>
-                Defaults are already set. Search for a sound you want to change; add only the exceptions that matter to you.
+                Try baby crying, a doorbell, rain or a train horn.
               </p>
               <div id={uid + "-results"} aria-live="polite">
+                {!query.trim() && <div className="setup-common" aria-label="Common sound choices">
+                  {['baby_cry','doorbell','train_horn','rain','phone_ring','cat_meow'].map((id) => {
+                    const cue = cuesById.get(id);
+                    const added = selectedCueIds.has(id);
+                    return <button type="button" key={id} className="key" disabled={added}
+                      onClick={() => setPending({cue_id:id,tier:cue.default_tier})}>
+                      <SoundIcon type="custom" iconId={cue.icon_id} size={22} />
+                      {cue.label}{added ? ' · added' : ''}
+                    </button>;
+                  })}
+                </div>}
                 {curatedMatches.length > 0 && <ul style={{...s.group, listStyle:"none", padding:0, marginTop:12}}>
                   {curatedMatches.slice(0,8).map((cue, i) => <li key={cue.id} style={s.row(i)}>
                     <button type="button" style={{...s.textBtn, width:"100%", textAlign:"left", textDecoration:"none", padding:"14px 16px"}}
@@ -969,7 +1023,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   </li>)}
                 </ul>}
                 </details>}
-                {query.trim() && curatedMatches.length === 0 && (
+                {query.trim() && curatedMatches.length === 0 && catalogMatches.length === 0 && matches.length === 0 && (
+                  <details style={{marginTop:12}}>
+                  <summary style={{...s.summary,fontSize:15}}>Save an unsupported sound request (optional)</summary>
+                  <p style={s.help}>This is a wishlist item. It will not trigger an alert until recognition is connected.</p>
                   <button
                     type="button"
                     style={{ ...s.textBtn, marginTop: 12 }}
@@ -994,8 +1051,9 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       );
                     }}
                   >
-                    Request “{query.trim()}” as a custom sound
+                    Save “{query.trim()}” as pending
                   </button>
+                  </details>
                 )}
                 {customNote && (
                   <p role="status" style={s.help}>
@@ -1078,11 +1136,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       No supported sound matches “{query.trim()}”.
                     </div>
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                      Aware can only react to sounds its classifier has been
-                      trained to recognize. Typing a new name here would not
-                      teach it that sound. You can request it below and choose
-                      its priority; recognition will stay pending until support
-                      is connected.
+                      Try a simpler sound name, or save it as a pending request. Personal recordings are an optional advanced feature; they are not needed for catalog sounds.
                     </p>
                   </div>
                 )}
@@ -1182,10 +1236,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           )}
 
           <div style={{ marginTop: 24 }}>
-            <div style={{ fontWeight: 500 }}>Your rules</div>
+            <div style={{ fontWeight: 500 }}>Changes to common alerts</div>
             {ruleCount === 0 ? (
               <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                {draft.custom_rules.length ? `Built-in sounds follow the ${preset.label} preset. Your added sounds are below.` : `No rules yet. Every sound follows the ${preset.label} preset.`}
+                {(draft.custom_rules ?? []).length ? `Built-in sounds follow the ${preset.label} preset. Your added sounds are below.` : `Common alerts follow the ${preset.label} defaults. Nothing else to configure.`}
               </p>
             ) : (
               <ul
@@ -1266,8 +1320,8 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
         </section>
 
         {(draft.custom_rules ?? []).length > 0 && (
-          <section style={s.section} aria-label="Added sounds">
-            <h2 style={s.h2}>Added sounds</h2>
+          <section style={s.section} aria-label="Your sound choices">
+            <h2 style={s.h2}>Your sound choices</h2>
             <p style={s.lead}>
               Selected catalog sounds use built-in recognition; no teaching is required. Sensitive matching favors catching sounds and may also alert on related sounds. Free-text requests remain pending.
             </p>
@@ -1284,13 +1338,16 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   }}
                 >
                   <span style={{ flex: 1, minWidth: 140 }}>
-                    {rule.label}
+                    <span style={{display:"flex",alignItems:"center",gap:10}}>
+                      <SoundIcon type="custom" iconId={rule.icon_id || rule.icon || "wave"} size={28} />
+                      {rule.label}
+                    </span>
                     <small style={{ display: "block", color: p.muted }}>
                       {rule.status === "recognized" ? (rule.cue_id && cuesById.get(rule.cue_id)?.fallback_labels?.length ? "Sensitive · related sounds may also alert" : "Sensitive · recognition still needs room testing") : "Recognition pending"}
                     </small>
                   </span>
                   <select
-                    aria-label={`Priority for custom sound ${rule.label}`}
+                    aria-label={`Priority for ${rule.label}`}
                     value={rule.tier}
                     style={s.select}
                     onChange={(e) =>
@@ -1313,7 +1370,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   <button
                     type="button"
                     style={s.textBtn}
-                    aria-label={`Remove custom sound ${rule.label}`}
+                    aria-label={`Remove ${rule.label}`}
                     onClick={() =>
                       setDraft((d) => ({
                         ...d,
@@ -1331,59 +1388,47 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           </section>
         )}
 
-        {/* Name */}
         <section style={s.section}>
           <details>
-            <summary style={s.summary}>
-              Name (optional){" "}
-              <span
+            <summary style={s.summary}>Category defaults (optional)</summary>
+            <p style={s.help}>
+              Change a group together. Individual sound rules take priority;
+              otherwise the selected preset applies.
+            </p>
+            {Object.entries(alertPolicy.categories).map(([key, label]) => (
+              <label
+                key={key}
                 style={{
-                  fontWeight: 400,
-                  fontSize: 15,
-                  color: p.muted,
-                  marginLeft: 6,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 16,
+                  alignItems: "center",
+                  marginTop: 12,
                 }}
               >
-                {primary ? "Name configured" : "Off"}
-              </span>
-            </summary>
-            <div style={{ marginTop: 16 }}>
-              <label htmlFor={uid + "-name"} style={s.label}>
-                Name
+                {label}
+                <select
+                  aria-label={`Priority for category ${label}`}
+                  style={s.select}
+                  value={draft.category_rules?.[key] ?? ""}
+                  onChange={(e) =>
+                    setDraft((d) => {
+                      const categories = { ...d.category_rules };
+                      if (e.target.value === "") delete categories[key];
+                      else categories[key] = Number(e.target.value);
+                      return { ...d, category_rules: categories };
+                    })
+                  }
+                >
+                  <option value="">Use preset</option>
+                  {AWARE_TIERS.map((t) => (
+                    <option key={t.value} value={t.value}>
+                      {t.label}
+                    </option>
+                  ))}
+                </select>
               </label>
-              <input
-                id={uid + "-name"}
-                type="text"
-                autoComplete="given-name"
-                value={draft.name}
-                onChange={(e) => update({ name: e.target.value, name_enabled: true })}
-                aria-describedby={uid + "-name-help"}
-                style={s.input}
-              />
-              <p id={uid + "-name-help"} style={s.help}>
-                {primary
-                  ? (draft.name_enabled ? "Your name is saved for the speech recognizer. Live recognition needs the speech worker running." : "Your name is saved. Name detection is currently disabled on the receiver.")
-                  : "Leave blank to keep name detection off."}
-              </p>
-            </div>
-            <div style={{ marginTop: 20 }}>
-              <label htmlFor={uid + "-aliases"} style={s.label}>
-                Other names
-              </label>
-              <input
-                id={uid + "-aliases"}
-                type="text"
-                value={draft.aliasesText}
-                onChange={(e) => update({ aliasesText: e.target.value })}
-                aria-describedby={uid + "-aliases-help"}
-                style={s.input}
-              />
-              <p id={uid + "-aliases-help"} style={s.help}>
-                {!primary && profile.name_detection.aliases.length
-                  ? "These are kept, but name detection stays off until you add a name."
-                  : "Nicknames or spellings people use, separated by commas (for example: Sam, Sammy)."}
-              </p>
-            </div>
+            ))}
           </details>
         </section>
 
@@ -1635,7 +1680,6 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   direction={direction}
                   motionOn={motionOn}
                   playKey={playKey}
-                  mono={mono}
                 />
               </div>
               <p
@@ -1670,16 +1714,17 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
               marginTop: 20,
             }}
           >
-            <button type="button" onClick={onComplete} style={s.primaryBtn}>
-              Start preview
+            <button type="button" onClick={onComplete} disabled={!canFinish} style={{...s.primaryBtn,opacity:canFinish?1:.55}}>
+              {firstUse ? "Start Aware" : "Go to live view"}
             </button>
+            {!canFinish && <p style={s.help}>Your preferences haven’t finished syncing. Reconnect or wait for Saved before starting.</p>}
             {!confirmReset ? (
               <button
                 type="button"
                 onClick={() => setConfirmReset(true)}
                 style={s.textBtn}
               >
-                Start over
+                Reset preferences
               </button>
             ) : (
               <span
