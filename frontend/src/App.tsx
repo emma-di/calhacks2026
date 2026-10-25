@@ -476,14 +476,15 @@ export default function App() {
               </button>
             ))}
           </div>}
-          <span
+          {/* Live status only matters on the Live view. */}
+          {view === "live" && <span
             className={`pill ${offline ? "is-off" : "is-on"}`}
             title={sourceSummary}
           >
             <span className="dot" />
             {sourceSummary}
-          </span>
-          {!HOSTED && <span className={`pill ${glasses ? "is-on" : "is-off"}`}>
+          </span>}
+          {!HOSTED && view === "live" && <span className={`pill ${glasses ? "is-on" : "is-off"}`}>
             <span className="dot" />
             {glasses ? "Display client connected" : "Glasses not connected"}
           </span>}
@@ -503,7 +504,7 @@ export default function App() {
         </div>
       </header>
 
-      <div className="mobile-session" role="status">
+      <div className="mobile-session" role="status" hidden={view !== "live"}>
         <span>
           {sourceSummary}
           {HOSTED ? "" : ` · ${glasses ? "Display client online" : "Glasses not connected"}`}

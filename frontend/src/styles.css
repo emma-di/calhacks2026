@@ -1602,3 +1602,4 @@ code {
 /* Log page diagnostics: everything technical the Live view no longer shows. */
 .diagnostics { margin-top: 40px; display: grid; gap: 20px; }
 .diagnostics > h2 { font-size: 17px; font-weight: 600; }
+.mobile-session[hidden] { display: none !important; }
