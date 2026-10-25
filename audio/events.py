@@ -3,6 +3,7 @@ import math
 import time
 import uuid
 import json
+import re
 from pathlib import Path
 
 # Exact YAMNet class names. Thresholds are starting points, not calibrated probabilities.
@@ -11,10 +12,25 @@ TARGETS = {
     'bicycle_bell': ('Bicycle bell', 'Bicycle bell', 2, 0.30),
     'dog_bark': ('Bark', 'Dog barking', 1, 0.30),
     'siren': ('Siren', 'Siren', 3, 0.40),
-    'smoke_alarm': ('Smoke detector, smoke alarm', 'Smoke alarm', 4, 0.40),
+    'smoke_alarm': ('Smoke detector, smoke alarm', 'Fire / smoke alarm', 4, 0.40),
     'alarm_clock': ('Alarm clock', 'Alarm clock', 2, 0.40),
     'bell': ('Bell', 'Bell / chime', 2, 0.30),
+    # A gesture, not an alert: never displayed; the alert engine treats it as snap-to-dismiss.
+    'finger_snap': ('Finger snapping', 'Finger snap', 0, 0.30),
 }
+# Every type the receiver accepts. name_called comes from the planned speech worker, not the classifier.
+EVENT_TYPES = {kind:(label, tier) for kind,(_, label, tier, _) in TARGETS.items()}
+EVENT_TYPES['name_called'] = ('Your name', 3)
+# Wearer gestures seen by a camera (glasses camera or the demo webcam); never displayed.
+EVENT_TYPES['thumbs_up'] = ('Thumbs up', 0)
+# Custom sounds: taught by recording (audio/custom_sounds.py) or picked from the model's catalog
+# (audio/custom_rules.py). The label and tier come from the person; custom_sound_id says which sound,
+# so acknowledging one never silences another. icon_id optionally picks a glasses icon.
+EVENT_TYPES['custom'] = ('Custom sound', 2)
+# A question or request someone asked the wearer, transcribed on the laptop right after their name or an
+# attention call (audio/questions.py). label is the short version for the glasses; transcript is what was said.
+EVENT_TYPES['question'] = ('Question', 3)
+ICON_ID = re.compile(r'^[a-z][a-z0-9_]{0,39}$')
 
 def runtime_model():
     path=Path(__file__).with_name('runtime.json')
@@ -31,8 +47,19 @@ def load_policy(path=None, model_name=None):
 
 def evaluate_rule(scores, rule, now=None, state=None):
     values = [float(scores.get(label, 0))*weight for label,weight in rule['labels'].items()]
+    # A parent class alone is insufficient; specific vocal evidence must coincide in this window.
+    supports = {}
+    for label, gate in rule.get('gated_labels', {}).items():
+        supporting = {name: float(scores.get(name, 0)) for name, threshold in gate.get('requires_any', {}).items()
+                      if math.isfinite(float(scores.get(name, 0))) and float(scores.get(name, 0)) >= threshold}
+        parent = float(scores.get(label, 0))
+        if supporting and math.isfinite(parent) and 0 <= parent <= 1:
+            values.append(parent * gate['weight'])
+            supports.update({label: parent, **supporting})
     raw=max((value for value in values if math.isfinite(value) and 0<=value<=1), default=0)
     decision={'raw_score':raw,'threshold':rule['threshold'],'reason':'eligible'}
+    if supports:
+        decision['support_labels'] = supports
     active={label:float(scores.get(label,0)) for label,threshold in rule.get('suppressors',{}).items()
             if float(scores.get(label,0))>=threshold}
     if active:
@@ -59,24 +86,79 @@ def make_event(kind, confidence, source, timestamp_ms=None):
                 direction_degrees=None, direction_confidence=None,
                 distance_meters=None, proximity='unknown')
 
+def make_custom_event(sound, confidence, source, timestamp_ms=None):
+    """Event for a user-taught sound. `label` is the person's own name for it, e.g. "Front doorbell"."""
+    return dict(schema_version=1, event_id=str(uuid.uuid4()), type='custom',
+                custom_sound_id=sound['id'], label=sound['label'], confidence=float(confidence),
+                source=source, priority_tier=int(sound['priority_tier']),
+                timestamp_ms=timestamp_ms if timestamp_ms is not None else int(time.time()*1000),
+                direction_degrees=None, direction_confidence=None,
+                distance_meters=None, proximity='unknown')
+
+def validate_name_event(event):
+    """v2 name event (audio/names.py, John). Keyword spotting has no calibrated score: confidence may be null."""
+    if event.get('schema_version') != 2:
+        raise ValueError('name_called events use schema_version 2')
+    for key in ('event_id', 'label', 'source', 'matched_alias_id'):
+        if not isinstance(event.get(key), str) or not 0 < len(event[key]) <= 120:
+            raise ValueError(f'Invalid {key}')
+    score = event.get('confidence')
+    if score is not None and (type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        raise ValueError('confidence must be null or within 0..1')
+    if type(event.get('profile_revision')) is not int or event['profile_revision'] < 0:
+        raise ValueError('profile_revision must be a nonnegative integer')
+    if type(event.get('priority_tier')) is not int or not 0 <= event['priority_tier'] <= 4:
+        raise ValueError('priority_tier must be 0..4')
+    if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
+        raise ValueError('timestamp_ms must be a nonnegative integer')
+    return validate_direction(event)
+
+
 def validate_event(event):
-    if not isinstance(event, dict) or event.get('type') not in TARGETS:
+    if isinstance(event, dict) and event.get('type') == 'name_called':
+        return validate_name_event(event)
+    if not isinstance(event, dict) or event.get('type') not in EVENT_TYPES:
         raise ValueError('Unknown event type')
+    if event.get('target_event_id') is not None and (
+            not isinstance(event['target_event_id'], str) or not 0 < len(event['target_event_id']) <= 120):
+        raise ValueError('Invalid gesture target_event_id')
+    if event['type'] == 'custom':
+        sound_id = event.get('custom_sound_id')
+        if not isinstance(sound_id, str) or not 0 < len(sound_id) <= 120 or not sound_id.isprintable():
+            raise ValueError('custom events need a custom_sound_id of 1..120 printable characters')
+        if event.get('icon_id') is not None and not ICON_ID.match(str(event['icon_id'])):
+            raise ValueError('icon_id must be a short lowercase icon name')
+    if event['type'] == 'question':
+        transcript = event.get('transcript')
+        if not isinstance(transcript, str) or not 0 < len(transcript) <= 600 or not transcript.isprintable():
+            raise ValueError('question events need a transcript of 1..600 printable characters')
     if event.get('schema_version') != 1:
         raise ValueError('Expected schema_version 1')
     for key in ('event_id', 'label', 'source'):
         if not isinstance(event.get(key), str) or not 0 < len(event[key]) <= 120:
             raise ValueError(f'Invalid {key}')
     score = event.get('confidence')
-    if type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1:
-        raise ValueError('confidence must be finite and within 0..1')
+    # Nullable for workers without a calibrated score (NAME-04); the UI never formats a missing score.
+    if score is not None and (type(score) not in (int, float) or not math.isfinite(score) or not 0 <= score <= 1):
+        raise ValueError('confidence must be null or finite within 0..1')
     if type(event.get('priority_tier')) is not int or not 0 <= event['priority_tier'] <= 4:
         raise ValueError('priority_tier must be 0..4')
     if type(event.get('timestamp_ms')) is not int or event['timestamp_ms'] < 0:
         raise ValueError('timestamp_ms must be a nonnegative integer')
-    # Direction is deliberately unsupported until a localization adapter is validated.
-    if any(event.get(k) is not None for k in ('direction_degrees', 'direction_confidence', 'distance_meters')):
-        raise ValueError('Spatial estimates are not supported yet')
+    return validate_direction(event)
+
+
+def validate_direction(event):
+    # Direction from a localization worker: degrees relative to the face (0 front, +90 right), with a
+    # confidence. The alert engine ignores low-confidence directions. Distance stays unsupported.
+    degrees, certainty = event.get('direction_degrees'), event.get('direction_confidence')
+    if degrees is not None or certainty is not None:
+        if type(degrees) not in (int, float) or not math.isfinite(degrees) or not -180 <= degrees <= 180:
+            raise ValueError('direction_degrees must be within -180..180')
+        if type(certainty) not in (int, float) or not math.isfinite(certainty) or not 0 <= certainty <= 1:
+            raise ValueError('direction_confidence must accompany direction_degrees, within 0..1')
+    if event.get('distance_meters') is not None:
+        raise ValueError('Distance estimates are not supported yet')
     return event
 
 class Detector:
@@ -103,8 +185,9 @@ class Detector:
                 continue
             if score<rule['threshold']:
                 decision['reason']='below_threshold'
-            elif now-self.last.get(kind,-math.inf)<self.cooldown:
-                decision.update(reason='cooldown',cooldown_remaining_seconds=round(self.cooldown-(now-self.last[kind]),3))
+            elif getattr(self, 'repeat_suppression', True) and now-self.last.get(kind,-math.inf)<rule.get('cooldown_seconds',self.cooldown):
+                cooldown=rule.get('cooldown_seconds',self.cooldown)
+                decision.update(reason='cooldown',cooldown_remaining_seconds=round(cooldown-(now-self.last[kind]),3))
             else:
                 event=make_event(kind, score, source, timestamp_ms)
                 events.append(event)

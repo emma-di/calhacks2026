@@ -1,0 +1,15 @@
+{
+  "name": "Busy apartment",
+  "note": "Real labeled recordings over light background noise, with simulated directions. Shows ambient skip, interruption by urgent, repeats and sides.",
+  "length_seconds": 45,
+  "noise_level": 0.01,
+  "seed": 1,
+  "sounds": [
+    {"at": 2, "sound": "knock", "direction": "right"},
+    {"at": 9, "sound": "dog_bark", "direction": "left"},
+    {"at": 15, "sound": "alarm_clock", "direction": "behind"},
+    {"at": 22, "sound": "smoke_alarm", "direction": "front", "max_seconds": 6},
+    {"at": 31, "sound": "siren", "direction": "right"},
+    {"at": 38, "sound": "knock", "direction": "left", "pick": 3}
+  ]
+}

@@ -1,0 +1,867 @@
+{
+  "schema_version": 1,
+  "status": "approved by Emma October24",
+  "note": "Curated selectable cues, not all enabled by default. Emma requested recall-first defaults: custom primary threshold0.15; related-label fallback0.25 with uncertain subtype labels. Provisional, not calibrated accuracy. Name uses speech worker; bicycle bell stays gated.",
+  "cues": [
+    {
+      "id": "fire_smoke",
+      "label": "Fire / smoke alarm",
+      "category": "Safety",
+      "model_labels": [
+        "Fire alarm",
+        "Smoke detector, smoke alarm"
+      ],
+      "icon_id": "cue_fire_smoke",
+      "default_tier": 4,
+      "threshold": 0.25,
+      "aliases": [
+        "smoke alarm",
+        "fire alarm",
+        "smoke detector"
+      ],
+      "event_type": "smoke_alarm",
+      "experimental": false,
+      "pitch": "Bring a sounding fire or smoke detector into view immediately."
+    },
+    {
+      "id": "emergency_siren",
+      "label": "Emergency siren",
+      "category": "Safety",
+      "model_labels": [
+        "Siren",
+        "Police car (siren)",
+        "Ambulance (siren)",
+        "Fire engine, fire truck (siren)"
+      ],
+      "icon_id": "cue_emergency_siren",
+      "default_tier": 4,
+      "threshold": 0.25,
+      "aliases": [],
+      "event_type": "siren",
+      "experimental": false,
+      "pitch": "Flag an emergency-vehicle siren so the wearer can check their surroundings."
+    },
+    {
+      "id": "civil_siren",
+      "label": "Civil-defense siren",
+      "category": "Safety",
+      "model_labels": [
+        "Civil defense siren"
+      ],
+      "icon_id": "cue_civil_siren",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Distinguish a broad outdoor warning siren from an everyday notification."
+    },
+    {
+      "id": "car_horn",
+      "label": "Car horn",
+      "category": "Safety",
+      "model_labels": [
+        "Vehicle horn, car horn, honking"
+      ],
+      "icon_id": "cue_car_horn",
+      "default_tier": 4,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a driver’s audible warning visible.",
+      "fallback_labels": [
+        "Air horn, truck horn",
+        "Train horn"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Vehicle horn"
+    },
+    {
+      "id": "truck_horn",
+      "label": "Truck air horn",
+      "category": "Safety",
+      "model_labels": [
+        "Air horn, truck horn"
+      ],
+      "icon_id": "cue_truck_horn",
+      "default_tier": 4,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Give a large-vehicle warning its own recognizable cue.",
+      "fallback_labels": [
+        "Vehicle horn, car horn, honking",
+        "Train horn"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Horn — possibly truck"
+    },
+    {
+      "id": "reverse_beep",
+      "label": "Reversing beeps",
+      "category": "Safety",
+      "model_labels": [
+        "Reversing beeps"
+      ],
+      "icon_id": "cue_reverse_beep",
+      "default_tier": 4,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Highlight a reversing-vehicle signal without implying a known distance."
+    },
+    {
+      "id": "breaking",
+      "label": "Breaking / shattering",
+      "category": "Safety",
+      "model_labels": [
+        "Breaking",
+        "Shatter"
+      ],
+      "icon_id": "cue_breaking",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Draw attention to a sudden breakage that may warrant checking nearby."
+    },
+    {
+      "id": "scream",
+      "label": "Screaming",
+      "category": "Safety",
+      "model_labels": [
+        "Screaming"
+      ],
+      "icon_id": "cue_scream",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a potentially urgent human vocalization difficult to miss.",
+      "fallback_labels": [
+        "Shout",
+        "Yell"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Shouting / screaming"
+    },
+    {
+      "id": "explosion",
+      "label": "Explosion / loud boom",
+      "category": "Safety",
+      "model_labels": [
+        "Explosion",
+        "Boom"
+      ],
+      "icon_id": "cue_explosion",
+      "default_tier": 4,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Flag a sudden explosive sound for immediate situational awareness."
+    },
+    {
+      "id": "tire_squeal",
+      "label": "Skid / tire squeal",
+      "category": "Safety",
+      "model_labels": [
+        "Skidding",
+        "Tire squeal"
+      ],
+      "icon_id": "cue_tire_squeal",
+      "default_tier": 4,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Signal an abrupt vehicle maneuver that deserves a glance."
+    },
+    {
+      "id": "name_called",
+      "label": "Your name",
+      "category": "People & communication",
+      "model_labels": [],
+      "icon_id": "cue_name_called",
+      "default_tier": 3,
+      "threshold": 0.25,
+      "aliases": [],
+      "event_type": "name_called",
+      "experimental": false,
+      "pitch": "Let someone get your attention naturally by saying your configured name."
+    },
+    {
+      "id": "doorbell",
+      "label": "Doorbell",
+      "category": "People & communication",
+      "model_labels": [
+        "Doorbell",
+        "Ding-dong"
+      ],
+      "icon_id": "cue_doorbell",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [
+        "doorbell",
+        "door bell",
+        "ding dong"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Let you know a visitor is waiting without watching the door."
+    },
+    {
+      "id": "knock",
+      "label": "Door knock",
+      "category": "People & communication",
+      "model_labels": [
+        "Knock"
+      ],
+      "icon_id": "cue_knock",
+      "default_tier": 2,
+      "threshold": 0.25,
+      "aliases": [],
+      "event_type": "knock",
+      "experimental": false,
+      "pitch": "Make an in-person visitor’s knock visible even without a doorbell."
+    },
+    {
+      "id": "phone_ring",
+      "label": "Phone ringing",
+      "category": "People & communication",
+      "model_labels": [
+        "Telephone bell ringing",
+        "Ringtone"
+      ],
+      "icon_id": "cue_phone_ring",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [
+        "phone",
+        "phone call",
+        "telephone",
+        "ringtone"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Help you notice an incoming call when the phone is out of sight."
+    },
+    {
+      "id": "baby_cry",
+      "label": "Baby crying",
+      "category": "People & communication",
+      "model_labels": [
+        "Baby cry, infant cry"
+      ],
+      "icon_id": "cue_baby_cry",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [
+        "baby",
+        "baby crying",
+        "baby cryingf",
+        "infant",
+        "infant crying"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Help a caregiver notice a baby calling for attention.",
+      "fallback_labels": [
+        "Crying, sobbing"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Crying — possibly baby"
+    },
+    {
+      "id": "children_shout",
+      "label": "Children shouting",
+      "category": "People & communication",
+      "model_labels": [
+        "Children shouting"
+      ],
+      "icon_id": "cue_children_shout",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Provide an optional cue when children nearby raise their voices.",
+      "fallback_labels": [
+        "Shout",
+        "Yell"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Shouting — possibly children"
+    },
+    {
+      "id": "speech",
+      "label": "Nearby speech",
+      "category": "People & communication",
+      "model_labels": [
+        "Speech"
+      ],
+      "icon_id": "cue_speech",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer a quiet indication of speech activity without pretending to know whom it addresses."
+    },
+    {
+      "id": "human_whistle",
+      "label": "Human whistling",
+      "category": "People & communication",
+      "model_labels": [
+        "Whistling"
+      ],
+      "icon_id": "cue_human_whistle",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a common nonverbal attention-getting sound visible."
+    },
+    {
+      "id": "crying",
+      "label": "Crying / sobbing",
+      "category": "People & communication",
+      "model_labels": [
+        "Crying, sobbing"
+      ],
+      "icon_id": "cue_crying",
+      "default_tier": 3,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Surface an emotional vocal cue that the wearer may want to respond to.",
+      "fallback_labels": [
+        "Baby cry, infant cry"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Crying"
+    },
+    {
+      "id": "clap",
+      "label": "Clapping",
+      "category": "People & communication",
+      "model_labels": [
+        "Clapping"
+      ],
+      "icon_id": "cue_clap",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Reveal a group’s applause or attention signal without requiring a glance at everyone.",
+      "fallback_labels": [
+        "Applause"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Clapping / applause"
+    },
+    {
+      "id": "alarm_clock",
+      "label": "Alarm clock",
+      "category": "Home",
+      "model_labels": [
+        "Alarm clock"
+      ],
+      "icon_id": "cue_alarm_clock",
+      "default_tier": 2,
+      "threshold": 0.25,
+      "aliases": [],
+      "event_type": "alarm_clock",
+      "experimental": false,
+      "pitch": "Turn an audible reminder into a visible cue."
+    },
+    {
+      "id": "microwave",
+      "label": "Microwave activity",
+      "category": "Home",
+      "model_labels": [
+        "Microwave oven"
+      ],
+      "icon_id": "cue_microwave",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Provide optional awareness of a microwave running without assuming the food is ready."
+    },
+    {
+      "id": "device_beep",
+      "label": "Electronic beep / buzzer",
+      "category": "Home",
+      "model_labels": [
+        "Beep, bleep",
+        "Buzzer",
+        "Ping"
+      ],
+      "icon_id": "cue_device_beep",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Catch a device’s audible signal even before its exact appliance is taught."
+    },
+    {
+      "id": "boiling",
+      "label": "Boiling water",
+      "category": "Home",
+      "model_labels": [
+        "Boiling"
+      ],
+      "icon_id": "cue_boiling",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make an active cooking sound visible when the kitchen is outside your view."
+    },
+    {
+      "id": "faucet",
+      "label": "Running tap",
+      "category": "Home",
+      "model_labels": [
+        "Water tap, faucet"
+      ],
+      "icon_id": "cue_faucet",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [
+        "tap",
+        "running water",
+        "running tap"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Help you notice a faucet that is still running."
+    },
+    {
+      "id": "drip",
+      "label": "Dripping water",
+      "category": "Home",
+      "model_labels": [
+        "Drip"
+      ],
+      "icon_id": "cue_drip",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a recurring drip noticeable before it becomes an overlooked nuisance."
+    },
+    {
+      "id": "door",
+      "label": "Door opening / closing",
+      "category": "Home",
+      "model_labels": [
+        "Door"
+      ],
+      "icon_id": "cue_door",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer quiet awareness of a door moving nearby."
+    },
+    {
+      "id": "slam",
+      "label": "Door slam",
+      "category": "Home",
+      "model_labels": [
+        "Slam"
+      ],
+      "icon_id": "cue_slam",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Separate an abrupt slam from ordinary background activity."
+    },
+    {
+      "id": "keys",
+      "label": "Keys jangling",
+      "category": "Home",
+      "model_labels": [
+        "Keys jangling"
+      ],
+      "icon_id": "cue_keys",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Provide an optional arrival cue when someone handles keys nearby."
+    },
+    {
+      "id": "dishes",
+      "label": "Dishes / cookware",
+      "category": "Home",
+      "model_labels": [
+        "Dishes, pots, and pans"
+      ],
+      "icon_id": "cue_dishes",
+      "default_tier": 2,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer context about kitchen activity without making it an urgent interruption."
+    },
+    {
+      "id": "traffic",
+      "label": "Road traffic",
+      "category": "Travel",
+      "model_labels": [
+        "Traffic noise, roadway noise"
+      ],
+      "icon_id": "cue_traffic",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Provide low-priority awareness that the surrounding environment includes road traffic."
+    },
+    {
+      "id": "passing_car",
+      "label": "Passing car",
+      "category": "Travel",
+      "model_labels": [
+        "Car passing by"
+      ],
+      "icon_id": "cue_passing_car",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make passing-vehicle activity visible without claiming a safe crossing opportunity."
+    },
+    {
+      "id": "motorcycle",
+      "label": "Motorcycle",
+      "category": "Travel",
+      "model_labels": [
+        "Motorcycle"
+      ],
+      "icon_id": "cue_motorcycle",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Give a nearby motorcycle a distinct visual identity."
+    },
+    {
+      "id": "bus",
+      "label": "Bus",
+      "category": "Travel",
+      "model_labels": [
+        "Bus"
+      ],
+      "icon_id": "cue_bus",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer an optional cue for bus activity at a stop or roadside."
+    },
+    {
+      "id": "train",
+      "label": "Train",
+      "category": "Travel",
+      "model_labels": [
+        "Train"
+      ],
+      "icon_id": "cue_train",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make train activity visible without claiming it is approaching."
+    },
+    {
+      "id": "train_horn",
+      "label": "Train horn / whistle",
+      "category": "Travel",
+      "model_labels": [
+        "Train horn",
+        "Train whistle"
+      ],
+      "icon_id": "cue_train_horn",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Distinguish a rail warning signal from a road-vehicle horn.",
+      "fallback_labels": [
+        "Air horn, truck horn",
+        "Vehicle horn, car horn, honking"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Horn — possibly train"
+    },
+    {
+      "id": "bicycle_bell",
+      "label": "Bicycle bell",
+      "category": "Travel",
+      "model_labels": [
+        "Bicycle bell"
+      ],
+      "icon_id": "cue_bicycle_bell",
+      "default_tier": 1,
+      "threshold": 0.25,
+      "aliases": [],
+      "event_type": "bicycle_bell",
+      "experimental": true,
+      "pitch": "Provide a cycling-warning cue once this currently experimental class passes real tests."
+    },
+    {
+      "id": "footsteps",
+      "label": "Footsteps",
+      "category": "Travel",
+      "model_labels": [
+        "Walk, footsteps"
+      ],
+      "icon_id": "cue_footsteps",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer quiet awareness of someone walking nearby."
+    },
+    {
+      "id": "running",
+      "label": "Running footsteps",
+      "category": "Travel",
+      "model_labels": [
+        "Run"
+      ],
+      "icon_id": "cue_running",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Distinguish faster human movement when the wearer wants that context."
+    },
+    {
+      "id": "engine_start",
+      "label": "Engine starting",
+      "category": "Travel",
+      "model_labels": [
+        "Engine starting"
+      ],
+      "icon_id": "cue_engine_start",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Let the wearer notice a vehicle or machine starting up."
+    },
+    {
+      "id": "dog_bark",
+      "label": "Dog barking",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Bark",
+        "Bow-wow",
+        "Yip"
+      ],
+      "icon_id": "cue_dog_bark",
+      "default_tier": 1,
+      "threshold": 0.25,
+      "aliases": [
+        "dog",
+        "dog barking",
+        "barking"
+      ],
+      "event_type": "dog_bark",
+      "experimental": false,
+      "pitch": "Make a dog’s vocal alert visible without permanently conflating all pets with dogs."
+    },
+    {
+      "id": "dog_vocal",
+      "label": "Dog whimper / howl",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Whimper (dog)",
+        "Howl"
+      ],
+      "icon_id": "cue_dog_vocal",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Distinguish a dog’s softer or sustained vocalization from barking."
+    },
+    {
+      "id": "cat_meow",
+      "label": "Cat meowing",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Meow"
+      ],
+      "icon_id": "cue_cat_meow",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Give a cat’s request for attention its own cue.",
+      "fallback_labels": [
+        "Cat",
+        "Caterwaul"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Cat vocalization"
+    },
+    {
+      "id": "bird",
+      "label": "Bird calls",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Bird vocalization, bird call, bird song"
+      ],
+      "icon_id": "cue_bird",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer optional awareness of wildlife and birdsong.",
+      "fallback_labels": [
+        "Bird",
+        "Chirp, tweet"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Bird sound"
+    },
+    {
+      "id": "rain",
+      "label": "Rain",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Rain",
+        "Rain on surface"
+      ],
+      "icon_id": "cue_rain",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [
+        "rain",
+        "raining",
+        "rainfall"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a change to rainy weather noticeable from indoors.",
+      "fallback_labels": [
+        "Raindrop"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Rain / water drops"
+    },
+    {
+      "id": "thunder",
+      "label": "Thunder",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Thunder"
+      ],
+      "icon_id": "cue_thunder",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Provide a distinct storm-awareness cue rather than a generic loud-noise alert."
+    },
+    {
+      "id": "wind",
+      "label": "Wind",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Wind"
+      ],
+      "icon_id": "cue_wind",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Offer a quiet cue when outdoor wind conditions become noticeable."
+    },
+    {
+      "id": "music",
+      "label": "Music",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Music"
+      ],
+      "icon_id": "cue_music",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Let the wearer know music is part of the current social environment."
+    },
+    {
+      "id": "saxophone",
+      "label": "Saxophone",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Saxophone"
+      ],
+      "icon_id": "cue_saxophone",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [
+        "sax",
+        "saxophone"
+      ],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Demonstrate a personalized niche sound with an unmistakable instrument symbol."
+    },
+    {
+      "id": "laughter",
+      "label": "Laughter",
+      "category": "Pets, nature & everyday life",
+      "model_labels": [
+        "Laughter"
+      ],
+      "icon_id": "cue_laughter",
+      "default_tier": 1,
+      "threshold": 0.15,
+      "aliases": [],
+      "event_type": "custom",
+      "experimental": false,
+      "pitch": "Make a shared moment of laughter visible as optional social context."
+    }
+  ]
+}

@@ -1,0 +1,19 @@
+{
+  "scope": "Observed summary of user live alarm trial after centered calibration. Counts are repeated detections, not independent accuracy.",
+  "real_alarm_events": 17,
+  "received_bearing_counts": {
+    "-45": 10,
+    "45": 5,
+    "0_assumed_front": 2
+  },
+  "oled_connected": true,
+  "calibration": {
+    "gain_offset_db": -0.89,
+    "margin_db": 0.75
+  },
+  "limitations": [
+    "No precisely timestamped position ground truth or wrong-side accuracy estimate.",
+    "Only front hemisphere assumed; no rear direction or distance measurement.",
+    "Receiver event history is bounded; this report preserves the aggregate observed immediately after the trial."
+  ]
+}

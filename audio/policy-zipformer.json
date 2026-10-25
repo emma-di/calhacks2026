@@ -26,7 +26,17 @@
         "Yip": 1
       },
       "threshold": 0.175,
-      "status": "tuned_on_source_split"
+      "status": "guarded_parent_fallback_exploratory_cached_and_live_reported_miss",
+      "gated_labels": {
+        "Dog": {
+          "weight": 0.25,
+          "requires_any": {
+            "Bark": 0.08,
+            "Bow-wow": 0.08,
+            "Yip": 0.08
+          }
+        }
+      }
     },
     "siren": {
       "labels": {
@@ -37,10 +47,11 @@
     },
     "smoke_alarm": {
       "labels": {
-        "Smoke detector, smoke alarm": 1
+        "Smoke detector, smoke alarm": 1,
+        "Fire alarm": 1
       },
       "threshold": 0.35,
-      "status": "provisional_small_sample"
+      "status": "fire_and_smoke_aliases_threshold_unchanged_pending_room_validation"
     },
     "alarm_clock": {
       "labels": {
@@ -58,11 +69,21 @@
       "suppressors": {
         "Alarm clock": 0.05,
         "Smoke detector, smoke alarm": 0.35,
-        "Siren": 0.225
+        "Siren": 0.225,
+        "Fire alarm": 0.35
       },
       "suppressor_hold_seconds": 4,
       "threshold": 0.075,
       "status": "tuned_on_source_split"
+    },
+    "finger_snap": {
+      "labels": {
+        "Finger snapping": 1
+      },
+      "threshold": 0.3,
+      "cooldown_seconds": 0.9,
+      "status": "disabled: superseded by the camera thumbs-up; quiet snappers and loud alarms make audio snaps unreliable",
+      "enabled": false
     }
   }
 }

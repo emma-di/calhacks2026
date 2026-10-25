@@ -1,6 +1,8 @@
 # B — Name detection implementation plan
 
-Status: planned, not implemented. No speech model has been installed or benchmarked in this stage.
+Status: **implemented with a different recognizer**: see [name-detection.md](name-detection.md). The
+build uses the sherpa-onnx Zipformer keyword spotter (streaming, same library as the sound model) instead
+of whisper.cpp, plus optional learned spellings recorded during onboarding. This plan is kept for context.
 
 ## Relationship to onboarding
 

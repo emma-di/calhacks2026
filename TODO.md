@@ -1,5 +1,13 @@
 # Project TODO
 
+Latest October24 software supersedes older unchecked snapshots: catalog selection and name integration
+are wired, Mana receiver adapter is live, stale profile overwrite fixed, centered16-arrow renderer ready.
+See WORK-STATUS.md and docs/audio-software-readiness.md; remaining room/device acceptance is not
+completed by unit tests. Approved 50 symbols and curated picker are implemented; see docs/cue-catalog-verification.md for
+wiring evidence and remaining recognition gaps. Physical optics, independent per-class accuracy
+and final room testing remain acceptance gates.
+
+
 Single project checklist. Update IDs and evidence in every relevant PR. Checked means implemented
 or verified as stated; unchecked means pending. This list covers the whole product, not just the UI.
 See the [UI → backend plan](docs/ui-ux-backend-plan.md) for sequencing and proposed contracts.
@@ -20,34 +28,44 @@ name recognition, or a polished UI. None of those should be presented as complet
 
 Before selecting the frontend builder, complete SPONSOR-02 below. The mirror work remains the first product milestone.
 
-- [ ] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
-- [ ] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
-- [ ] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
-- [ ] UI-04 — Add deterministic mock scenarios: all tiers, interruption, repeated/long labels, idle,
-  paused, unknown direction, disconnection and reconnect. Label simulated inputs.
-- [ ] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
-- [ ] UI-06 — Review contrast, keyboard access, reduced motion, responsive layout and audience-distance readability.
-- [ ] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
-- [ ] UI-08 — Capture screenshots and short demo evidence for teammate review.
+- [x] UI-01 — Scaffold frontend; lock dependencies; establish visual tokens and accessible controls.
+- [x] UI-02 — Build shared browser HUD with all five tiers (0 hidden), short labels and icon mapping.
+- [x] UI-03 — Build fullscreen audience mirror and companion preview of the same session.
+- [x] UI-04 — Deterministic scenarios: all tiers, interruption, skip, queue/resume, repeats, idle, paused,
+  Work/DND, unknown direction, disconnect and reconnect. Shared fixtures in audio/alert-scenarios.json;
+  Play a busy minute in the UI. Sources labeled (Test sound / Recording / Microphone).
+- [x] UI-05 — Connect existing receiver and dismiss API; show a real recorded event in the polished UI.
+- [ ] UI-06 — Redesigned Live screen; taste lint and inspector pass (0 FAIL) at 1440/768/390; keyboard focus,
+  reduced motion and phone order checked. Remaining: wearer readability through the optics and an
+  unfamiliar tester. See docs/display-ux.md.
+- [x] UI-07 — Add recent alerts and separate diagnostics; keep raw scores/JSON out of the mirror.
+- [x] UI-08 — Capture screenshots and short demo evidence for teammate review.
 
 ## Then: setup and preferences — Emma
 
-- [ ] SET-01 — Confirm profile fields, mode defaults versus explicit overrides, and sound enable/disable semantics.
-- [ ] SET-02 — Design/build optional typed name + aliases, sound preferences and cue previews.
-- [ ] SET-03 — Support editable settings and clear draft/saved/applied/error states.
-- [ ] SET-04 — Connect saved profile to backend; show name worker availability accurately.
+- [x] SET-01 — Defaults → searchable exception rules; numeric 0–4 overrides separate from presets; Ignore (0) is
+  the disable. Receiver validates and applies the same semantics.
+- [x] SET-02 — Mana onboarding integrated: defaults, searchable exceptions, optional name/aliases, display preview and Start preview. Automatic browser-local saving; no user-facing JSON. Eight frontend tests plus browser Ignore/reset flow verified. Name recognition itself remains pending.
+- [x] SET-03 — Browser-local settings plus receiver saved/applied/error states (version shown) and glasses
+  connection from /health.
+- [x] SET-04 — Profile pushed via PUT /profile on connect/change, persisted atomically, reloaded on restart.
+  /health reports name_worker unavailable; the UI says names are not running yet.
 
 ## Backend/integration — Emma after initial UI
 
-- [ ] API-01 — Agree versioned output state and backward-compatible event/profile contracts with teammates.
-- [ ] API-02 — Implement profile validation, revision handling and atomic local persistence.
-- [ ] API-03 — Compute effective priority from defaults, mode and user overrides in one backend location.
-- [ ] API-04 — Add event deduplication, bounded fresh queue, interruption/resume and repeated-sound behavior.
-- [ ] API-05 — Add sequence/freshness/expiry state and event-specific dismiss; prevent stale cue replay.
-- [ ] API-06 — Add capture/inference/display health and capabilities; silence must not imply disconnection.
-- [ ] API-07 — Implement real pause/resume and visible acknowledgement; do not fake worker controls.
-- [ ] API-08 — Verify mirror/hardware state alignment, timeout clearing and reconnect snapshots.
-- [ ] API-09 — Test full settings → detected event → effective tier → mirrored cue flow.
+- [ ] API-01 — Implemented backward-compatible /state, /display, /profile, /controls (docs/alert-engine.md);
+  awaiting teammate review before calling the contract agreed.
+- [x] API-02 — Profile validation, server revision, atomic .cache/profile.json persistence (tests/test_alerts.py).
+- [x] API-03 — audio/alerts.py effective_tier: per-sound → category → preset → producer default; focus modes applied after.
+- [x] API-04 — Dedup, 5-item queue with 10 s freshness, interruption/resume, repeat merging, urgent ongoing cap.
+- [x] API-05 — state_sequence, remaining_ms, session_id, event-specific dismiss; restart does not replay.
+- [ ] API-06 — /health reports per-source event recency and display clients; silence ≠ disconnect. Inference
+  heartbeat from the capture worker still pending (needs audio/cli change).
+- [ ] API-07 — Pause/resume and acknowledgement implemented in the receiver and labeled honestly (pause hides
+  alerts; it does not stop capture). Stopping capture itself still needs a worker control.
+- [ ] API-08 — Verified in software: browser and hardware/oled_client follow one envelope, clear on timeout and
+  disconnect, ignore re-polled sequences. Repeat on the physical OLED.
+- [x] API-09 — Browser Ignore rule → receiver → dog ignored, knock drawn by the glasses client in 71 ms.
 
 ## Environmental audio / ML — John and Leo (proposed)
 
@@ -67,17 +85,26 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] NAME-05 — Test uncommon names, similar-sounding negatives, background conversation and repeated mentions.
 - [ ] NAME-06 — Demonstrate configured name → “Your name” cue; log evidence without storing raw speech by default.
 
-## Hardware and display — Yameen; stack pending
+## Hardware and display — Yameen; stack supplied, device validation pending
 
-- [ ] HW-01 — Supply compute/OS, controller, display/driver/resolution, transports and controls.
+- [ ] HW-01 — Inventory supplied in [hardware stack](docs/hardware-stack.md): original Pi Zero W, 2× INMP441, SSD1306 128×64. Confirm OS, driver, actual transport and controls.
 - [ ] HW-02 — Supply audio interface, sample rate, channel count/order and synchronization capability.
-- [ ] HW-03 — Display a fake cue on actual hardware independently of recognition.
-- [ ] HW-04 — Implement device renderer for agreed icon IDs, labels, tiers, clear and expiry.
-- [ ] HW-05 — Connect authoritative backend state; compare event IDs with audience mirror.
+- [x] HW-03 — Fake cues on the real SSD1306 via glasses-pi (Oct 24): `scripts/glasses_up.sh selftest`, OLED at 0x3C.
+- [ ] HW-04 — Renderer + browser preview byte-identical (render fixtures); SSD1306 I²C driver and
+  hardware/oled_client.py with self-test written and tested against a fake bus. Mark complete after it
+  drives the real module. See docs/alert-engine.md.
+- [x] HW-05 — Live receiver state on the real OLED (Oct 24): `scripts/glasses_up.sh live` over an SSH tunnel; demo scene drove knock/dog/alarm-clock/smoke cues, 40–118 ms receiver→display.
 - [ ] HW-06 — Validate optical readability, refresh, mounting, power and reconnect/clear behavior.
 - [ ] HW-07 — Feed final audio device into capture adapter and complete the physical end-to-end demo.
 
 ## Spatial audio — John and Leo (proposed); synchronized capture gate
+
+- [ ] SPACE-PHONE-01 — **John:** evaluate a phone in a loose front pocket for front/back evidence.
+  First deliverable: supported/unsupported report comparing the existing native FOA probe with
+  pocket movement and wearer head turns. Raw third-channel TDOA is a separate experiment requiring
+  clock/geometry calibration. Do not merge streams on arrival time or claim synchronized capture.
+  Baseline, pocket and failure test matrix: [phone feasibility](docs/third-microphone-feasibility.md).
+  Keep the working Pi-only demo intact; return wrong-side and unknown counts before real-alert use.
 
 - [ ] SPACE-01 — Prove synchronized multichannel capture and document microphone geometry.
 - [ ] SPACE-02 — Prototype GCC-PHAT with known-angle recordings and measure error/confidence.
@@ -99,13 +126,14 @@ Before selecting the frontend builder, complete SPONSOR-02 below. The mirror wor
 - [ ] EXTRA-01 — Distance estimation, only after sensor feasibility and accuracy are demonstrated.
 - [ ] EXTRA-02 — Gestures or extra input controls supported by the final hardware.
 - [ ] EXTRA-03 — Additional AI/personalization beyond names and saved notification preferences.
+- [ ] EXTRA-04 — Proposed optional attention-keyword triggers and short, on-demand companion captions, only after name detection and the physical loop. Nearby speech does not establish that someone is addressing the wearer. Revoicing/ASL translation are outside current scope.
 
 ## Sponsor and track decisions
 
 See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluation tasks, not adopted integrations.
 
 - [ ] SPONSOR-01 — Verify official briefs, eligibility, required technology, submission links, deadlines and multi-track rules.
-- [ ] SPONSOR-02 — Emma: timebox Mana frontend trial before committing to the builder; record adopt/defer and evidence.
+- [ ] SPONSOR-02 — Mana-built onboarding exported and integrated locally with provenance. Bridge pairing/authenticated device integration and verified public submission links remain pending. React mirror remains locally authored.
 - [ ] SPONSOR-03 — Emma + hardware owner: evaluate Convex versus SpacetimeDB before choosing new synchronization infrastructure;
   prove event delivery, expiry and reconnect, or explicitly defer while retaining the local receiver.
 - [ ] SPONSOR-06 — John/Leo: evaluate Cartesia streaming STT for names; verify endpoint, live accuracy and local fallback.
@@ -115,6 +143,16 @@ See [sponsor build instructions](docs/sponsor-build-guide.md). These are evaluat
 
 ## Current dependencies
 
-Browser design, mock scenarios and receiver integration can proceed now. Physical rendering depends
-on HW-01; spatial localization depends on HW-02 and SPACE-01. Name setup can be designed now,
+Browser companion, mock scenarios and recorded-audio receiver integration are implemented; see [frontend evidence](frontend/README.md). Physical rendering depends
+on the remaining HW-01 confirmations; spatial localization depends on HW-02 and SPACE-01. Name setup can be designed now,
 but recognition depends on NAME-01–05. No live microphone session is required for the first UI pass.
+
+## October 25 prep completion
+
+- [x] SET-STREAMLINE-01 — Defaults-first onboarding, explicit catalog-priority preview, blank Ignore
+  preview and latest-save finish gating. 64 frontend tests/build and isolated browser persistence
+  checks pass. [Verification](docs/onboarding-review.md).
+- [ ] SET-LIVE-ACCEPT-01 — After hardware reconnect: chosen sound/Ignore → recognition → canonical
+  alert → browser and mounted OLED, including save/reload and receiver restart.
+- [ ] SPEECH-QUESTION-ACCEPT-01 — Validate commit3a593dc question-after-name output live; do not
+  infer physical speech accuracy from unit tests.

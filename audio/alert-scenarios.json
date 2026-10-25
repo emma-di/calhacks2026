@@ -1,0 +1,1483 @@
+{
+ "note": "Shared timeline fixtures. tests/test_alerts.py and frontend/src/lib/alerts.test.ts both replay these against their engine. Times are milliseconds. 'expect.active' is the id of the shown event or null. 'direction' on an add step is [degrees, confidence]; 'look' resolves toward a side; 'last_reason' checks the newest decision. 'confirm' checks whether the resolve check mark is showing.",
+ "scenarios": [
+  {
+   "name": "urgent interrupts, lower priority recorded, knock resumes only while fresh",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "reason": "displayed",
+      "active": "k1"
+     }
+    },
+    {
+     "at": 1000,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "reason": "interrupted",
+      "replaced": "knock",
+      "active": "s1",
+      "queue": [
+       "k1"
+      ]
+     }
+    },
+    {
+     "at": 1500,
+     "add": "dog_bark",
+     "id": "d1",
+     "expect": {
+      "reason": "suppressed_lower_priority",
+      "active": "s1"
+     }
+    },
+    {
+     "at": 2000,
+     "dismiss": "s1",
+     "expect": {
+      "dismissed": true,
+      "active": null,
+      "confirm": true
+     }
+    },
+    {
+     "at": 2600,
+     "tick": true,
+     "expect": {
+      "active": "k1",
+      "confirm": false,
+      "last_reason": "resumed_from_queue"
+     }
+    },
+    {
+     "at": 5600,
+     "tick": true,
+     "expect": {
+      "active": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "stale queued cue is dropped instead of replayed",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "active": "s1"
+     }
+    },
+    {
+     "at": 100,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "reason": "queued",
+      "queue": [
+       "k1"
+      ]
+     }
+    },
+    {
+     "at": 30000,
+     "tick": true,
+     "expect": {
+      "active": null,
+      "queue": []
+     }
+    }
+   ]
+  },
+  {
+   "name": "dismiss acknowledges an ongoing alarm; it can alert again after it stops",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "active": "s1"
+     }
+    },
+    {
+     "at": 1000,
+     "dismiss": "s1",
+     "expect": {
+      "dismissed": true,
+      "active": null
+     }
+    },
+    {
+     "at": 3000,
+     "add": "smoke_alarm",
+     "id": "s2",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    },
+    {
+     "at": 15000,
+     "add": "smoke_alarm",
+     "id": "s3",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    },
+    {
+     "at": 31000,
+     "add": "smoke_alarm",
+     "id": "s4",
+     "expect": {
+      "reason": "displayed",
+      "active": "s4"
+     }
+    }
+   ]
+  },
+  {
+   "name": "stale dismiss naming an older cue cannot clear a newer urgent cue",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "active": "k1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "active": "s1"
+     }
+    },
+    {
+     "at": 600,
+     "dismiss": "k1",
+     "expect": {
+      "dismissed": false,
+      "active": "s1"
+     }
+    }
+   ]
+  },
+  {
+   "name": "repeated detections merge without restarting a nonurgent lifetime",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "active": "k1",
+      "remaining": 3000,
+      "sequence": 1
+     }
+    },
+    {
+     "at": 1000,
+     "add": "knock",
+     "id": "k2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2000,
+      "sequence": 1
+     }
+    },
+    {
+     "at": 2500,
+     "add": "knock",
+     "id": "k3",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 500
+     }
+    },
+    {
+     "at": 3000,
+     "tick": true,
+     "expect": {
+      "active": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "an ongoing urgent sound stays visible while it continues, up to the cap",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "active": "s1",
+      "sequence": 1
+     }
+    },
+    {
+     "at": 20000,
+     "add": "smoke_alarm",
+     "id": "s2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "s1",
+      "remaining": 30000,
+      "sequence": 2
+     }
+    },
+    {
+     "at": 100000,
+     "add": "smoke_alarm",
+     "id": "s3",
+     "expect": {
+      "active": "s3",
+      "reason": "displayed"
+     }
+    }
+   ]
+  },
+  {
+   "name": "duplicate event ids are ignored",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "active": "k1"
+     }
+    },
+    {
+     "at": 10,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "reason": "duplicate",
+      "active": "k1",
+      "events": 1
+     }
+    }
+   ]
+  },
+  {
+   "name": "profile overrides and presets decide the effective tier",
+   "profile": {
+    "mode": "active",
+    "event_tiers": {
+     "dog_bark": 0
+    }
+   },
+   "steps": [
+    {
+     "at": 0,
+     "add": "dog_bark",
+     "id": "d1",
+     "expect": {
+      "reason": "ignored_tier_zero",
+      "tier": 0,
+      "active": null
+     }
+    },
+    {
+     "at": 100,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "reason": "displayed",
+      "tier": 3,
+      "active": "k1"
+     }
+    },
+    {
+     "at": 200,
+     "add": "siren",
+     "id": "r1",
+     "expect": {
+      "reason": "interrupted",
+      "tier": 4,
+      "active": "r1"
+     }
+    }
+   ]
+  },
+  {
+   "name": "work mode holds everyday sounds but lets attention and urgent through",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "active": "k1"
+     }
+    },
+    {
+     "at": 100,
+     "controls": {
+      "focus_mode": "work"
+     },
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 200,
+     "add": "knock",
+     "id": "k2",
+     "expect": {
+      "reason": "held_work_mode",
+      "active": null
+     }
+    },
+    {
+     "at": 300,
+     "add": "name_called",
+     "id": "n1",
+     "expect": {
+      "reason": "displayed",
+      "active": "n1"
+     }
+    },
+    {
+     "at": 400,
+     "controls": {
+      "focus_mode": "dnd"
+     },
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 500,
+     "add": "siren",
+     "id": "r1",
+     "expect": {
+      "reason": "held_dnd_mode",
+      "active": null
+     }
+    },
+    {
+     "at": 600,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "reason": "displayed",
+      "active": "s1"
+     }
+    }
+   ]
+  },
+  {
+   "name": "pause hides everything, including urgent, and clears the queue",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "expect": {
+      "active": "s1"
+     }
+    },
+    {
+     "at": 100,
+     "add": "knock",
+     "id": "k1",
+     "expect": {
+      "queue": [
+       "k1"
+      ]
+     }
+    },
+    {
+     "at": 200,
+     "controls": {
+      "paused": true
+     },
+     "expect": {
+      "active": null,
+      "queue": []
+     }
+    },
+    {
+     "at": 300,
+     "add": "smoke_alarm",
+     "id": "s2",
+     "expect": {
+      "reason": "paused",
+      "active": null
+     }
+    },
+    {
+     "at": 400,
+     "controls": {
+      "paused": false
+     },
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 500,
+     "add": "knock",
+     "id": "k2",
+     "expect": {
+      "reason": "displayed",
+      "active": "k2"
+     }
+    }
+   ]
+  },
+  {
+   "name": "a confident direction can be resolved by looking; a weak one stays undirected",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "reason": "displayed",
+      "active": "k1",
+      "direction": "left"
+     }
+    },
+    {
+     "at": 500,
+     "look": "right",
+     "expect": {
+      "resolved": false,
+      "active": "k1"
+     }
+    },
+    {
+     "at": 1000,
+     "look": "left",
+     "expect": {
+      "resolved": true,
+      "active": null,
+      "last_reason": "resolved_looked"
+     }
+    },
+    {
+     "at": 2000,
+     "add": "knock",
+     "id": "k2",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    },
+    {
+     "at": 20000,
+     "add": "smoke_alarm",
+     "id": "s1",
+     "direction": [
+      90,
+      0.3
+     ],
+     "expect": {
+      "active": "s1",
+      "direction": null
+     }
+    },
+    {
+     "at": 20500,
+     "look": "right",
+     "expect": {
+      "resolved": false,
+      "active": "s1"
+     }
+    }
+   ]
+  },
+  {
+   "name": "expiry is logged as its own resolution",
+   "steps": [
+    {
+     "at": 0,
+     "add": "bell",
+     "id": "b1",
+     "direction": [
+      120,
+      1
+     ],
+     "expect": {
+      "active": "b1",
+      "direction": "right"
+     }
+    },
+    {
+     "at": 3000,
+     "tick": true,
+     "expect": {
+      "active": null,
+      "last_reason": "expired"
+     }
+    }
+   ]
+  },
+  {
+   "name": "every side maps to its own edge",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      10,
+      1
+     ],
+     "expect": {
+      "active": "k1",
+      "direction": "front"
+     }
+    },
+    {
+     "at": 10,
+     "look": "left",
+     "expect": {
+      "resolved": false,
+      "active": "k1"
+     }
+    },
+    {
+     "at": 20,
+     "look": "front",
+     "expect": {
+      "resolved": true,
+      "active": null
+     }
+    },
+    {
+     "at": 30000,
+     "add": "siren",
+     "id": "r1",
+     "direction": [
+      -170,
+      0.9
+     ],
+     "expect": {
+      "active": "r1",
+      "direction": "behind"
+     }
+    }
+   ]
+  },
+  {
+   "name": "a gesture dismisses only while a cue is showing, then a check mark confirms it",
+   "steps": [
+    {
+     "at": 0,
+     "add": "thumbs_up",
+     "id": "f1",
+     "expect": {
+      "reason": "gesture_ignored",
+      "active": null,
+      "events": 0
+     }
+    },
+    {
+     "at": 100,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "active": "k1"
+     }
+    },
+    {
+     "at": 1100,
+     "add": "thumbs_up",
+     "id": "f2",
+     "expect": {
+      "reason": "dismissed_gesture",
+      "active": null,
+      "confirm": true,
+      "events": 1
+     }
+    },
+    {
+     "at": 1500,
+     "add": "knock",
+     "id": "k2",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    },
+    {
+     "at": 1700,
+     "tick": true,
+     "expect": {
+      "confirm": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "pause removes resolve confirmation immediately",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k"
+     }
+    },
+    {
+     "at": 100,
+     "dismiss": "k",
+     "expect": {
+      "confirm": true
+     }
+    },
+    {
+     "at": 200,
+     "controls": {
+      "paused": true
+     },
+     "expect": {
+      "active": null,
+      "confirm": false,
+      "queue": []
+     }
+    },
+    {
+     "at": 300,
+     "add": "smoke_alarm",
+     "id": "s",
+     "expect": {
+      "reason": "paused",
+      "active": null,
+      "confirm": false
+     }
+    }
+   ]
+  },
+  {
+   "name": "equal priority interruptions keep the queue bounded",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {
+     "knock": 2,
+     "bell": 2,
+     "dog_bark": 2,
+     "name_called": 2,
+     "smoke_alarm": 2,
+     "siren": 2,
+     "alarm_clock": 2,
+     "bicycle_bell": 2
+    }
+   },
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "0",
+     "expect": {
+      "active": "0"
+     }
+    },
+    {
+     "at": 10,
+     "add": "bell",
+     "id": "1",
+     "expect": {
+      "active": "1"
+     }
+    },
+    {
+     "at": 20,
+     "add": "dog_bark",
+     "id": "2",
+     "expect": {
+      "active": "2"
+     }
+    },
+    {
+     "at": 30,
+     "add": "name_called",
+     "id": "3",
+     "expect": {
+      "active": "3"
+     }
+    },
+    {
+     "at": 40,
+     "add": "smoke_alarm",
+     "id": "4",
+     "expect": {
+      "active": "4"
+     }
+    },
+    {
+     "at": 50,
+     "add": "siren",
+     "id": "5",
+     "expect": {
+      "active": "5",
+      "queue": [
+       "0",
+       "1",
+       "2",
+       "3",
+       "4"
+      ]
+     }
+    },
+    {
+     "at": 60,
+     "add": "alarm_clock",
+     "id": "6",
+     "expect": {
+      "active": "6",
+      "queue": [
+       "1",
+       "2",
+       "3",
+       "4",
+       "5"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "queue ties choose the first received cue consistently across languages",
+   "steps": [
+    {
+     "at": 0,
+     "add": "bell",
+     "id": "b",
+     "expect": {
+      "active": "b"
+     }
+    },
+    {
+     "at": 0,
+     "add": "alarm_clock",
+     "id": "c",
+     "expect": {
+      "active": "c"
+     }
+    },
+    {
+     "at": 1,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k",
+      "queue": [
+       "b",
+       "c"
+      ]
+     }
+    },
+    {
+     "at": 3001,
+     "expect": {
+      "active": "b",
+      "queue": [
+       "c"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "per-sound overrides inherit category before preset defaults",
+   "profile": {
+    "mode": "balanced",
+    "category_tiers": {
+     "home": 1
+    },
+    "event_tiers": {
+     "bell": 4
+    }
+   },
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "tier": 1,
+      "active": "k"
+     }
+    },
+    {
+     "at": 100,
+     "add": "bell",
+     "id": "b",
+     "expect": {
+      "tier": 4,
+      "active": "b"
+     }
+    }
+   ]
+  },
+  {
+   "name": "two taught custom sounds are separate sounds: dismissing the kettle never silences the doorbell",
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d1",
+     "expect": {
+      "reason": "displayed",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 1000,
+     "add": "custom",
+     "sound": "kettle",
+     "id": "k1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "k1",
+      "queue": [
+       "d1"
+      ]
+     }
+    },
+    {
+     "at": 1500,
+     "dismiss": "k1",
+     "expect": {
+      "dismissed": true,
+      "active": null,
+      "confirm": true
+     }
+    },
+    {
+     "at": 2200,
+     "tick": true,
+     "expect": {
+      "active": "d1",
+      "last_reason": "resumed_from_queue"
+     }
+    },
+    {
+     "at": 2500,
+     "add": "custom",
+     "sound": "kettle",
+     "id": "k2",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": "d1"
+     }
+    },
+    {
+     "at": 2600,
+     "dismiss": "d1",
+     "expect": {
+      "dismissed": true
+     }
+    },
+    {
+     "at": 3500,
+     "add": "custom",
+     "sound": "front-doorbell",
+     "id": "d3",
+     "expect": {
+      "reason": "acknowledged_repeat",
+      "active": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "testing repeats bypass dismissal and merging but preserve duplicates",
+   "steps": [
+    {
+     "at": 0,
+     "add": "name_called",
+     "id": "n1",
+     "expect": {
+      "active": "n1"
+     }
+    },
+    {
+     "at": 1,
+     "dismiss": "n1",
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 2,
+     "controls": {
+      "repeat_suppression": false
+     },
+     "expect": {}
+    },
+    {
+     "at": 3,
+     "add": "name_called",
+     "id": "n2",
+     "expect": {
+      "active": "n2",
+      "reason": "displayed"
+     }
+    },
+    {
+     "at": 4,
+     "add": "name_called",
+     "id": "n3",
+     "expect": {
+      "active": "n3",
+      "reason": "interrupted"
+     }
+    },
+    {
+     "at": 5,
+     "add": "name_called",
+     "id": "n3",
+     "expect": {
+      "active": "n3",
+      "reason": "duplicate"
+     }
+    },
+    {
+     "at": 6,
+     "controls": {
+      "repeat_suppression": true
+     },
+     "expect": {}
+    },
+    {
+     "at": 7,
+     "add": "name_called",
+     "id": "n4",
+     "expect": {
+      "active": "n3",
+      "reason": "merged_repeat"
+     }
+    },
+    {
+     "at": 8,
+     "dismiss": "n3",
+     "expect": {
+      "active": null
+     }
+    },
+    {
+     "at": 9,
+     "add": "name_called",
+     "id": "n5",
+     "expect": {
+      "active": null,
+      "reason": "acknowledged_repeat"
+     }
+    }
+   ]
+  },
+  {
+   "name": "alarm clears on sustained same-source quiet, gaps and returning beeps reset quiet",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "a",
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 1000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 3000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": true,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 4000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 5000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "replay"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 5000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 6000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 7999,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 8000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": null,
+      "last_reason": "sound_stopped",
+      "confirm": false
+     }
+    },
+    {
+     "at": 8100,
+     "add": "smoke_alarm",
+     "id": "b",
+     "expect": {
+      "active": "b",
+      "reason": "displayed"
+     }
+    }
+   ]
+  },
+  {
+   "name": "scoped snap cannot dismiss a replacement cue",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k"
+     }
+    },
+    {
+     "at": 1,
+     "add": "smoke_alarm",
+     "id": "a",
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 2,
+     "add": "finger_snap",
+     "id": "s1",
+     "target": "k",
+     "expect": {
+      "active": "a",
+      "reason": "gesture_ignored"
+     }
+    },
+    {
+     "at": 3,
+     "add": "finger_snap",
+     "id": "s2",
+     "target": "a",
+     "expect": {
+      "active": null,
+      "reason": "dismissed_gesture",
+      "confirm": true
+     }
+    }
+   ]
+  },
+  {
+   "name": "catalog per-id priorities override producer including Ignore0",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "whistle",
+     "label": "Whistling",
+     "tier": 0,
+     "status": "recognized",
+     "model_labels": [
+      "Whistling"
+     ]
+    },
+    {
+     "id": "sax",
+     "label": "Saxophone",
+     "tier": 3,
+     "status": "recognized",
+     "model_labels": [
+      "Saxophone"
+     ]
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "whistle",
+     "id": "c1",
+     "expect": {
+      "reason": "ignored_tier_zero",
+      "active": null,
+      "tier": 0
+     }
+    },
+    {
+     "at": 1,
+     "add": "custom",
+     "sound": "sax",
+     "id": "c2",
+     "expect": {
+      "active": "c2",
+      "tier": 3
+     }
+    }
+   ]
+  },
+ {
+  "name": "a spoken warning is urgent even when names are lowered; an attention call follows the name setting",
+  "profile": {
+   "mode": "balanced",
+   "event_tiers": {
+    "name_called": 2
+   }
+  },
+  "steps": [
+   {
+    "at": 0,
+    "add": "name_called",
+    "id": "n1",
+    "alias": "attention-0",
+    "expect": {
+     "active": "n1",
+     "tier": 2
+    }
+   },
+   {
+    "at": 500,
+    "add": "name_called",
+    "id": "w1",
+    "alias": "warning-0",
+    "expect": {
+     "reason": "interrupted",
+     "active": "w1",
+     "tier": 4
+    }
+   }
+  ]
+ },
+  {
+   "name": "ongoing cue follows fresh confident bearing without restarting identity or lifetime",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      45,
+      0.8
+     ],
+     "expect": {
+      "active": "k1",
+      "sequence": 1,
+      "bearing": 45
+     }
+    },
+    {
+     "at": 500,
+     "add": "knock",
+     "id": "k2",
+     "direction": [
+      -45,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2500,
+      "sequence": 2,
+      "bearing": -45
+     }
+    },
+    {
+     "at": 750,
+     "add": "knock",
+     "id": "k3",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2250,
+      "sequence": 3,
+      "direction": "left",
+      "bearing": -90
+     }
+    },
+    {
+     "at": 1000,
+     "add": "knock",
+     "id": "k4",
+     "direction": [
+      90,
+      0.2
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2000,
+      "sequence": 3,
+      "bearing": -90
+     }
+    },
+    {
+     "at": 3000,
+     "tick": true,
+     "expect": {
+      "active": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "train and horn labels hold one readable cue but urgent unrelated sounds still interrupt",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "train",
+     "label": "Train",
+     "tier": 3,
+     "status": "pending"
+    },
+    {
+     "id": "horn",
+     "label": "Train horn",
+     "tier": 3,
+     "status": "pending"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "controls": {
+      "repeat_suppression": false
+     },
+     "expect": {}
+    },
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "direction": [
+      45,
+      0.8
+     ],
+     "expect": {
+      "active": "t1",
+      "sequence": 1
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h1",
+     "direction": [
+      -45,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "t1",
+      "remaining": 4500,
+      "sequence": 2,
+      "bearing": -45,
+      "queue": []
+     }
+    },
+    {
+     "at": 1000,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "t1",
+      "remaining": 4000,
+      "queue": []
+     }
+    },
+    {
+     "at": 1500,
+     "add": "smoke_alarm",
+     "id": "fire",
+     "expect": {
+      "reason": "interrupted",
+      "active": "fire",
+      "queue": [
+       "t1"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "a higher priority horn interrupts a related train cue",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "train",
+     "label": "Train",
+     "tier": 2,
+     "status": "pending"
+    },
+    {
+     "id": "horn",
+     "label": "Train horn",
+     "tier": 3,
+     "status": "pending"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "expect": {
+      "active": "t1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "h1",
+      "tier": 3
+     }
+    }
+   ]
+  },
+  {
+   "name": "different capture sources do not share a train cue latch",
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "expect": {
+      "active": "t1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "source": "replay",
+     "id": "h1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "h1"
+     }
+    }
+   ]
+  }
+ ]
+}

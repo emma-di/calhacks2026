@@ -3,10 +3,18 @@
 Read this before choosing frontend tools, backend infrastructure, or demo scope.
 This guide distills the sponsor/track discussion supplied by Emma on October 23, 2026.
 It records **candidate opportunities, not verified eligibility or a commitment to use a sponsor**.
-The supplied discussion references a separate prize list that is not included here. Confirm the
+A later user-supplied prize snapshot is summarized in the decision matrix; the earlier discussion alone was incomplete. Confirm the
 official challenge briefs before relying on required technologies, judging criteria, deadlines,
 multi-track entry rules, or submission formats. Prize amounts and scoring percentages are omitted
 until verified. Nobody is assigned a sponsor integration by this document alone.
+
+## Standing selection policy
+
+Before choosing any required API, storage, backend, hosting or AI service, check the [prize-based
+decision matrix](sponsor-decision-matrix.md). Prefer a sponsor only when usage is meaningful, loss/change
+is small, and the actual cash or strategic benefit is worthwhile. Keep urgent delivery local and reliable.
+The user has now supplied the prize snapshot (updated Oct 23, 9:55 PM); amounts in the matrix are
+attributed to that snapshot, while missing/ambiguous rules remain unverified.
 
 ## TLDR for builders
 
@@ -124,8 +132,22 @@ described in the [name plan](name-detection-plan.md). Provider choice must not c
 | Decision | Status | Evidence / outcome |
 | --- | --- | --- |
 | Official track rules and eligibility | Unverified | Need official briefs; supplied summary alone is insufficient |
-| Mana for frontend workflow | Evaluate | No integration or qualifying usage claimed |
+| Mana for frontend workflow | Evaluation | Signed in; assistant queried about Bridge. No pairing, export or live event proof completed; React mirror runs locally |
 | Convex versus SpacetimeDB for cloud state | Evaluate | Handoff prefers Convex; select one or defer both; local receiver works |
 | Cartesia for streaming name transcription | Evaluate | Handoff proposes Ink-2; endpoint and live performance still need verification |
 | Claude for preference interpretation | Optional | After basic settings; user reviews proposed values before saving |
 | Final submission tracks | Pending | Choose after eligibility and working capabilities are confirmed |
+
+## Mana Bridge follow-up
+
+A sponsor contact supplied by Emma suggested Mana Bridge for connecting the hardware and frontend.
+Treat this as a lead, not verified transport capability. After sign-in, inspect official Bridge setup,
+source/API access, deployment model and permission scope. Prove local event → Mana view with mock
+data first; do not expose the current unauthenticated loopback receiver publicly or grant broad
+filesystem/network access without understanding the bridge. Final track demo should show actual
+nearby sound → physical display, with a clearly labeled recorded fallback.
+
+Mana assistant follow-up: Bridge was described as remote terminal/file access, not a generic HTTP
+tunnel. Generated React was described as adaptable outside Mana, with platform-specific dependencies
+to replace. These are assistant-reported capabilities, not independently validated export/runtime
+integrations. No Bridge installation or pairing was performed. See [team notepad](../TEAM-NOTES.md).

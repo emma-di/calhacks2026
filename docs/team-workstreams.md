@@ -43,3 +43,7 @@ synchronization capability, display model/resolution/driver, audio and alert tra
 dismiss/mute controls. Then implement the selected adapters against the existing event contract.
 
 Read the [distilled team build instructions](team-build-instructions.md) for the latest supplied handoff, sponsor candidates, contract reconciliations and demo acceptance evidence.
+
+Hardware inventory is now supplied: see [Pi Zero W + INMP441 + SSD1306 handoff](hardware-stack.md).
+The browser implementation and validation are in [frontend/README.md](../frontend/README.md);
+[AGENTS.md](../AGENTS.md) is the starting point for teammates’ coding agents.
