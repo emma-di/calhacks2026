@@ -105,11 +105,31 @@ class SpellingTests(unittest.TestCase):
 
     def test_keyword_lines_use_sensitivity_and_skip_unknown_tokens(self):
         profile = names.validate_profile({'name_detection': {
-            'enabled': True, 'primary_name': 'John', 'sensitivity': 'high',
+            'enabled': True, 'primary_name': 'John', 'sensitivity': 'high', 'attention_calls': False,
             'learned_spellings': [{'text': 'YEMY', 'tokens': '▁ Y E M Y'}, {'text': 'ZZ', 'tokens': '▁ZZ Q'}]}})
         with mock.patch.object(names, 'tokenize', side_effect=lambda t: {'JOHN': ['▁JO', 'H', 'N']}[t]):
             lines = names.keyword_lines(profile)
         self.assertEqual(lines, ['▁JO H N :2.0 #0.1 @primary', '▁ Y E M Y :2.0 #0.1 @learned-0'])
+
+    def test_attention_calls_use_a_stricter_threshold_and_work_without_a_name(self):
+        words = lambda t: ['▁' + w for w in t.split()]
+        with mock.patch.object(names, 'tokenize', side_effect=words), \
+             mock.patch.object(names, 'model_vocabulary', return_value=set()):
+            no_name = names.keyword_lines(names.validate_profile({'name_detection': {}}))
+            with_name = names.keyword_lines(names.validate_profile(
+                {'name_detection': {'enabled': True, 'primary_name': 'Emma'}}))
+            off = names.keyword_lines(names.validate_profile({'name_detection': {'attention_calls': False}}))
+        self.assertIn(f'▁HEY ▁YOU :{names.ATTENTION_BOOST} #{names.ATTENTION_THRESHOLD} @attention-1', no_name)
+        self.assertEqual(len(no_name), len(names.ATTENTION_PHRASES))
+        self.assertEqual(with_name[0], '▁EMMA :1.5 #0.15 @primary')
+        self.assertGreater(names.ATTENTION_THRESHOLD, names.DEFAULT_THRESHOLD)   # stricter than names
+        self.assertEqual(off, [])
+
+    def test_attention_event_label(self):
+        event = names.make_name_event(dict(revision=1), 'attention-0', 'microphone')
+        self.assertEqual((event['type'], event['label']), ('name_called', "Someone's calling"))
+        self.assertEqual(validate_event(event)['matched_alias_id'], 'attention-0')
+        self.assertEqual(names.make_name_event(dict(revision=1), 'primary', 'microphone')['label'], 'Your name')
 
 class EventTests(unittest.TestCase):
     profile = dict(revision=3)

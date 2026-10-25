@@ -28,6 +28,11 @@ MAX_LEARNED = 8
 MAX_NAME_LENGTH = 40
 WARMUP_SECONDS = 2.5   # streaming models ignore roughly the first 2 s after a stream starts
 
+# Attention calls: someone trying to get the wearer's attention without using their name. Common in
+# everyday talk, so they use a stricter threshold than names. profile.name_detection.attention_calls.
+ATTENTION_PHRASES = ('HEY', 'HEY YOU', 'EXCUSE ME', 'HELLO', 'OVER HERE')
+ATTENTION_BOOST, ATTENTION_THRESHOLD = 1.0, 0.25
+
 # Detection settings chosen on a synthetic multi-voice test (docs/name-detection.md).
 DEFAULT_BOOST = 1.5
 DEFAULT_THRESHOLD = 0.15
@@ -42,7 +47,7 @@ SENSITIVITY = {   # profile.name_detection.sensitivity -> (boost, threshold)
 def default_profile():
     return dict(schema_version=1, profile_id='local', revision=0, display_name='',
                 name_detection=dict(enabled=False, primary_name='', aliases=[], language='en',
-                                    sensitivity='balanced', learned_spellings=[]))
+                                    sensitivity='balanced', learned_spellings=[], attention_calls=True))
 
 def clean_name(value, field):
     if not isinstance(value, str):
@@ -90,8 +95,11 @@ def validate_profile(profile):
         if (not isinstance(item, dict) or not isinstance(item.get('tokens'), str) or not isinstance(item.get('text'), str)
                 or not 0 < len(item['tokens']) <= 200 or not 0 < len(item['text']) <= 60):
             raise ValueError('each learned spelling needs "text" and "tokens"')
+    attention = detection.get('attention_calls', True)
+    if type(attention) is not bool:
+        raise ValueError('attention_calls must be true or false')
     result['name_detection'] = dict(enabled=enabled, primary_name=primary, aliases=aliases,
-                                    language=language, sensitivity=sensitivity,
+                                    language=language, sensitivity=sensitivity, attention_calls=attention,
                                     learned_spellings=[dict(text=i['text'], tokens=i['tokens']) for i in learned])
     return result
 
@@ -130,7 +138,9 @@ def keyword_lines(profile):
     """sherpa-onnx keyword lines, one per spoken name: '▁JO H N :1.5 #0.15 @primary'."""
     detection = profile['name_detection']
     boost, threshold = SENSITIVITY[detection.get('sensitivity', 'balanced')]
+    names_on = detection.get('enabled') is not False and bool(detection.get('primary_name'))
     entries = [('primary', detection['primary_name'])]+[(f'alias-{i}', a) for i, a in enumerate(detection['aliases'])]
+    entries = entries if names_on else []
     lines, seen = [], set()
     for alias_id, name in entries:
         spoken = spoken_form(name)
@@ -140,6 +150,14 @@ def keyword_lines(profile):
         if tokens not in seen:
             seen.add(tokens)
             lines.append(f"{tokens} :{boost} #{threshold} @{alias_id}")
+    if detection.get('attention_calls', True):
+        for i, phrase in enumerate(ATTENTION_PHRASES):
+            tokens = ' '.join(tokenize(phrase))
+            if tokens not in seen:
+                seen.add(tokens)
+                lines.append(f"{tokens} :{ATTENTION_BOOST} #{ATTENTION_THRESHOLD} @attention-{i}")
+    if not names_on:
+        return lines
     vocabulary = model_vocabulary()
     for i, item in enumerate(detection.get('learned_spellings', [])):
         if item['tokens'] not in seen and all(t in vocabulary for t in item['tokens'].split()):
@@ -280,7 +298,8 @@ def learn_spelling(waveform, profile):
 def make_name_event(profile, alias_id, source, timestamp_ms=None):
     """Schema-v2 name event (audio/events.py validate_name_event). Keyword spotting gives no calibrated
     score, so confidence is null with confidence_kind 'unavailable'."""
-    return dict(schema_version=2, event_id=str(uuid.uuid4()), type='name_called', label='Your name',
+    label = "Someone's calling" if alias_id.startswith('attention') else 'Your name'
+    return dict(schema_version=2, event_id=str(uuid.uuid4()), type='name_called', label=label,
                 source=source, recognizer='sherpa-onnx-kws-zipformer-3.3M', confidence=None,
                 confidence_kind='unavailable', matched_alias_id=alias_id,
                 profile_revision=profile.get('revision', 0), priority_tier=3,
@@ -322,7 +341,8 @@ class NameDetector:
             return False
         self.profile = profile
         detection = profile['name_detection']
-        if not detection['enabled'] or not detection['primary_name']:
+        names_on = detection['enabled'] and bool(detection['primary_name'])
+        if not names_on and not detection.get('attention_calls', True):
             self.spotter = self.stream = None
             print('Name detection: off (enable it in the profile)', file=sys.stderr)
             return True
@@ -334,8 +354,9 @@ class NameDetector:
             tokens=str(KWS_DIR/'tokens.txt'), encoder=model('encoder'), decoder=model('decoder'),
             joiner=model('joiner'), keywords_file=str(keywords), num_threads=1)
         self.reset()
-        names = [detection['primary_name']]+detection['aliases']
-        print(f'Name detection: listening for {", ".join(names)} (profile revision {profile["revision"]})', file=sys.stderr)
+        heard = ([detection['primary_name']]+detection['aliases'] if names_on else []) + \
+            (['attention calls (hey, excuse me…)'] if detection.get('attention_calls', True) else [])
+        print(f'Name detection: listening for {", ".join(heard)} (profile revision {profile["revision"]})', file=sys.stderr)
         return True
 
     def reset(self):
