@@ -519,3 +519,23 @@ liveness did not prove changed thresholds loaded. Spatial accuracy remains unval
   only after wearer-view confirmation; do not swap microphone labels to fix mirrored text.
 - At initial check the existing Pi recognizer PID79402 was alive but Pi hostname unresolved.
   Receiver8766 was responding; no inference/capture liveness claimed from process status alone.
+
+
+## October 25: mounted optics and live direction diagnosis
+
+- Pi reconnected; bear PID1079 paused, display deployed, six-cue self-test and live OLED worked.
+  User canceled a requested15-degree rotation; no rotation/mirroring applied.
+- Live site is http://127.0.0.1:5174/?view=log in Receiver mode, proxying8766. Port5173
+  was a different session. Do not use hosted Browser mode to inspect the Pi live session.
+- Current mounted centered reference: alarm-dominant/speech-filtered, higher-coherence numeric
+  samples had median left-minus-right−3.85dB (32 unique frames; background noise present).
+  This provisional offset replaces−0.89dB locally, margin remains0.75dB. Not localization accuracy.
+  Runtime file and backup remain only in ignored .cache/. New managed Pi worker confirmed loaded
+  calibration. Receiver session/API key preserved; repeat suppression OFF for testing.
+- A post-reload name event did carry−45 degrees; this proves left is representable, not a passed
+  controlled left/right alarm trial. Physical acceptance remains pending.
+- Software fix: merged repeats refresh confident same-source bearing without resetting identity
+  or ordinary lifetime. Narrow rail/horn icon family reduces alternate-label churn; unrelated
+  urgent sounds still interrupt. See docs/alert-engine.md. Receiver was restarted on8766 to activate the changes. Saved profile revision118 and controls
+  were preserved; new session4c04cbec80b3461eaa44a3b8a7d3241b. Session-only provider key must
+  be reconnected. 188 Python tests,68 frontend tests and production build passed.

@@ -26,6 +26,10 @@ def run_step(engine, step):
     result = {}
     if 'add' in step:
         event = fixture_event(step['add'], step['id'], at, step.get('direction'))
+        if 'icon' in step:
+            event['icon_id'] = step['icon']
+        if 'source' in step:
+            event['source'] = step['source']
         if 'sound' in step:   # a user-taught custom sound
             event.update(custom_sound_id=step['sound'], label=step['sound'])
         if 'target' in step:
@@ -83,6 +87,8 @@ class SharedScenarioTests(unittest.TestCase):
                         self.assertEqual(result['resolved'], expect['resolved'])
                     if 'direction' in expect:
                         self.assertEqual(snap['direction'], expect['direction'])
+                    if 'bearing' in expect:
+                        self.assertEqual(snap['active']['direction_degrees'], expect['bearing'])
                     if 'confirm' in expect:
                         self.assertEqual(snap['confirm'] is not None, expect['confirm'])
                     if 'last_reason' in expect:
@@ -138,6 +144,37 @@ class PolicyTests(unittest.TestCase):
 
 
 class ConfirmationTests(unittest.TestCase):
+    def test_merged_bearing_reaches_oled_without_restarting_cue_or_rewriting_history(self):
+        engine = AlertEngine()
+        state = DisplayState(clock=lambda: 0.0)
+        state.connect(engine.session_id)
+        engine.add(dict(fixture_event('knock', 'first', 0, (45, .8)),
+                        direction_source='pi_stereo', direction_reason='assumed_front:quiet',
+                        direction_assumed_front=True), 0)
+        state.accept(engine.presentation(0))
+        before = bytes(state.frame().buffer)
+        engine.add(dict(fixture_event('knock', 'second', 500, (-90, .9)),
+                        direction_source='pi_stereo', direction_reason='measured_left'), 500)
+        envelope = engine.presentation(500)
+        self.assertEqual((envelope['event_id'], envelope['age_ms'], envelope['remaining_ms']),
+                         ('first', 500, 2500))
+        self.assertEqual((envelope['direction'], envelope['bearing_degrees']), ('left', -90))
+        self.assertTrue(state.accept(envelope))
+        self.assertNotEqual(before, bytes(state.frame().buffer))
+        self.assertEqual(engine.events[0]['direction_degrees'], 45)
+        self.assertEqual(engine.active['event']['direction_reason'], 'measured_left')
+        self.assertNotIn('direction_assumed_front', engine.active['event'])
+
+    def test_delayed_or_foreign_source_repeat_cannot_overwrite_latest_bearing(self):
+        engine = AlertEngine()
+        engine.add(fixture_event('knock', 'first', 0, (45, .8)), 0)
+        engine.add(fixture_event('knock', 'second', 500, (-90, .9)), 500)
+        engine.add(fixture_event('knock', 'delayed', 250, (90, .9)), 750)
+        foreign = fixture_event('knock', 'other', 1000, (90, .9))
+        foreign['source'] = 'replay'
+        engine.add(foreign, 1000)
+        self.assertEqual(engine.presentation(1000)['bearing_degrees'], -90)
+
     def test_resolve_check_reaches_the_glasses_at_the_cue_position_then_clears(self):
         engine = AlertEngine()
         state = DisplayState(clock=lambda: 0.0)

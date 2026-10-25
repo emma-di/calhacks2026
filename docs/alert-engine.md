@@ -156,3 +156,22 @@ windows, so this is not an instant hardware button. Manual Dismiss remains avail
 
 Claude's centered icon + solid direction triangles remain byte-identical in Python and browser
 renderers. No direction feed means no triangle. Simulated directions remain confined to mock cues.
+
+
+## October 25: direction refresh and rail/horn presentation stability
+
+A merged repeat keeps its original displayed event ID/start time, but fresh confident direction
+from the same source updates its bearing and display sequence. Delayed, low-confidence and
+foreign-source updates do not replace it. Direction provenance follows the new evidence; the
+original event-history record is not rewritten. Existing urgent lifetime extension still applies.
+
+The four curated custom symbols Train, Train horn, Car horn and Truck horn form a narrow
+presentation family: a different family label from the same source at the same/lower tier merges
+into the currently shown cue until its existing lifetime expires, instead of rapidly replacing it
+or queuing alternate icons. This applies even with repeat suppression off. Higher-tier and
+unrelated alerts retain normal interruption behavior. It is not proof that labels came from one
+physical source; the raw observations remain available in Log.
+
+Both engines share timeline fixtures for direction changes, expiry, alternate icons and urgent
+interruption. Python receiver changes require a receiver restart; hot frontend updates alone do
+not update an already-running Python process.

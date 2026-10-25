@@ -1,6 +1,15 @@
 # Resume here — October 24 software checkpoint
 
-## CURRENT October25: disconnected hardware, prep work
+## Latest mounted session — October25
+
+Hardware has reconnected; physical OLED self-test/live worked. User canceled rotation, so no
+optical transform was applied. Use local5174 Receiver → Log (8766 session), not5173/hosted demo.
+Provisional mounted gain offset is now−3.85dB, margin0.75, loaded by managed Pi recognizer.
+Local calibration is not transferred by Git. Confirm controlled left/right alarm accuracy next.
+New merged-direction/rail-icon stability changes are active after a receiver8766 restart;
+profile revision118 and test controls preserved. Reconnect the session-only Claude key. Details: TEAM-NOTES.md and docs/alert-engine.md.
+
+## Historical prep checkpoint — October25: disconnected hardware
 
 The physical sound→browser/OLED path worked; hardware is now disconnected for assembly.
 Do not start a fresh mic test or label offline readings live. Current direction calibration and

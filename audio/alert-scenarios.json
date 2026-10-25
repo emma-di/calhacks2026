@@ -1242,6 +1242,242 @@
     }
    }
   ]
- }
+ },
+  {
+   "name": "ongoing cue follows fresh confident bearing without restarting identity or lifetime",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k1",
+     "direction": [
+      45,
+      0.8
+     ],
+     "expect": {
+      "active": "k1",
+      "sequence": 1,
+      "bearing": 45
+     }
+    },
+    {
+     "at": 500,
+     "add": "knock",
+     "id": "k2",
+     "direction": [
+      -45,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2500,
+      "sequence": 2,
+      "bearing": -45
+     }
+    },
+    {
+     "at": 750,
+     "add": "knock",
+     "id": "k3",
+     "direction": [
+      -90,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2250,
+      "sequence": 3,
+      "direction": "left",
+      "bearing": -90
+     }
+    },
+    {
+     "at": 1000,
+     "add": "knock",
+     "id": "k4",
+     "direction": [
+      90,
+      0.2
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "k1",
+      "remaining": 2000,
+      "sequence": 3,
+      "bearing": -90
+     }
+    },
+    {
+     "at": 3000,
+     "tick": true,
+     "expect": {
+      "active": null
+     }
+    }
+   ]
+  },
+  {
+   "name": "train and horn labels hold one readable cue but urgent unrelated sounds still interrupt",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "train",
+     "label": "Train",
+     "tier": 3,
+     "status": "pending"
+    },
+    {
+     "id": "horn",
+     "label": "Train horn",
+     "tier": 3,
+     "status": "pending"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "controls": {
+      "repeat_suppression": false
+     },
+     "expect": {}
+    },
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "direction": [
+      45,
+      0.8
+     ],
+     "expect": {
+      "active": "t1",
+      "sequence": 1
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h1",
+     "direction": [
+      -45,
+      0.9
+     ],
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "t1",
+      "remaining": 4500,
+      "sequence": 2,
+      "bearing": -45,
+      "queue": []
+     }
+    },
+    {
+     "at": 1000,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h2",
+     "expect": {
+      "reason": "merged_repeat",
+      "active": "t1",
+      "remaining": 4000,
+      "queue": []
+     }
+    },
+    {
+     "at": 1500,
+     "add": "smoke_alarm",
+     "id": "fire",
+     "expect": {
+      "reason": "interrupted",
+      "active": "fire",
+      "queue": [
+       "t1"
+      ]
+     }
+    }
+   ]
+  },
+  {
+   "name": "a higher priority horn interrupts a related train cue",
+   "profile": {
+    "mode": "balanced",
+    "event_tiers": {}
+   },
+   "custom_sound_requests": [
+    {
+     "id": "train",
+     "label": "Train",
+     "tier": 2,
+     "status": "pending"
+    },
+    {
+     "id": "horn",
+     "label": "Train horn",
+     "tier": 3,
+     "status": "pending"
+    }
+   ],
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "expect": {
+      "active": "t1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "id": "h1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "h1",
+      "tier": 3
+     }
+    }
+   ]
+  },
+  {
+   "name": "different capture sources do not share a train cue latch",
+   "steps": [
+    {
+     "at": 0,
+     "add": "custom",
+     "sound": "train",
+     "icon": "cue_train",
+     "id": "t1",
+     "expect": {
+      "active": "t1"
+     }
+    },
+    {
+     "at": 500,
+     "add": "custom",
+     "sound": "horn",
+     "icon": "cue_train_horn",
+     "source": "replay",
+     "id": "h1",
+     "expect": {
+      "reason": "interrupted",
+      "active": "h1"
+     }
+    }
+   ]
+  }
  ]
 }

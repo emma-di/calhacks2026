@@ -10,6 +10,12 @@ export type FocusMode = "everyday" | "work" | "dnd";
 export function soundKey(event: SoundEvent): string {
   return event.type === "custom" ? `custom:${event.custom_sound_id}` : event.type;
 }
+// Presentation latch for alternating rail/horn labels, not a physical-source identity claim.
+function relatedTransportCue(first: SoundEvent, second: SoundEvent): boolean {
+  const icons = new Set(["cue_train", "cue_train_horn", "cue_car_horn", "cue_truck_horn"]);
+  return first.source === second.source && first.type === "custom" && second.type === "custom" &&
+    icons.has(first.icon_id ?? "") && icons.has(second.icon_id ?? "");
+}
 export type Preset = keyof typeof policy.presets;
 export interface Preferences {
   mode: Preset;
@@ -44,6 +50,7 @@ interface Active {
   expires: number;
   repeats: number;
   direction: Direction | null;
+  directionTimestamp?: number;
 }
 interface Queued {
   event: LoggedEvent;
@@ -183,6 +190,26 @@ export class AlertEngine {
       this.sequence += 1;
     }
   }
+  private refreshDirection(active: Active, event: SoundEvent) {
+    const direction = directionBucket(event.direction_degrees, event.direction_confidence);
+    const previousAt = active.directionTimestamp ?? active.event.timestamp_ms;
+    if (direction === null || event.source !== active.event.source || event.timestamp_ms < previousAt) return;
+    active.directionTimestamp = event.timestamp_ms;
+    const fields = ["direction_degrees", "direction_confidence", "direction_source",
+      "direction_reason", "direction_assumed_front"] as const;
+    const incoming = event as SoundEvent & Partial<Record<(typeof fields)[number], unknown>>;
+    const previous = active.event as LoggedEvent & Partial<Record<(typeof fields)[number], unknown>>;
+    if (fields.some(key => previous[key] !== incoming[key])) {
+      const refreshed = {...previous};
+      for (const key of fields) {
+        if (key in incoming) Object.assign(refreshed, {[key]: incoming[key]});
+        else delete refreshed[key];
+      }
+      active.event = refreshed;
+      active.direction = direction;
+      this.sequence += 1;
+    }
+  }
   private freshQueue(now: number) {
     this.queue = this.queue.filter((item) => {
       if (now - item.received <= policy.queue_fresh_ms) return true;
@@ -287,8 +314,11 @@ export class AlertEngine {
       return this.decide(logged, tier, "acknowledged_repeat", now);
     }
     const active = this.active;
-    if (this.repeatSuppression && active && soundKey(active.event) === kind && tier <= active.tier) {
+    const sameSound = active && soundKey(active.event) === kind;
+    const relatedLabel = active && !sameSound && relatedTransportCue(active.event, event);
+    if (active && tier <= active.tier && ((this.repeatSuppression && sameSound) || relatedLabel)) {
       active.repeats += 1;
+      this.refreshDirection(active, event);
       if (active.tier === 4) {
         const cap = active.started + policy.urgent_ongoing_cap_ms;
         const extended = Math.min(

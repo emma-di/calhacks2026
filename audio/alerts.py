@@ -144,6 +144,18 @@ def sound_key(event):
     return event['type']
 
 
+def related_transport_cue(first, second):
+    """Keep a train/horn clip readable when its related model labels alternate.
+
+    This is presentation stability, not evidence that two physical sources are the same.
+    Only explicitly selected rail/horn symbols from the same capture source participate.
+    Higher-priority cues always bypass the latch, and unrelated sounds retain normal priority.
+    """
+    icons = {'cue_train', 'cue_train_horn', 'cue_car_horn', 'cue_truck_horn'}
+    return (first['source'] == second['source'] and first['type'] == second['type'] == 'custom'
+            and first.get('icon_id') in icons and second.get('icon_id') in icons)
+
+
 def effective_tier(kind, producer_tier, profile, event=None):
     """Explicit override, then the selected preset, then the producer's legacy default."""
     if kind == 'name_called' and event and str(event.get('matched_alias_id', '')).startswith('warning-'):
@@ -204,6 +216,23 @@ class AlertEngine:
     def _clear(self):
         if self.active is not None:
             self.active = None
+            self.sequence += 1
+
+    def _refresh_direction(self, active, event):
+        """A merged cue keeps identity/age but follows newer confident spatial evidence."""
+        direction = direction_bucket(event.get('direction_degrees'), event.get('direction_confidence'))
+        previous_at = active.get('direction_timestamp', active['event']['timestamp_ms'])
+        if (direction is None or event['source'] != active['event']['source']
+                or event['timestamp_ms'] < previous_at):
+            return
+        active['direction_timestamp'] = event['timestamp_ms']
+        fields = ('direction_degrees', 'direction_confidence', 'direction_source',
+                  'direction_reason', 'direction_assumed_front')
+        if any(active['event'].get(key) != event.get(key) for key in fields):
+            # Replace all provenance together, dropping old metadata absent from this reading.
+            active['event'] = {key: value for key, value in active['event'].items() if key not in fields}
+            active['event'].update({key: event[key] for key in fields if key in event})
+            active['direction'] = direction
             self.sequence += 1
 
     def _fresh_queue(self, now):
@@ -285,9 +314,13 @@ class AlertEngine:
             self.acks[kind] = now + POLICY['acknowledge_hold_ms']
             return self._decide(logged, tier, 'acknowledged_repeat', now)
         active = self.active
-        if self.repeat_suppression and active and sound_key(active['event']) == kind and tier <= active['tier']:
+        same_sound = active and sound_key(active['event']) == kind
+        related_label = active and not same_sound and related_transport_cue(active['event'], event)
+        if active and tier <= active['tier'] and ((self.repeat_suppression and same_sound) or related_label):
             # Same ongoing sound: keep the original cue, no new animation or lifetime restart.
+            # Related train/horn labels also stay readable with detection cooldowns disabled.
             active['repeats'] += 1
+            self._refresh_direction(active, event)
             if active['tier'] == 4:
                 cap = active['started'] + POLICY['urgent_ongoing_cap_ms']
                 extended = min(cap, max(active['expires'], now + POLICY['lifetime_ms']['4']))

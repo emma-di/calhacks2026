@@ -34,7 +34,7 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       const label = `${scenario.name} / step ${index}`;
       let result: Record<string, unknown> = {};
       if (step.add)
-        result = { ...engine.add({...fixtureEvent(step.add, step.id, step.at, step.direction, step.sound), ...(step.target ? {target_event_id: step.target} : {}), ...(step.alias ? {matched_alias_id: step.alias} : {})}, step.at) };
+        result = { ...engine.add({...fixtureEvent(step.add, step.id, step.at, step.direction, step.sound), ...(step.icon ? {icon_id: step.icon} : {}), ...(step.source ? {source: step.source} : {}), ...(step.target ? {target_event_id: step.target} : {}), ...(step.alias ? {matched_alias_id: step.alias} : {})}, step.at) };
       else if (step.look) result = { resolved: engine.look(step.at, step.look) };
       else if (step.dismiss) {
         result = { dismissed: engine.dismiss(step.at, step.dismiss) };
@@ -57,6 +57,7 @@ test("browser simulator passes the same scenarios as the Python receiver", () =>
       if ("sequence" in expect) assert.equal(snap.state_sequence, expect.sequence, label);
       if ("resolved" in expect) assert.equal(result.resolved, expect.resolved, label);
       if ("direction" in expect) assert.equal(snap.direction, expect.direction, label);
+      if ("bearing" in expect) assert.equal(snap.active?.direction_degrees, expect.bearing, label);
       if ("confirm" in expect) assert.equal(snap.confirm !== null, expect.confirm, label);
       if ("last_reason" in expect) assert.equal(snap.decisions.at(-1)?.reason, expect.last_reason, label);
       if ("events" in expect) assert.equal(snap.events.length, expect.events, label);
@@ -87,4 +88,20 @@ test("manual reset clears acknowledgement so a retest always shows", () => {
   engine.dismiss(10, "s1");
   engine.reset(20);
   assert.equal(engine.add(fixtureEvent("smoke_alarm", "s2", 30), 30).reason, "displayed");
+});
+
+test("merged directions reject delayed/foreign readings and preserve original detection history", () => {
+  const engine = new AlertEngine();
+  const first = {...fixtureEvent("knock", "first", 0, [45, .8]),
+    direction_source: "pi_stereo", direction_reason: "assumed_front:quiet", direction_assumed_front: true};
+  const second = {...fixtureEvent("knock", "second", 500, [-90, .9]),
+    direction_source: "pi_stereo", direction_reason: "measured_left"};
+  engine.add(first, 0);
+  engine.add(second, 500);
+  engine.add(fixtureEvent("knock", "delayed", 250, [90, .9]), 750);
+  engine.add({...fixtureEvent("knock", "other", 1000, [90, .9]), source: "replay"}, 1000);
+  assert.equal(engine.snapshot(1000).active?.direction_degrees, -90);
+  assert.equal(engine.events[0].direction_degrees, 45);
+  assert.equal((engine.snapshot(1000).active as any).direction_reason, "measured_left");
+  assert.equal("direction_assumed_front" in engine.snapshot(1000).active!, false);
 });
