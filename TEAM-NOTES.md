@@ -341,3 +341,17 @@ Known settings caveat observed during this test: refreshing a companion with sta
 settings can reapply them to the receiver, including disabling a name configured elsewhere. Restored
 Emma's previously active name/aliases after the refresh. Resolve receiver/browser initial ownership
 before claiming multi-client settings synchronization is complete; avoid multiple settings owners.
+
+### Alarm stop and glasses-only dismissal — October 24
+
+Emma confirmed the glasses have no camera; keep phone-camera thumbs-up optional, and add opt-in
+microphone Snap to dismiss. Its score >=0.8 and current-event target/latch guards are implemented,
+but real snap accuracy remains unverified. A stronger clap or alarm may still confuse the model.
+Ongoing fire/smoke cues clear after four seconds of continuous fresh below-threshold windows from
+the same source, not immediately between beeps or on capture disconnect. No resolved/check mark
+for automatic sound stop. Claude's solid triangles already render when supported direction exists.
+
+Live test also exposed a stale parser closure after hot reload: receiver polling now depends on
+parseSnapshot so new control fields reach the toggle immediately. Clicked snap off/on through UI and
+verified both server states. Mic worker also now waits through queue timeouts instead of exiting on
+_queue.Empty; missing audio still reports as not listening and is never treated as alarm quiet.

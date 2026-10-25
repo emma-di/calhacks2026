@@ -130,7 +130,7 @@ export function useSession(
       clearTimeout(timer);
       controller?.abort();
     };
-  }, [source]);
+  }, [parseSnapshot, source]);
 
   // Saved preferences follow the receiver, including after it restarts with a new session.
   const synced = useRef<string | null>(null);
@@ -287,7 +287,7 @@ export function useSession(
   );
 
   const setControls = useCallback(
-    async (changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean }) => {
+    async (changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean; snap_to_dismiss?: boolean }) => {
       if (source === "browser") {
         engine.current.setControls(performance.now(), changes);
         return;

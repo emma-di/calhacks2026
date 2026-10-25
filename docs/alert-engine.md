@@ -134,3 +134,25 @@ The urgent `smoke_alarm` event now accepts both exact model labels `Fire alarm` 
 rule. Generic Alarm/Alarm clock are not directly mapped to fire. Broader alias matching remains
 provisional: cached recorded-score evaluation found additional false positives (including alarm
 clocks and crickets); see reports/fire-alarm-alias-review.json. Real room calibration is still needed.
+
+## Ongoing fire-alarm lifecycle and camera-free input — October 24
+
+Fresh `/observations` windows from the active alarm's own capture source now feed the alert engine.
+The urgent fire/smoke cue clears after 4,000 ms of continuous below-threshold evidence; a positive
+window restarts that quiet hold. A gap over two seconds resets continuity. Missing capture, stale
+uploads and another source's quiet windows do not prove the alarm stopped. Windowing adds capture
+latency to the quiet hold. Automatic clearing logs `sound_stopped`, does not acknowledge the sound
+or show a wearer-confirmation check, and resumes a fresh waiting cue. The original maximum lifetime
+remains the fallback if evidence stops arriving. This is absence of model evidence, not proof that
+a physical fire or danger has ended.
+
+Live → **Snap to dismiss** sets session-only `snap_to_dismiss` via `/controls`. Off by default; enabled
+for Emma's requested test. CLI enables Finger snapping only while a cue exists, requires score >=0.8,
+and scopes the resulting gesture to the current `target_event_id`; a stale snap cannot dismiss a
+replacement cue. An overlapping high-score window stays latched until the score drops below0.4.
+Camera thumbs-up remains optional and independent; neither glasses nor snap dismissal need a camera.
+Snap accuracy and latency are experimental until actual wearer/room tests pass. Inference uses 2s
+windows, so this is not an instant hardware button. Manual Dismiss remains available.
+
+Claude's centered icon + solid direction triangles remain byte-identical in Python and browser
+renderers. No direction feed means no triangle. Simulated directions remain confined to mock cues.

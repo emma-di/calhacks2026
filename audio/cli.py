@@ -102,6 +102,7 @@ def main():
             print(f'Name detection off: {exc}', file=sys.stderr)
     name_events = []   # emitted since the last window, so observations can report them
     name_decisions = []
+    snap_latched = False
     from audio.runtime_controls import RecognitionControls
     controls = RecognitionControls(args.endpoint)
 
@@ -125,11 +126,29 @@ def main():
                 decisions=names.decisions,deliveries=deliveries))
 
     def process(window, source, clock=None, timestamp=None):
+        nonlocal snap_latched
         refresh_controls()
         scores, elapsed = model.predict(window)
         if args.debug:
             print(json.dumps({'inference_ms':round(elapsed, 1), 'top5':sorted(scores.items(), key=lambda x:x[1], reverse=True)[:5]}), file=sys.stderr)
+        snap = detector.policy['rules'].get('finger_snap')
+        if snap is not None:
+            # Camera-free experimental input: explicit opt-in, a current target, strong model evidence.
+            snap['enabled'] = controls.snap_to_dismiss and controls.active_event_id is not None
+            snap['threshold'] = max(0.8, snap['threshold'])
+            snap['cooldown_seconds'] = 0.5
+        if scores.get('Finger snapping', 0) < 0.4:
+            snap_latched = False
         events=detector.detect(scores, source, now=clock, timestamp_ms=timestamp)
+        scoped = []
+        for event in events:
+            if event['type'] == 'finger_snap':
+                if snap_latched:
+                    continue
+                snap_latched = True
+                event['target_event_id'] = controls.active_event_id
+            scoped.append(event)
+        events = scoped
         custom_decisions=[]
         if custom is not None:
             from audio.custom_sounds import rms
@@ -198,7 +217,17 @@ def main():
                         blocksize=block_samples, dtype='float32', callback=callback):
         print('Microphone active; Ctrl+C stops. Raw audio is not saved.', file=sys.stderr)
         while not args.seconds or time.monotonic()-start < args.seconds:
-            block, captured, wall = pending.get(timeout=3)
+            try:
+                block, captured, wall = pending.get(timeout=3)
+            except queue.Empty:
+                # OS/device interruptions are not silence and must not terminate recognition.
+                if last_capture is not None:
+                    print('Audio input paused; waiting for microphone frames to resume.', file=sys.stderr)
+                    buffer = np.empty(0, dtype=np.float32)
+                    if names is not None:
+                        names.reset()
+                    last_capture = None
+                continue
             if last_capture is not None and captured-last_capture > 1.5*block_samples/16000:
                 buffer = np.empty(0, dtype=np.float32)
                 if names is not None:

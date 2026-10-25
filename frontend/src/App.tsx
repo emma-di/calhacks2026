@@ -545,6 +545,15 @@ export default function App() {
               >
                 {state.repeat_suppression === false ? "Show every detection: on" : "Show every detection: off"}
               </button>
+              {source === "receiver" && <button
+                className="key"
+                aria-pressed={state.snap_to_dismiss === true}
+                disabled={offline}
+                title="Experimental microphone control: one strongly recognized finger snap dismisses the current cue. No camera needed."
+                onClick={() => void session.setControls({ snap_to_dismiss: !state.snap_to_dismiss })}
+              >
+                {state.snap_to_dismiss ? "Snap to dismiss: on" : "Snap to dismiss: off"}
+              </button>}
               <span className="dock-spacer" />
               <button
                 className="key"

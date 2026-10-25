@@ -26,6 +26,7 @@ export interface AlertDecision {
   label?: string; // custom sounds are named by the user, not the type
   active_label?: string | null;
   repeat_suppression?: boolean;
+  snap_to_dismiss?: boolean;
   shown_event_id?: string;
   direction?: Direction;
   gesture?: string;
@@ -37,6 +38,8 @@ interface Active {
   event: LoggedEvent;
   tier: Tier;
   started: number;
+  quietSince?: number;
+  quietLast?: number;
   expires: number;
   repeats: number;
   direction: Direction | null;
@@ -57,6 +60,7 @@ export interface EngineSnapshot {
   focus_mode: FocusMode;
   paused: boolean;
   repeat_suppression?: boolean;
+  snap_to_dismiss?: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
 }
 
@@ -120,6 +124,7 @@ export class AlertEngine {
   focusMode: FocusMode = "everyday";
   paused = false;
   repeatSuppression = true;
+  snapToDismiss = false;
   sequence = 0;
   active: Active | null = null;
   queue: Queued[] = [];
@@ -149,6 +154,7 @@ export class AlertEngine {
       at_ms: Math.round(now),
       active_type: this.active?.event.type ?? null,
       repeat_suppression: this.repeatSuppression,
+      snap_to_dismiss: this.snapToDismiss,
       label: event.label,
       active_label: this.active?.event.label ?? null,
       ...extra,
@@ -222,7 +228,7 @@ export class AlertEngine {
   // A thumbs-up (camera) or snap dismisses the showing cue; with nothing showing it does nothing.
   private gesture(event: SoundEvent, now: number): AlertDecision {
     const extra = { gesture: event.type };
-    if (!this.active)
+    if (!this.active || (event.target_event_id !== undefined && event.target_event_id !== this.active.event.event_id))
       return this.decide(event, 0, "gesture_ignored", now, extra);
     const rule = policy.gesture_to_dismiss;
     this.gestures = [
@@ -340,11 +346,29 @@ export class AlertEngine {
     return true;
   }
 
+  observeSound(kind: string, present: boolean, source: string, now: number) {
+    this.tick(now);
+    const active = this.active;
+    const hold = (policy.ongoing_sound_quiet_ms as Record<string, number>)[kind];
+    if (!hold || !active || active.event.type !== kind || active.event.source !== source) return;
+    if (present) { delete active.quietSince; return; }
+    if (active.quietLast !== undefined && (now < active.quietLast || now - active.quietLast > 2000))
+      delete active.quietSince;
+    active.quietLast = now;
+    active.quietSince ??= now;
+    if (now - active.quietSince >= hold) {
+      this.decide(active.event, active.tier, "sound_stopped", now);
+      this.clear();
+      this.tick(now);
+    }
+  }
+
   setControls(
     now: number,
-    changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean },
+    changes: { focus_mode?: FocusMode; paused?: boolean; repeat_suppression?: boolean; snap_to_dismiss?: boolean },
   ) {
     this.tick(now);
+    if (changes.snap_to_dismiss !== undefined) this.snapToDismiss = changes.snap_to_dismiss;
     if (changes.repeat_suppression !== undefined) {
       this.repeatSuppression = changes.repeat_suppression;
       this.acks.clear();
@@ -398,6 +422,7 @@ export class AlertEngine {
       focus_mode: this.focusMode,
       paused: this.paused,
       repeat_suppression: this.repeatSuppression,
+      snap_to_dismiss: this.snapToDismiss,
       queue: this.queue.map((item) => ({
         event_id: item.event.event_id,
         type: item.event.type,

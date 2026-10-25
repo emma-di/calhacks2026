@@ -4,6 +4,16 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Alarm lifecycle and glasses-only input checkpoint
+
+Claude's centered icon + solid direction triangles remain in both pixel renderers. Triangles require
+supported direction; no connected spatial feed currently. Fire/smoke clears after four seconds of
+continuous same-source negative model evidence; gaps/dropouts do not count as quiet. Session-only
+Snap to dismiss is available without camera; camera thumbs-up stays optional. Snap accuracy awaits
+real trials. Verified: 89 Python tests, 21 frontend tests, build and 10,000 engine parity steps.
+Live snap toggle was clicked off/on and checked against receiver health. Fixed stale hot-reload
+state and mic worker queue-timeout exit found during the user's live trial.
+
 ## Live-testing checkpoint
 
 Session-only Show every detection bypasses recognizer cooldowns and alert repeat suppression.

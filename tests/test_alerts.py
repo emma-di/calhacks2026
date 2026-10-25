@@ -28,6 +28,8 @@ def run_step(engine, step):
         event = fixture_event(step['add'], step['id'], at, step.get('direction'))
         if 'sound' in step:   # a user-taught custom sound
             event.update(custom_sound_id=step['sound'], label=step['sound'])
+        if 'target' in step:
+            event['target_event_id'] = step['target']
         result = engine.add(event, at)
     elif 'look' in step:
         result = dict(resolved=engine.look(at, step['look']))
@@ -35,6 +37,9 @@ def run_step(engine, step):
         result = dict(dismissed=engine.dismiss(at, step['dismiss']))
         if engine.decisions and engine.decisions[-1]['at_ms'] == at:
             result['reason'] = engine.decisions[-1]['reason']
+    elif 'evidence' in step:
+        evidence = step['evidence']
+        engine.observe_sound(evidence['type'], evidence['present'], evidence['source'], at)
     elif 'controls' in step:
         engine.set_controls(at, **step['controls'])
     else:

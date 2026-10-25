@@ -41,6 +41,8 @@ export function explain(d: Explainable): string {
       return `${sound} again. Same cue kept, not restarted.`;
     case "acknowledged_repeat":
       return `${sound} still going. Already dismissed, so it stays quiet.`;
+    case "sound_stopped":
+      return `${sound} cleared after four seconds without alarm evidence.`;
     case "expired":
       return `${sound} cleared on its own.`;
     case "resolved_looked":
@@ -89,6 +91,7 @@ export function outcome(reason: string): string {
       gesture_ignored: "Gesture, nothing showing",
       gesture_waiting: "Gesture, waiting for another",
       expired: "Cleared",
+      sound_stopped: "Sound stopped",
       resolved_looked: "Resolved, looked",
       duplicate: "Duplicate",
       paused: "Paused",

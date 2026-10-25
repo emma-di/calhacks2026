@@ -12,10 +12,14 @@ class RepeatTestingTests(unittest.TestCase):
         control = RecognitionControls('http://127.0.0.1:8766/events')
         with patch('audio.runtime_controls.time.monotonic', side_effect=[0, .2, 2]), patch(
                 'audio.runtime_controls.urlopen', side_effect=[io.BytesIO(json.dumps(
-                    dict(repeat_suppression=False)).encode()), OSError('offline')]) as fetch:
+                    dict(repeat_suppression=False, snap_to_dismiss=True, active_event_id='cue-1')).encode()), OSError('offline')]) as fetch:
             self.assertFalse(control.refresh())
+            self.assertTrue(control.snap_to_dismiss)
+            self.assertEqual(control.active_event_id, "cue-1")
             self.assertFalse(control.refresh())
             self.assertTrue(control.refresh())
+            self.assertFalse(control.snap_to_dismiss)
+            self.assertIsNone(control.active_event_id)
             self.assertEqual(fetch.call_count, 2)
 
     def test_built_in_cooldown_can_be_bypassed_and_restored(self):

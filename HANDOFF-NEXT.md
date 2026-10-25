@@ -3,6 +3,14 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest: ongoing alarms, solid triangles, and snap input
+
+Fire/smoke cues now clear after four seconds of continuous fresh same-source below-threshold
+observations (not on a single missed window or disconnect). Snap to dismiss is a session opt-in,
+gated by a strong model score and a current-cue target; camera thumbs-up remains independent.
+Real snap recognition still needs the wearer/room trial. Unknown direction still has no triangle;
+Claude's solid arrows are already in both renderers. See docs/alert-engine.md for precise semantics.
+
 ## Latest: name testing and fire alarm aliases
 
 Live has a session-only **Show every detection** toggle. It bypasses recognition cooldowns (including

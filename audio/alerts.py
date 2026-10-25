@@ -139,6 +139,7 @@ class AlertEngine:
         self.focus_mode = 'everyday'
         self.paused = False
         self.repeat_suppression = True
+        self.snap_to_dismiss = False
         self.sequence = 0
         self.active = None  # dict(event, tier, started, expires, repeats)
         self.queue = []
@@ -208,7 +209,7 @@ class AlertEngine:
 
     def _gesture(self, event, now):
         """A thumbs-up (camera) or snap dismisses the showing cue; with nothing showing it does nothing."""
-        if self.active is None:
+        if self.active is None or (event.get('target_event_id') is not None and event['target_event_id'] != self.active['event']['event_id']):
             return self._decide(event, 0, 'gesture_ignored', now, gesture=event['type'])
         rule = POLICY['gesture_to_dismiss']
         self.gestures = [t for t in self.gestures if now - t <= rule['window_ms']] + [now]
@@ -307,15 +308,42 @@ class AlertEngine:
         self._resolve(now, 'resolved_looked', direction=direction)
         return True
 
-    def set_controls(self, now, focus_mode=None, paused=None, repeat_suppression=None):
+    def observe_sound(self, kind, present, source, now):
+        """Clear an ongoing alarm only on continued negative evidence from its own capture source.
+
+        No observation (capture disconnected) is not evidence of quiet. A new beep resets the hold.
+        """
+        self.tick(now)
+        active = self.active
+        hold = POLICY.get('ongoing_sound_quiet_ms', {}).get(kind)
+        if not hold or not active or active['event']['type'] != kind or active['event']['source'] != source:
+            return
+        if present:
+            active.pop('quiet_since', None)
+            return
+        previous = active.get('quiet_last')
+        if previous is not None and (now < previous or now - previous > 2000):
+            active.pop('quiet_since', None)
+        active['quiet_last'] = now
+        active.setdefault('quiet_since', now)
+        if now - active['quiet_since'] >= hold:
+            self._decide(active['event'], active['tier'], 'sound_stopped', now)
+            self._clear()
+            self.tick(now)
+
+    def set_controls(self, now, focus_mode=None, paused=None, repeat_suppression=None, snap_to_dismiss=None):
         # Validate the whole request before applying any part.
         if focus_mode is not None and focus_mode not in FOCUS_MODES:
             raise ValueError(f'focus_mode must be one of {", ".join(FOCUS_MODES)}')
         if paused is not None and not isinstance(paused, bool):
             raise ValueError('paused must be true or false')
+        if snap_to_dismiss is not None and not isinstance(snap_to_dismiss, bool):
+            raise ValueError('snap_to_dismiss must be true or false')
         if repeat_suppression is not None and not isinstance(repeat_suppression, bool):
             raise ValueError('repeat_suppression must be true or false')
         self.tick(now)
+        if snap_to_dismiss is not None:
+            self.snap_to_dismiss = snap_to_dismiss
         if repeat_suppression is not None:
             self.repeat_suppression = repeat_suppression
             self.acks.clear()
@@ -375,7 +403,7 @@ class AlertEngine:
             remaining_ms=self.remaining_ms(now), direction=self.active['direction'] if self.active else None,
             confirm=dict(direction=self.confirm['direction'], remaining_ms=round(self.confirm['until'] - now))
             if self.confirm else None,
-            focus_mode=self.focus_mode, paused=self.paused, repeat_suppression=self.repeat_suppression,
+            focus_mode=self.focus_mode, paused=self.paused, repeat_suppression=self.repeat_suppression, snap_to_dismiss=self.snap_to_dismiss,
             queue=[dict(event_id=i['event']['event_id'], type=i['event']['type'], tier=i['tier'])
                    for i in self.queue],
             profile_revision=self.profile['revision'],

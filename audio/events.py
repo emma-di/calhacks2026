@@ -107,6 +107,9 @@ def validate_event(event):
         return validate_name_event(event)
     if not isinstance(event, dict) or event.get('type') not in EVENT_TYPES:
         raise ValueError('Unknown event type')
+    if event.get('target_event_id') is not None and (
+            not isinstance(event['target_event_id'], str) or not 0 < len(event['target_event_id']) <= 120):
+        raise ValueError('Invalid gesture target_event_id')
     if event['type'] == 'custom':
         sound_id = event.get('custom_sound_id')
         if not isinstance(sound_id, str) or not 0 < len(sound_id) <= 120 or not sound_id.isprintable():

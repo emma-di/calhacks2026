@@ -13,6 +13,7 @@ export type EventType =
   | "thumbs_up"
   | "custom";
 export interface SoundEvent {
+  target_event_id?: string;
   schema_version: number;
   event_id: string;
   type: EventType;
@@ -74,6 +75,7 @@ export interface ViewState extends Snapshot {
   focus_mode: "everyday" | "work" | "dnd";
   paused: boolean;
   repeat_suppression?: boolean;
+  snap_to_dismiss?: boolean;
   queue: { event_id: string; type: EventType; tier: Tier }[];
   health: Health | null;
   session_id: string | null;
@@ -366,6 +368,7 @@ export function parseSnapshot(input: unknown): ViewState {
     focus_mode: focus,
     paused: s.paused === true,
     repeat_suppression: s.repeat_suppression !== false,
+    snap_to_dismiss: s.snap_to_dismiss === true,
     queue,
     health,
     session_id: typeof s.session_id === "string" ? s.session_id : null,

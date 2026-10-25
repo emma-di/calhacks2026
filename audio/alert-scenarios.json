@@ -1006,6 +1006,160 @@
      }
     }
    ]
+  },
+  {
+   "name": "alarm clears on sustained same-source quiet, gaps and returning beeps reset quiet",
+   "steps": [
+    {
+     "at": 0,
+     "add": "smoke_alarm",
+     "id": "a",
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 1000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 3000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": true,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 4000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 5000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "replay"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 5000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 6000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 7999,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 8000,
+     "evidence": {
+      "type": "smoke_alarm",
+      "present": false,
+      "source": "mock"
+     },
+     "expect": {
+      "active": null,
+      "last_reason": "sound_stopped",
+      "confirm": false
+     }
+    },
+    {
+     "at": 8100,
+     "add": "smoke_alarm",
+     "id": "b",
+     "expect": {
+      "active": "b",
+      "reason": "displayed"
+     }
+    }
+   ]
+  },
+  {
+   "name": "scoped snap cannot dismiss a replacement cue",
+   "steps": [
+    {
+     "at": 0,
+     "add": "knock",
+     "id": "k",
+     "expect": {
+      "active": "k"
+     }
+    },
+    {
+     "at": 1,
+     "add": "smoke_alarm",
+     "id": "a",
+     "expect": {
+      "active": "a"
+     }
+    },
+    {
+     "at": 2,
+     "add": "finger_snap",
+     "id": "s1",
+     "target": "k",
+     "expect": {
+      "active": "a",
+      "reason": "gesture_ignored"
+     }
+    },
+    {
+     "at": 3,
+     "add": "finger_snap",
+     "id": "s2",
+     "target": "a",
+     "expect": {
+      "active": null,
+      "reason": "dismissed_gesture",
+      "confirm": true
+     }
+    }
+   ]
   }
  ]
 }

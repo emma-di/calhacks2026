@@ -113,6 +113,18 @@ class AlertState:
                                  direction_source=f"{reading['device']}_foa")
             return self.engine.add(event, at)
 
+    def observe(self, observation, now=None):
+        with self.lock:
+            # Only fresh model windows are evidence; queued uploads cannot clear a newer alarm.
+            age = time.time() * 1000 - observation['timestamp_ms']
+            if now is None and not 0 <= age <= 5000:
+                return
+            for kind in ('smoke_alarm',):
+                rule = observation['rules'].get(kind)
+                if rule and rule.get('reason') != 'disabled':
+                    self.engine.observe_sound(kind, rule['score'] >= rule['threshold'],
+                                              observation['source'], self._ms(now))
+
     def spatial_calibrate(self, examples):
         with self.lock:
             self.spatial.calibrate(examples)
@@ -172,6 +184,8 @@ class AlertState:
         heard = latest[0] if latest and time.time() * 1000 - latest[0]['received_ms'] < 3000 else None
         return dict(
             receiver='ok', session_id=self.engine.session_id, repeat_suppression=self.engine.repeat_suppression,
+            snap_to_dismiss=self.engine.snap_to_dismiss,
+            active_event_id=self.engine.active['event']['event_id'] if self.engine.active else None,
             # Receiver health never implies a listening microphone: only recent capture events do.
             capture=dict(last_event_ms_ago=recent, live=any(
                 recent.get(source, 1e12) < 10000 for source in CAPTURE_SOURCES),
@@ -437,7 +451,9 @@ class Handler(BaseHTTPRequestHandler):
                 if self.headers.get('Content-Type', '').split(';')[0].strip() != 'application/json':
                     raise ValueError('Expected application/json')
                 payload = json.loads(self.rfile.read(length))
-                return self.reply(200, {'ok': True, 'seq': observations.add(validate_observation(payload))})
+                observation = validate_observation(payload)
+                self.receiver_state.observe(observation)
+                return self.reply(200, {'ok': True, 'seq': observations.add(observation)})
             except (ValueError, TypeError) as exc:
                 return self.reply(400, {'error': str(exc)})
         if path not in ('/events', '/dismiss', '/controls', '/look', '/spatial', '/spatial/calibrate'):
@@ -467,7 +483,8 @@ class Handler(BaseHTTPRequestHandler):
                 return self.reply(200, {'ok': True})
             if path == '/controls':
                 self.receiver_state.controls(focus_mode=payload.get('focus_mode'), paused=payload.get('paused'),
-                                             repeat_suppression=payload.get('repeat_suppression'))
+                                             repeat_suppression=payload.get('repeat_suppression'),
+                                             snap_to_dismiss=payload.get('snap_to_dismiss'))
                 return self.reply(200, {'ok': True})
             decision = self.receiver_state.add(validate_event(payload))
             self.reply(200, {'ok': True, 'reason': decision['reason'], 'priority_tier': decision['priority_tier']})
