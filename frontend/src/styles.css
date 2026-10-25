@@ -1535,3 +1535,17 @@ code {
 
 .setup-name-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:20px; margin-top:16px; }
 @media(max-width:560px) { .setup-name-grid { grid-template-columns:1fr; } }
+
+/* Pi capture diagnostics use the same quiet surfaces as the recognizer panel. */
+.pi-microphone-channels { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:24px; margin:20px 0 16px; }
+.pi-microphone-values { display:flex; justify-content:space-between; align-items:baseline; gap:12px; font-size:14px; }
+.pi-microphone-values .hearing-num { white-space:nowrap; }
+.pi-microphone-track { position:relative; height:10px; margin-top:10px; overflow:hidden; border-radius:3px; background:var(--raise-2); }
+.pi-microphone-fill { display:block; height:100%; background:var(--text); transform-origin:left; }
+.pi-microphone-track.is-off { opacity:.5; }
+.pi-microphone-peak { position:absolute; top:0; bottom:0; width:2px; background:var(--signal); transform:translateX(-2px); }
+.pi-microphone-detail { margin:8px 0 0; min-height:20px; color:var(--muted); font-size:12px; font-variant-numeric:tabular-nums; }
+.pi-microphone-clipping { color:var(--signal); }
+.pi-microphones > .aside { margin:8px 0 0; }
+.pi-microphone-error { margin:12px 0 0; color:var(--muted); font-size:13px; overflow-wrap:anywhere; }
+@media(max-width:560px) { .pi-microphone-channels { grid-template-columns:1fr; gap:20px; } }
