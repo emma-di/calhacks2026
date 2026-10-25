@@ -10,6 +10,7 @@ export interface Cue {
   effective_tier: number;
   remaining_ms: number;
   direction?: string | null;
+  bearing_degrees?: number | null;
 }
 const font: Record<string, string[]> = Object.fromEntries(
   Object.entries(assets.glyphs).map(([char, rows]) => [char, rows.split(" ")]),
@@ -154,7 +155,10 @@ export function render(cue: Cue | null, showLabels = true): Bitmap {
     if (tier === 4) bitmap.rect(tx - 2, ty - 2, place.width + 4, 11, true);
     bitmap.text(place.text, tx, ty, tier === 4 ? 0 : 1);
   }
-  drawEdge(bitmap, cue.direction);
+  if (cue.direction && cue.bearing_degrees != null && Number.isFinite(cue.bearing_degrees)) {
+    const bucket = Math.floor((((cue.bearing_degrees % 360) + 360) % 360 + 11.25) / 22.5) % 16;
+    for (const [x, y] of assets.direction_arrows[bucket]) bitmap.pixel(x, y);
+  } else drawEdge(bitmap, cue.direction);
   return bitmap;
 }
 

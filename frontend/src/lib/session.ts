@@ -186,14 +186,14 @@ export function useSession(
   const send = useCallback(
     async (
       type: EventType,
-      direction: Direction | null = null,
+      direction: Direction | number | null = null,
       provenance = "mock",
     ) => {
       const event = {
         ...makeMock(
           type,
           undefined,
-          direction ? directionDegrees[direction] : null,
+          typeof direction === "number" ? direction : direction ? directionDegrees[direction] : null,
         ),
         source: provenance,
       };
@@ -208,7 +208,7 @@ export function useSession(
   );
 
   const play = useCallback(
-    async (type: EventType, direction: Direction | null = null) => {
+    async (type: EventType, direction: Direction | number | null = null) => {
       stopSequence();
       setError(null);
       if (source === "browser") engine.current.reset(performance.now());

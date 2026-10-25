@@ -32,6 +32,14 @@ def cases():
         yield dict(icon_id='knock', label='A very long label that needs wrapping onto two lines', effective_tier=2,
                    remaining_ms=3000, show_labels=True, direction=direction)
 
+    for index in range(16):
+        bearing = index * 22.5
+        if bearing > 180:
+            bearing -= 360
+        for labels in (False, True):
+            yield dict(icon_id='smoke', label='Fire / smoke alarm', effective_tier=4,
+                       remaining_ms=3000, show_labels=labels, direction='front', bearing_degrees=bearing)
+
 
 def frames():
     out = []
@@ -41,7 +49,7 @@ def frames():
                                       label=case['label'] if case['effective_tier'] else '',
                                       icon_id=case['icon_id'] if case['effective_tier'] else None,
                                       effective_tier=case['effective_tier'], remaining_ms=case['remaining_ms'],
-                                      direction=case.get('direction')))
+                                      direction=case.get('direction'), bearing_degrees=case.get('bearing_degrees')))
         out.append(dict(case, frame=render(cue, case['show_labels']).buffer.hex()))
     return out
 

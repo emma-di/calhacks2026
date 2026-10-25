@@ -391,6 +391,7 @@ class AlertEngine:
                     event_id=event['event_id'], label=event['label'],
                     icon_id=event.get('icon_id') or POLICY['icons'].get(event['type']), effective_tier=active['tier'],
                     remaining_ms=self.remaining_ms(now), direction=active['direction'],
+                    bearing_degrees=event.get('direction_degrees') if active['direction'] is not None else None,
                     show_labels=self.profile['display']['labels'],
                     age_ms=round(now - active['started']), repeats=active['repeats'])
 

@@ -355,3 +355,15 @@ Live test also exposed a stale parser closure after hot reload: receiver polling
 parseSnapshot so new control fields reach the toggle immediately. Clicked snap off/on through UI and
 verified both server states. Mic worker also now waits through queue timeouts instead of exiting on
 _queue.Empty; missing audio still reports as not listening and is never treated as alarm quiet.
+
+### Pi-only display deployment and 16-position arrows — October 24
+
+Emma clarified: display code only on Pi, inference stays on Mac. Audited scripts/glasses_up.sh:
+copy list contains only hardware/__init__.py, display.py, oled_client.py, oled-assets.json (plus
+smbus2 wheel), not models/audio/website. Added 16 triangle positions at 22.5° steps with shared
+baked pixels. Original four triangles unchanged. Receiver supplies optional bearing_degrees only
+for supported direction; simulator has a separate explicit bearing selector. Spatial accuracy is
+not improved by rendering more bins. Tests: 93 Python / 21 frontend / build; live mock 22.5° verified.
+Pi hostname did not resolve, so not deployed to hardware. See docs/display-16-directions.md.
+Emma chose to park snap recognition: switched snap_to_dismiss off. Keep manual Dismiss, optional
+phone-camera thumbs-up and automatic alarm clear after sustained quiet.

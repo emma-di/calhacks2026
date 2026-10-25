@@ -186,3 +186,48 @@ class SharedFixtureTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+class SixteenDirectionTests(unittest.TestCase):
+    def test_all_positions_are_distinct_and_preserve_icon_and_box(self):
+        from hardware.display import _ASSETS
+        arrows = _ASSETS['direction_arrows']
+        self.assertEqual(len(arrows), 16)
+        self.assertEqual(len({tuple(map(tuple, arrow)) for arrow in arrows}), 16)
+        for i, arrow in enumerate(arrows):
+            self.assertTrue(arrow)
+            for x, y in arrow:
+                self.assertTrue(0 <= x < 128 and 0 <= y < 54)
+                self.assertFalse(44 <= x <= 83 and 6 <= y <= 45, (i, x, y))
+        frames = set()
+        for i in range(16):
+            degrees = i * 22.5
+            if degrees > 180: degrees -= 360
+            frame = render(Presentation.parse(snapshot(direction='front', bearing_degrees=degrees)))
+            frames.add(bytes(frame.buffer))
+        self.assertEqual(len(frames), 16)
+
+    def test_old_four_directions_and_180_wrap_stay_identical(self):
+        for direction, degrees in [('front',0),('right',90),('behind',180),('left',-90)]:
+            old = render(Presentation.parse(snapshot(direction=direction)))
+            new = render(Presentation.parse(snapshot(direction=direction, bearing_degrees=degrees)))
+            self.assertEqual(old.buffer, new.buffer)
+        self.assertEqual(render(Presentation.parse(snapshot(direction='behind', bearing_degrees=-180))).buffer,
+                         render(Presentation.parse(snapshot(direction='behind', bearing_degrees=180))).buffer)
+
+    def test_invalid_fine_bearings_and_unknown_direction_rejected(self):
+        for bearing in (True, '45', float('nan'), 181):
+            with self.assertRaises(ValueError):
+                Presentation.parse(snapshot(direction='front', bearing_degrees=bearing))
+        with self.assertRaises(ValueError):
+            Presentation.parse(snapshot(bearing_degrees=45))
+
+    def test_receiver_does_not_supply_fine_bearing_below_confidence_floor(self):
+        from audio.alerts import AlertEngine
+        from audio.events import make_event
+        engine = AlertEngine()
+        event = make_event('knock', .9, 'mock')
+        engine.add(dict(event, direction_degrees=22.5, direction_confidence=.2), 0)
+        self.assertIsNone(engine.presentation(0)['bearing_degrees'])
+        engine = AlertEngine()
+        engine.add(dict(event, direction_degrees=22.5, direction_confidence=.9), 0)
+        self.assertEqual(engine.presentation(0)['bearing_degrees'], 22.5)

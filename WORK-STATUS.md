@@ -4,6 +4,13 @@ Checkpoint: October 24, 2026, Pacific time. This is a maintained milestone snaps
 agent telemetry feed**. Root updates it when work changes state. For detailed tasks use [TODO](TODO.md);
 for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 
+## Latest: finer display directions and snap parked
+
+16-position triangle renderer is ready in shared Pi/browser assets; original four directions are
+unchanged. Explicit simulated-bearing selector verified with a 22.5° mock cue. 93 Python tests,
+21 frontend tests and build pass. Pi display-only deployment audited; Pi unreachable, not deployed.
+Snap is off per Emma. See [direction/deployment guide](docs/display-16-directions.md).
+
 ## Alarm lifecycle and glasses-only input checkpoint
 
 Claude's centered icon + solid direction triangles remain in both pixel renderers. Triangles require

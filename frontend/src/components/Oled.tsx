@@ -23,9 +23,9 @@ export default function Oled({
   const canvas = useRef<HTMLCanvasElement>(null);
   const cue =
     event && event.priority_tier > 0 && (event.icon_id ?? iconIds[event.type])
-      ? { icon_id: event.icon_id ?? iconIds[event.type], label: event.label, effective_tier: event.priority_tier, remaining_ms: 1, direction }
+      ? { icon_id: event.icon_id ?? iconIds[event.type], label: event.label, effective_tier: event.priority_tier, remaining_ms: 1, direction, bearing_degrees: direction && event.direction_confidence !== null && event.direction_confidence >= policy.direction_min_confidence ? event.direction_degrees : null }
       : null;
-  const key = cue ? `${event!.event_id}:${cue.effective_tier}:${labels}:${direction}` : "blank";
+  const key = cue ? `${event!.event_id}:${cue.effective_tier}:${labels}:${direction}:${cue.bearing_degrees}` : "blank";
   useEffect(() => {
     const ctx = canvas.current?.getContext("2d");
     if (!ctx) return;

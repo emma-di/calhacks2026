@@ -16,7 +16,6 @@ import Onboarding, {
 } from "../mana/AwareOnboarding.jsx";
 import {
   effectiveTier,
-  type Direction,
   type FocusMode,
   type Preferences,
 } from "./lib/alerts";
@@ -206,7 +205,7 @@ export default function App() {
   const [profile, setProfile] = useState<ManaProfile | null>(null);
   const [appearance, setAppearance] = useState<Appearance>(defaultAppearance);
   const [labels, setLabels] = useState(false);
-  const [testDirection, setTestDirection] = useState<Direction | null>(null);
+  const [testDirection, setTestDirection] = useState<number | null>(null);
   const [help, setHelp] = useState(false);
   const helpDialog = useRef<HTMLDialogElement>(null);
   const session = useSession(source, profile, labels);
@@ -567,31 +566,20 @@ export default function App() {
               <summary>Test a direction or sequence</summary>
               <div className="dock-row">
                 {" "}
-                <div
-                  className="switch"
-                  role="radiogroup"
-                  onKeyDown={radioKeys}
-                  aria-label="Simulated direction of the next test sound"
-                >
-                  {([null, "left", "front", "right", "behind"] as const).map(
-                    (d) => (
-                      <button
-                        key={d ?? "unknown"}
-                        role="radio"
-                        aria-checked={testDirection === d}
-                        tabIndex={testDirection === d ? 0 : -1}
-                        onClick={() => setTestDirection(d)}
-                        title={
-                          d
-                            ? `Next test sound comes from the ${d} (simulated)`
-                            : "No direction, as today's hardware reports"
-                        }
-                      >
-                        {d ? d[0].toUpperCase() + d.slice(1) : "No direction"}
-                      </button>
-                    ),
-                  )}
-                </div>
+                <label>
+                  Simulated bearing{" "}
+                  <select aria-label="Simulated direction of the next test sound"
+                    value={testDirection === null ? "unknown" : String(testDirection)}
+                    onChange={(e) => setTestDirection(e.target.value === "unknown" ? null : Number(e.target.value))}>
+                    <option value="unknown">No direction</option>
+                    {Array.from({length:16}, (_, i) => {
+                      const angle = i * 22.5;
+                      const signed = angle > 180 ? angle - 360 : angle;
+                      const side = angle === 0 ? "Front" : angle === 90 ? "Right" : angle === 180 ? "Behind" : angle === 270 ? "Left" : `${signed}°`;
+                      return <option key={i} value={signed}>{side} · simulated</option>;
+                    })}
+                  </select>
+                </label>
                 <button
                   className="key"
                   onClick={

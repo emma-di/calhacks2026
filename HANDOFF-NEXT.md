@@ -3,6 +3,15 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest: 16 display positions, Pi scope, snap parked
+
+Snap is OFF by Emma's decision; keep manual Dismiss, optional phone-camera thumbs-up and alarm
+quiet clearing. Fine display directions now use 16 baked positions around the centered icon,
+preserving the original four cardinal arrows. No confidence/direction means no arrow. See
+docs/display-16-directions.md for the protocol, gallery and exact Pi-only copy list. Inference stays
+on Mac. Pi unreachable by hostname, so no physical deployment yet. 93 Python / 21 frontend tests
+and build pass; 22.5-degree mock cue checked in the live site with source=mock.
+
 ## Latest: ongoing alarms, solid triangles, and snap input
 
 Fire/smoke cues now clear after four seconds of continuous fresh same-source below-threshold

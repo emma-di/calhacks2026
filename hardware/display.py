@@ -105,11 +105,13 @@ class Presentation:
     remaining_ms: int
     direction: str | None = None  # left/right/front/behind once localization is measured
 
+    bearing_degrees: float | None = None  # optional finer bearing; quantized to 16 display positions
+
     @classmethod
     def parse(cls, value):
         if not isinstance(value, dict):
             raise ValueError("Presentation must be an object")
-        if not (set(cls.__dataclass_fields__) - {"direction"}).issubset(value):
+        if not (set(cls.__dataclass_fields__) - {"direction", "bearing_degrees"}).issubset(value):
             raise ValueError("Presentation is missing required fields")
         if type(value.get("schema_version")) is not int or value["schema_version"] != 1:
             raise ValueError("Expected presentation schema_version 1")
@@ -132,8 +134,12 @@ class Presentation:
         direction = value.get("direction")
         if direction not in (None, *DIRECTIONS):
             raise ValueError("direction must be left, right, front, behind or null")
-        fields = [key for key in cls.__dataclass_fields__ if key != "direction"]
-        return cls(**{key: value[key] for key in fields}, direction=direction)
+        bearing = value.get('bearing_degrees')
+        if bearing is not None and (type(bearing) not in (int, float) or not math.isfinite(bearing)
+                                    or not -180 <= bearing <= 180 or direction is None):
+            raise ValueError('bearing_degrees needs a known direction and finite -180..180 degrees')
+        fields = [key for key in cls.__dataclass_fields__ if key not in ('direction', 'bearing_degrees')]
+        return cls(**{key: value[key] for key in fields}, direction=direction, bearing_degrees=bearing)
 
 
 def fit_label(label, width):
@@ -192,7 +198,12 @@ def render(presentation=None, show_labels=True):
         if tier == 4:
             bitmap.rect(tx - 2, ty - 2, place["width"] + 4, 11, fill=True)
         bitmap.text(place["text"], tx, ty, value=0 if tier == 4 else 1)
-    draw_edge(bitmap, direction)
+    if presentation.bearing_degrees is not None and direction is not None:
+        bucket = math.floor(((presentation.bearing_degrees % 360) + 11.25) / 22.5) % 16
+        for ax, ay in _ASSETS['direction_arrows'][bucket]:
+            bitmap.pixel(ax, ay)
+    else:
+        draw_edge(bitmap, direction)
     return bitmap
 
 
