@@ -9,6 +9,9 @@ website (labeled **Aware**) shows the same cue, the full transcript of questions
 
 **Sound → glasses mics → laptop recognition → priority rules → glasses display + website**
 
+**Try it in your browser:** https://emma-di.github.io/calhacks2026/ (test sounds, no install). Live
+microphones run on a laptop: see [Try it on your laptop](#try-it-on-your-laptop).
+
 ## What to look for in the demo
 
 - **Any important sound, as an icon with an arrow.** Smoke alarm, siren, door knock, doorbell, dog,
