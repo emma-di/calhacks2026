@@ -1606,3 +1606,7 @@ code {
 .browser-mic { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin-bottom: 14px; }
 .browser-mic .aside { margin: 0; }
 .browser-mic-note { flex-basis: 100%; max-width: 680px; }
+.listen-pill { background: var(--signal); color: var(--signal-ink); border-color: transparent; font-weight: 600; }
+.listen-pill .dot { background: var(--signal-ink); box-shadow: none; }
+.listen-pill.is-on { background: var(--raise-2); color: var(--text); }
+.listen-pill.is-on .dot { background: var(--urgent); }

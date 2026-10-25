@@ -46,6 +46,8 @@ export function useBrowserHearing(enabled: boolean, names: string[], picked: Pic
 
     (async () => {
       try {
+        // Browsers only offer the microphone on https or localhost pages.
+        if (!navigator.mediaDevices?.getUserMedia) throw new Error("open the https link or localhost; this address can't use the microphone");
         stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: false, noiseSuppression: false } });
         const audio = await import("@mediapipe/tasks-audio");
         const files = await audio.FilesetResolver.forAudioTasks(`${import.meta.env?.BASE_URL ?? "/"}mediapipe/audio-wasm`);

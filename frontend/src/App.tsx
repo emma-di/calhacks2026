@@ -489,6 +489,11 @@ export default function App() {
               </button>
             ))}
           </div>}
+          {source === "browser" && view === "live" && (
+            <button className={`pill pill-button listen-pill ${micOn ? "is-on" : ""}`} aria-pressed={micOn} onClick={() => setMicOn((on) => !on)}>
+              <span className="dot" /> {micOn ? "Stop listening" : "Listen with your mic"}
+            </button>
+          )}
           {/* Live status only matters on the Live view. */}
           {view === "live" && <span
             className={`pill ${offline ? "is-off" : "is-on"}`}
