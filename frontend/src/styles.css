@@ -961,18 +961,20 @@ code {
   color: var(--signal);
 }
 
-/* Physical display is a fixed right-side optical patch, not a full-FOV projection. */
+/* The physical display is a right-side optical patch; the website centers it so viewers can read it.
+   The corner preview still shows the exact 128x64 frame the glasses draw. */
 .stage .lens-frame {
-  left: auto;
-  right: 5%;
+  left: 50%;
+  right: auto;
   top: 50%;
   width: 42%;
   height: auto;
   max-width: 42%;
-  transform: translateY(-50%);
+  transform: translate(-50%, -50%);
 }
 .audience .lens-frame {
-  right: 5%;
+  left: 50%;
+  right: auto;
   width: min(46vw, 100dvh);
   max-width: 46%;
   height: auto;
@@ -981,7 +983,6 @@ code {
   .stage .lens-frame {
     width: 60%;
     max-width: 60%;
-    right: 4%;
   }
 }
 
@@ -1636,3 +1637,4 @@ code {
 .listen-tries h3 { font-size: 14px; font-weight: 600; color: var(--text); }
 .listen-tries ul { margin: 8px 0 0; padding-left: 18px; color: var(--muted); display: grid; gap: 6px; font-size: 14px; }
 .listen-tries q { color: var(--text); }
+.listen-privacy { margin-top: 10px; font-size: 12px; color: var(--muted); }

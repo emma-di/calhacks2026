@@ -14,9 +14,10 @@ export interface Explainable {
 }
 
 const gestureName = (gesture?: string) => (gesture === "finger_snap" ? "Snap" : "Thumbs up");
-// A taught custom sound is named by the user ("Front doorbell"); built-in sounds use the catalog label.
+// Custom sounds are named by the user ("Front doorbell") and name-spotter cues by their phrase
+// ("Watch out!", "Someone's calling"); other built-in sounds use the catalog label.
 const name = (type?: string | null, label?: string | null) =>
-  (type === "custom" && label) ||
+  ((type === "custom" || type === "name_called") && label) ||
   (soundCatalog.find((s) => s.type === type)?.label ?? type ?? "another cue");
 
 // One sentence per backend decision, written for someone watching the demo, not for a log reader.

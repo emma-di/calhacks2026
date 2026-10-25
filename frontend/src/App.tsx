@@ -554,7 +554,7 @@ export default function App() {
                 <button className={`listen-cta-button ${micOn ? "is-on" : ""}`} onClick={() => setMicOn((on) => !on)}>
                   <Mic size={20} /> {micOn ? "Stop listening" : "Listen with your mic"}
                 </button>
-                {micOn && <p className="listen-status" role="status">{mic.status === "listening" ? `Listening${mic.heard.length ? ` · hearing ${mic.heard.join(", ")}` : "…"}` : mic.status === "error" ? `Microphone unavailable: ${mic.error}` : "Starting the microphone…"}</p>}
+                {micOn && <p className="listen-status" role="status">{mic.status === "listening" ? `Listening${mic.heard.length ? ` · hearing ${mic.heard.join(", ")}` : "…"}${mic.speech === "unavailable" ? " · name detection needs Chrome, Edge or Safari" : ""}` : mic.status === "error" ? `Microphone unavailable: ${mic.error}` : "Starting the microphone…"}</p>}
               </div>
               <div className="listen-tries">
                 <h3>Things to try</h3>
@@ -563,6 +563,11 @@ export default function App() {
                   <li>Say <q>Excuse me</q> or <q>Watch out!</q></li>
                   <li>Knock on your desk, or play a dog bark or siren from your phone.</li>
                 </ul>
+                <p className="listen-privacy">
+                  Sounds are recognized on this device. Names and questions use your browser's speech service,
+                  which sends speech to its provider (Google in Chrome). Nothing is saved. One mic can't tell
+                  direction, so there are no arrows here.
+                </p>
               </div>
             </section>
           )}
@@ -601,24 +606,6 @@ export default function App() {
 
 
           <section className="dock" aria-label="Controls">
-            {source === "browser" && (
-              <div className="browser-mic">
-                <button className="key" aria-pressed={micOn} onClick={() => setMicOn((on) => !on)}>
-                  {micOn ? "Stop listening" : "Listen with this device's mic"}
-                </button>
-                <span className="aside" role="status">
-                  {mic.status === "starting" ? "Starting the microphone…"
-                    : mic.status === "error" ? `Microphone unavailable: ${mic.error}`
-                    : mic.status === "listening" ? `Listening${mic.heard.length ? ` · hearing ${mic.heard.join(", ")}` : ""}${mic.speech === "unavailable" ? " · name detection needs Chrome, Edge or Safari" : ""}`
-                    : "Or tap a test sound."}
-                </span>
-                <p className="aside browser-mic-note">
-                  Sounds are recognized on this device. Names and questions use your browser's speech
-                  service, which sends speech to its provider (Google in Chrome). Nothing is saved here.
-                  No arrows: one microphone can't tell direction.
-                </p>
-              </div>
-            )}
             {/* Test sounds are for Browser mode; Receiver mode shows only what the microphones hear. */}
             {source === "browser" && <div className="keys" role="group" aria-label="Play a sound">
               {sounds.map((sound) => {
