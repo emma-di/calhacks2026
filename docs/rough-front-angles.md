@@ -56,3 +56,9 @@ Tests cover known signed delays, all five attainable front-hemisphere buckets, e
 quiet/dropout, event association and renderer compatibility. Real-room left/right accuracy remains
 open. A farther sound loses simple distance-related level contrast, but far-field timing difference
 is still approximately spacing*sin(angle)/sound-speed; echoes and reducedSNR make it harder to use.
+
+Latest calibrated live alarm trial:17 real microphone alarm events reached the receiver with
+10 at−45°,5 at+45° and2 at0° explicitly assumed-front. OLED remained connected. This demonstrates
+both lateral cues working in the integrated path; repeated events are not independent accuracy
+samples and speaker positions were not precisely timestamped. Sanitized aggregate evidence is in
+reports/pi-calibrated-live-trial.json. No raw audio/transcripts in this report.
