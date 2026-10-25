@@ -399,9 +399,53 @@ export default function App() {
     </figure>
   );
 
+  // Audience view: what the microphone hears right now and what was said, so viewers can follow along.
+  const fresh = hearing.receivedAt !== null && Date.now() - hearing.receivedAt < 4000;
+  const hearingNow: { label: string; score: number | null }[] =
+    source === "receiver"
+      ? fresh && hearing.latest ? hearing.latest.top.slice(0, 4) : []
+      : mic.heard.map((label) => ({ label, score: null }));
+  const said = [...state.events]
+    .filter((e) => e.type === "name_called" || e.type === "question")
+    .slice(-3)
+    .reverse();
+  const following = (
+    <aside className="audience-hearing" aria-label="What the microphone hears">
+      <h3>Hearing now</h3>
+      {hearingNow.length ? (
+        <ul className="audience-bars">
+          {hearingNow.map((t) => (
+            <li key={t.label}>
+              <span>{t.label}</span>
+              {t.score !== null && (
+                <span className="audience-bar-track"><span style={{ transform: `scaleX(${t.score})` }} /></span>
+              )}
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="aside">{source === "browser" && !micOn ? "Mic is off" : "Waiting for sound…"}</p>
+      )}
+      {said.length > 0 && (
+        <>
+          <h3>Heard</h3>
+          <ol className="audience-said">
+            {said.map((e) => (
+              <li key={e.event_id}>
+                <span className="audience-said-time">{clock(e.timestamp_ms)}</span>
+                {e.type === "question" ? `“${e.transcript ?? e.label}”` : e.label}
+              </li>
+            ))}
+          </ol>
+        </>
+      )}
+    </aside>
+  );
+
   if (audience) {
     return (
       <div className="night audience">
+        {following}
         <Stage
           event={lensEvent}
           labels={lensLabels}
