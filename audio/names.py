@@ -31,8 +31,9 @@ WARMUP_SECONDS = 2.5   # streaming models ignore roughly the first 2 s after a s
 # Attention calls: someone trying to get the wearer's attention without using their name. Common in
 # everyday talk, so they use a stricter threshold than names. profile.name_detection.attention_calls.
 # Very short or constant words (yo, hi, sorry, wait) are left out: they would fire all day.
+# "Wait up" was dropped after a live test: it rarely fired and is an uncommon way to call someone.
 ATTENTION_PHRASES = ('HEY', 'HEY YOU', 'EXCUSE ME', 'HELLO', 'OVER HERE', 'COME HERE', 'GET OVER HERE',
-                     'HEY THERE', 'PARDON ME', 'WAIT UP')
+                     'HEY THERE', 'PARDON ME')
 # Warnings mean danger, not a chat: they show as an urgent cue (alerts.effective_tier, warning- ids).
 WARNING_PHRASES = ('WATCH OUT', 'LOOK OUT')
 ATTENTION_BOOST, ATTENTION_THRESHOLD = 1.0, 0.25
