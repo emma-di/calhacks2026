@@ -44,8 +44,13 @@ def main():
             p.add_argument('--realtime', action='store_true')
         else:
             p.add_argument('--device', type=int)
+            p.add_argument('--pi', help='Primary stereo input over SSH, e.g. pi@glasses-pi.local; no Mac mic opened')
+            p.add_argument('--pi-device', default='hw:CARD=AwareINMP441,DEV=0')
+            p.add_argument('--levels-port', type=int, default=8768)
             p.add_argument('--seconds', type=float, default=0, help='0 runs until Ctrl+C')
     args = parser.parse_args()
+    if args.command == 'mic' and args.pi and args.device is not None:
+        parser.error('Choose --pi OR --device; Mac fallback must be selected explicitly')
     if args.command == 'devices':
         import sounddevice as sd
         print(sd.query_devices())
@@ -80,6 +85,7 @@ def main():
     import atexit
     atexit.register(decision_log.close)
     decision_log.write(dict(kind='recognition_session',model=args.model,policy=detector.policy,
+        audio_input=('pi_stereo' if args.command == 'mic' and args.pi else args.command),
         window_samples=model.window_samples,hop_samples=model.hop_samples,sample_rate=16000))
     print(f'Decision log: {args.decision_log}',file=sys.stderr)
     observer=None
@@ -200,14 +206,13 @@ def main():
             process(window, 'replay', position, base+int(end*1000))
         hear_names(np.zeros(8000, dtype=np.float32), 'replay', len(data)/16000+0.5, base+int(len(data)/16+500))
         return
-    import sounddevice as sd
     # 0.2 s blocks so the name spotter hears speech quickly; sound windows still run every hop.
-    block_samples = 3200 if model.hop_samples % 3200 == 0 else model.hop_samples
+    block_samples = 1600 if args.pi else (3200 if model.hop_samples % 3200 == 0 else model.hop_samples)
     pending = queue.Queue(maxsize=max(4, 4*model.hop_samples//block_samples))
     def callback(indata, frames, timing, status):
         if status:
             print(f'Audio capture: {status}', file=sys.stderr)
-        item = (indata[:, 0].copy(), time.monotonic(), int(time.time()*1000))
+        item = (indata[:, 0].copy(), time.monotonic(), int(time.time()*1000), 0)
         try:
             pending.put_nowait(item)
         except queue.Full:
@@ -216,13 +221,21 @@ def main():
             print('Dropped audio block: processing is behind', file=sys.stderr)
     buffer = np.empty(0, dtype=np.float32)
     last_capture = None
+    last_generation = None
     start = time.monotonic()
-    with sd.InputStream(device=args.device, channels=1, samplerate=16000,
-                        blocksize=block_samples, dtype='float32', callback=callback):
-        print('Microphone active; Ctrl+C stops. Raw audio is not saved.', file=sys.stderr)
+    if args.pi:
+        from audio.pi_input import PiInput
+        capture = PiInput(pending, args.pi, args.pi_device, args.levels_port)
+    else:
+        import sounddevice as sd
+        capture = sd.InputStream(device=args.device, channels=1, samplerate=16000,
+                                 blocksize=block_samples, dtype='float32', callback=callback)
+    with capture:
+        print(f'Audio input: {"Pi stereo " + args.pi if args.pi else "Mac microphone (fallback)"}; '
+              'Ctrl+C stops. Raw audio is not saved.', file=sys.stderr)
         while not args.seconds or time.monotonic()-start < args.seconds:
             try:
-                block, captured, wall = pending.get(timeout=3)
+                block, captured, wall, generation = pending.get(timeout=3)
             except queue.Empty:
                 # OS/device interruptions are not silence and must not terminate recognition.
                 if last_capture is not None:
@@ -232,10 +245,18 @@ def main():
                         names.reset()
                     last_capture = None
                 continue
-            if last_capture is not None and captured-last_capture > 1.5*block_samples/16000:
+            if time.monotonic() - captured > .5:
                 buffer = np.empty(0, dtype=np.float32)
                 if names is not None:
                     names.reset()
+                last_capture = None
+                continue
+            if generation != last_generation or (last_capture is not None and
+                    captured-last_capture > 3*block_samples/16000):
+                buffer = np.empty(0, dtype=np.float32)
+                if names is not None:
+                    names.reset()
+            last_generation = generation
             last_capture = captured
             hear_names(block, 'microphone', captured, wall)
             buffer = np.concatenate((buffer, block))

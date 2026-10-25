@@ -9,7 +9,9 @@ for decisions and caveats use [TEAM-NOTES](TEAM-NOTES.md).
 Live stereo level bridge and browser meters are implemented, with no raw audio served or saved.
 57 frontend tests and build pass. New priority: make Pi capture primary for recognition, retaining
 Mac only as explicit fallback, then conservative left/right/unknown from the same stereo windows.
-**Not yet implemented:** Pi recognition input and measured spatial alerts. Detailed restart plan,
+Pi recognition input is now implemented and running; Mac mic worker stopped. Verified actual
+inference windows and receiver observations, plus advancing Pi meter sequence through the site.
+13 capture/resampling/bridge tests pass. **Not yet implemented:** measured spatial alerts. Detailed restart plan,
 tests, stream ownership and calibration gates: [Pi spatial handoff](docs/pi-spatial-handoff.md).
 
 I²S capture driver installed with original bootconfig backed up on Pi at

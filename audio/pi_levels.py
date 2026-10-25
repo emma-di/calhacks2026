@@ -80,6 +80,7 @@ class LevelState:
             age = None if self.received is None else max(0, self.clock() - self.received)
             connected = bool(self.levels) and age is not None and age <= FRESH_SECONDS
             return dict(schema_version=1, sample_rate=SAMPLE_RATE, channels=CHANNELS,
+                        inference_input=getattr(self, 'inference_input', 'levels_only'),
                         sequence=self.sequence, age_ms=None if age is None else round(age * 1000),
                         connected=connected,
                         levels=[dict(level) for level in self.levels] if connected else [],

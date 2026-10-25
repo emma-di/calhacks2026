@@ -1,5 +1,10 @@
 # Live Pi microphone levels
 
+**Primary mode now:** run `.venv/bin/python -m audio.cli mic --pi pi@glasses-pi.local
+--endpoint http://127.0.0.1:8766/events`. This serves the same meters on 8768 while feeding recognition
+from the Pi; `inference_input=pi_stereo` distinguishes it from `levels_only` below. Do not start the
+standalone bridge alongside this command. See [spatial handoff](pi-spatial-handoff.md).
+
 The Mac bridge `audio/pi_levels.py` streams the Pi's two digital microphone slots over SSH and
 publishes **numerical levels only** on loopback port 8768. It does not run recognition, save audio,
 change the existing receiver, or estimate direction. The Pi runs only its stock `arecord` utility.

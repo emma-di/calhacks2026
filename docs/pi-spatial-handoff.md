@@ -18,14 +18,16 @@ Weak, equal, conflicting or unavailable evidence gives no arrow and never suppre
   advantage 21.65 dB. See `reports/pi-stereo-mic-check.json`.
 - Physical channel-to-left/right mounting is **not confirmed**. Mic separation is not measured.
 - `audio/pi_levels.py` supplies live numeric meters to the site through `/pi-audio/levels`.
-- **Recognition still uses the Mac mic at this checkpoint.** Merely showing Pi meters does not
-  switch inference. Do not report Pi sound-to-alert integration or real direction as completed.
+- **Recognition now uses Pi stereo.** `audio.cli mic --pi` shares capture with meters through
+  `audio/pi_input.py`; the Mac mic worker is stopped. Actual model windows, receiver observations
+  and site telemetry were verified after the switch. No requested-sound-to-OLED acceptance trial
+  was performed at this checkpoint; do not claim physical end-to-end acceptance or real direction.
 - Existing `audio/spatial.py` is a separate phone-FOA experiment. Do not send uncalibrated Pi
   readings into that buffer or attach Pi direction to independently captured Mac audio.
 
 ## Resume order (small commits)
 
-1. **Switch recognition to the Pi capture, preserve meters.** One SSH/ALSA owner only. Reuse
+1. **Implemented: Pi recognition input; review and exercise it.** One SSH/ALSA owner only. Reuse
    `CaptureBridge` in `audio/pi_levels.py`; fan out each complete stereo PCM block in memory to
    meters, localization and one bounded recognition queue. Do not start another `arecord` client.
    Add an explicit Pi input option to `audio/cli.py` and retain `mic --device` as manual fallback.
@@ -35,6 +37,11 @@ Weak, equal, conflicting or unavailable evidence gives no arrow and never suppre
    Reset recognition/resampler/localization buffers on reconnect, queue loss or capture gap.
    Never concatenate samples across an outage. Keep queues bounded; discard stale backlog.
    Surface the actual selected input in diagnostics. No automatic switch to Mac on failure.
+   Current implementation: `StereoResampler` uses a continuous 127-tap FIR and 3:1 decimation;
+   `RecognitionState` queues 100ms blocks with generation resets on gaps/overflow/disconnect.
+   Burst arrivals are discarded; timestamp remains Mac receive time, not a synchronized Pi clock.
+   Tests: `tests/test_pi_input.py` (5) + `tests/test_pi_levels.py` (8), all pass.
+   **Start actual spatial work at step 2.** Steps 2–6 are still pending.
 2. **Offline left/right estimator.** Add a separate `audio/pi_spatial.py` with a pure estimator
    and focused tests; do not replace the phone API. Start with calibrated interchannel RMS
    difference, requiring clear evidence across multiple short frames. Initial *experimental*
@@ -89,7 +96,15 @@ fewer arrows is preferable to a confident wrong side. No promise of zero wrong-s
 - Site: `http://127.0.0.1:5174/` → Live. Pi meters are below the preview.
 - Receiver: `http://127.0.0.1:8766/`. **Do not restart unnecessarily: Claude API key is memory-only.**
 - Meter bridge: `.venv/bin/python -m audio.pi_levels --pi pi@glasses-pi.local --port 8768`.
-  Already running at checkpoint; inspect before starting another. Stop gracefully with Ctrl+C.
+  This is the standalone levels-only alternative. **Do not run it alongside Pi recognition.**
+  Current primary command (already running at checkpoint):
+
+  ```sh
+  .venv/bin/python -m audio.cli mic --pi pi@glasses-pi.local --endpoint http://127.0.0.1:8766/events
+  ```
+
+  That command also serves meters on 8768. Inspect existing processes before starting another.
+  Stop gracefully with Ctrl+C. The former standalone bridge has been stopped.
 - Pi access: `ssh pi@glasses-pi.local`; requires same reachable Wi-Fi/hotspot and existing SSH key.
   No password or private key belongs in docs, commands committed to Git, or chat handoffs.
 - Check numerical feed: `curl http://127.0.0.1:8768/levels`; `connected=true` plus advancing
@@ -100,6 +115,10 @@ fewer arrows is preferable to a confident wrong side. No promise of zero wrong-s
 - Meter tests: `.venv/bin/python -m unittest tests.test_pi_levels -v`;
   `npm test --prefix frontend`; `npm run build --prefix frontend`.
 
-Next agent: implement step 1 before enabling direction. Emma returned to the Pi hotspot after a
-Wi-Fi change; SSH resolves again, but the meter bridge last reported a disconnected capture and
-must recover/be checked before claiming live recognition.
+Network recovery: hotspot return restored SSH but an orphan `arecord` retained the ALSA device.
+Its specific PID was verified and terminated; SIGTERM did not release its blocked write, so SIGKILL
+was needed for that confirmed orphan only. Check `fuser -v /dev/snd/pcmC1D0c` and the matching process
+before cleanup; never blindly kill all audio processes. The Pi primary worker now has a fresh
+advancing sequence and `connected=true`, with `inference_input=pi_stereo` visible through the site
+proxy. SSH availability alone does not prove capture. Reconnect/orphan recovery still deserves
+an intentional hardware failure trial. Do not restart receiver 8766 to test this.

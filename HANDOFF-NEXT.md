@@ -6,11 +6,13 @@ signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/produ
 ## Latest: two Pi microphones verified — October 25
 
 **Next: [Pi recognition + left/right implementation handoff](docs/pi-spatial-handoff.md).**
-Pi is the primary recognition input; Mac mic is explicit fallback only. At this checkpoint the
-switch is **not implemented**: Pi meters are live-capable, recognition still uses Mac input.
+Pi is now the primary recognition input; Mac mic is explicit fallback only. Current command:
+`audio.cli mic --pi pi@glasses-pi.local --endpoint http://127.0.0.1:8766/events`.
+One SSH capture feeds model + meters; former Mac mic and standalone meter workers are stopped.
+Actual inference windows and receiver observations verified; spatial detection is still pending.
 New left/right-only scope replaces speculative front/back; unknown means no arrow.
 Meter UI/bridge implementation: [live levels](docs/pi-live-levels.md). 57 frontend tests/build pass;
-8 bridge tests cover numeric levels, stale clearing and SSH process lifecycle.
+13 capture/resampling/bridge tests cover levels, stale clearing, antialiasing and process lifecycle.
 
 I²S capture driver installed with original bootconfig backed up on Pi at
 /home/pi/aware-mic-backup-20261025-000106/config.txt. Device AwareINMP441 now captures 48 kHz, S32_LE,

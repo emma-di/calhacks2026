@@ -155,7 +155,7 @@ class PiLevelTests(unittest.TestCase):
                 self.assertEqual(response.headers['Cache-Control'], 'no-store')
                 snapshot = json.load(response)
             self.assertEqual(set(snapshot), {'schema_version', 'sample_rate', 'channels', 'sequence',
-                                            'age_ms', 'connected', 'levels', 'error'})
+                                            'age_ms', 'connected', 'levels', 'error', 'inference_input'})
             self.assertEqual(snapshot['channels'], 2)
             self.assertTrue(snapshot['connected'])
             for route in ('/audio', '/profile', '/levels.wav'):

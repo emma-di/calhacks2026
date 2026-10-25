@@ -452,3 +452,13 @@ with no front/back or distance claim. Physical channel mapping and real-room dir
 required. Detailed step-by-step handoff: docs/pi-spatial-handoff.md. On hotspot return SSH resolved
 again, but the existing level bridge remained disconnected; inspect capture lifecycle before claiming
 it recovered. Do not restart receiver 8766 unnecessarily (Claude key is memory-only).
+
+### Follow-up: Pi recognition is now active
+
+Implemented audio/pi_input.py + audio.cli mic --pi. Single stereo capture feeds both recognition
+and meters. Continuous antialias FIR converts 48k stereo to 16k mono on Mac; queue generations reset
+on disconnect/gaps/overflow and burst backlog is rejected. Mac mic worker and standalone meter
+bridge stopped. Site says Pi is selected; actual model windows/receiver observations verified.
+13 Python capture tests, 57 frontend tests and build pass. A confirmed old orphan arecord needed
+specific-PID SIGKILL after hotspot switch; failure/reconnect hardware acceptance is still pending.
+Spatial estimator/calibration remains TODO; resume at step 2 of docs/pi-spatial-handoff.md.

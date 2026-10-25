@@ -15,6 +15,7 @@ export interface PiLevelsSnapshot {
   connected: boolean;
   levels: PiChannelLevel[];
   error: string | null;
+  inference_input?: "levels_only" | "pi_stereo";
 }
 export interface PiLevelsState {
   snapshot: PiLevelsSnapshot | null;
@@ -35,6 +36,7 @@ export function parsePiLevels(input: unknown): PiLevelsSnapshot {
   if (value.schema_version !== 1 || value.sample_rate !== 48000 || value.channels !== 2 ||
       !Number.isSafeInteger(value.sequence) || !finite(value.sequence, 0) ||
       typeof value.connected !== "boolean" ||
+      !(value.inference_input === undefined || value.inference_input === "levels_only" || value.inference_input === "pi_stereo") ||
       !(value.age_ms === null || finite(value.age_ms, 0)) ||
       !(value.error === null || (typeof value.error === "string" && value.error.length <= 2000)) ||
       !Array.isArray(value.levels) ||
@@ -110,5 +112,6 @@ export function usePiMicrophoneLevels(enabled = true) {
       controller?.abort();
     };
   }, [enabled]);
-  return { ...displayPiLevels(state, now), error: state.error ?? state.snapshot?.error ?? null };
+  return { ...displayPiLevels(state, now), inferenceInput: state.snapshot?.inference_input,
+    error: state.error ?? state.snapshot?.error ?? null };
 }
