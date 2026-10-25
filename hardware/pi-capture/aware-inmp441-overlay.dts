@@ -1,0 +1,46 @@
+// Two INMP441 microphones share BCLK/WS/DIN; L/R selects opposite stereo slots.
+// Uses the kernel's register-free ICS43432/similar-I2S-MEMS interface descriptor.
+// No third-party kernel driver, GPIO16 amp control, playback, or inference code.
+/dts-v1/;
+/plugin/;
+
+/ {
+    compatible = "brcm,bcm2835";
+
+    fragment@0 {
+        target = <&i2s_clk_producer>;
+        __overlay__ { status = "okay"; };
+    };
+
+    fragment@1 {
+        target-path = "/";
+        __overlay__ {
+            aware_mic: aware-inmp441-codec {
+                #sound-dai-cells = <0>;
+                compatible = "invensense,ics43432";
+                status = "okay";
+            };
+        };
+    };
+
+    fragment@2 {
+        target = <&sound>;
+        __overlay__ {
+            compatible = "simple-audio-card";
+            simple-audio-card,name = "AwareINMP441";
+            simple-audio-card,format = "i2s";
+            simple-audio-card,bitclock-master = <&aware_cpu>;
+            simple-audio-card,frame-master = <&aware_cpu>;
+            status = "okay";
+
+            aware_cpu: simple-audio-card,cpu {
+                sound-dai = <&i2s_clk_producer>;
+                dai-tdm-slot-num = <2>;
+                dai-tdm-slot-width = <32>;
+            };
+            simple-audio-card,codec {
+                sound-dai = <&aware_mic>;
+            };
+        };
+    };
+};

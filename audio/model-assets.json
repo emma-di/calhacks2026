@@ -1,3 +1,5 @@
 {
-  "zipformer_archive_sha256": "07e2fafcdcbc461f2816188d9b0bbafced12584030cf67d5652e549ef256a2c6"
+  "zipformer_archive_sha256": "07e2fafcdcbc461f2816188d9b0bbafced12584030cf67d5652e549ef256a2c6",
+  "kws_archive_sha256": "f170013b4716e41b62b9bfd809687c207cef798ef9bc6534d524e17af9b6561a",
+  "speech_archive_sha256": "d5fe6ec4334fef36255b2a4010412cad4c007e33103fec62fb5d17cad88086f2"
 }

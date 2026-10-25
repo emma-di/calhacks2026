@@ -1,0 +1,52 @@
+name: Public demo site
+# Builds the companion in Browser mode (VITE_HOSTED=1: test sounds only, no receiver, no Claude) and
+# deploys it to GitHub Pages at https://emma-di.github.io/calhacks2026/ whenever the frontend changes
+# on main or the demo branch (both are allowed in the github-pages environment), or by hand.
+on:
+  push:
+    branches: [main, codex/browser-mirror]
+    paths: ['frontend/**', 'audio/*.json', 'hardware/oled-assets.json', '.github/workflows/pages.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      # The camera gesture and microphone sound runtimes are gitignored locally; copy them from the npm
+      # packages. The gesture and YAMNet models load from Google's hosted copies.
+      - run: |
+          mkdir -p public/mediapipe
+          cp -r node_modules/@mediapipe/tasks-vision/wasm public/mediapipe/wasm
+          cp -r node_modules/@mediapipe/tasks-audio/wasm public/mediapipe/audio-wasm
+      - run: npm run build
+        env:
+          VITE_HOSTED: '1'
+          AWARE_BASE: /calhacks2026/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

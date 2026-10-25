@@ -1,0 +1,11 @@
+{
+  "clip": "samples/speech_whistling2.wav",
+  "model": "zipformer",
+  "max_whistling_score": 0.9125,
+  "delivered_events": 4,
+  "icon": "person",
+  "effective_tier": 3,
+  "frame_bytes": 1024,
+  "microphone_used": false,
+  "physical_hardware_used": false
+}

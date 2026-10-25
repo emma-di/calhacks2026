@@ -3,6 +3,11 @@
 Use **one branch per task** and a pull request into `main`. Keep `main` runnable for the demo.
 Everyone has write access after accepting their GitHub invitation; nobody needs a fork.
 
+Commit and push each coherent, verified working slice so teammates can follow progress. You do not
+need to wait for an entire feature. Keep experimental or broken checkpoints on clearly labeled draft
+branches, and never commit credentials, recordings or model weights. Update WORK-STATUS.md when a
+milestone changes; pushed branch work is not necessarily merged into main.
+
 ## First time
 
 Accept your repo invitation, then:

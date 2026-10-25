@@ -1,0 +1,24 @@
+{
+  "status": "passed_two_independently_responding_microphones",
+  "date": "2026-10-25",
+  "board": "Raspberry Pi Zero W Rev1.1",
+  "capture_device": "hw:CARD=AwareINMP441,DEV=0",
+  "sample_rate_hz": 48000,
+  "sample_format": "S32_LE",
+  "channels": 2,
+  "frames": 960000,
+  "duration_seconds": 20.0,
+  "overall_rms_dbfs": [
+    -38.75,
+    -36.25
+  ],
+  "peak_dbfs": [
+    -3.76,
+    -6.88
+  ],
+  "first_near_mic_channel0_advantage_db": 14.82,
+  "second_near_mic_channel1_advantage_db": 21.65,
+  "reported_capture_overruns": false,
+  "interpretation": "Both stereo channels respond independently during user speaking close to each microphone. User did not identify physical left/right; channel-to-physical-side mapping and spatial accuracy are not established.",
+  "privacy": "Raw audio remains in ignored local cache and on the Pi; no audio or transcripts in this report."
+}

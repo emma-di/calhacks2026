@@ -1,0 +1,14 @@
+{
+  "status": "passed",
+  "mana_adapter": {
+    "revision": 2,
+    "ignore_preserved": true,
+    "name_preserved": true
+  },
+  "catalog_event": "Rain",
+  "icon": "cue_rain",
+  "tier": 3,
+  "frame_bytes": 1024,
+  "microphone_used": false,
+  "physical_hardware_used": false
+}

@@ -36,10 +36,11 @@
     },
     "smoke_alarm": {
       "labels": {
-        "Smoke detector, smoke alarm": 1
+        "Smoke detector, smoke alarm": 1,
+        "Fire alarm": 1
       },
       "threshold": 0.875,
-      "status": "tuned_on_source_split"
+      "status": "fire_and_smoke_aliases_threshold_unchanged_pending_room_validation"
     },
     "alarm_clock": {
       "labels": {
@@ -47,6 +48,15 @@
       },
       "threshold": 0.075,
       "status": "tuned_on_source_split"
+    },
+    "finger_snap": {
+      "labels": {
+        "Finger snapping": 1
+      },
+      "threshold": 0.3,
+      "cooldown_seconds": 0.9,
+      "status": "disabled: superseded by the camera thumbs-up; quiet snappers and loud alarms make audio snaps unreliable",
+      "enabled": false
     }
   }
 }

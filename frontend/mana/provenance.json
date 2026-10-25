@@ -1,0 +1,52 @@
+{
+  "tool": "Mana",
+  "source_app": "Aware",
+  "export_date": "2026-10-23",
+  "original_export_sha256": "dcdb11a234c22465c500a67d0d43d42241c9b8383425769c88c632f87f9016ec",
+  "integration_changes": [
+    "Canonical Cue/Oled replace independent Mana glyph/renderers",
+    "onChange callback applies draft to browser simulator only",
+    "Remove optional Mana globals for standalone host",
+    "Local-demo storage key scope",
+    "Host font and copy: preferences now sync to the local receiver through PUT /profile",
+    "Receiver-authoritative hydration; only explicit user edits become patches",
+    "Mana-generated serialized receiver adapter used by the companion for profile reads/writes",
+    "Recognized catalog selections feed Mac CustomRules, canonical priorities and shared OLED icons",
+    "Centered fixed-patch previews with 16 arrow positions replace directional alignment"
+  ],
+  "live_backend_connected": true,
+  "receiver_adapter": {
+    "generator": "Mana workspace Aware, existing build conversation",
+    "workspace_source": "exports/aware/awareReceiverAdapter.js",
+    "sha256": "67edd9f736a559cd7ba1e537e14b93238d5be05019389b1df3a455fff8ff07c0",
+    "locally_verified_contract_tests": 10,
+    "local_runtime_changes": [
+      "TypeScript declaration only; generated JavaScript preserved"
+    ],
+    "live_backend_connected": true
+  },
+  "onboarding_revamp": {
+    "generator": "Mana workspace Aware, existing build conversation (October 25)",
+    "prompt": "docs/mana-onboarding-revamp-prompt.md",
+    "workspace_source": "/cloudspace/exports/aware/integrated/AwareOnboarding.jsx",
+    "sha256": "775e1baf63e7acd8f6e30a87f26c0c5a46f5c69a3e4a1abacde6b143d908c365",
+    "mana_reported_checks": "8/8 flow checks against stand-in modules (Mana-side; not rerun here)",
+    "local_runtime_changes": [
+      "Step titles renamed per Emma: \"Alerts already set up\", \"Add or customize sounds\"",
+      "\"Tell us about you\" (Claude suggestions and key connection) moved from More settings to the start of step 3; the missing-key link now opens it",
+      "Self-explanatory subtitles and help lines removed; save status shown only on failure; Spidey Sense product name",
+      "Default urgent browser glow changed from amber to the brand comic red (#df443d)",
+      "Public demo build (HOSTED) hides Ask Claude, which needs the local receiver",
+      "Name made optional per Emma (Start no longer waits for it); \"Tell us about you\" hidden on the public demo, which has no Claude"
+    ],
+    "local_test_changes": [
+      "frontend/src/lib/setupSuggestions.test.ts: three render tests updated from the old layout to the new step order, required name and aria-disabled Start"
+    ],
+    "verified_locally": [
+      "frontend build and 64 frontend tests",
+      "Python suite",
+      "rendered first-run and returning views in the companion"
+    ],
+    "live_backend_connected": true
+  }
+}

@@ -1,0 +1,444 @@
+{
+  "method": "Existing Zipformer cached per-window score re-evaluation; any qualifying window per recording-condition. No new inference/capture. All conjunctive gates use the same window, not independently maximized recording scores. Threshold candidate comparison is exploratory; evaluation split has been inspected.",
+  "rows": 1672,
+  "candidates": {
+    "baseline": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "lower_bark_0.15": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "lower_bark_0.125": {
+      "tune": {
+        "tp": 96,
+        "tn": 902,
+        "fp": 2,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 607,
+        "tp": 63,
+        "fp": 1,
+        "fn": 1,
+        "false_positives": [
+          {
+            "id": "esc50-5-171118-A-26",
+            "category": "laughing",
+            "variant": "noise10"
+          }
+        ],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ]
+      }
+    },
+    "Dog_weight_0.25": {
+      "tune": {
+        "tp": 96,
+        "tn": 898,
+        "fp": 6,
+        "false_positives": [
+          {
+            "id": "esc50-1-17092-A-27",
+            "category": "brushing_teeth",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-1-208757-A-2",
+            "category": "pig",
+            "variant": "quiet"
+          },
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-2-110417-A-28",
+            "category": "snoring",
+            "variant": "noise10"
+          },
+          {
+            "id": "esc50-2-73544-A-27",
+            "category": "brushing_teeth",
+            "variant": "noise10"
+          },
+          {
+            "id": "esc50-3-141684-A-21",
+            "category": "sneezing",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 602,
+        "fp": 6,
+        "tp": 64,
+        "false_positives": [
+          {
+            "id": "esc50-4-180337-A-28",
+            "category": "snoring",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-4-180337-A-28",
+            "category": "snoring",
+            "variant": "echo"
+          },
+          {
+            "id": "esc50-5-178997-A-24",
+            "category": "coughing",
+            "variant": "echo"
+          },
+          {
+            "id": "esc50-5-198891-A-8",
+            "category": "sheep",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-5-198891-A-8",
+            "category": "sheep",
+            "variant": "quiet"
+          },
+          {
+            "id": "esc50-5-198891-A-8",
+            "category": "sheep",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      }
+    },
+    "Dog_0.6_and_bark_0.05": {
+      "tune": {
+        "tp": 96,
+        "tn": 902,
+        "fp": 2,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-3-141684-A-21",
+            "category": "sneezing",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 607,
+        "tp": 64,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-5-156026-A-4",
+            "category": "frog",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      }
+    },
+    "Dog_0.6_and_bark_0.08": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 64,
+        "false_positives": [],
+        "misses": [],
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "Dog_0.6_and_bark_0.1": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "Dog_0.7_and_bark_0.05": {
+      "tune": {
+        "tp": 96,
+        "tn": 902,
+        "fp": 2,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          },
+          {
+            "id": "esc50-3-141684-A-21",
+            "category": "sneezing",
+            "variant": "echo"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 64,
+        "false_positives": [],
+        "misses": [],
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "Dog_0.7_and_bark_0.08": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 64,
+        "false_positives": [],
+        "misses": [],
+        "fp": 0,
+        "fn": 0
+      }
+    },
+    "Dog_0.7_and_bark_0.1": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "Dog_0.8_and_bark_0.05": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "Dog_0.8_and_bark_0.08": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    },
+    "Dog_0.8_and_bark_0.1": {
+      "tune": {
+        "tp": 96,
+        "tn": 903,
+        "fp": 1,
+        "false_positives": [
+          {
+            "id": "esc50-1-34094-A-5",
+            "category": "cat",
+            "variant": "clean"
+          }
+        ],
+        "misses": [],
+        "fn": 0
+      },
+      "test": {
+        "tn": 608,
+        "tp": 63,
+        "fn": 1,
+        "false_positives": [],
+        "misses": [
+          {
+            "id": "esc50-5-9032-A-0",
+            "variant": "noise10"
+          }
+        ],
+        "fp": 0
+      }
+    }
+  },
+  "recommended_candidate": "Dog_0.7_and_bark_0.08",
+  "recommended_expression": "max(Bark,Bow-wow,Yip)>=0.175 OR (Dog>=0.7 AND max(Bark,Bow-wow,Yip)>=0.08); same window",
+  "scope": "Exploratory comparison on previously inspected source splits. No live-room or independent validation. Dog is a parent class, so parent-only detection is not confirmed barking."
+}
