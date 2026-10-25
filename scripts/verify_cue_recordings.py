@@ -43,15 +43,17 @@ def run():
         maxima, emitted = {}, set()
         for offset, window in windows(signal, model.window_samples, model.hop_samples):
             scores, _ = model.predict(window)
-            for label in cue['model_labels']:
+            for label in cue['model_labels'] + cue.get('fallback_labels', []):
                 maxima[label] = max(maxima.get(label, 0), scores.get(label, 0))
             emitted.update(event['type'] for event in detector.detect(scores, 'replay', now=offset))
-        peak = max(maxima.values())
-        recognized = (peak >= cue['threshold'] if cue['event_type'] == 'custom'
+        peak = max(maxima[label] for label in cue['model_labels'])
+        fallback_peak = max((maxima[label] for label in cue.get('fallback_labels', [])), default=0)
+        recognized = ((peak >= cue['threshold'] or fallback_peak >= cue.get('fallback_threshold', 1)) if cue['event_type'] == 'custom'
                       else cue['event_type'] in emitted)
         result = dict(cue_id=cue['id'], source_id=row['id'], source_category=category,
                       split=row['split'], source_path=row['path'], source_sha256=row['sha256'],
                       peak_label_scores=maxima, catalog_threshold=cue['threshold'],
+                      fallback_peak=fallback_peak, fallback_threshold=cue.get('fallback_threshold'),
                       recognition_path='catalog_rule' if cue['event_type'] == 'custom' else 'builtin_policy',
                       qualifies=recognized, builtin_emitted=sorted(emitted))
         results.append(result)

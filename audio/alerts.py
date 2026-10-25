@@ -79,7 +79,8 @@ def validate_profile(value, known_types):
             if not isinstance(labels, list) or not 1 <= len(labels) <= 4 or not all(
                     isinstance(label, str) and label in LABEL_ICONS for label in labels):
                 raise ValueError('Recognized sounds need 1..4 exact catalog labels')
-            threshold = request.get('threshold', .25)
+            from audio.custom_rules import DEFAULT_THRESHOLD
+            threshold = request.get('threshold', DEFAULT_THRESHOLD)
             if type(threshold) not in (int, float) or not 0 < threshold <= 1:
                 raise ValueError('Custom threshold must be greater than 0 and at most 1')
             cue = selected_cue(request)

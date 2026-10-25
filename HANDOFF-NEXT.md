@@ -3,6 +3,16 @@
 Branch `codex/browser-mirror` (PR #2), everything pushed. Read AGENTS.md, then this. John owns audio/
 signals ([HANDOFF-JOHN.md](HANDOFF-JOHN.md)); Emma + agent own the display/product.
 
+## Latest: recall-first selected sounds
+
+Emma requests fewer misses even at the cost of related-sound false alerts. Custom catalog threshold
+is now 0.15; 11 cue groups have explicit related-label fallbacks 0.25. Train horn catches strong
+truck/vehicle horn evidence with label “Horn — possibly train,” retaining the chosen icon/tier.
+No teaching is required for catalog sounds. Existing five selections updated through profile API;
+MacBook mic device 1 currently (phone is device 0). Enumerate devices before restarting.
+112 Python/45 frontend tests and build pass; 16/16 inspected recordings qualify, not independent accuracy.
+See docs/recall-first-matching.md. Old 13/16 results below are historical. Pi remains disconnected.
+
 ## Latest software consolidation (read before older snapshots)
 
 Catalog picker + backend rules + per-ID priorities + icons are connected, including Rain/Saxophone.

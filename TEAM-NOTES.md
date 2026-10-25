@@ -403,3 +403,11 @@ recorded Zipformer positive → matching previews; Ignore and removal verified. 
 107 Python/44 frontend tests and 10,000 parity actions pass.13/16 recorded spotchecks qualify, with
 breaking/clapping/footsteps misses and 34 cues lacking mapped recordings. No 50-class accuracy claim.
 Live MacBook microphone is device 0 now; device 1 is speakers. Pi network remains disconnected.
+
+## Recall preference — October 24
+
+Emma explicitly prefers more related-sound false alerts over missing selected sounds. Catalog
+choices require no teaching. Custom primary defaults are 0.15 and related-label fallbacks 0.25;
+train horn accepts strong truck/generic horn evidence with uncertain wording, not a definite train.
+Exact selected categories win over subtype fallbacks. Existing five selections updated; MacBook
+mic currently device 1 (phone device 0). See docs/recall-first-matching.md for tests and limitations.

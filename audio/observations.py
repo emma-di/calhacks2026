@@ -40,7 +40,8 @@ def build_observation(scores, *, source, model, timestamp_ms, inference_ms, wind
         custom.append(dict(id=sound_id, label=(custom_labels or {}).get(sound_id, sound_id),
                            score=round(float(decision.get('raw_score', 0)), 4),
                            threshold=round(float(decision.get('threshold', 0)), 4),
-                           reason=decision.get('reason', 'unknown')))
+                           reason=decision.get('reason', 'unknown'),
+                           **{key:decision[key] for key in ('matched_label', 'match_kind') if key in decision}))
     return dict(schema_version=SCHEMA_VERSION, kind='observation', source=source, model=model,
                 timestamp_ms=int(timestamp_ms if timestamp_ms is not None else time.time()*1000),
                 window_seconds=window_seconds, hop_seconds=hop_seconds,
@@ -98,6 +99,9 @@ def validate_observation(obs):
                 _text(item.get(item_key), f'{key} {item_key}')
             if key == 'custom':
                 _score(item.get('score'), 'custom score')
+                for optional in ('matched_label', 'match_kind'):
+                    if optional in item:
+                        _text(item[optional], f'custom {optional}')
     return obs
 
 class ObservationPublisher:

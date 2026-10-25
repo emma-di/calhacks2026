@@ -213,7 +213,7 @@ export function sanitizeCustomSounds(raw) {
       return recognized
         ? {...base, status:"recognized", model_labels:[...new Set(r.model_labels)],
            icon:catalogLabels.get(r.model_labels[0]).icon,
-           threshold:typeof r.threshold === "number" && r.threshold > 0 && r.threshold <= 1 ? r.threshold : .25}
+           threshold:typeof r.threshold === "number" && r.threshold > 0 && r.threshold <= 1 ? r.threshold : .15}
         : {...base, status:"pending"};
     });
 }
@@ -1269,7 +1269,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
           <section style={s.section} aria-label="Added sounds">
             <h2 style={s.h2}>Added sounds</h2>
             <p style={s.lead}>
-              Catalog sounds can trigger alerts while the recognizer is running. Free-text requests stay pending until recognition is connected.
+              Selected catalog sounds use built-in recognition; no teaching is required. Sensitive matching favors catching sounds and may also alert on related sounds. Free-text requests remain pending.
             </p>
             <ul style={{ listStyle: "none", padding: 0, marginTop: 16 }}>
               {draft.custom_rules.map((rule) => (
@@ -1286,7 +1286,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                   <span style={{ flex: 1, minWidth: 140 }}>
                     {rule.label}
                     <small style={{ display: "block", color: p.muted }}>
-                      {rule.status === "recognized" ? (rule.cue_id ? "Sound cue · sensitivity provisional" : "Model label · sensitivity provisional") : "Recognition pending"}
+                      {rule.status === "recognized" ? (rule.cue_id && cuesById.get(rule.cue_id)?.fallback_labels?.length ? "Sensitive · related sounds may also alert" : "Sensitive · recognition still needs room testing") : "Recognition pending"}
                     </small>
                   </span>
                   <select

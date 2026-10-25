@@ -38,7 +38,9 @@ records nothing, and changes no live receiver or profile. One available held-out
 per mapped cue, using the normal window size and hop. Results, source IDs/checksums and peak scores
 are in [the report](../reports/cue-recording-spotchecks.json).
 
-**13 of 16 recorded spot-checks qualify** under current built-in or provisional catalog thresholds.
+**16 of 16 recorded spot-checks now qualify** after Emma requested recall-first matching.
+The previous exact-only threshold 0.25 pass qualified 13/16. See [recall-first matching](recall-first-matching.md)
+for the explicit threshold/fallback change and lack of independent false-positive evidence.
 
 | Cue | Highest selected-label score | Result |
 | --- | --- | --- |
@@ -52,9 +54,9 @@ are in [the report](../reports/cue-recording-spotchecks.json).
 | Train | 0.9650 | Qualifies |
 | Laughter | 0.9372 | Qualifies |
 | Siren, knock, dog bark, alarm clock | See report | Qualify under built-in policies |
-| Breaking | 0.1976 | Misses provisional 0.25 threshold |
-| Clapping | 0.0419 | Misses provisional 0.25 threshold |
-| Footsteps | 0.2042 | Misses provisional 0.25 threshold |
+| Breaking | 0.1976 | Qualifies at provisional 0.15 |
+| Clapping | 0.0419; Applause 0.9738 | Qualifies via related Applause label |
+| Footsteps | 0.2042 | Qualifies at provisional 0.15 |
 
 This small, inspected sample is **not an accuracy benchmark** and provides no false-positive rate.
 Do not lower thresholds from one missed clip alone: evaluate more independent positives and
@@ -62,7 +64,7 @@ negative sounds before changing a default. Thirty-four catalog cues have no mapp
 script, including saxophone; names require the separate speech evaluation. The existing synthetic
 name report and environmental benchmark remain useful but measure different tasks.
 
-Custom spot-check results compare actual model label scores with the catalog rule threshold; the
+Custom spot-check results compare actual primary/fallback model label scores with catalog rule thresholds; the
 synthetic wiring suite separately verifies that qualifying custom scores reach a receiver and frame.
 The recorded script does not upload its scores/events to the running demo receiver.
 

@@ -12,7 +12,8 @@ export interface Observation {
   level_dbfs: number;
   top: { label: string; score: number }[];
   rules: Record<string, { score: number; threshold: number; reason: string }>;
-  custom: { id: string; label: string; score: number; threshold: number; reason: string }[];
+  custom: { id: string; label: string; score: number; threshold: number; reason: string;
+    matched_label?: string; match_kind?: string }[];
   emitted: { event_id: string; type: string; label: string }[];
 }
 
@@ -37,7 +38,9 @@ export function parseObservation(input: unknown): Observation {
     !Array.isArray(o.top) ||
     !o.top.every((t) => t && typeof t.label === "string" && finite(t.score, 0, 1)) ||
     !Array.isArray(o.custom) ||
-    !o.custom.every((c) => c && typeof c.label === "string" && finite(c.score, 0, 1)) ||
+    !o.custom.every((c) => c && typeof c.label === "string" && finite(c.score, 0, 1) &&
+      (c.matched_label === undefined || typeof c.matched_label === "string") &&
+      (c.match_kind === undefined || typeof c.match_kind === "string")) ||
     !Array.isArray(o.emitted) ||
     typeof o.rules !== "object" ||
     o.rules === null

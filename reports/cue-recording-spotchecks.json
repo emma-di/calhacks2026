@@ -2,7 +2,7 @@
   "method": "Real pretrained Zipformer inference on one existing held-out public recording per available mapped cue. No microphone, download, live receiver, profile changes or training. This is not a representative accuracy evaluation: examples are few, classes overlap, and results have been inspected. Catalog thresholds are provisional.",
   "model": "zipformer-small-int8/2024-04-15",
   "recorded_cases": 16,
-  "qualifying_cases": 13,
+  "qualifying_cases": 16,
   "results": [
     {
       "cue_id": "emergency_siren",
@@ -18,6 +18,8 @@
         "Fire engine, fire truck (siren)": 0.5895186066627502
       },
       "catalog_threshold": 0.25,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "builtin_policy",
       "qualifies": true,
       "builtin_emitted": [
@@ -32,9 +34,13 @@
       "source_path": "esc50/4-175845-A-43.wav",
       "source_sha256": "aeaf26bd07b54964985f7c5726b2724f57b9912b6e70c0af2f8bf3758ca0f18c",
       "peak_label_scores": {
-        "Vehicle horn, car horn, honking": 0.8802007436752319
+        "Vehicle horn, car horn, honking": 0.8802007436752319,
+        "Air horn, truck horn": 0.060308098793029785,
+        "Train horn": 0.0005634129047393799
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0.060308098793029785,
+      "fallback_threshold": 0.25,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -50,9 +56,11 @@
         "Breaking": 0.19759151339530945,
         "Shatter": 0.05233728885650635
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
-      "qualifies": false,
+      "qualifies": true,
       "builtin_emitted": []
     },
     {
@@ -66,6 +74,8 @@
         "Knock": 0.9998035430908203
       },
       "catalog_threshold": 0.25,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "builtin_policy",
       "qualifies": true,
       "builtin_emitted": [
@@ -80,9 +90,12 @@
       "source_path": "esc50/4-167077-A-20.wav",
       "source_sha256": "43a894a23a4a1bed053e2ca040f7029a5d9029269173d8bac1c650c52c03e937",
       "peak_label_scores": {
-        "Baby cry, infant cry": 0.8762876987457275
+        "Baby cry, infant cry": 0.8762876987457275,
+        "Crying, sobbing": 0.48398277163505554
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0.48398277163505554,
+      "fallback_threshold": 0.25,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -95,11 +108,14 @@
       "source_path": "esc50/4-189828-A-22.wav",
       "source_sha256": "13a9c47cba0d2dab78358fa78a6ffe10d7fd209b94b4f062b260dd7ea1b67243",
       "peak_label_scores": {
-        "Clapping": 0.04185926914215088
+        "Clapping": 0.04185926914215088,
+        "Applause": 0.9737640619277954
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0.9737640619277954,
+      "fallback_threshold": 0.25,
       "recognition_path": "catalog_rule",
-      "qualifies": false,
+      "qualifies": true,
       "builtin_emitted": []
     },
     {
@@ -113,6 +129,8 @@
         "Alarm clock": 0.8626124858856201
       },
       "catalog_threshold": 0.25,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "builtin_policy",
       "qualifies": true,
       "builtin_emitted": [
@@ -129,7 +147,9 @@
       "peak_label_scores": {
         "Drip": 0.6785870790481567
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -144,7 +164,9 @@
       "peak_label_scores": {
         "Train": 0.9650148153305054
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -159,9 +181,11 @@
       "peak_label_scores": {
         "Walk, footsteps": 0.20422795414924622
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
-      "qualifies": false,
+      "qualifies": true,
       "builtin_emitted": []
     },
     {
@@ -177,6 +201,8 @@
         "Yip": 0.042693376541137695
       },
       "catalog_threshold": 0.25,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "builtin_policy",
       "qualifies": true,
       "builtin_emitted": [
@@ -191,9 +217,13 @@
       "source_path": "esc50/4-120160-A-5.wav",
       "source_sha256": "5828c0621dddd37ba88c08d99edb9c3860bf2e7f9c3b8adcc02f845bbf6e7211",
       "peak_label_scores": {
-        "Meow": 0.6781201958656311
+        "Meow": 0.6781201958656311,
+        "Cat": 0.9802502393722534,
+        "Caterwaul": 0.32460612058639526
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0.9802502393722534,
+      "fallback_threshold": 0.25,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": [
@@ -209,9 +239,12 @@
       "source_sha256": "c85ef3d5cbd86ba80a7f089277d66f165e36b8dcf8070643ddc7ec73eb4f5dcb",
       "peak_label_scores": {
         "Rain": 0.5126864910125732,
-        "Rain on surface": 0.3007826805114746
+        "Rain on surface": 0.3007826805114746,
+        "Raindrop": 0.05578234791755676
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0.05578234791755676,
+      "fallback_threshold": 0.25,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -226,7 +259,9 @@
       "peak_label_scores": {
         "Thunder": 0.84693443775177
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -241,7 +276,9 @@
       "peak_label_scores": {
         "Wind": 0.33887356519699097
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []
@@ -256,7 +293,9 @@
       "peak_label_scores": {
         "Laughter": 0.9371959567070007
       },
-      "catalog_threshold": 0.25,
+      "catalog_threshold": 0.15,
+      "fallback_peak": 0,
+      "fallback_threshold": null,
       "recognition_path": "catalog_rule",
       "qualifies": true,
       "builtin_emitted": []

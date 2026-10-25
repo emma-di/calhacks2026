@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "status": "approved by Emma October24",
-  "note": "Curated selectable cues, not all enabled by default. Recognition thresholds remain provisional. Name uses speech worker; bicycle bell requires testing before enabling.",
+  "note": "Curated selectable cues, not all enabled by default. Emma requested recall-first defaults: custom primary threshold0.15; related-label fallback0.25 with uncertain subtype labels. Provisional, not calibrated accuracy. Name uses speech worker; bicycle bell stays gated.",
   "cues": [
     {
       "id": "fire_smoke",
@@ -50,7 +50,7 @@
       ],
       "icon_id": "cue_civil_siren",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -65,11 +65,17 @@
       ],
       "icon_id": "cue_car_horn",
       "default_tier": 4,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Make a driver\u2019s audible warning visible."
+      "pitch": "Make a driver’s audible warning visible.",
+      "fallback_labels": [
+        "Air horn, truck horn",
+        "Train horn"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Vehicle horn"
     },
     {
       "id": "truck_horn",
@@ -80,11 +86,17 @@
       ],
       "icon_id": "cue_truck_horn",
       "default_tier": 4,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Give a large-vehicle warning its own recognizable cue."
+      "pitch": "Give a large-vehicle warning its own recognizable cue.",
+      "fallback_labels": [
+        "Vehicle horn, car horn, honking",
+        "Train horn"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Horn — possibly truck"
     },
     {
       "id": "reverse_beep",
@@ -95,7 +107,7 @@
       ],
       "icon_id": "cue_reverse_beep",
       "default_tier": 4,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -111,7 +123,7 @@
       ],
       "icon_id": "cue_breaking",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -126,11 +138,17 @@
       ],
       "icon_id": "cue_scream",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Make a potentially urgent human vocalization difficult to miss."
+      "pitch": "Make a potentially urgent human vocalization difficult to miss.",
+      "fallback_labels": [
+        "Shout",
+        "Yell"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Shouting / screaming"
     },
     {
       "id": "explosion",
@@ -142,7 +160,7 @@
       ],
       "icon_id": "cue_explosion",
       "default_tier": 4,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -158,7 +176,7 @@
       ],
       "icon_id": "cue_tire_squeal",
       "default_tier": 4,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -187,7 +205,7 @@
       ],
       "icon_id": "cue_doorbell",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "doorbell",
         "door bell",
@@ -210,7 +228,7 @@
       "aliases": [],
       "event_type": "knock",
       "experimental": false,
-      "pitch": "Make an in-person visitor\u2019s knock visible even without a doorbell."
+      "pitch": "Make an in-person visitor’s knock visible even without a doorbell."
     },
     {
       "id": "phone_ring",
@@ -222,7 +240,7 @@
       ],
       "icon_id": "cue_phone_ring",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "phone",
         "phone call",
@@ -242,7 +260,7 @@
       ],
       "icon_id": "cue_baby_cry",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "baby",
         "baby crying",
@@ -252,7 +270,12 @@
       ],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Help a caregiver notice a baby calling for attention."
+      "pitch": "Help a caregiver notice a baby calling for attention.",
+      "fallback_labels": [
+        "Crying, sobbing"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Crying — possibly baby"
     },
     {
       "id": "children_shout",
@@ -263,11 +286,17 @@
       ],
       "icon_id": "cue_children_shout",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Provide an optional cue when children nearby raise their voices."
+      "pitch": "Provide an optional cue when children nearby raise their voices.",
+      "fallback_labels": [
+        "Shout",
+        "Yell"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Shouting — possibly children"
     },
     {
       "id": "speech",
@@ -278,7 +307,7 @@
       ],
       "icon_id": "cue_speech",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -293,7 +322,7 @@
       ],
       "icon_id": "cue_human_whistle",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -308,11 +337,16 @@
       ],
       "icon_id": "cue_crying",
       "default_tier": 3,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Surface an emotional vocal cue that the wearer may want to respond to."
+      "pitch": "Surface an emotional vocal cue that the wearer may want to respond to.",
+      "fallback_labels": [
+        "Baby cry, infant cry"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Crying"
     },
     {
       "id": "clap",
@@ -323,11 +357,16 @@
       ],
       "icon_id": "cue_clap",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Reveal a group\u2019s applause or attention signal without requiring a glance at everyone."
+      "pitch": "Reveal a group’s applause or attention signal without requiring a glance at everyone.",
+      "fallback_labels": [
+        "Applause"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Clapping / applause"
     },
     {
       "id": "alarm_clock",
@@ -353,7 +392,7 @@
       ],
       "icon_id": "cue_microwave",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -370,11 +409,11 @@
       ],
       "icon_id": "cue_device_beep",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Catch a device\u2019s audible signal even before its exact appliance is taught."
+      "pitch": "Catch a device’s audible signal even before its exact appliance is taught."
     },
     {
       "id": "boiling",
@@ -385,7 +424,7 @@
       ],
       "icon_id": "cue_boiling",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -400,7 +439,7 @@
       ],
       "icon_id": "cue_faucet",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "tap",
         "running water",
@@ -419,7 +458,7 @@
       ],
       "icon_id": "cue_drip",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -434,7 +473,7 @@
       ],
       "icon_id": "cue_door",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -449,7 +488,7 @@
       ],
       "icon_id": "cue_slam",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -464,7 +503,7 @@
       ],
       "icon_id": "cue_keys",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -479,7 +518,7 @@
       ],
       "icon_id": "cue_dishes",
       "default_tier": 2,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -494,7 +533,7 @@
       ],
       "icon_id": "cue_traffic",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -509,7 +548,7 @@
       ],
       "icon_id": "cue_passing_car",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -524,7 +563,7 @@
       ],
       "icon_id": "cue_motorcycle",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -539,7 +578,7 @@
       ],
       "icon_id": "cue_bus",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -554,7 +593,7 @@
       ],
       "icon_id": "cue_train",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -570,11 +609,17 @@
       ],
       "icon_id": "cue_train_horn",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Distinguish a rail warning signal from a road-vehicle horn."
+      "pitch": "Distinguish a rail warning signal from a road-vehicle horn.",
+      "fallback_labels": [
+        "Air horn, truck horn",
+        "Vehicle horn, car horn, honking"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Horn — possibly train"
     },
     {
       "id": "bicycle_bell",
@@ -600,7 +645,7 @@
       ],
       "icon_id": "cue_footsteps",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -615,7 +660,7 @@
       ],
       "icon_id": "cue_running",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -630,7 +675,7 @@
       ],
       "icon_id": "cue_engine_start",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -655,7 +700,7 @@
       ],
       "event_type": "dog_bark",
       "experimental": false,
-      "pitch": "Make a dog\u2019s vocal alert visible without permanently conflating all pets with dogs."
+      "pitch": "Make a dog’s vocal alert visible without permanently conflating all pets with dogs."
     },
     {
       "id": "dog_vocal",
@@ -667,11 +712,11 @@
       ],
       "icon_id": "cue_dog_vocal",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Distinguish a dog\u2019s softer or sustained vocalization from barking."
+      "pitch": "Distinguish a dog’s softer or sustained vocalization from barking."
     },
     {
       "id": "cat_meow",
@@ -682,11 +727,17 @@
       ],
       "icon_id": "cue_cat_meow",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Give a cat\u2019s request for attention its own cue."
+      "pitch": "Give a cat’s request for attention its own cue.",
+      "fallback_labels": [
+        "Cat",
+        "Caterwaul"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Cat vocalization"
     },
     {
       "id": "bird",
@@ -697,11 +748,17 @@
       ],
       "icon_id": "cue_bird",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Offer optional awareness of wildlife and birdsong."
+      "pitch": "Offer optional awareness of wildlife and birdsong.",
+      "fallback_labels": [
+        "Bird",
+        "Chirp, tweet"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Bird sound"
     },
     {
       "id": "rain",
@@ -713,7 +770,7 @@
       ],
       "icon_id": "cue_rain",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "rain",
         "raining",
@@ -721,7 +778,12 @@
       ],
       "event_type": "custom",
       "experimental": false,
-      "pitch": "Make a change to rainy weather noticeable from indoors."
+      "pitch": "Make a change to rainy weather noticeable from indoors.",
+      "fallback_labels": [
+        "Raindrop"
+      ],
+      "fallback_threshold": 0.25,
+      "fallback_display_label": "Rain / water drops"
     },
     {
       "id": "thunder",
@@ -732,7 +794,7 @@
       ],
       "icon_id": "cue_thunder",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -747,7 +809,7 @@
       ],
       "icon_id": "cue_wind",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -762,7 +824,7 @@
       ],
       "icon_id": "cue_music",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,
@@ -777,7 +839,7 @@
       ],
       "icon_id": "cue_saxophone",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [
         "sax",
         "saxophone"
@@ -795,7 +857,7 @@
       ],
       "icon_id": "cue_laughter",
       "default_tier": 1,
-      "threshold": 0.25,
+      "threshold": 0.15,
       "aliases": [],
       "event_type": "custom",
       "experimental": false,

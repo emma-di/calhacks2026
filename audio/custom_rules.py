@@ -17,7 +17,7 @@ ROOT = Path(__file__).resolve().parent.parent
 PROFILE = ROOT / '.cache' / 'profile.json'
 CATALOG = json.loads(Path(__file__).with_name('sound-catalog.json').read_text())['sounds']
 LABEL_ICONS = {s['label']: s['icon'] for s in CATALOG}
-DEFAULT_THRESHOLD = 0.25   # untuned for most classes: tighten per sound with the signal panel
+DEFAULT_THRESHOLD = 0.15   # recall-first preference; provisional, not calibrated per class
 COOLDOWN_SECONDS = 5
 RELOAD_SECONDS = 2
 
@@ -65,6 +65,9 @@ class CustomRules:
                 continue
             self.rules.append(dict(id=r['id'], label=r['label'], tier=r['tier'], labels=labels,
                 icon=cue['icon_id'] if cue else LABEL_ICONS[labels[0]],
+                fallback_labels=cue.get('fallback_labels', []) if cue else [],
+                fallback_threshold=cue.get('fallback_threshold', .25) if cue else .25,
+                fallback_display_label=cue.get('fallback_display_label', r['label']) if cue else r['label'],
                 threshold=float(r.get('threshold', DEFAULT_THRESHOLD))))
 
     def detect(self, scores, source, now=None, timestamp_ms=None):
@@ -72,11 +75,24 @@ class CustomRules:
         self.reload()
         now = time.monotonic() if now is None else now
         events, self.decisions = [], []
+        # Prefer an explicitly selected exact category over a related subtype fallback. This
+        # avoids a selected truck horn also raising a train cue on the same model evidence.
+        claimed_labels = {label for rule in self.rules for label in rule['labels']
+                          if float(scores.get(label, 0)) >= rule['threshold']}
         for rule in self.rules:
-            score = max(float(scores.get(label, 0)) for label in rule['labels'])
+            matched_label = max(rule['labels'], key=lambda label: float(scores.get(label, 0)))
+            score = float(scores.get(matched_label, 0))
+            fallback_label = max((label for label in rule['fallback_labels'] if label not in claimed_labels),
+                                 key=lambda label: float(scores.get(label, 0)), default=None)
+            fallback_score = float(scores.get(fallback_label, 0)) if fallback_label else 0
+            used_fallback = score < rule['threshold'] and fallback_score >= rule['fallback_threshold']
+            threshold = rule['threshold']
+            if used_fallback:
+                score, matched_label, threshold = fallback_score, fallback_label, rule['fallback_threshold']
             decision = dict(type='custom', custom_sound_id=rule['id'], raw_score=score,
-                            threshold=rule['threshold'], reason='below_threshold')
-            if score >= rule['threshold']:
+                            threshold=threshold, reason='below_threshold', matched_label=matched_label,
+                            match_kind='related_label' if used_fallback else 'primary_label')
+            if score >= threshold:
                 if getattr(self, 'repeat_suppression', True) and now - self.last.get(rule['id'], -math.inf) < COOLDOWN_SECONDS:
                     decision['reason'] = 'cooldown'
                 else:
@@ -84,7 +100,10 @@ class CustomRules:
                     decision['reason'] = 'emitted'
                     events.append(dict(
                         schema_version=1, event_id=str(uuid.uuid4()), type='custom',
-                        custom_sound_id=rule['id'], label=rule['label'], icon_id=rule['icon'],
+                        custom_sound_id=rule['id'],
+                        label=rule['fallback_display_label'] if used_fallback else rule['label'],
+                        icon_id=rule['icon'], matched_model_label=matched_label,
+                        recognition_match='related_label' if used_fallback else 'primary_label',
                         confidence=round(score, 4), source=source, priority_tier=rule['tier'],
                         timestamp_ms=timestamp_ms if timestamp_ms is not None else int(time.time() * 1000),
                         direction_degrees=None, direction_confidence=None, distance_meters=None,

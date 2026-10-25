@@ -116,12 +116,13 @@ export default function HearingPanel({ hearing }: { hearing: Hearing }) {
           </ul>
           {o.custom.length > 0 && (
             <>
-              <h3 className="hearing-sub">Your taught sounds</h3>
+              <h3 className="hearing-sub">Your selected sounds</h3>
               <ul className="hearing-list">
                 {o.custom.map((c) => (
                   <li key={c.id}>
-                    <span className="hearing-label" title={c.label}>
+                    <span className="hearing-label" title={c.matched_label ? `${c.label}: ${c.match_kind === "related_label" ? "related match" : "model label"} ${c.matched_label}` : c.label}>
                       {c.label}
+                      {c.match_kind === "related_label" && <small> · related: {c.matched_label}</small>}
                     </span>
                     <Bar
                       value={c.score}

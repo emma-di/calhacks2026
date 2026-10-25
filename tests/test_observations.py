@@ -25,6 +25,12 @@ def sample(**overrides):
     return build_observation(scores, **args)
 
 class BuildAndValidateTests(unittest.TestCase):
+    def test_related_match_explains_the_actual_model_label(self):
+        obs=validate_observation(sample(custom_decisions=[dict(custom_sound_id='train',raw_score=.35,
+            threshold=.25,reason='emitted',matched_label='Air horn, truck horn',match_kind='related_label')]))
+        self.assertEqual(obs['custom'][0]['matched_label'],'Air horn, truck horn')
+        self.assertEqual(obs['custom'][0]['match_kind'],'related_label')
+
     def test_shape(self):
         obs = validate_observation(sample())
         self.assertEqual([t['label'] for t in obs['top']], ['Knock', 'Speech', 'Music'])

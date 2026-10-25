@@ -21,3 +21,9 @@ test("level meter maps dBFS onto 0..1", () => {
   assert.equal(levelFraction(-30), 0.5);
   assert.equal(levelFraction(-100), 0);
 });
+
+test("related matches retain the actual classifier label and reject malformed explanations", () => {
+  const custom = [{...sample.custom[0],matched_label:"Air horn, truck horn",match_kind:"related_label"}];
+  assert.equal(parseObservation({...sample,custom}).custom[0].matched_label,"Air horn, truck horn");
+  assert.throws(() => parseObservation({...sample,custom:[{...custom[0],matched_label:123}]}));
+});
