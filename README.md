@@ -1,112 +1,105 @@
-# CalHacks 2026 · Situational Awareness Glasses
+# Spidey Sense
 
-Turn relevant sounds into readable visual cues for Deaf and hard-of-hearing users.
+*Visual cues for the sounds around you.*
 
-**Sound → local recognition → event JSON → priority rules → laptop / glasses cue.**
+## Inspiration
 
-The audio-to-laptop pipeline works. Hardware integration, spatial direction, name detection,
-and the full onboarding UI are still being built. The default audio model is pretrained
-**Zipformer Small INT8** with tuned recognition rules; its weights have not been fine-tuned.
+My aunt is hard of hearing, and growing up so close to her, I witnessed firsthand the challenges she faced in certain situations, such as evacuations, finding people in crowds, or interacting with strangers in public. The loss of this vital sense can greatly impact how you approach your daily decisions. 
 
-## Start here
+In a survey of 201 deaf and hard-of-hearing people, safety sounds (alarms, sirens, approaching cars) topped the list. Next came attention-getting sounds: someone calling you, a knock, people nearby. Both what a sound is and where it comes from were rated "very interested." (Findlater et al., CHI 2019)
 
-1. Accept your GitHub invitation and clone the repo.
-2. Choose the mock-only or audio setup below.
-3. Read [CONTRIBUTING.md](CONTRIBUTING.md) and create your task branch before editing.
-4. Use [team workstreams](docs/team-workstreams.md) to coordinate interfaces and ownership.
+And one University of Washington study, **about half of deaf and hard-of-hearing participants reported missing an important sound every day.**
 
-```sh
-gh repo clone emma-di/calhacks2026
-cd calhacks2026
-git switch -c yourname/short-task-name
-```
+(https://par.nsf.gov/servlets/purl/10106339)
 
-## UI / hardware: run mock alerts immediately
+We wanted to make a wearable device that would alert deaf users of important sounds in their lives while also keeping this technology accessible. 
+Prescription hearing aids average $3,432 per pair (HearingTracker, 2025) and don't help everyone, including many profoundly deaf people. Commercial assistive glasses cost $499 to $5,000, often with monthly subscriptions, and focus mostly on captions rather than the sounds around you (HearingTracker review). Spidey Sense takes a different approach.
 
-This path needs only Python; no model, microphone, recordings, or ML packages.
-From the project root, run:
+## What it does
 
-```sh
-python3 -m audio.server
-```
+Spidey Sense creates visual cues for auditory inputs from the user's surroundings, counteracting a loss of hearing by depicting what direction sounds like voices, alarms, and approaching cars are coming from.
 
-Open **http://127.0.0.1:8765**. In a second terminal in the same folder:
+- **Name alerts:** notifies the user when someone nearby calls their name or nickname
+- **Environmental sound alerts:** recognizes 527 types of everyday sounds, from smoke alarms to dog barks
+- **Custom sounds:** lets users teach the glasses sounds unique to their home, such as their own doorbell
+- **Direction finding:** shows which direction each sound is coming from
+- **Priority modes:** Work and Do-not-disturb modes hold back lower-priority sounds, while urgent alerts like smoke alarms always come through
 
-```sh
-python3 -m audio.cli fake knock
-python3 -m audio.cli fake bell
-python3 -m audio.cli fake smoke_alarm
-```
+## How we built it
 
-Events are labeled `mock`. A smoke alarm has higher priority and persists for up to 30 seconds;
-use **Dismiss alert** before checking lower-priority cues. Ctrl+C stops the server.
+This project had both heavy software and hardware requirements.
 
-## Audio / ML: recognize a recording
+### Hardware
 
-Use **Python 3.12**. Apple Silicon macOS is the tested platform; other platforms need validation.
-Commands below are for macOS/Linux; on Windows use `.venv\Scripts\python.exe` instead of `.venv/bin/python`.
+Physically, we 3D printed a mount that is meant to be placed on the glasses. The mount holds together our electrical components: a $10 Raspberry Pi Zero W and a $2 OLED display. The mount also holds a reflective mirror that concentrates all of the display light through an optical lens, which is lastly presented on a translucent beam splitter in front of the eyes. On the arms of the glasses are the microphones, one on the left and one on the right. The microphones constantly stream audio data to the Pi, so that relevant sounds can be classified.
 
-```sh
-python3.12 -m venv .venv
-.venv/bin/python -m pip install -r requirements-audio.txt
-.venv/bin/python -m audio.download_model
-.venv/bin/python -m audio.prepare_benchmark --from-manifest reports/dataset-manifest.json
-.venv/bin/python -m audio.demo --event dog_bark
-```
+| Component | Cost |
+|---|---:|
+| Raspberry Pi Zero W | $10.00 |
+| OLED Display | $2.20 |
+| INMP441 Microphones | $6.10 |
+| 3D Print | $7.40 |
+| Wiring, resistors, lens | $10.00 |
+| **Total** | **$35.70** |
 
-Open **http://127.0.0.1:8765**. The demo classifies a real labeled recording and sends its events
-to the monitor. Initial downloads include the model and roughly 166 MB of public evaluation audio;
-these files stay in your local cache. Choose `dog_bark`, `knock`, `siren`, `alarm_clock`, `smoke_alarm`, or `bell`.
+### Speech Model
 
-For microphone input later:
+To alert the user when someone calls their name, we run a streaming keyword spotter, which is a small 3.3-million-parameter speech model from the sherpa-onnx Zipformer family. Rather than transcribing everything said around the user, which would be slow, power-hungry, and a privacy concern, the model listens only for the user's name and nicknames, which are entered once in the companion app. Audio is fed to the model in 0.2-second chunks, allowing an alert to appear at about the same time the name finishes being spoken.
 
-```sh
-.venv/bin/python -m audio.cli devices
-.venv/bin/python -m audio.demo --input mic --device <device-index>
-```
+However, because the model spells words using a small vocabulary of about 500 word fragments, it often interprets uncommon names differently than they are written. For example, the base model hears "Yameen" as "YEMY." To solve this issue, we allow the user to have a friend say their name a few times. The model transcribes those recordings using its own fragments, and we add what it heard as additional keywords. Thus, the model learns to recognize the name the way it actually hears it. Spellings that are common English words, such as "why" for Wei, are rejected, since they would trigger constantly during normal conversation.
 
-Replace `<device-index>` with an input index from the first command. macOS may ask for microphone
-permission. Raw microphone audio is not saved. Decision logs contain scores, timestamps and rule reasons.
+### Audio Classification Model
 
-To also use the YAMNet baseline, install `requirements.txt`. `requirements.lock.txt` records the
-full tested Mac environment. See the [audio guide](docs/audio-guide.md) for benchmark commands and diagnostics.
+For environmental sounds, we use **Zipformer Small**, a compact audio-tagging model trained on Google's AudioSet that recognizes 527 different sound types. Every second, the model analyzes the most recent two seconds of audio. Per-sound thresholds, cooldowns, and suppression rules then convert its scores into alerts, ensuring that a fading alarm, for example, is not reported again as a "bell."
 
-## Where things live
+However, since every home sounds different, we also allow users to teach the system their own sounds. To do this, we extract the model's internal 256-number "fingerprint" of each sound and train a small classifier on about five recordings of a sound, such as the user's doorbell. These recordings are compared against a bank of everyday background noise and, optionally, a recording of the user's own room. Training takes about a second, allowing the new sound to start working on the live microphone immediately.
 
-| Location | Purpose |
-| --- | --- |
-| `audio/model.py`, `audio/cli.py` | Local inference and capture/replay |
-| `audio/events.py`, `audio/policy-*.json` | Event contract, thresholds, cooldown and recent-context rules |
-| `audio/server.py` | Local event receiver and alert priority/state |
-| `audio/monitor.html` | Browser cue simulator |
-| `audio/benchmark.py`, `audio/simulate.py` | Reproducible evaluation and multi-event scenarios |
-| `tests/` | Fast unit checks; no weights or microphone required |
-| `docs/` | Team handoffs, setup detail and planned contracts |
-| `reports/` | Measurements, source manifests and example decision logs |
+Every alert is then sent to a **priority engine**, which decides what reaches the glasses. A smoke alarm will always interrupt the user, while a dog bark can be skipped. Thus, users can enable **Work** and **Do-not-disturb** modes to hold back lower-priority sounds.
 
-## Current readiness
+### Two-Microphone Pseudo-Triangulation
 
-- Environmental recognition, event JSON, mock events, laptop cues and decision logs are implemented.
-- The current Zipformer evaluation covers **418 recordings / 1,672 transformed cases**.
-- Generic bells improved, but false alerts remain. Bicycle-specific labeling stays disabled.
-- Smoke-alarm evidence is limited; the final microphone and room still need testing.
-- Name detection is [planned](docs/name-detection-plan.md). It will read the typed name and aliases
-  from the saved onboarding profile; it does not require training a new model per user.
-- Hardware output and spatial audio await the confirmed hardware stack. Direction is currently unknown.
+With only two microphones, each auditory input has two plausible directions relative to the user. The microphones locate a sound by measuring the small difference in when it reaches each one, but a sound in front of the user and its mirror image behind the user produce the exact same delay. This makes it impossible to ascertain whether an input is in front of or behind the user.
 
-Read [measured results](reports/summary.md) for counts, misses and false alerts. This prototype is
-an awareness aid, not a certified emergency alert system.
+To solve this issue, we first considered using the natural rotation of the user's head while walking to determine the location of the input. As the user turns, the delay between the microphones changes, and the direction of that change would reveal whether the sound came from the front or the back. However, without an IMU, we would not be able to know which direction the user turned their head, making the direction of the sound ambiguous once again.
 
-## Shared interfaces and team workflow
+Thus, we resorted to using the user's phone microphone as a third microphone. Because the phone sits in a different position from the two microphones on the glasses, it breaks the front-back symmetry and lets us verify the direction a signal is coming from.
 
-- [Event / hardware contract](docs/integration.md)
-- [Name detection and onboarding plan](docs/name-detection-plan.md)
-- [Proposed profile example](docs/onboarding-profile.example.json) — not implemented yet
-- [Branches, pull requests and testing](CONTRIBUTING.md)
-- [Team responsibilities and first handoffs](docs/team-workstreams.md)
+## Challenges we ran into
 
-Keep `main` runnable. Push work to task branches and open pull requests; Python checks run on pushes
-and PRs. Coordinate changes to the event schema, settings contract and shared dependencies.
+- Assessing audio direction with only two microphones
+- Customizing names, isolating
+- Fine-tuning signal inputs to be readable and classifiable
+- Creating an ergonomic product while maintaining functionality
+- Hardware layout
 
-**Never commit model weights, recordings, logs, environments or credentials.** Source manifests
-include attribution and checksums so teammates can download the same test audio locally.
+## Accomplishments that we're proud of
+
+- Building a working heads-up display for under $36 in parts
+- Running both speech and sound classification models on a $10 Raspberry Pi Zero W
+- Letting users teach the glasses a new sound in about a second from only five recordings
+- Recognizing uncommon names by learning how the model actually hears them
+- Resolving front-back ambiguity using the phone the user already carries
+
+## What we learned
+
+- Communicating between two I2S microphones through hardware
+- Post-training on a 65 million parameter sound classification model
+- Using resistors to clean audio data
+
+## What's next for Spidey Sense
+
+- Adding an IMU so head rotation can resolve sound direction without relying on the phone
+- Testing with deaf and hard-of-hearing users, including measuring alert latency, alert accuracy, and comfort
+- Slimming down the mount so it fits comfortably alongside hearing aids and cochlear implants
+- Expanding name alerts into optional live captions for conversations
+- Creating PCB design for the electrical layout to produce a more slim and ergonomic design for users
+
+## References
+
+- Jain et al., "Exploring Sound Awareness in the Home for People Who are Deaf or Hard of Hearing," *CHI 2019*. [Link](https://par.nsf.gov/servlets/purl/10106339)
+
+## Running the code
+
+- [Developer setup](docs/setup.md): run the mock alerts, the audio recognizer and the laptop monitor
+- [Contributing](CONTRIBUTING.md): branches, pull requests and checks
+- [Direction finding](spatial/README.md): the two-microphone sound map simulator

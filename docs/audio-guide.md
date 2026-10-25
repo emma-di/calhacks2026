@@ -25,7 +25,7 @@ An OS audio device can use that switch directly; a raw hardware stream or Quest 
 
 ## Run on this Mac
 
-Complete the [project setup](../README.md) before running these project-root commands.
+Complete the [project setup](setup.md) before running these project-root commands.
 From the project directory, start the receiver:
 
 ```sh
