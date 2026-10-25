@@ -10,6 +10,7 @@ import SetupSuggestions from "../src/components/SetupSuggestions";
 import { SoundIcon } from "../src/components/Cue";
 import { makeMock } from "../src/lib/events";
 import { directionBucket } from "../src/lib/alerts";
+import { HOSTED } from "../src/lib/hosted";
 
 // --- profile logic ---
 export const AWARE_TIERS = [
@@ -1226,9 +1227,10 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       No supported sound matches “{query.trim()}”.
                     </div>
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
-                      Try a simpler name, ask Claude, or save it as pending.
+                      {HOSTED ? "Try a simpler name. Asking Claude needs the laptop setup." : "Try a simpler name, ask Claude, or save it as pending."}
                     </p>
                     <button
+                      hidden={HOSTED}
                       type="button"
                       style={{ ...s.textBtn, marginTop: 8 }}
                       disabled={claudeMatch?.state === "loading" || query.trim().length > 80}
@@ -1237,7 +1239,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                       {claudeMatch?.state === "loading" && claudeMatch.request === query.trim()
                         ? "Asking Claude…" : `Ask Claude to find “${query.trim()}”`}
                     </button>
-                    <p style={Object.assign({}, s.help, { marginTop: 4 })}>
+                    <p hidden={HOSTED} style={Object.assign({}, s.help, { marginTop: 4 })}>
                       Sends only what you typed. You choose before anything is added.
                     </p>
                     {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "error" && (

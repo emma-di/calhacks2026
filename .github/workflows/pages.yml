@@ -1,0 +1,46 @@
+name: Public demo site
+# Builds the companion in Browser mode (VITE_HOSTED=1: test sounds only, no receiver, no Claude) and
+# deploys it to GitHub Pages at /calhacks2026/. Runs only when started by hand from the Actions tab,
+# and only publishes once Pages is enabled for this repository (Settings → Pages → GitHub Actions).
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages
+  cancel-in-progress: true
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7.0.1
+      - uses: actions/setup-node@v7.1.0
+        with:
+          node-version: '22'
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      # The camera gesture runtime is gitignored locally; copy it from the npm package. The gesture
+      # model itself falls back to Google's hosted copy.
+      - run: mkdir -p public/mediapipe && cp -r node_modules/@mediapipe/tasks-vision/wasm public/mediapipe/wasm
+      - run: npm run build
+        env:
+          VITE_HOSTED: '1'
+          AWARE_BASE: /calhacks2026/
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: frontend/dist
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

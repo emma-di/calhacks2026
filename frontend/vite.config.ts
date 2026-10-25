@@ -12,6 +12,8 @@ const proxy = {
   },
 };
 export default defineConfig({
+  // AWARE_BASE is the site's path when hosted, e.g. /calhacks2026/ on GitHub Pages.
+  base: process.env.AWARE_BASE ?? "/",
   plugins: [react()],
   server: { strictPort: true, proxy },
   preview: { proxy },

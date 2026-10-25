@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 
 // Optional demo-webcam control. No camera is installed on the glasses. Video stays in this tab.
 const FRAME_MS = 66;
-const LOCAL_MODEL = "/mediapipe/gesture_recognizer.task";
+const LOCAL_MODEL = `${import.meta.env?.BASE_URL ?? "/"}mediapipe/gesture_recognizer.task`;
 const REMOTE_MODEL =
   "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task";
 
@@ -36,7 +36,7 @@ export function useThumbsUp(
       try {
         const vision = await import("@mediapipe/tasks-vision");
         const files =
-          await vision.FilesetResolver.forVisionTasks("/mediapipe/wasm");
+          await vision.FilesetResolver.forVisionTasks(`${import.meta.env?.BASE_URL ?? "/"}mediapipe/wasm`);
         const make = (modelAssetPath: string) =>
           vision.GestureRecognizer.createFromOptions(files, {
             baseOptions: { modelAssetPath },

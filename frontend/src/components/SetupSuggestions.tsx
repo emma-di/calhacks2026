@@ -1,5 +1,6 @@
 import { useEffect, useId, useRef, useState } from "react";
 import catalog from "../../../audio/cue-catalog.json";
+import { HOSTED, REPO_URL } from "../lib/hosted";
 import {
   parseSetupSuggestions,
   type SetupSuggestion,
@@ -87,6 +88,7 @@ export default function SetupSuggestions({
     }
   }
   useEffect(() => {
+    if (HOSTED) return;   // no receiver on the public demo
     const controller = new AbortController();
     void check(controller.signal);
     const timer = setInterval(() => void check(controller.signal), 5000);
@@ -144,6 +146,13 @@ export default function SetupSuggestions({
   const additions = rows.filter(
     (row) => row.included && !selected.has(row.cue_id),
   );
+  if (HOSTED)
+    return (
+      <p className="aside">
+        Claude suggestions run on the laptop setup.{" "}
+        <a href={REPO_URL} target="_blank" rel="noreferrer">See how to run it</a>.
+      </p>
+    );
   return (
     <section className="setup-suggestions" aria-labelledby={uid + "-title"}>
       <h2 id={uid + "-title"}>What matters to you?</h2>

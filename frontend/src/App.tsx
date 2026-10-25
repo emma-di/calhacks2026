@@ -30,6 +30,7 @@ import HearingPanel from "./components/Hearing";
 import TeachPanel from "./components/TeachPanel";
 import PiMicrophoneLevels from "./components/PiMicrophoneLevels";
 import { initialView, SETUP_COMPLETE_KEY } from "./lib/setupEntry";
+import { HOSTED, REPO_URL } from "./lib/hosted";
 
 type View = "live" | "preferences" | "log";
 
@@ -241,6 +242,7 @@ export default function App() {
     window.scrollTo(0, 0);
   }, [view, audience]);
   const [source, setSource] = useState<Source>(() => {
+    if (HOSTED) return "browser";
     try {
       return localStorage.getItem("aware-source") === "browser" ? "browser" : "receiver";
     } catch {
@@ -446,7 +448,12 @@ export default function App() {
           ))}
         </nav>
         <div className="top-status">
-          <div
+          {HOSTED && (
+            <a className="pill pill-button" href={REPO_URL} target="_blank" rel="noreferrer">
+              Online demo · run it with real mics
+            </a>
+          )}
+          {!HOSTED && <div
             className="switch"
             role="radiogroup"
             onKeyDown={radioKeys}
@@ -468,7 +475,7 @@ export default function App() {
                 {label}
               </button>
             ))}
-          </div>
+          </div>}
           <span
             className={`pill ${offline ? "is-off" : "is-on"}`}
             title={sourceSummary}
@@ -476,10 +483,10 @@ export default function App() {
             <span className="dot" />
             {sourceSummary}
           </span>
-          <span className={`pill ${glasses ? "is-on" : "is-off"}`}>
+          {!HOSTED && <span className={`pill ${glasses ? "is-on" : "is-off"}`}>
             <span className="dot" />
             {glasses ? "Display client connected" : "Glasses not connected"}
-          </span>
+          </span>}
           <button
             className="pill pill-button"
             onClick={() => setAudience(true)}
@@ -498,8 +505,8 @@ export default function App() {
 
       <div className="mobile-session" role="status">
         <span>
-          {sourceSummary} ·{" "}
-          {glasses ? "Display client online" : "Glasses not connected"}
+          {sourceSummary}
+          {HOSTED ? "" : ` · ${glasses ? "Display client online" : "Glasses not connected"}`}
         </span>
         <button className="key" onClick={() => setAudience(true)}>
           <Expand size={14} /> Audience view
@@ -687,7 +694,7 @@ export default function App() {
             setView("live");
           }}
         />
-        <details
+        {!HOSTED && <details
           className="personal-recordings"
           onToggle={(event) => {
             if (event.currentTarget.open) setRecordingsOpened(true);
@@ -700,7 +707,7 @@ export default function App() {
           </p>
           {/* Keep the mounted recorder alive when the disclosure closes or views change. */}
           {recordingsOpened && <TeachPanel />}
-        </details>
+        </details>}
       </div>
 
       {view === "log" && (
