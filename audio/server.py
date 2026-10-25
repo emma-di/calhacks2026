@@ -371,7 +371,13 @@ class Handler(BaseHTTPRequestHandler):
         except OSError:
             self.reply(503, {'error': 'Could not save; previous settings remain active'})
 
-    def setup_suggestions(self, method):
+    def setup_sound_match(self):
+        """Claude matches a typed sound to catalog labels for review; same local-only rules as suggestions."""
+        from audio import sound_match
+        return self.setup_suggestions('POST', handler=sound_match.match,
+                                      invalid='Enter a sound of 1..80 characters as JSON.')
+
+    def setup_suggestions(self, method, handler=None, invalid=None):
         """Private, optional setup helper. It never touches profiles or the alert engine."""
         if not self.from_loopback():
             return self.reply(403, {'error': 'Setup suggestions are only available on the receiver laptop',
@@ -388,12 +394,13 @@ class Handler(BaseHTTPRequestHandler):
                                         'code': 'local_only'})
         from audio import setup_suggestions
         try:
-            payload = setup_suggestions.status() if method == 'GET' else setup_suggestions.suggest(self.read_json())
+            payload = (setup_suggestions.status() if method == 'GET' else
+                       (handler or setup_suggestions.suggest)(self.read_json()))
             self.reply(200, payload)
         except setup_suggestions.SuggestionError as exc:
             self.reply(exc.status, {'error': str(exc), 'code': exc.code})
         except (ValueError, TypeError, json.JSONDecodeError):
-            self.reply(400, {'error': 'Enter a description of 1..1500 characters as JSON.',
+            self.reply(400, {'error': invalid or 'Enter a description of 1..1500 characters as JSON.',
                              'code': 'invalid_description'})
 
     def question_paraphrase(self):
@@ -509,6 +516,8 @@ class Handler(BaseHTTPRequestHandler):
             return self.setup_key('POST')
         if path == '/setup/suggestions':
             return self.setup_suggestions('POST')
+        if path == '/setup/sound-match':
+            return self.setup_sound_match()
         if path == '/questions/paraphrase':
             return self.question_paraphrase()
         if is_audio_route(self.parts()):

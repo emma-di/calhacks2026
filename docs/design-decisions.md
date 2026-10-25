@@ -157,3 +157,14 @@ the full sentence under the narration and in the Log after the cue clears. Short
 default (drop the name/call words and fillers). "Shorten questions with Claude" is opt-in, sends only
 the text through the receiver's in-memory key, and falls back to local on any failure. Rejected:
 always-on captions (privacy, noise and OLED space) and sending audio to a cloud service.
+
+## Claude matches typed sounds to what the model knows
+
+When a typed sound has no catalog hit ("my kettle"), setup offers "Ask Claude to find it". The receiver's
+POST /setup/sound-match sends only the typed text plus the public list of 526 enabled model classes and
+asks for up to three exact labels with a short reason. Invented or disabled labels (Bicycle bell) are
+dropped before anything is shown. The person picks one; it is saved as a recognized custom sound under
+their own words, with the matched class shown ("added, heard as Whistle"), and alerts like any picked
+sound. It uses the same in-memory key as setup suggestions and question shortening.
+Without a key, the button explains how to connect one. Rejected: auto-adding Claude's choice
+without review, and training a new sound model per request.

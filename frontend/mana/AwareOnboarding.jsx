@@ -510,6 +510,25 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const [query, setQuery] = useState("");
   const [pending, setPending] = useState(null); // { key, tier }
   const [customNote, setCustomNote] = useState("");
+  // Claude matching for a typed sound with no catalog hit: { request, state, matches, message }.
+  const [claudeMatch, setClaudeMatch] = useState(null);
+  const askClaude = async (request) => {
+    setClaudeMatch({ request, state: "loading", matches: [] });
+    try {
+      const r = await fetch("/api/setup/sound-match", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ request }),
+      });
+      const body = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(body.code === "missing_api_key"
+        ? "Connect Claude above with an Anthropic API key first."
+        : body.error || "Claude could not match this sound. Try again.");
+      setClaudeMatch({ request, state: "done", matches: Array.isArray(body.matches) ? body.matches : [] });
+    } catch (e) {
+      setClaudeMatch({ request, state: "error", matches: [], message: e.message });
+    }
+  };
   const [confirmReset, setConfirmReset] = useState(false);
   const [previewKey, setPreviewKey] = useState("smoke_alarm");
   const [direction, setDirection] = useState("unknown");
@@ -719,10 +738,11 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
       const sound=catalogLabels.get(pending.model_label);
       if (!sound) return;
       setDraft((d)=>({...d,custom_rules:sanitizeCustomSounds([...(d.custom_rules ?? []),{
-        id:crypto.randomUUID(),label:sound.name,tier:pending.tier,status:'recognized',
+        id:crypto.randomUUID(),label:pending.custom_label || sound.name,tier:pending.tier,status:'recognized',
         model_labels:[sound.label],icon:sound.icon,
       }])}));
-      setCustomNote(`${sound.name} added. You can change its priority below.`);
+      setCustomNote(`${pending.custom_label || sound.name} added${pending.custom_label ? ` (heard as ${sound.name})` : ""}. You can change its priority below.`);
+      setClaudeMatch(null);
     } else if (pending.cue_id) {
       const cue = cuesById.get(pending.cue_id);
       if (!cue || cue.experimental || cue.event_type === "name_called") return;
@@ -759,7 +779,7 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
   const motionOn =
     display.motion === "pulse" && !reducedMotion && render === "browser";
   const pendingModel = pending?.model_label ? catalogLabels.get(pending.model_label) : null;
-  const pendingEv = pending ? (pendingModel ? {...pendingModel,label:pendingModel.name,event_type:'custom',default_tier:2}
+  const pendingEv = pending ? (pendingModel ? {...pendingModel,label:pending.custom_label || pendingModel.name,event_type:'custom',default_tier:2}
     : pending.cue_id ? cuesById.get(pending.cue_id) : awareEvent(pending.key)) : null;
   const readyToFinish = canFinish && !pending;
 
@@ -1196,6 +1216,46 @@ export default function AwareOnboarding({ onChange, onComplete, theme, receiverP
                     <p style={Object.assign({}, s.help, { marginTop: 4 })}>
                       Try a simpler sound name, or save it as a pending request. Personal recordings are an optional advanced feature; they are not needed for catalog sounds.
                     </p>
+                    <button
+                      type="button"
+                      style={{ ...s.textBtn, marginTop: 8 }}
+                      disabled={claudeMatch?.state === "loading" || query.trim().length > 80}
+                      onClick={() => void askClaude(query.trim())}
+                    >
+                      {claudeMatch?.state === "loading" && claudeMatch.request === query.trim()
+                        ? "Asking Claude…" : `Ask Claude to find “${query.trim()}”`}
+                    </button>
+                    <p style={Object.assign({}, s.help, { marginTop: 4 })}>
+                      Sends only what you typed to Anthropic. Claude picks from sounds Aware already
+                      recognizes; you choose before anything is added.
+                    </p>
+                    {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "error" && (
+                      <p role="status" style={s.help}>{claudeMatch.message}</p>
+                    )}
+                    {claudeMatch && claudeMatch.request === query.trim() && claudeMatch.state === "done" && (
+                      claudeMatch.matches.length === 0
+                        ? <p role="status" style={s.help}>Claude found no recognizable sound for this. You can save it as pending.</p>
+                        : <ul aria-label="Claude's matches" style={{ listStyle: "none", margin: "10px 0 0", padding: 0 }}>
+                          {claudeMatch.matches.map((m) => (
+                            <li key={m.label}>
+                              <button
+                                type="button"
+                                onClick={() => { setPending({ model_label: m.label, tier: 2, custom_label: claudeMatch.request }); setQuery(""); }}
+                                aria-label={`Use ${m.name} for ${claudeMatch.request}`}
+                                style={{ width: "100%", textAlign: "left", display: "flex", gap: 12, alignItems: "center",
+                                  padding: "10px 0", background: "transparent", border: "none", borderTop: "1px solid " + p.line,
+                                  color: p.ink, fontFamily: font, fontSize: 15, cursor: "pointer" }}
+                              >
+                                <SoundIcon type="custom" iconId={m.icon} size={22} />
+                                <span>
+                                  <span style={{ display: "block", fontWeight: 500 }}>{m.name}</span>
+                                  <span style={{ display: "block", fontSize: 14, color: p.muted }}>{m.reason}</span>
+                                </span>
+                              </button>
+                            </li>
+                          ))}
+                        </ul>
+                    )}
                   </div>
                 )}
               </div>
